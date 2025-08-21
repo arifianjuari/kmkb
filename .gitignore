@@ -1,0 +1,164 @@
+# Laravel specific files
+.env
+.env.backup
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+storage/*.key
+vendor/
+node_modules/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+log/*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Database
+*.sqlite
+*.sqlite3
+
+# Composer
+composer.phar
+composer.lock
+
+# Artifacts
+/public/storage
+/storage/*.key
+/bootstrap/cache/*.php
+
+# Uploaded files
+/public/uploads
+/storage/app/public
+
+# Testing
+/phpunit.xml
+/.phpunit
+coverage/
+
+# Backup files
+*.bak
+
+# IDE helper files
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
+
+# Laravel sail
+.docker/
+sail
+
+# Vagrant
+.vagrant/
+
+# Laravel Telescope
+/vendor/laravel/telescope/storage
+
+# Laravel Horizon
+/vendor/laravel/horizon/storage
+
+# Laravel Echo Server
+laravel-echo-server.json
+
+# Laravel Envoy
+Envoy.blade.php
+
+# Laravel Dusk
+/laravel dusk
+
+# Laravel Passport
+/oauth-private.key
+/oauth-public.key
+
+# Laravel Sanctum
+/sanctum
+
+# Laravel Scout
+/scout
+
+# Laravel Socialite
+/socialite
+
+# Laravel Spark
+/spark
+
+# Laravel Valet
+.valet/
+
+# Laravel Mix
+mix-manifest.json
+
+# Laravel Nova
+/nova
+/vendor/laravel/nova
+
+# Laravel Cashier
+/cashier
+
+# Laravel Fortify
+/fortify
+
+# Laravel Jetstream
+/jetstream
+
+# Laravel Breeze
+/breeze
+
+# Laravel Pulse
+/pulse
+
+# Laravel Pennant
+/pennant
+
+# Laravel Reverb
+/reverb
+
+# Laravel Prompts
+/prompts
+
+# Laravel Pint
+/pint
+
+# Laravel Envoy
+/envoy
+
+# Laravel Reverb
+/reverb
+
+# Laravel Prompts
+/prompts
+
+# Laravel Pint
+/pint
+
+# Laravel Envoy
+/envoy
+
+# Laravel Sail
+/sail
+
+# Laravel Dusk
+/dusk
+
+# Laravel Telescope
+/telescope
+
+# Laravel Horizon
+/horizon
