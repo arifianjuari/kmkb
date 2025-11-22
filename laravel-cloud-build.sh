@@ -5,6 +5,15 @@
 
 echo "🚀 Starting build process..."
 
+# Ensure required directories exist and are writable
+echo "📁 Creating required directories..."
+mkdir -p bootstrap/cache
+mkdir -p storage/framework/cache
+mkdir -p storage/framework/sessions
+mkdir -p storage/framework/views
+mkdir -p storage/logs
+chmod -R 775 bootstrap/cache storage
+
 # Install Composer dependencies
 echo "📦 Installing Composer dependencies..."
 composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
