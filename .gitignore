@@ -37,7 +37,7 @@ log/*.log
 
 # Composer
 composer.phar
-composer.lock
+# composer.lock - HARUS di-commit untuk deployment Laravel Cloud
 
 # Artifacts
 /public/storage
