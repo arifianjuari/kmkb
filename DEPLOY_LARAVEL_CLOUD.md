@@ -653,6 +653,41 @@ php artisan view:cache
    chmod -R 775 storage bootstrap/cache
    ```
 
+### 10.11 Error: bootstrap/cache directory must be present and writable
+
+**Penyebab:** Directory `bootstrap/cache` tidak ada atau tidak writable saat composer install dijalankan.
+
+**Solusi:**
+
+1. **Pastikan `.gitkeep` file ada:**
+   - File `bootstrap/cache/.gitkeep` sudah ter-commit di repository
+   - Ini memastikan directory ter-track oleh Git
+
+2. **Update Build Command di Laravel Cloud:**
+   - Tambahkan perintah ini di awal build command:
+     ```bash
+     mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
+     chmod -R 775 bootstrap/cache storage
+     ```
+   - Pastikan perintah ini dijalankan SEBELUM `composer install`
+
+3. **Atau set di Before Deploy Hook:**
+   - Di Laravel Cloud settings, tambahkan di "Before Deploy":
+     ```bash
+     mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
+     chmod -R 775 bootstrap/cache storage
+     ```
+
+4. **Verifikasi di Repository:**
+   - Pastikan file `bootstrap/cache/.gitkeep` ada di repository
+   - Jika belum ada, commit file tersebut:
+     ```bash
+     touch bootstrap/cache/.gitkeep
+     git add bootstrap/cache/.gitkeep
+     git commit -m "Add .gitkeep to bootstrap/cache"
+     git push
+     ```
+
 ### 10.9 Error: Memory Limit Exceeded
 
 **Solusi:**
