@@ -22,6 +22,7 @@ Panduan lengkap langkah demi langkah untuk mendeploy aplikasi KMKB ke Laravel Cl
 ### 1.1 Persyaratan
 
 Pastikan Anda memiliki:
+
 - ✅ Akun Laravel Cloud (daftar di [laravel.com/cloud](https://laravel.com/cloud))
 - ✅ Akses ke repository Git (GitHub, GitLab, atau Bitbucket)
 - ✅ Kredensial database MySQL
@@ -31,6 +32,7 @@ Pastikan Anda memiliki:
 ### 1.2 Persiapan File
 
 Pastikan file-file berikut sudah siap:
+
 - ✅ `composer.json` dan `composer.lock`
 - ✅ `package.json` dan `package-lock.json`
 - ✅ Semua file migration di folder `database/migrations/`
@@ -81,6 +83,7 @@ git push -u origin main
 ### 2.3 Verifikasi Repository
 
 Pastikan semua file penting sudah ter-commit:
+
 - ✅ `composer.json` dan `composer.lock`
 - ✅ `package.json` dan `package-lock.json`
 - ✅ Folder `app/`, `config/`, `database/`, `routes/`, `resources/`
@@ -257,13 +260,45 @@ DB_PASSWORD=
 
 #### D. SIMRS Database Variables (jika diperlukan)
 
+**PENTING:** Database SIMRS biasanya berada di server internal/on-premise. Pastikan server Laravel Cloud bisa mengakses database SIMRS.
+
 ```
-SIMRS_DB_HOST=
+SIMRS_DB_HOST=<ip_address_atau_hostname_server_simrs>
 SIMRS_DB_PORT=3306
-SIMRS_DB_DATABASE=
-SIMRS_DB_USERNAME=
-SIMRS_DB_PASSWORD=
+SIMRS_DB_DATABASE=<nama_database_simrs>
+SIMRS_DB_USERNAME=<username_database_simrs>
+SIMRS_DB_PASSWORD=<password_database_simrs>
 ```
+
+**Cara Mendapatkan Kredensial Database SIMRS:**
+
+1. **Hubungi Administrator SIMRS** untuk mendapatkan:
+   - IP Address atau Hostname server database SIMRS
+   - Port database (biasanya 3306 untuk MySQL)
+   - Nama database SIMRS
+   - Username dan password database (disarankan menggunakan user read-only)
+
+2. **Pastikan Network Access:**
+   - Database SIMRS harus bisa diakses dari internet (jika di on-premise, perlu setup VPN atau whitelist IP Laravel Cloud)
+   - Atau database SIMRS harus di-deploy di cloud yang bisa diakses dari Laravel Cloud
+   - Jika menggunakan VPN, pastikan Laravel Cloud support VPN connection
+
+3. **Test Koneksi:**
+   - Setelah set environment variables, test koneksi dari SSH terminal Laravel Cloud:
+     ```bash
+     php artisan tinker
+     DB::connection('simrs')->getPdo();
+     ```
+   - Atau gunakan command:
+     ```bash
+     php artisan simrs:test-connection
+     ```
+
+**Catatan Keamanan:**
+- Gunakan user database dengan permission **READ-ONLY** untuk keamanan
+- Jangan gunakan root user atau user dengan full access
+- Simpan credentials dengan aman, jangan commit ke repository
+- Pertimbangkan menggunakan SSL connection jika memungkinkan
 
 #### E. Session & Cache
 
@@ -316,6 +351,7 @@ Setelah semua variables ditambahkan, klik **"Save"** atau **"Update Environment"
 ### 6.2 Dapatkan Database Credentials
 
 Setelah database dibuat, Laravel Cloud akan menampilkan:
+
 - **Database Host**
 - **Database Port** (biasanya 3306)
 - **Database Name**
@@ -484,15 +520,18 @@ php artisan view:cache
 ### 9.2 Test Fitur Utama
 
 1. **Test Login:**
+
    - Buka halaman login
    - Login dengan user yang sudah ada di database
    - Pastikan login berhasil
 
 2. **Test Database Connection:**
+
    - Pastikan data bisa di-load dari database
    - Test CRUD operations
 
 3. **Test SIMRS Connection (jika ada):**
+
    - Test koneksi ke database SIMRS
    - Pastikan data bisa di-sync
 
@@ -513,6 +552,7 @@ php artisan view:cache
 ### 10.1 Error: APP_KEY is not set
 
 **Solusi:**
+
 1. Buka SSH terminal
 2. Jalankan: `php artisan key:generate --force`
 3. Atau set `APP_KEY` di environment variables
@@ -520,6 +560,7 @@ php artisan view:cache
 ### 10.2 Error: Database Connection Failed
 
 **Solusi:**
+
 1. Periksa database credentials di environment variables
 2. Pastikan database sudah dibuat di Laravel Cloud
 3. Pastikan `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` sudah benar
@@ -532,6 +573,7 @@ php artisan view:cache
 ### 10.3 Error: Assets Not Loading (404)
 
 **Solusi:**
+
 1. Pastikan build command sudah dijalankan
 2. Pastikan `npm run build` berhasil
 3. Periksa folder `public/build` sudah ada
@@ -544,6 +586,7 @@ php artisan view:cache
 ### 10.4 Error: Storage Link Not Found
 
 **Solusi:**
+
 1. Jalankan di SSH terminal:
    ```bash
    php artisan storage:link
@@ -553,6 +596,7 @@ php artisan view:cache
 ### 10.5 Error: Migration Failed
 
 **Solusi:**
+
 1. Periksa log error di Laravel Cloud
 2. Pastikan database sudah dibuat
 3. Pastikan user database punya permission untuk create table
@@ -564,6 +608,7 @@ php artisan view:cache
 ### 10.6 Error: SIMRS Connection Failed
 
 **Solusi:**
+
 1. Periksa `SIMRS_DB_*` environment variables
 2. Pastikan database SIMRS bisa diakses dari server Laravel Cloud
 3. Jika SIMRS database di network internal, pastikan Laravel Cloud bisa mengaksesnya
@@ -576,6 +621,7 @@ php artisan view:cache
 ### 10.7 Error: Build Failed (NPM/Node)
 
 **Solusi:**
+
 1. Pastikan Node.js version sesuai (18+ atau 20+)
 2. Periksa `package.json` dan `package-lock.json` sudah ter-commit
 3. Pastikan build command sudah benar
@@ -584,6 +630,7 @@ php artisan view:cache
 ### 10.8 Error: Permission Denied
 
 **Solusi:**
+
 1. Pastikan folder `storage` dan `bootstrap/cache` writable
 2. Di SSH terminal, jalankan:
    ```bash
@@ -593,6 +640,7 @@ php artisan view:cache
 ### 10.9 Error: Memory Limit Exceeded
 
 **Solusi:**
+
 1. Update `memory_limit` di PHP settings (jika memungkinkan)
 2. Atau optimize build process
 3. Contact Laravel Cloud support untuk increase memory limit
@@ -600,6 +648,7 @@ php artisan view:cache
 ### 10.10 Error: Timeout During Deploy
 
 **Solusi:**
+
 1. Periksa ukuran repository (jangan commit `node_modules` atau `vendor`)
 2. Pastikan `.gitignore` sudah benar
 3. Optimize build process
@@ -654,7 +703,7 @@ php artisan view:cache
 3. Enable auto-deploy untuk branch tertentu (misalnya `main`)
 4. Set deployment hooks jika diperlukan:
    - **Before Deploy:** (opsional)
-   - **After Deploy:** 
+   - **After Deploy:**
      ```bash
      php artisan migrate --force
      php artisan config:cache
@@ -704,12 +753,14 @@ php artisan view:cache
 ### 14.2 Regular Maintenance
 
 1. **Update Dependencies:**
+
    ```bash
    composer update
    npm update
    ```
 
 2. **Clear Cache:**
+
    ```bash
    php artisan cache:clear
    php artisan config:clear
@@ -751,24 +802,28 @@ php artisan view:cache
 Gunakan checklist ini untuk memastikan semua langkah sudah dilakukan:
 
 ### Pre-Deploy
+
 - [ ] Repository Git sudah dibuat dan di-push
 - [ ] File `.env.example` sudah lengkap
 - [ ] Build scripts sudah benar
 - [ ] Semua dependencies sudah ter-commit
 
 ### Laravel Cloud Setup
+
 - [ ] Akun Laravel Cloud sudah dibuat
 - [ ] Project sudah dibuat
 - [ ] Repository sudah di-connect
 - [ ] Environment sudah dibuat
 
 ### Configuration
+
 - [ ] Environment variables sudah di-set
 - [ ] Database sudah dibuat
 - [ ] Database credentials sudah di-update
 - [ ] APP_KEY sudah di-generate
 
 ### Deploy
+
 - [ ] Deploy pertama sudah berhasil
 - [ ] Migrations sudah di-run
 - [ ] Seeders sudah di-run (jika ada)
@@ -776,6 +831,7 @@ Gunakan checklist ini untuk memastikan semua langkah sudah dilakukan:
 - [ ] Cache sudah di-clear dan di-rebuild
 
 ### Verification
+
 - [ ] Aplikasi bisa diakses
 - [ ] Login berfungsi
 - [ ] Database connection berhasil
@@ -784,6 +840,7 @@ Gunakan checklist ini untuk memastikan semua langkah sudah dilakukan:
 - [ ] SIMRS connection berhasil (jika diperlukan)
 
 ### Post-Deploy
+
 - [ ] Logs sudah di-check
 - [ ] Error tracking sudah di-setup
 - [ ] Monitoring sudah di-setup
@@ -794,4 +851,3 @@ Gunakan checklist ini untuk memastikan semua langkah sudah dilakukan:
 **Selamat! Aplikasi KMKB Anda sudah berhasil di-deploy ke Laravel Cloud! 🎉**
 
 Jika ada pertanyaan atau masalah, silakan refer ke bagian [Troubleshooting](#troubleshooting) atau hubungi Laravel Cloud support.
-
