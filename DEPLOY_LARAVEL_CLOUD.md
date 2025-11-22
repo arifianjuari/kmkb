@@ -501,13 +501,27 @@ php artisan migrate --force
 php artisan db:seed --force
 ```
 
-### 8.5 Setup Storage Link
+### 8.5 Setup Storage Link dan Image Storage
 
-1. Di terminal SSH, jalankan:
+1. **Buat folder storage yang diperlukan:**
+   ```bash
+   mkdir -p storage/app/public/hospitals
+   chmod -R 775 storage bootstrap/cache
+   ```
 
-```bash
-php artisan storage:link
-```
+2. **Buat storage link:**
+   ```bash
+   php artisan storage:link
+   ```
+
+3. **Verifikasi:**
+   ```bash
+   ls -la public/storage
+   ```
+   
+   Seharusnya menampilkan symlink ke `storage/app/public`
+
+**Catatan:** Untuk panduan lengkap tentang setup image storage, lihat file `IMAGE_STORAGE_SETUP.md`.
 
 ### 8.6 Clear dan Cache Config
 
@@ -660,10 +674,12 @@ php artisan view:cache
 **Solusi:**
 
 1. **Pastikan `.gitkeep` file ada:**
+
    - File `bootstrap/cache/.gitkeep` sudah ter-commit di repository
    - Ini memastikan directory ter-track oleh Git
 
 2. **Update Build Command di Laravel Cloud:**
+
    - Tambahkan perintah ini di awal build command:
      ```bash
      mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
@@ -672,6 +688,7 @@ php artisan view:cache
    - Pastikan perintah ini dijalankan SEBELUM `composer install`
 
 3. **Atau set di Before Deploy Hook:**
+
    - Di Laravel Cloud settings, tambahkan di "Before Deploy":
      ```bash
      mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
