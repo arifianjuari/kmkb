@@ -17,7 +17,7 @@ All project documentation can be found in the `documentation/` folder:
 
 ## Directories
 
-- `src/` - Main source code for the application
+- `app/`, `bootstrap/`, `config/`, `database/`, `public/`, `resources/`, `routes/`, `storage/`, `tests/` - Laravel application
 - `documentation/` - All project documentation
 
 ## Getting Started

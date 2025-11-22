@@ -97,7 +97,15 @@ Catatan: Pada tahap awal tanpa integrasi, ada langkah manual ekstra seperti inpu
 
 Pathway Builder (Penyusun Clinical Pathway)
 
-## Fitur untuk membuat, mengedit, dan menyimpan clinical pathway dalam format terstruktur. Pengguna (Tim Mutu) dapat menambahkan tahap-tahap/step pada pathway lengkap dengan detail seperti deskripsi tindakan, pilihan prosedur/obat, kriteria mutu (misal pemeriksaan apa harus dilakukan hari ke berapa), serta parameter lain (misal estimasi durasi rawat, estimasi biaya per tahap). Pathway Builder mendukung pembuatan branching sederhana jika ada skenario pilihan (misal opsi terapi A atau B). Setiap pathway memiliki versi/tanggal berlaku untuk mengelola perubahan. Output: repositori pathway digital yang menjadi acuan standar rumah sakit.
+## Fitur untuk membuat, mengedit, dan menyimpan clinical pathway dalam format terstruktur. Pengguna (Tim Mutu) dapat menambahkan tahap-tahap/step pada pathway lengkap dengan detail seperti deskripsi tindakan, pilihan prosedur/obat, kriteria mutu (misal pemeriksaan apa harus dilakukan hari ke berapa), serta parameter lain (misal kuantitas/quantity per tindakan dan estimasi biaya per tahap). Pathway Builder mendukung pembuatan branching sederhana jika ada skenario pilihan (misal opsi terapi A atau B). Setiap pathway memiliki versi/tanggal berlaku untuk mengelola perubahan. Output: repositori pathway digital yang menjadi acuan standar rumah sakit.
+
+Manajemen Cost Reference (CRUD)
+
+## Fitur untuk mengelola master referensi biaya (CostReference) secara penuh: daftar, tambah, edit, hapus, dan lihat detail. Field utama yang digunakan adalah service_code, service_description, dan standard_cost. Data ini menjadi referensi biaya standar yang terhubung dengan langkah pathway.
+
+## Integrasi dengan Pathway Builder: dropdown Cost Reference pada Pathway Builder terhubung ke entitas CostReference. Saat item dipilih, standard_cost akan mengisi estimated_cost pada langkah pathway terkait untuk memudahkan estimasi biaya.
+
+## Akses menu: tersedia di navigasi aplikasi untuk pengguna dengan role admin melalui menu “Cost References”.
 
 Unggah Biaya Sampel & Master Tarif
 
@@ -115,17 +123,17 @@ Master Tarif & Unit Cost:
 
 Dashboard & Laporan KPI
 
-## Fitur dashboard interaktif menampilkan indikator kinerja kunci terkait mutu dan biaya. Contoh KPI yang ditampilkan:
+## Fitur dashboard interaktif menampilkan indikator kinerja kunci terkait mutu dan biaya dengan antarmuka pengguna yang modern dan responsif. Dashboard telah ditingkatkan dengan implementasi Tailwind CSS 3.x dan mendukung dark mode untuk kenyamanan pengguna dalam berbagai kondisi pencahayaan. Contoh KPI yang ditampilkan:
 
 Kepatuhan Pathway (%): Misal persentase rata-rata kepatuhan untuk tiap pathway (per bulan). Dapat difilter per departemen atau dokter.
 
-Selisih Biaya Rata-Rata: Perbandingan rata-rata biaya riil vs tarif INA-CBG per diagnosa. Ditampilkan apakah rata-rata over atau under budget dalam bentuk grafik.
+Selisih Biaya Rata-rata per Diagnosa: rata-rata selisih antara biaya aktual dan tarif INA-CBG untuk tiap diagnosa utama. Ditampilkan dalam nilai rupiah dan persentase.
 
-Distribusi Variasi Tindakan: Grafik/diagram yang menunjukkan area mana di pathway yang paling sering terjadi varian (penyimpangan). Misal “30% kasus Demam Tifoid tidak melakukan pemeriksaan Widal sesuai pathway”.
+Jumlah Kasus Over/Under Budget: jumlah kasus yang biayanya melebihi atau di bawah tarif INA-CBG, dikelompokkan per bulan atau periode.
 
-Outcome Klinis (optional): Jika ada data outcome (misal rerata LOS, angka re-admisi, komplikasi), bisa ditampilkan berdampingan untuk melihat korelasi dengan kepatuhan pathway. (Catatan: Outcome klinis bisa ditambahkan di versi lanjutan).
+Rata-rata Length of Stay (LOS) vs Target: perbandingan rata-rata durasi rawat aktual vs target pathway per diagnosa.
 
-## Dashboard memungkinkan pengguna melakukan filter (rentang waktu, unit, dokter penanggung jawab). Selain itu, laporan dalam format PDF/Excel dapat di-generate, seperti laporan bulanan KMKB yang merinci KPI tersebut untuk meeting manajemen atau akreditasi. Dashboard dan laporan ini membantu memastikan transparansi dan akuntabilitas kinerja mutu sesuai semangat standar ISO 7101 yang menekankan pendekatan sistematis dan berkelanjutan untuk kualitas tinggi .
+## Dashboard dirancang interaktif: pengguna bisa memilih periode (mingguan/bulanan/triwulan), filter berdasarkan diagnosa/unit/departemen, serta mengekspor data ke PDF/Excel. Visualisasi menggunakan chart (bar, line, pie) untuk mempermudah analisis tren. Misalnya, chart line untuk tren kepatuhan bulanan, atau pie chart untuk komposisi biaya. Antarmuka dashboard dioptimalkan untuk aksesibilitas dengan struktur heading yang benar dan atribut ARIA yang sesuai.
 
 Audit Trail
 
@@ -171,7 +179,46 @@ Laporan Deviasi & Biaya: sistem menghasilkan persentase kepatuhan, daftar varian
 
 ## Selain fitur utama di atas, ada juga fitur pendukung lainnya yang akan disertakan:
 
-## Manajemen Pengguna & Hak Akses: Modul untuk mengatur pengguna sistem, peran/role (misal Role Admin, Role Tim Mutu, Role Klaim, Role Manajemen [hanya view]), dan pengaturan akses fitur/data sesuai prinsip least privilege.
+## Manajemen Pengguna & Hak Akses: Modul untuk mengatur pengguna sistem, peran/role (Admin, Tim Mutu, Tim Klaim, Manajemen [hanya view]) serta pengaturan akses sesuai prinsip least privilege.
+
+### Superadmin (Global)
+- Peran khusus di level sistem untuk mengelola multi-tenant (multi-RS) dan pengguna lintas RS.
+- Kewenangan utama:
+  - CRUD master tenant (Hospital): nama, kode, logo, tema/branding, status aktif.
+  - Kelola pengguna lintas RS: membuat/mengubah/nonaktifkan user pada RS mana pun.
+  - Akses lintas tenant untuk tujuan audit/operasional (tidak terbatasi `hospital_id`).
+- Catatan keamanan dan tata kelola:
+  - Akun sangat terbatas (1–2 akun), dilindungi MFA dan password policy kuat.
+  - Semua aktivitas superadmin wajib terekam di audit log.
+  - Tidak digunakan untuk operasional harian; hanya provisioning, investigasi, dan maintenance.
+
+### Catatan Teknis Superadmin
+- Model `User` memiliki role `superadmin`. Akun superadmin tidak terikat RS (kolom `users.hospital_id` bisa `NULL` khusus superadmin).
+- Global scope tenant (`BelongsToHospital`) tidak diterapkan kepada superadmin sehingga query tidak otomatis difilter `hospital_id`.
+- Route model binding (contoh `ClinicalPathway`, `PatientCase`) mengizinkan superadmin mengakses data lintas RS.
+- Middleware penetapan tenant (`SetHospital`) tidak menyetel `session('hospital_id')` untuk superadmin.
+- Cache/storage per tenant tetap terstruktur per `hospital_id`; superadmin tidak memiliki folder tenant sendiri. Aksi tulis data oleh superadmin harus memilih RS target secara eksplisit.
+
+### Akun Default (untuk pengujian/dev)
+- Dibuat melalui seeder: `superadmin@example.com` dengan kata sandi awal `password` (WAJIB diganti di produksi).
+
+### Modul Manajemen Rumah Sakit (Tenant) untuk Superadmin
+- Fitur CRUD penuh untuk entitas `Hospital` (nama, kode, logo, warna tema, alamat, kontak, status aktif) melalui `HospitalController` dan Blade views `index/create/edit/show` berbasiskan Tailwind.
+- Route resource hanya dapat diakses superadmin dan diposisikan sebelum grup route yang terikat tenant agar tidak terkena global scope.
+- Upload logo tersimpan di storage publik sesuai struktur per-tenant.
+
+### Pengelolaan User Lintas-Tenant oleh Superadmin
+- Superadmin dapat melihat seluruh pengguna lintas `hospital_id` pada halaman index users (kolom “Hospital” tampil khusus superadmin).
+- Form create/edit user menampilkan dropdown pemilihan `hospital` hanya untuk superadmin sehingga user dapat diprovisikan ke RS manapun.
+- Validasi memastikan hanya superadmin yang boleh mengatur/ubah `hospital_id`; non-superadmin dibatasi pada tenant aktif.
+
+### Routing & Middleware
+- Routes modul `hospitals` dilindungi `auth` + role superadmin. Routes users tetap seperti semula, namun controller mengakomodasi akses superadmin lintas-tenant.
+- Middleware penetapan tenant tetap aktif untuk user biasa; superadmin dilewati dari penyetelan `session('hospital_id')` sehingga tidak terscope otomatis.
+
+### Keamanan & Audit
+- Semua aksi superadmin (CRUD hospital, pengelolaan user lintas-tenant) tercatat di `AuditLog` untuk keperluan jejak audit.
+- Pembatasan akses ketat pada role superadmin, disarankan MFA dan hardening password policy.
 
 ## Master Data Klinik: Seperti master data diagnosa (ICD-10), master prosedur (ICD-9 CM atau kode internasional lain), dan master unit/ruangan. Ini diperlukan untuk standarisasi input data kasus dan integrasi ke depannya.
 
@@ -221,6 +268,44 @@ Diagram ERD sederhana untuk entitas di atas kira-kira: ClinicalPathway –< Path
 
 ## Struktur data di atas memastikan bahwa satu pathway dapat diaplikasikan ke banyak kasus pasien dan evaluasi detail per langkah bisa dilakukan. Dengan struktur relasional ini, query untuk mendapatkan tingkat kepatuhan, rata-rata biaya, dsb, dapat dijalankan dengan efektif. Misalnya, menghitung persentase kepatuhan pathway: sistem cukup mengambil jumlah PathwayStep per pathway dan berapa yang terpenuhi di CaseDetail per kasus.
 
+Catatan Implementasi Terkini (Agustus 2025)
+
+## Pathway Builder: perbaikan pemetaan field agar konsisten dengan skema database. Field yang digunakan: step_order (urutan), action (aksi/tindakan), description (deskripsi), estimated_cost (estimasi biaya), quantity (kuantitas). Dropdown Cost Reference mengisi estimated_cost secara otomatis saat dipilih. Total cost ditampilkan sebagai atribut terhitung (estimated_cost x quantity) dan tidak disimpan di database.
+
+## Cost Reference Management: penambahan modul CRUD penuh (routes resource, controller, dan Blade views index/create/edit/show) untuk mengelola referensi biaya. Tersedia pagination dan validasi form.
+
+## Navigasi: menu “Cost References” ditambahkan pada navigasi (desktop dan responsif) khusus untuk role admin.
+
+## User Seeder: disediakan seeder UsersTableSeeder untuk membuat akun default per role (admin, mutu, klaim, manajemen) guna memudahkan pengujian. Password default: "password" (harap ganti di produksi).
+
+## Pathway Steps Drag-and-Drop Ordering (Agustus 2025)
+
+- **Fitur**: Pathway Builder mendukung drag-and-drop untuk mengubah urutan tampilan langkah (row) dengan handle ikon "☰".
+- **Perilaku Day (step_order)**: Nilai "Day" tidak berubah otomatis saat drag. Pengguna tetap dapat mengedit Day secara manual pada kolomnya masing-masing.
+- **Persistensi Urutan**: Urutan visual disimpan pada kolom baru `display_order` di tabel `pathway_steps`. Tampilan builder mengurutkan langkah berdasarkan `display_order`.
+- **Perubahan Skema**: Ditambahkan kolom `display_order` (integer, nullable, indexed) dan dilakukan backfill awal agar nilainya = `step_order` untuk data eksisting.
+- **API Reorder**: Endpoint `POST pathways/{pathway}/steps/reorder` menerima payload `{"order": [{"id": <step_id>, "position": <urutan_baru>}, ...]}` dan menyimpan ke `display_order` (transaksional). Tidak mengubah `step_order`.
+- **Frontend**: Menggunakan SortableJS (1.15.2). CSRF dan header JSON sudah ditangani. Drag handle hanya mengubah urutan visual; kolom Day tidak di-update otomatis.
+- **Model**: `PathwayStep` menambahkan atribut `display_order` pada `$fillable` dan `$casts`.
+
+## Bulk Import Pathway Steps via Excel (Agustus 2025)
+
+- **Fitur**: Pathway Builder mendukung unduh template Excel (.xlsx) dan unggah file Excel/CSV untuk membuat langkah pathway secara massal.
+- **Template**: Kolom yang disediakan: `day` (wajib), `activity` (wajib), `description` (wajib), `criteria` (opsional), `standard_cost` (wajib), `quantity` (opsional, default 1), `cost_reference_id` (opsional). Template menyertakan contoh baris untuk panduan.
+- **Validasi Server-side** (`app/Http/Controllers/PathwayStepController.php`):
+  - `day` integer ≥ 1
+  - `activity`, `description` wajib terisi
+  - `standard_cost` numerik (mendukung format desimal umum). Jika menggunakan format lokal, parser dapat disesuaikan.
+  - `quantity` integer ≥ 1 (default 1)
+  - `cost_reference_id` (jika diisi) harus valid dan ada pada master CostReference
+  - Baris tidak valid dilewati; sistem menampilkan ringkasan baris yang gagal. Baris valid tetap diimpor (partial success).
+- **Inisialisasi Urutan**: Untuk entri hasil impor baru, `step_order` dan `display_order` diinisialisasi sama dengan nilai `day` untuk memudahkan penyusunan awal. Pengguna dapat mengatur ulang urutan tampilan melalui fitur drag-and-drop (menulis ke `display_order`).
+- **Dependensi**: `phpoffice/phpspreadsheet` (untuk buat/baca Excel) dan ekstensi Zip PHP harus aktif. Jika library belum tersedia, tombol unduh otomatis mengunduh template CSV dan unggah Excel akan ditolak dengan pesan ramah; unggah CSV tetap didukung.
+- **Endpoint**:
+  - `GET /pathways/{pathway}/steps/template` — unduh template (Excel, fallback CSV)
+  - `POST /pathways/{pathway}/steps/import` — unggah Excel/CSV untuk impor langkah
+- **UI** (`resources/views/pathways/builder.blade.php`): Tombol “Download Excel Template” dan input berkas menerima `.xlsx, .xls, .csv`. Teks instruksi diperbarui agar pengguna mengisi template dan mengunggah kembali.
+
 Pemetaan Canonical Service dan Aturan Rekonsiliasi
 
 Untuk menjembatani pathway (istilah klinis) dan billing (kode tarif), sistem menggunakan lapisan canonical service dan aturan mapping.
@@ -232,9 +317,6 @@ Untuk menjembatani pathway (istilah klinis) dan billing (kode tarif), sistem men
 service_map: aturan pemetaan kode_billing ↔ canonical_service_id (match type, nilai, prioritas).
 
 step_matches: hasil evaluasi per kasus, mencatat pathway step, item billing terkait, status (done/missed/varian), qty dan biaya realisasi.
-
-
-
 Alur Rekonsiliasi
 
 Data billing → normalisasi → mapping ke canonical service.
@@ -291,6 +373,8 @@ Platform & Stack Teknologi
 
 ## Aplikasi akan dibangun berbasis PHP stack. Disarankan menggunakan framework PHP modern seperti Laravel (versi terbaru yang LTS) untuk mempercepat development dengan arsitektur MVC yang rapi. Laravel menyediakan fitur bawaan untuk otentikasi, migrasi database, dan keamanan yang akan bermanfaat. Alternatif lain bisa berupa CodeIgniter 4 atau Symfony, namun Laravel dipilih karena ekosistemnya kuat dan banyak library pendukung. Aplikasi akan berjalan di atas web server Apache atau Nginx (bagian dari stack LAMP/LEMP – Linux, Apache/Nginx, MySQL/MariaDB, PHP). Sistem operasi server bisa Linux (Ubuntu LTS atau CentOS) agar stabil dan hemat biaya. Database MySQL/MariaDB direkomendasikan untuk kemudahan integrasi dengan PHP; PostgreSQL juga bisa dipertimbangkan untuk peningkatan performa dan compliance ACID. Semua komponen stack tersebut adalah open-source, sesuai dengan kemungkinan keterbatasan anggaran dan untuk kemudahan kustomisasi.
 
+Untuk frontend, aplikasi menggunakan Tailwind CSS 3.x sebagai framework CSS utility-first yang memungkinkan pengembangan UI yang konsisten dan responsif. Tailwind CSS dikombinasikan dengan Alpine.js untuk interaktivitas frontend yang ringan. Pendekatan ini menggantikan Bootstrap 5 dan jQuery yang digunakan sebelumnya, memberikan fleksibilitas yang lebih besar dalam desain UI/UX serta performa yang lebih baik.
+
 Arsitektur Aplikasi & Rancangan Modul
 
 Aplikasi akan dibangun dengan arsitektur modular agar mudah dikembangkan lebih lanjut dan diintegrasikan. Rancangan modul meliputi:
@@ -314,6 +398,22 @@ Tiap modul di atas akan dikemas sedemikian rupa sehingga bisa dikembangkan atau 
 Desain Basis Data
 
 Database relasional (MySQL/MariaDB) dengan desain sesuai entitas pada bagian sebelumnya. Dibuat dengan normalisasi secukupnya: data master terpisah, data transaksi kasus terpisah. Indexing dioptimalkan untuk query utama (misal index di kolom ID Pathway pada tabel kasus untuk analisis per pathway). Juga disiapkan beberapa materialized view atau table agregat untuk keperluan dashboard agar load cepat (misal tabel rekapan bulanan kepatuhan per pathway). Migrasi skema akan dikelola via tool (Laravel migration) agar perubahan skema tercatat dan reproducible.
+
+## Multi-tenant (Single DB, Row-based, Tanpa Subdomain)
+
+Untuk memungkinkan satu instance aplikasi melayani banyak rumah sakit, arsitektur disiapkan sejak awal sebagai multi-tenant berbasis satu database (row-based tenancy) tanpa menggunakan subdomain. Pemisahan tenant dilakukan melalui kolom `hospital_id` pada tabel-tabel domain, dengan cakupan berikut:
+
+- Entitas tenant: tabel `hospitals` menyimpan identitas RS (id, name, code, logo_path, theme_color, address, contact, is_active).
+- Kolom `hospital_id`: ditambahkan pada tabel utama seperti `users`, `clinical_pathways`, `pathway_steps`, `patient_cases`, `case_details`, `cost_references`, dan `audit_logs` agar setiap baris selalu terkait ke satu RS.
+- Indeks & FK: `hospital_id` diindeks dan menjadi foreign key ke `hospitals.id` untuk menjaga integritas dan kinerja query.
+- Global scope model: seluruh model domain (mis. `ClinicalPathway`, `PathwayStep`, `PatientCase`, `CaseDetail`, `CostReference`, `AuditLog`) menerapkan Global Scope berbasis `hospital_id` sehingga semua query otomatis terfilter sesuai tenant aktif. Disediakan mekanisme sementara (tanpa subdomain) untuk menentukan tenant dari user yang sedang login.
+- Resolusi tenant: karena tidak menggunakan subdomain, tenant aktif diambil dari `auth()->user()->hospital_id` pasca login melalui middleware `SetHospital` dan helper `hospital()` yang dapat diakses view/service.
+- Konfigurasi per-tenant (sederhana): hanya branding dan identitas, seperti nama RS, logo, dan warna tema. Branding dipakai pada layout dan laporan.
+- Storage & cache: prefiks folder/file dan key cache menggunakan `hospital_id` (mis. `storage/app/public/tenants/{hospital_id}/branding/logo.png`) untuk menghindari tabrakan nama file lintas tenant.
+- Import/Export Excel: sesuai preferensi, sistem mendukung unduh template Excel dan unggah Excel/CSV (PhpSpreadsheet). Pada saat impor/ekspor, data selalu ditandai/diambil dengan `hospital_id` tenant aktif sehingga tidak terjadi kebocoran data lintas RS.
+- Keamanan & isolasi: route model binding dan policy memastikan akses antar-tenant terblokir (404/forbidden) meskipun ada upaya mengakses ID milik tenant lain.
+
+Catatan: Meskipun pilot operasional dapat dimulai dengan 1 RS, rancangan ini siap multi-tenant sejak hari pertama. Karena sistem baru dibangun dari nol, tidak diperlukan proses backfill `hospital_id` pada data eksisting.
 
 Keamanan Aplikasi
 
@@ -345,7 +445,7 @@ Modular & Plugin Architecture: Jika memungkinkan, beberapa komponen dibuat seper
 
 ## Scalability: Walaupun saat ini untuk 1 RS, sistem dipersiapkan agar bisa menangani skala data yang lebih besar. Misal, jumlah pathway bisa puluhan, data kasus mungkin ribuan per tahun. Query dan coding dioptimalkan (penting memastikan N+1 query problem dihindari). Jika di masa depan multi-RS, struktur database bisa diadaptasi (misal menambah kode RS di tabel, dsb., atau menggunakan basis data terpisah per RS).
 
-## Documentation & Code Quality: Kode akan di-dokumentasi dengan baik (comments, README developer) agar dev lain mudah mengambil alih. Mengikuti standar PSR untuk PHP coding style. Dengan codebase rapi, penambahan fitur baru (misal modul mobile app) akan lebih mudah.
+## Documentation & Code Quality: Kode telah di-dokumentasi dengan baik (comments, README developer) agar dev lain mudah mengambil alih. Mengikuti standar PSR untuk PHP coding style. Codebase telah ditingkatkan dengan refactor dari Bootstrap 5 ke Tailwind CSS 3.x untuk meningkatkan konsistensi tampilan dan maintainability. Struktur kode dioptimalkan dengan peningkatan struktur HTML semantik dan peningkatan aksesibilitas. Dengan codebase yang rapi dan terdokumentasi dengan baik, penambahan fitur baru akan lebih mudah dan pengembangan selanjutnya dapat dilakukan dengan efisien.
 
 Lingkungan Deployment
 
@@ -383,7 +483,7 @@ Tujuan MVP: Sistem dapat digunakan oleh Tim Mutu dan Unit Klaim untuk satu atau 
 
 Penyempurnaan Pathway Builder: mendukung duplikasi pathway, versi pathway (bila update bisa simpan versi lama untuk audit), mungkin mendukung conditional step sederhana (jika perlu).
 
-Peningkatan UI/UX: mempercantik tampilan dashboard (grafik interaktif), navigasi user lebih intuitif, penambahan filter/pencarian (misal search pathway, filter kasus per periode).
+Peningkatan UI/UX: Refactor seluruh tampilan dari Bootstrap 5 ke Tailwind CSS 3.x dengan implementasi dark mode menyeluruh, peningkatan struktur HTML semantik, peningkatan aksesibilitas dengan atribut ARIA dan struktur heading yang benar, serta implementasi kelas tombol yang dapat digunakan kembali untuk konsistensi tampilan. Selain itu, penambahan grafik interaktif di dashboard, navigasi user yang lebih intuitif, dan filter/pencarian yang lebih lengkap (misal search pathway, filter kasus per periode).
 
 ## Fitur Unggah Data lebih lengkap: mendukung unggahan batch data kasus (dari file Excel) agar Unit Klaim bisa import data banyak sekaligus. Juga modul master tarif yang bisa diunggah dari data billing.
 
@@ -415,7 +515,7 @@ Analitik Lanjutan: Misal penambahan modul predictive sederhana: memprediksi kemu
 
 ## Benchmarking & Multi-unit: Jika RS besar dengan banyak unit, bisa tambahkan fitur perbandingan antar departemen atau antar RS (bila group hospital). Meskipun awalnya 1 RS, modul ini disiapkan jika manajemen ingin melihat perbandingan antar cabang di masa depan.
 
-Mobile Access: Pembuatan versi mobile-friendly atau aplikasi mobile (minimal untuk melihat dashboard KPI) bagi manajemen on-the-go. Ini bisa meningkatkan aksesibilitas data.
+Mobile Access: Aplikasi telah dirancang dengan pendekatan mobile-first menggunakan Tailwind CSS 3.x, memastikan antarmuka pengguna yang responsif dan optimal di berbagai perangkat, termasuk desktop, tablet, dan mobile. Desain responsif memungkinkan manajemen untuk mengakses dashboard KPI dan fitur penting lainnya dengan baik saat on-the-go. Dengan implementasi desain responsif yang komprehensif, kebutuhan akan aplikasi mobile terpisah dapat diminimalkan sementara pengalaman pengguna tetap optimal di semua perangkat.
 
 ## Feedback Loop ke Klinik: Fitur untuk dokter atau kepala departemen melihat data mereka (misal dokter bedah bisa lihat kepatuhan pathway bedahnya). Ini semacam membuka akses terbatas ke lebih banyak user klinis sebagai end-user data. Harus disertai kontrol hak akses yang ketat.
 
