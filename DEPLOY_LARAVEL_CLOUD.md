@@ -273,12 +273,14 @@ SIMRS_DB_PASSWORD=<password_database_simrs>
 **Cara Mendapatkan Kredensial Database SIMRS:**
 
 1. **Hubungi Administrator SIMRS** untuk mendapatkan:
+
    - IP Address atau Hostname server database SIMRS
    - Port database (biasanya 3306 untuk MySQL)
    - Nama database SIMRS
    - Username dan password database (disarankan menggunakan user read-only)
 
 2. **Pastikan Network Access:**
+
    - Database SIMRS harus bisa diakses dari internet (jika di on-premise, perlu setup VPN atau whitelist IP Laravel Cloud)
    - Atau database SIMRS harus di-deploy di cloud yang bisa diakses dari Laravel Cloud
    - Jika menggunakan VPN, pastikan Laravel Cloud support VPN connection
@@ -295,6 +297,7 @@ SIMRS_DB_PASSWORD=<password_database_simrs>
      ```
 
 **Catatan Keamanan:**
+
 - Gunakan user database dengan permission **READ-ONLY** untuk keamanan
 - Jangan gunakan root user atau user dengan full access
 - Simpan credentials dengan aman, jangan commit ke repository
@@ -418,9 +421,20 @@ php artisan db:seed --force
 3. Pastikan build command sudah terkonfigurasi:
 
 ```bash
+# Ensure required directories exist and are writable
+mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
+chmod -R 775 bootstrap/cache storage
+
+# Install Composer dependencies
 composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+# Install NPM dependencies
 npm ci
+
+# Build frontend assets
 npm run build
+
+# Cache configuration for production
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
@@ -428,6 +442,8 @@ php artisan view:cache
 
 4. Jika belum ada, tambahkan build command tersebut
 5. Klik **"Save"**
+
+**Catatan:** Perintah `mkdir -p` dan `chmod` di awal memastikan directory `bootstrap/cache` dan `storage` ada dan writable sebelum menjalankan composer install. Ini penting untuk menghindari error "bootstrap/cache directory must be present and writable".
 
 ### 7.2 Verifikasi Node.js Version
 
