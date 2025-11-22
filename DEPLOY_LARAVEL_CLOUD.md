@@ -617,11 +617,27 @@ php artisan view:cache
 
 **Solusi:**
 
-1. Jalankan di SSH terminal:
+1. **Buat folder storage yang diperlukan:**
+   ```bash
+   mkdir -p storage/app/public/hospitals
+   chmod -R 775 storage bootstrap/cache
+   ```
+
+2. **Buat storage link:**
    ```bash
    php artisan storage:link
    ```
-2. Pastikan folder `storage/app/public` ada
+
+3. **Verifikasi:**
+   ```bash
+   ls -la public/storage
+   ```
+   
+   Seharusnya menampilkan symlink ke `storage/app/public`
+
+4. **Pastikan folder `storage/app/public` ada dan writable**
+
+**Catatan:** Untuk troubleshooting lengkap tentang image storage, lihat file `IMAGE_STORAGE_SETUP.md`.
 
 ### 10.5 Error: Migration Failed
 
