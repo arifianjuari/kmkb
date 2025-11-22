@@ -5,9 +5,14 @@
 
 echo "🚀 Starting deployment process..."
 
-# Run migrations (uncomment jika ingin auto-migrate)
-# echo "📊 Running database migrations..."
-# php artisan migrate --force
+# Ensure required storage directories exist and are writable
+echo "📁 Creating storage directories..."
+mkdir -p storage/app/public/hospitals
+mkdir -p storage/framework/cache
+mkdir -p storage/framework/sessions
+mkdir -p storage/framework/views
+mkdir -p storage/logs
+chmod -R 775 storage bootstrap/cache
 
 # Create storage link
 echo "🔗 Creating storage link..."
