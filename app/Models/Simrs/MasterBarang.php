@@ -73,11 +73,11 @@ class MasterBarang extends SimrsModel
                 expire,
                 status
             FROM databarang
-            WHERE kode_brng LIKE ? OR nama_brng LIKE ?
+            WHERE status = '1' AND (kode_brng LIKE ? OR nama_brng LIKE ?)
             ORDER BY nama_brng
             LIMIT ? OFFSET ?";
             
-            $countQuery = "SELECT COUNT(*) as total FROM databarang WHERE kode_brng LIKE ? OR nama_brng LIKE ?";
+            $countQuery = "SELECT COUNT(*) as total FROM databarang WHERE status = '1' AND (kode_brng LIKE ? OR nama_brng LIKE ?)";
             
             $data = DB::connection('simrs')->select($dataQuery, [$searchTerm, $searchTerm, $limit, $offset]);
             $count = DB::connection('simrs')->select($countQuery, [$searchTerm, $searchTerm])[0]->total;
@@ -92,10 +92,11 @@ class MasterBarang extends SimrsModel
                 expire,
                 status
             FROM databarang
+            WHERE status = '1'
             ORDER BY nama_brng
             LIMIT ? OFFSET ?";
             
-            $countQuery = "SELECT COUNT(*) as total FROM databarang";
+            $countQuery = "SELECT COUNT(*) as total FROM databarang WHERE status = '1'";
             
             $data = DB::connection('simrs')->select($dataQuery, [$limit, $offset]);
             $count = DB::connection('simrs')->select($countQuery)[0]->total;
