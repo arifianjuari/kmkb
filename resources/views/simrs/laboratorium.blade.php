@@ -35,6 +35,7 @@
                 <p class="mt-1 max-w-2xl text-sm text-gray-500">Data diambil secara real-time dari database SIMRS.</p>
             </div>
             <div class="border-t border-gray-200">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -53,6 +54,7 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
             
             <!-- Pagination Controls for Laboratorium -->
