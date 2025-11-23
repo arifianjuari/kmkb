@@ -27,6 +27,11 @@ class CostReference extends Model
         'simrs_kode_brng',
         'is_synced_from_simrs',
         'last_synced_at',
+        'cost_center_id',
+        'expense_category_id',
+        'is_bundle',
+        'active_from',
+        'active_to',
     ];
 
     /**
@@ -51,5 +56,21 @@ class CostReference extends Model
     public function pathwaySteps()
     {
         return $this->hasMany(PathwayStep::class);
+    }
+
+    /**
+     * Get the cost center for this cost reference.
+     */
+    public function costCenter()
+    {
+        return $this->belongsTo(CostCenter::class);
+    }
+
+    /**
+     * Get the expense category for this cost reference.
+     */
+    public function expenseCategory()
+    {
+        return $this->belongsTo(ExpenseCategory::class);
     }
 }

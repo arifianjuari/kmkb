@@ -14,7 +14,22 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Plus Jakarta Sans', 'Figtree', ...defaultTheme.fontFamily.sans],
+            },
+            animation: {
+                'blob': 'animate-blob 7s infinite',
+                'spin-slow': 'spin 20s linear infinite',
+            },
+            keyframes: {
+                'animate-blob': {
+                    '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+                    '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                    '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                },
+            },
+            animationDelay: {
+                '2000': '2000ms',
+                '4000': '4000ms',
             },
         },
     },

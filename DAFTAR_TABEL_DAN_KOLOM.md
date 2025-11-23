@@ -1,6 +1,7 @@
 # Daftar Tabel dan Kolom Data
 
 ## 1. users
+
 - id
 - name
 - email
@@ -14,6 +15,7 @@
 - updated_at
 
 ## 2. hospitals
+
 - id
 - name
 - code
@@ -26,6 +28,7 @@
 - updated_at
 
 ## 3. clinical_pathways
+
 - id
 - name
 - description
@@ -39,6 +42,7 @@
 - updated_at
 
 ## 4. pathway_steps
+
 - id
 - clinical_pathway_id
 - step_order
@@ -55,6 +59,7 @@
 - updated_at
 
 ## 5. patient_cases
+
 - id
 - patient_id
 - medical_record_number
@@ -75,6 +80,7 @@
 - updated_at
 
 ## 6. case_details
+
 - id
 - patient_case_id
 - pathway_step_id
@@ -90,6 +96,7 @@
 - updated_at
 
 ## 7. cost_references
+
 - id
 - service_code
 - simrs_kode_brng
@@ -107,6 +114,7 @@
 - last_synced_at
 
 ## 8. audit_logs
+
 - id
 - user_id
 - activity_type
@@ -120,6 +128,7 @@
 - updated_at
 
 ## 9. jkn_cbg_codes
+
 - id
 - code
 - name
@@ -133,6 +142,7 @@
 - updated_at
 
 ## 10. personal_access_tokens
+
 - id
 - tokenable_type
 - tokenable_id
@@ -145,6 +155,7 @@
 - updated_at
 
 ## 11. test_patient_cases
+
 - id
 - created_at
 - updated_at

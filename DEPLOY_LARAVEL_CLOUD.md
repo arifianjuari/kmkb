@@ -504,21 +504,24 @@ php artisan db:seed --force
 ### 8.5 Setup Storage Link dan Image Storage
 
 1. **Buat folder storage yang diperlukan:**
+
    ```bash
    mkdir -p storage/app/public/hospitals
    chmod -R 775 storage bootstrap/cache
    ```
 
 2. **Buat storage link:**
+
    ```bash
    php artisan storage:link
    ```
 
 3. **Verifikasi:**
+
    ```bash
    ls -la public/storage
    ```
-   
+
    Seharusnya menampilkan symlink ke `storage/app/public`
 
 **Catatan:** Untuk panduan lengkap tentang setup image storage, lihat file `IMAGE_STORAGE_SETUP.md`.
@@ -618,21 +621,24 @@ php artisan view:cache
 **Solusi:**
 
 1. **Buat folder storage yang diperlukan:**
+
    ```bash
    mkdir -p storage/app/public/hospitals
    chmod -R 775 storage bootstrap/cache
    ```
 
 2. **Buat storage link:**
+
    ```bash
    php artisan storage:link
    ```
 
 3. **Verifikasi:**
+
    ```bash
    ls -la public/storage
    ```
-   
+
    Seharusnya menampilkan symlink ke `storage/app/public`
 
 4. **Pastikan folder `storage/app/public` ada dan writable**

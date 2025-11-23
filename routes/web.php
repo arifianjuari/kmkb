@@ -85,6 +85,40 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::delete('cost-references/bulk-destroy', [CostReferenceController::class, 'bulkDestroy'])->name('cost-references.bulk-destroy');
     Route::resource('cost-references', CostReferenceController::class);
 
+    // Cost Centers
+    Route::get('cost-centers/export', [App\Http\Controllers\CostCenterController::class, 'export'])->name('cost-centers.export');
+    Route::resource('cost-centers', App\Http\Controllers\CostCenterController::class);
+
+    // Expense Categories
+    Route::get('expense-categories/export', [App\Http\Controllers\ExpenseCategoryController::class, 'export'])->name('expense-categories.export');
+    Route::resource('expense-categories', App\Http\Controllers\ExpenseCategoryController::class);
+
+    // Allocation Drivers
+    Route::get('allocation-drivers/export', [App\Http\Controllers\AllocationDriverController::class, 'export'])->name('allocation-drivers.export');
+    Route::resource('allocation-drivers', App\Http\Controllers\AllocationDriverController::class);
+
+    // Tariff Classes
+    Route::get('tariff-classes/export', [App\Http\Controllers\TariffClassController::class, 'export'])->name('tariff-classes.export');
+    Route::resource('tariff-classes', App\Http\Controllers\TariffClassController::class);
+
+    // GL Expenses
+    Route::get('gl-expenses/import', [App\Http\Controllers\GlExpenseController::class, 'importForm'])->name('gl-expenses.import');
+    Route::post('gl-expenses/import', [App\Http\Controllers\GlExpenseController::class, 'import'])->name('gl-expenses.import.process');
+    Route::get('gl-expenses/export', [App\Http\Controllers\GlExpenseController::class, 'export'])->name('gl-expenses.export');
+    Route::resource('gl-expenses', App\Http\Controllers\GlExpenseController::class);
+
+    // Driver Statistics
+    Route::get('driver-statistics/import', [App\Http\Controllers\DriverStatisticController::class, 'importForm'])->name('driver-statistics.import');
+    Route::post('driver-statistics/import', [App\Http\Controllers\DriverStatisticController::class, 'import'])->name('driver-statistics.import.process');
+    Route::get('driver-statistics/export', [App\Http\Controllers\DriverStatisticController::class, 'export'])->name('driver-statistics.export');
+    Route::resource('driver-statistics', App\Http\Controllers\DriverStatisticController::class);
+
+    // Service Volumes
+    Route::get('service-volumes/import', [App\Http\Controllers\ServiceVolumeController::class, 'importForm'])->name('service-volumes.import');
+    Route::post('service-volumes/import', [App\Http\Controllers\ServiceVolumeController::class, 'import'])->name('service-volumes.import.process');
+    Route::get('service-volumes/export', [App\Http\Controllers\ServiceVolumeController::class, 'export'])->name('service-volumes.export');
+    Route::resource('service-volumes', App\Http\Controllers\ServiceVolumeController::class);
+
     // JKN CBG Codes
     // Expose search and tariff lookups to all authenticated users
     Route::get('jkn-cbg-codes/search', [App\Http\Controllers\JknCbgCodeController::class, 'search'])->name('jkn-cbg-codes.search');

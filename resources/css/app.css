@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Alpine.js x-cloak */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Ensure mobile overlay is hidden on desktop */
+@media (min-width: 1024px) {
+    .mobile-overlay {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+}
+
 @layer components {
     /* Base button */
     .btn {
@@ -35,6 +50,26 @@
     }
     .btn-link {
         @apply inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700 underline-offset-4 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300;
+    }
+
+    /* 3D Transforms */
+    .perspective-1000 {
+        perspective: 1000px;
+    }
+    
+    .preserve-3d {
+        transform-style: preserve-3d;
+    }
+}
+
+@layer utilities {
+    /* Animation Delays */
+    .animation-delay-2000 {
+        animation-delay: 2000ms;
+    }
+    
+    .animation-delay-4000 {
+        animation-delay: 4000ms;
     }
 }
 
