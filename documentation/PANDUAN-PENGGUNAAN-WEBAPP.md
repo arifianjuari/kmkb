@@ -79,10 +79,12 @@ Master data adalah data referensi yang harus disiapkan terlebih dahulu sebelum m
 **Tujuan:** Mendefinisikan unit-unit cost center di rumah sakit
 
 1. **Akses Menu:**
+
    - Klik menu **Master Data** di sidebar
    - Pilih **Cost Centers**
 
 2. **Membuat Cost Center:**
+
    - Klik tombol **Add New Cost Center**
    - Isi form:
      - **Code**: Kode cost center (contoh: `IGD`, `LAB`, `ADM`)
@@ -102,6 +104,7 @@ Master data adalah data referensi yang harus disiapkan terlebih dahulu sebelum m
    - **Export**: Klik **Export Excel** untuk mengekspor data
 
 **Catatan Penting:**
+
 - Pastikan semua cost center support dibuat terlebih dahulu sebelum membuat cost center revenue
 - Cost center dengan type `support` akan dialokasikan ke cost center lain
 - Cost center dengan type `revenue` menerima alokasi dari cost center support
@@ -113,10 +116,12 @@ Master data adalah data referensi yang harus disiapkan terlebih dahulu sebelum m
 **Tujuan:** Mendefinisikan kategori pengeluaran (COA accounts) untuk GL
 
 1. **Akses Menu:**
+
    - Klik menu **Master Data** di sidebar
    - Pilih **Expense Categories**
 
 2. **Membuat Expense Category:**
+
    - Klik tombol **Add New Expense Category**
    - Isi form:
      - **Account Code**: Kode akun COA (contoh: `5101`, `5201`)
@@ -145,10 +150,12 @@ Master data adalah data referensi yang harus disiapkan terlebih dahulu sebelum m
 **Tujuan:** Mendefinisikan basis alokasi untuk cost allocation (contoh: luas lantai, jumlah karyawan)
 
 1. **Akses Menu:**
+
    - Klik menu **Master Data** di sidebar
    - Pilih **Allocation Drivers**
 
 2. **Membuat Allocation Driver:**
+
    - Klik tombol **Add New Allocation Driver**
    - Isi form:
      - **Name**: Nama driver (contoh: `Luas Lantai`, `Jumlah Karyawan`, `Kilogram Laundry`)
@@ -169,6 +176,7 @@ Master data adalah data referensi yang harus disiapkan terlebih dahulu sebelum m
 **Tujuan:** Mendefinisikan kelas tariff untuk layanan/kamar
 
 1. **Akses Menu:**
+
    - Klik menu **Master Data** di sidebar
    - Pilih **Tariff Classes**
 
@@ -188,10 +196,12 @@ Master data adalah data referensi yang harus disiapkan terlebih dahulu sebelum m
 **Tujuan:** Mendefinisikan katalog layanan/item (chargemaster) dengan metadata costing
 
 1. **Akses Menu:**
+
    - Klik menu **Master Data** di sidebar
    - Pilih **Cost References**
 
 2. **Membuat Cost Reference:**
+
    - Klik tombol **Add New Cost Reference**
    - Isi form:
      - **Service Code**: Kode layanan/prosedur
@@ -202,6 +212,7 @@ Master data adalah data referensi yang harus disiapkan terlebih dahulu sebelum m
    - Klik **Save Cost Reference**
 
 3. **Mengupdate Cost Reference dengan Master Data:**
+
    - Edit Cost Reference yang sudah ada
    - Tambahkan informasi:
      - **Cost Center**: Pilih cost center yang terkait
@@ -223,6 +234,7 @@ Master data adalah data referensi yang harus disiapkan terlebih dahulu sebelum m
 **Tujuan:** Mengelola kode INA-CBG / case-based grouping
 
 1. **Akses Menu:**
+
    - Klik menu **Master Data** di sidebar
    - Pilih **JKN CBG Codes**
 
@@ -247,10 +259,12 @@ Setelah master data selesai disetup, langkah berikutnya adalah menginput data op
 **Tujuan:** Menginput pengeluaran aktual per cost center dan expense category per periode
 
 1. **Akses Menu:**
+
    - Klik menu **GL & Expenses** di sidebar
    - Pilih **GL Expenses**
 
 2. **Input Manual:**
+
    - Klik tombol **Add New GL Expense**
    - Isi form:
      - **Year**: Pilih tahun (contoh: 2025)
@@ -261,6 +275,7 @@ Setelah master data selesai disetup, langkah berikutnya adalah menginput data op
    - Klik **Save GL Expense**
 
 3. **Import dari Excel:**
+
    - Klik tombol **Import Excel**
    - Pilih **Year** dan **Month** untuk periode data
    - Upload file Excel dengan format:
@@ -276,6 +291,7 @@ Setelah master data selesai disetup, langkah berikutnya adalah menginput data op
    - Export data untuk validasi eksternal
 
 **Catatan Penting:**
+
 - Pastikan data GL Expenses lengkap untuk semua cost center dan expense category
 - Data harus diinput per bulan untuk akurasi costing
 - Validasi bahwa total GL Expenses sesuai dengan laporan keuangan
@@ -287,10 +303,12 @@ Setelah master data selesai disetup, langkah berikutnya adalah menginput data op
 **Tujuan:** Menginput nilai driver untuk cost allocation per periode
 
 1. **Akses Menu:**
+
    - Klik menu **GL & Expenses** di sidebar
    - Pilih **Driver Statistics**
 
 2. **Input Manual:**
+
    - Klik tombol **Add New Driver Statistic**
    - Isi form:
      - **Year**: Pilih tahun
@@ -310,6 +328,7 @@ Setelah master data selesai disetup, langkah berikutnya adalah menginput data op
    - Klik **Import Driver Statistics**
 
 **Contoh Data:**
+
 - Cost Center: IGD, Driver: Luas Lantai, Value: 200 m2
 - Cost Center: LAB, Driver: Jumlah Karyawan, Value: 15 orang
 - Cost Center: Housekeeping, Driver: Kilogram Laundry, Value: 1000 kg
@@ -321,11 +340,13 @@ Setelah master data selesai disetup, langkah berikutnya adalah menginput data op
 **Tujuan:** Menginput volume layanan per cost reference dan tariff class per periode
 
 1. **Akses Menu:**
+
    - Klik menu **GL & Expenses** di sidebar
    - Pilih **Service Volumes**
    - Atau akses melalui menu **Unit Costing** → **Service Volumes**
 
 2. **Input Manual:**
+
    - Klik tombol **Add New Service Volume**
    - Isi form:
      - **Year**: Pilih tahun
@@ -345,6 +366,7 @@ Setelah master data selesai disetup, langkah berikutnya adalah menginput data op
    - Klik **Import Service Volumes**
 
 **Catatan Penting:**
+
 - Service Volumes diperlukan untuk menghitung unit cost per layanan
 - Pastikan data volume lengkap untuk semua layanan yang akan dihitung unit cost-nya
 - Data volume dapat berbeda per tariff class
@@ -362,6 +384,7 @@ Cost allocation adalah proses mengalokasikan biaya dari cost center support ke c
 **Tujuan:** Mendefinisikan mapping alokasi dari cost center support ke cost center lain
 
 1. **Akses Menu:**
+
    - Klik menu **Allocation** di sidebar
    - Pilih **Allocation Maps**
 
@@ -377,11 +400,13 @@ Cost allocation adalah proses mengalokasikan biaya dari cost center support ke c
    - Klik **Save Allocation Map**
 
 **Contoh Allocation Map:**
+
 - **Step 1**: Housekeeping → dialokasikan ke semua cost center menggunakan driver "Luas Lantai"
 - **Step 2**: Administrasi → dialokasikan ke semua cost center menggunakan driver "Jumlah Karyawan"
 - **Step 3**: Maintenance → dialokasikan ke semua cost center menggunakan driver "Luas Lantai"
 
 **Catatan Penting:**
+
 - Urutan step sangat penting dalam step-down method
 - Cost center yang sudah dialokasikan di step sebelumnya tidak akan menerima alokasi lagi
 - Pastikan semua cost center support sudah memiliki allocation map
@@ -393,10 +418,12 @@ Cost allocation adalah proses mengalokasikan biaya dari cost center support ke c
 **Tujuan:** Menjalankan engine cost allocation untuk periode tertentu
 
 1. **Akses Menu:**
+
    - Klik menu **Allocation** di sidebar
    - Pilih **Run Allocation**
 
 2. **Menjalankan Allocation:**
+
    - Pilih **Year** dan **Month** untuk periode yang akan dialokasikan
    - Review **Allocation Configuration**:
      - Pastikan semua allocation maps sudah benar
@@ -407,6 +434,7 @@ Cost allocation adalah proses mengalokasikan biaya dari cost center support ke c
    - Tunggu hingga proses selesai
 
 3. **Proses Allocation:**
+
    - Sistem akan menghitung total cost per cost center support dari GL Expenses
    - Untuk setiap step allocation:
      - Mengambil driver statistics untuk driver yang digunakan
@@ -425,10 +453,12 @@ Cost allocation adalah proses mengalokasikan biaya dari cost center support ke c
 **Tujuan:** Melihat hasil cost allocation
 
 1. **Akses Menu:**
+
    - Klik menu **Allocation** di sidebar
    - Pilih **Allocation Results**
 
 2. **Melihat Results:**
+
    - Filter berdasarkan **Year**, **Month**, dan **Version**
    - Tampilan menampilkan:
      - **Source Cost Center**: Cost center yang dialokasikan
@@ -454,6 +484,7 @@ Unit costing adalah proses menghitung biaya per unit layanan berdasarkan total c
 **Tujuan:** Memastikan data service volumes sudah lengkap
 
 1. **Akses Menu:**
+
    - Klik menu **Unit Costing** di sidebar
    - Pilih **Service Volumes**
 
@@ -469,10 +500,12 @@ Unit costing adalah proses menghitung biaya per unit layanan berdasarkan total c
 **Tujuan:** Menghitung unit cost per layanan untuk periode tertentu
 
 1. **Akses Menu:**
+
    - Klik menu **Unit Costing** di sidebar
    - Pilih **Calculate Unit Cost**
 
 2. **Menjalankan Perhitungan:**
+
    - Pilih **Year** dan **Month** untuk periode yang akan dihitung
    - Masukkan **Version Label** (contoh: `UC_2025_JAN`, `UC_2025_Q1`)
    - Review **Configuration**:
@@ -502,10 +535,12 @@ Unit costing adalah proses menghitung biaya per unit layanan berdasarkan total c
 **Tujuan:** Melihat hasil perhitungan unit cost
 
 1. **Akses Menu:**
+
    - Klik menu **Unit Costing** di sidebar
    - Pilih **Unit Cost Results**
 
 2. **Melihat Results:**
+
    - Filter berdasarkan **Version Label**, **Period**, dan **Service**
    - Tampilan menampilkan:
      - **Service Code & Description**: Layanan
@@ -518,12 +553,14 @@ Unit costing adalah proses menghitung biaya per unit layanan berdasarkan total c
    - Klik **View** untuk melihat detail breakdown per cost center
 
 3. **Audit Trail:**
+
    - Sistem menyediakan audit trail yang menunjukkan:
      - Cost center mana yang berkontribusi pada unit cost
      - Kategori expense yang digunakan
      - Alokasi yang diterima dari cost center support
 
 4. **Compare Versions:**
+
    - Gunakan fitur compare untuk membandingkan unit cost antar versi
    - Analisis perubahan unit cost dari waktu ke waktu
 
@@ -544,10 +581,12 @@ Tariff management adalah proses menetapkan tariff final untuk layanan berdasarka
 **Tujuan:** Simulasi tariff dengan berbagai skenario margin
 
 1. **Akses Menu:**
+
    - Klik menu **Tariff** di sidebar
    - Pilih **Tariff Simulation**
 
 2. **Membuat Simulasi:**
+
    - Pilih **Unit Cost Version** yang akan digunakan
    - Set **Margin Percentage**:
      - **Global Margin**: Margin yang sama untuk semua layanan
@@ -559,6 +598,7 @@ Tariff management adalah proses menetapkan tariff final untuk layanan berdasarka
      - Simulated Tariff Price
 
 3. **Compare Scenarios:**
+
    - Buat beberapa skenario dengan margin berbeda
    - Bandingkan hasil simulasi
    - Pilih skenario yang paling sesuai
@@ -573,10 +613,12 @@ Tariff management adalah proses menetapkan tariff final untuk layanan berdasarka
 **Tujuan:** Menetapkan tariff final berdasarkan SK/approval
 
 1. **Akses Menu:**
+
    - Klik menu **Tariff** di sidebar
    - Pilih **Final Tariffs**
 
 2. **Membuat Final Tariff:**
+
    - Klik tombol **Add New Final Tariff**
    - Isi form:
      - **Service**: Pilih cost reference (layanan)
@@ -593,6 +635,7 @@ Tariff management adalah proses menetapkan tariff final untuk layanan berdasarka
    - Klik **Save Final Tariff**
 
 3. **Approval Workflow:**
+
    - Setelah dibuat, tariff dapat melalui proses approval
    - Status: Draft → Review → Approved
    - Hanya tariff yang approved yang dapat digunakan
@@ -610,10 +653,12 @@ Tariff management adalah proses menetapkan tariff final untuk layanan berdasarka
 **Tujuan:** Mencari dan melihat tariff yang berlaku
 
 1. **Akses Menu:**
+
    - Klik menu **Tariff** di sidebar
    - Pilih **Tariff Explorer**
 
 2. **Mencari Tariff:**
+
    - Gunakan search box untuk mencari berdasarkan Service Code atau Description
    - Filter berdasarkan **Tariff Class** dan **Effective Date**
    - Tampilan menampilkan:
@@ -624,6 +669,7 @@ Tariff management adalah proses menetapkan tariff final untuk layanan berdasarka
      - SK Number
 
 3. **View Tariff History:**
+
    - Klik pada layanan untuk melihat history tariff
    - Bandingkan tariff dari waktu ke waktu
 
@@ -644,6 +690,7 @@ Clinical pathway management adalah proses membuat dan mengelola clinical pathway
 **Tujuan:** Membuat clinical pathway untuk diagnosis tertentu
 
 1. **Akses Menu:**
+
    - Klik menu **Clinical Pathways** di sidebar
    - Pilih **Pathway List**
 
@@ -667,10 +714,12 @@ Clinical pathway management adalah proses membuat dan mengelola clinical pathway
 **Tujuan:** Menambahkan langkah-langkah dalam clinical pathway
 
 1. **Akses Pathway Builder:**
+
    - Dari Pathway List, klik **Builder** pada pathway yang ingin diedit
    - Atau klik **Edit** kemudian pilih tab **Builder**
 
 2. **Menambahkan Step:**
+
    - Klik tombol **Add Step**
    - Isi form:
      - **Category**: Kategori step (contoh: `Lab`, `Radiologi`, `Obat`, `Tindakan`)
@@ -688,10 +737,12 @@ Clinical pathway management adalah proses membuat dan mengelola clinical pathway
    - Klik **Save Step**
 
 3. **Mengatur Urutan Step:**
+
    - Gunakan tombol **Up/Down** untuk mengubah urutan
    - Atau drag and drop step untuk mengatur ulang
 
 4. **Import Steps dari Template:**
+
    - Klik **Import from Template**
    - Upload file Excel dengan format template
    - Sistem akan mengimpor steps secara bulk
@@ -709,11 +760,13 @@ Clinical pathway management adalah proses membuat dan mengelola clinical pathway
 **Tujuan:** Menyetujui clinical pathway
 
 1. **Review Pathway:**
+
    - Akses pathway yang statusnya `Review` atau `Draft`
    - Review semua steps dan estimasi biaya
    - Pastikan pathway sudah lengkap dan sesuai standar
 
 2. **Approve Pathway:**
+
    - Klik tombol **Approve**
    - (Opsional) Tambahkan komentar
    - Klik **Confirm Approval**
@@ -731,9 +784,11 @@ Clinical pathway management adalah proses membuat dan mengelola clinical pathway
 **Tujuan:** Melihat ringkasan pathway termasuk estimasi biaya dan tariff
 
 1. **Akses Pathway:**
+
    - Dari Pathway List, klik **View** pada pathway yang diinginkan
 
 2. **Pathway Summary:**
+
    - Tampilan menampilkan:
      - **Pathway Information**: Nama, diagnosis, versi, status
      - **Estimated Total Cost**: Total biaya estimasi
@@ -742,6 +797,7 @@ Clinical pathway management adalah proses membuat dan mengelola clinical pathway
      - **Steps Breakdown**: Daftar semua steps dengan biaya per step
 
 3. **Compare dengan Unit Cost Version:**
+
    - Pilih **Unit Cost Version** untuk melihat estimasi berdasarkan versi tertentu
    - Bandingkan estimasi antar versi
 
@@ -762,10 +818,12 @@ Patient case management adalah proses mencatat kasus pasien aktual dan membandin
 **Tujuan:** Mencatat kasus pasien baru
 
 1. **Akses Menu:**
+
    - Klik menu **Patient Cases** di sidebar
    - Pilih **Case List**
 
 2. **Membuat Case:**
+
    - Klik tombol **Add New Case**
    - Isi form:
      - **Patient ID**: ID pasien dari HIS (opsional)
@@ -792,15 +850,18 @@ Patient case management adalah proses mencatat kasus pasien aktual dan membandin
 **Tujuan:** Mencatat detail layanan yang dilakukan pada pasien
 
 1. **Akses Case:**
+
    - Dari Case List, klik **View** pada case yang ingin diisi detailnya
    - Atau klik **Edit** kemudian pilih tab **Case Details**
 
 2. **Generate Planned Steps dari Pathway:**
+
    - Jika case terkait dengan clinical pathway, klik **Copy Steps from Pathway**
    - Sistem akan membuat case details berdasarkan pathway steps
    - Semua steps akan berstatus `planned` secara default
 
 3. **Menambahkan Case Detail:**
+
    - Klik **Add Case Detail**
    - Isi form:
      - **Service Item**: Nama layanan (human-readable)
@@ -818,6 +879,7 @@ Patient case management adalah proses mencatat kasus pasien aktual dan membandin
    - Klik **Save Case Detail**
 
 4. **Mengupdate Status:**
+
    - Setelah layanan dilakukan, ubah status menjadi `done`
    - Centang checkbox **Performed**
    - Isi **Service Date** dan **Actual Cost** jika berbeda dari estimasi
@@ -837,10 +899,12 @@ Patient case management adalah proses mencatat kasus pasien aktual dan membandin
 **Tujuan:** Melihat analisis perbandingan planned vs actual
 
 1. **Akses Case:**
+
    - Dari Case List, klik **View** pada case yang ingin dianalisis
    - Pilih tab **Analysis**
 
 2. **Planned vs Actual Steps:**
+
    - Tampilan menampilkan:
      - **Planned Steps**: Steps yang direncanakan dari pathway
      - **Actual Steps**: Steps yang benar-benar dilakukan
@@ -848,17 +912,20 @@ Patient case management adalah proses mencatat kasus pasien aktual dan membandin
      - **Additional Steps**: Steps yang dilakukan tapi tidak direncanakan
 
 3. **Cost Comparison:**
+
    - **Estimated Cost**: Total biaya estimasi dari pathway
    - **Actual Cost**: Total biaya aktual
    - **Cost Variance**: Selisih antara actual dan estimated
    - **Variance Percentage**: Persentase variance
 
 4. **Compliance Analysis:**
+
    - **Compliance Percentage**: Persentase compliance dengan pathway
    - Breakdown compliance per kategori step (Lab, Radiologi, Obat, dll.)
    - Highlight steps yang tidak sesuai pathway
 
 5. **Tariff Comparison:**
+
    - **Calculated Total Tariff**: Total tariff yang dihitung
    - **INA-CBG Tariff**: Tariff INA-CBG (jika ada)
    - **Variance**: Selisih antara calculated dan INA-CBG
@@ -880,15 +947,18 @@ Sistem menyediakan berbagai laporan dan analisis untuk mendukung pengambilan kep
 **Tujuan:** Melihat tingkat compliance dengan clinical pathway
 
 1. **Akses Menu:**
+
    - Klik menu **Reports** di sidebar
    - Pilih **Pathway Compliance**
 
 2. **Filter Laporan:**
+
    - Pilih **Period** (Year, Month)
    - Pilih **Pathway** (spesifik atau semua)
    - Pilih **Department** (jika ada grouping)
 
 3. **Tampilan Laporan:**
+
    - **Compliance by Pathway**: Persentase compliance per pathway
    - **Compliance Trend**: Trend compliance dari waktu ke waktu
    - **Compliance by Department**: Compliance per departemen
@@ -904,15 +974,18 @@ Sistem menyediakan berbagai laporan dan analisis untuk mendukung pengambilan kep
 **Tujuan:** Menganalisis variance biaya aktual vs estimasi
 
 1. **Akses Menu:**
+
    - Klik menu **Reports** di sidebar
    - Pilih **Case Variance Analysis**
 
 2. **Filter Laporan:**
+
    - Pilih **Period**
    - Pilih **Pathway**
    - Pilih **Department**
 
 3. **Tampilan Laporan:**
+
    - **Cost Variance by Pathway**: Variance per pathway
    - **Cost Variance Trend**: Trend variance dari waktu ke waktu
    - **Variance by Department**: Variance per departemen
@@ -930,6 +1003,7 @@ Sistem menyediakan berbagai laporan dan analisis untuk mendukung pengambilan kep
 **Tujuan:** Melihat performa clinical pathway
 
 1. **Akses Menu:**
+
    - Klik menu **Reports** di sidebar
    - Pilih **Pathway Performance**
 
@@ -946,6 +1020,7 @@ Sistem menyediakan berbagai laporan dan analisis untuk mendukung pengambilan kep
 **Tujuan:** Melihat performa cost center
 
 1. **Akses Menu:**
+
    - Klik menu **Reports** di sidebar
    - Pilih **Cost Center Performance**
 
@@ -961,6 +1036,7 @@ Sistem menyediakan berbagai laporan dan analisis untuk mendukung pengambilan kep
 **Tujuan:** Melihat ringkasan hasil cost allocation
 
 1. **Akses Menu:**
+
    - Klik menu **Reports** di sidebar
    - Pilih **Allocation Results Summary**
 
@@ -976,6 +1052,7 @@ Sistem menyediakan berbagai laporan dan analisis untuk mendukung pengambilan kep
 **Tujuan:** Melihat ringkasan unit cost
 
 1. **Akses Menu:**
+
    - Klik menu **Reports** di sidebar
    - Pilih **Unit Cost Summary**
 
@@ -991,6 +1068,7 @@ Sistem menyediakan berbagai laporan dan analisis untuk mendukung pengambilan kep
 **Tujuan:** Membandingkan tariff internal dengan INA-CBG
 
 1. **Akses Menu:**
+
    - Klik menu **Reports** di sidebar
    - Pilih **Tariff Comparison**
 
@@ -1132,6 +1210,7 @@ Berikut adalah workflow lengkap dari awal setup hingga menghasilkan analisis pen
 ### Masalah: Data tidak muncul setelah import
 
 **Solusi:**
+
 - Pastikan format file Excel sesuai template
 - Pastikan kode (cost center, expense category, dll.) sudah ada di master data
 - Cek error log untuk detail error
@@ -1140,6 +1219,7 @@ Berikut adalah workflow lengkap dari awal setup hingga menghasilkan analisis pen
 ### Masalah: Allocation results tidak masuk akal
 
 **Solusi:**
+
 - Review allocation maps, pastikan step sequence benar
 - Validasi driver statistics, pastikan nilai benar
 - Cek GL expenses, pastikan data lengkap
@@ -1148,6 +1228,7 @@ Berikut adalah workflow lengkap dari awal setup hingga menghasilkan analisis pen
 ### Masalah: Unit cost terlalu tinggi/rendah
 
 **Solusi:**
+
 - Review service volumes, pastikan volume benar
 - Cek allocation results, pastikan alokasi benar
 - Review GL expenses, pastikan biaya benar
@@ -1156,6 +1237,7 @@ Berikut adalah workflow lengkap dari awal setup hingga menghasilkan analisis pen
 ### Masalah: Pathway compliance rendah
 
 **Solusi:**
+
 - Review pathway steps, pastikan realistis
 - Analisis cases dengan compliance rendah
 - Identifikasi penyebab non-compliance
@@ -1164,6 +1246,7 @@ Berikut adalah workflow lengkap dari awal setup hingga menghasilkan analisis pen
 ### Masalah: Cost variance tinggi
 
 **Solusi:**
+
 - Analisis variance per kategori
 - Identifikasi penyebab variance
 - Review unit cost yang digunakan
@@ -1184,6 +1267,7 @@ WebApp Costing, Tariff, dan Clinical Pathway Management System adalah tool yang 
 7. Menghasilkan laporan dan analisis yang komprehensif
 
 Dengan penggunaan yang konsisten dan tepat, sistem ini akan membantu rumah sakit dalam:
+
 - Meningkatkan akurasi costing
 - Menetapkan tariff yang kompetitif
 - Meningkatkan compliance dengan clinical pathway
@@ -1193,4 +1277,3 @@ Dengan penggunaan yang konsisten dan tepat, sistem ini akan membantu rumah sakit
 ---
 
 **Dokumen ini akan diupdate seiring dengan perkembangan fitur dan kebutuhan pengguna.**
-
