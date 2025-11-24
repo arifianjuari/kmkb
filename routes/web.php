@@ -9,6 +9,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CostReferenceController;
 use App\Http\Controllers\HospitalController;
+use App\Http\Controllers\ReferenceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -84,6 +85,9 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::get('cost-references/export', [CostReferenceController::class, 'export'])->name('cost-references.export');
     Route::delete('cost-references/bulk-destroy', [CostReferenceController::class, 'bulkDestroy'])->name('cost-references.bulk-destroy');
     Route::resource('cost-references', CostReferenceController::class);
+
+    // Knowledge References
+    Route::resource('references', ReferenceController::class);
 
     // Cost Centers
     Route::get('cost-centers/export', [App\Http\Controllers\CostCenterController::class, 'export'])->name('cost-centers.export');

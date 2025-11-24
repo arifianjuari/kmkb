@@ -227,7 +227,27 @@ Master data adalah data referensi yang harus disiapkan terlebih dahulu sebelum m
    - Gunakan fitur **SIMRS Sync** untuk mengimpor data dari SIMRS
    - Data yang diimpor akan otomatis terhubung dengan Cost References
 
-### Langkah 6: Setup JKN CBG Codes (Opsional)
+### Langkah 6: Referensi Pengetahuan
+
+**Akses:** Admin, Mutu, Klaim, Manajemen
+
+**Tujuan:** Mencatat SOP, insight, dan pengumuman penting agar dapat dibaca lintas tim.
+
+1. **Akses Menu:**
+   - Klik menu **Referensi** di sidebar
+   - Gunakan kolom pencarian atau filter status bila daftar sudah panjang
+
+2. **Membuat Referensi:**
+   - Klik tombol **Tambah Referensi**
+   - Isi judul, pilih status (Draft/Published/Archived), centang "Sematkan" bila ingin ditampilkan di urutan atas
+   - Tulis konten menggunakan Markdown (heading, list, link, dan lain-lain)
+   - Klik **Simpan**; referensi Published akan otomatis menampilkan tanggal terbit
+
+3. **Membaca & Mengelola:**
+   - Klik judul untuk membuka detail (jumlah pembaca akan bertambah otomatis)
+   - Tombol Edit/Hapus hanya muncul untuk user yang berwenang
+
+### Langkah 7: Setup JKN CBG Codes (Opsional)
 
 **Akses:** Semua role (read), Admin (CRUD)
 
@@ -1277,3 +1297,4 @@ Dengan penggunaan yang konsisten dan tepat, sistem ini akan membantu rumah sakit
 ---
 
 **Dokumen ini akan diupdate seiring dengan perkembangan fitur dan kebutuhan pengguna.**
+

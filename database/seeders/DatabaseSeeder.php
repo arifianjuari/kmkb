@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             PathwayStepsTableSeeder::class,
             PatientCasesTableSeeder::class,
             CaseDetailsTableSeeder::class,
+            ReferencesTableSeeder::class,
         ]);
     }
 }
