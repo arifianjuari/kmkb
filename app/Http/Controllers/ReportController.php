@@ -176,29 +176,85 @@ class ReportController extends Controller
     public function costVariance(Request $request)
     {
         try {
-            $query = PatientCase::with('clinicalPathway');
+            $query = PatientCase::with(['clinicalPathway.steps', 'caseDetails']);
             
             // Apply filters if provided
             if ($request->has('pathway_id') && $request->pathway_id) {
                 $query->where('clinical_pathway_id', $request->pathway_id);
             }
             
-            if ($request->has('variance_type') && $request->variance_type) {
-                if ($request->variance_type == 'over') {
-                    $query->where('cost_variance', '>', 0);
-                } elseif ($request->variance_type == 'under') {
-                    $query->where('cost_variance', '<', 0);
-                }
+            if ($request->has('date_from') && $request->date_from) {
+                $query->whereDate('admission_date', '>=', $request->date_from);
+            }
+            
+            if ($request->has('date_to') && $request->date_to) {
+                $query->whereDate('admission_date', '<=', $request->date_to);
             }
             
             $cases = $query->paginate(20);
             
+            // Calculate additional fields for each case
+            // Following the same logic as in cases/show.blade.php
+            $cases->getCollection()->transform(function ($case) {
+                // Calculate total charges (actual total cost from case details)
+                // This matches the calculation in cases/show.blade.php
+                $case->total_charges = $case->caseDetails->sum(function($detail) {
+                    return ($detail->actual_cost ?? 0) * ($detail->quantity ?? 1);
+                });
+                
+                // Standard Cost = INA CBG Tariff (not sum of pathway steps)
+                // This matches the "INA CBG Tariff" field in cases/show.blade.php
+                $case->standard_cost = $case->ina_cbg_tariff ?? 0;
+                
+                // Calculate Full Standard Cost (sum of pathway steps: estimated_cost * quantity)
+                // This matches the "Full Standard Cost" field in cases/show.blade.php line 172-174
+                $case->full_standard_cost = $case->clinicalPathway->steps->sum(function($step) {
+                    return ($step->estimated_cost ?? 0) * ($step->quantity ?? 1);
+                });
+                
+                // Calculate cost variance: ina_cbg_tariff - actual_total_cost
+                // This matches the calculation in cases/show.blade.php line 191
+                // Positive variance = tariff > actual cost (good) = green
+                // Negative variance = tariff < actual cost (bad) = red
+                $case->cost_variance = ($case->ina_cbg_tariff ?? 0) - ($case->total_charges ?? 0);
+                
+                // Calculate cost variance percentage
+                if ($case->standard_cost > 0) {
+                    $case->cost_variance_percentage = ($case->cost_variance / $case->standard_cost) * 100;
+                } else {
+                    $case->cost_variance_percentage = 0;
+                }
+                
+                return $case;
+            });
+            
+            // Apply variance_range filter after calculation
+            if ($request->has('variance_range') && $request->variance_range) {
+                $filtered = $cases->getCollection()->filter(function($case) use ($request) {
+                    if ($request->variance_range == 'over') {
+                        return $case->cost_variance < 0; // Negative variance = over budget
+                    } elseif ($request->variance_range == 'under') {
+                        return $case->cost_variance >= 0; // Positive or zero variance = under/at budget
+                    }
+                    return true;
+                });
+                
+                // Replace collection with filtered results
+                $cases->setCollection($filtered);
+            }
+            
             $pathways = ClinicalPathway::all();
             
-            // Calculate cost variance statistics
-            $overBudgetCount = PatientCase::where('cost_variance', '>', 0)->count();
-            $underBudgetCount = PatientCase::where('cost_variance', '<', 0)->count();
-            $totalVariance = PatientCase::sum('cost_variance');
+            // Calculate cost variance statistics based on the calculated variance
+            $overBudgetCount = $cases->getCollection()->filter(function($case) {
+                return $case->cost_variance < 0; // Negative variance = over budget
+            })->count();
+            
+            $underBudgetCount = $cases->getCollection()->filter(function($case) {
+                return $case->cost_variance >= 0; // Positive or zero variance = under/at budget
+            })->count();
+            
+            $totalVariance = $cases->getCollection()->sum('cost_variance');
             
             return view('reports.cost_variance', compact('cases', 'pathways', 'overBudgetCount', 'underBudgetCount', 'totalVariance'));
         } catch (\Exception $e) {
@@ -241,7 +297,6 @@ class ReportController extends Controller
                     'clinical_pathways.name as pathway_name',
                     DB::raw('COUNT(DISTINCT patient_cases.id) as total_cases'),
                     DB::raw('COALESCE(AVG(patient_cases.compliance_percentage), 0) as avg_compliance'),
-                    DB::raw('COALESCE(AVG(patient_cases.cost_variance), 0) as avg_cost_variance'),
                     DB::raw('COALESCE(AVG(CASE 
                         WHEN patient_cases.discharge_date IS NOT NULL 
                         THEN DATEDIFF(patient_cases.discharge_date, patient_cases.admission_date)
@@ -261,7 +316,7 @@ class ReportController extends Controller
             
             $pathwayMetrics = $pathwayMetricsQuery->get();
             
-            // Calculate avg_steps_completed for each pathway
+            // Recalculate cost variance and avg_steps_completed for each pathway
             foreach ($pathwayMetrics as $metric) {
                 $pathwayCaseIds = PatientCase::where('clinical_pathway_id', $metric->pathway_id);
                 
@@ -274,17 +329,38 @@ class ReportController extends Controller
                 $pathwayCaseIds = $pathwayCaseIds->pluck('id');
                 
                 if ($pathwayCaseIds->count() > 0) {
+                    // Recalculate cost variance for each case (matching cost-variance report logic)
+                    $cases = PatientCase::with(['caseDetails', 'clinicalPathway'])
+                        ->whereIn('id', $pathwayCaseIds)
+                        ->get();
+                    
+                    $costVariances = [];
+                    foreach ($cases as $case) {
+                        // Calculate total charges (actual total cost from case details)
+                        $totalCharges = $case->caseDetails->sum(function($detail) {
+                            return ($detail->actual_cost ?? 0) * ($detail->quantity ?? 1);
+                        });
+                        
+                        // Calculate cost variance: ina_cbg_tariff - actual_total_cost
+                        $costVariance = ($case->ina_cbg_tariff ?? 0) - ($totalCharges ?? 0);
+                        $costVariances[] = $costVariance;
+                    }
+                    
+                    // Recalculate avg_cost_variance
+                    $metric->avg_cost_variance = count($costVariances) > 0 ? array_sum($costVariances) / count($costVariances) : 0;
+                    
+                    // Calculate avg_steps_completed - only count performed steps that are not custom
+                    // This matches the compliance calculation logic
                     $stepCounts = CaseDetail::whereIn('patient_case_id', $pathwayCaseIds)
-                        ->where(function($query) {
-                            $query->where('performed', 1)
-                                  ->orWhere('status', 'completed');
-                        })
-                        ->select('patient_case_id', DB::raw('COUNT(*) as step_count'))
+                        ->whereNotNull('pathway_step_id') // Exclude custom steps
+                        ->where('performed', 1) // Only count performed steps
+                        ->select('patient_case_id', DB::raw('COUNT(DISTINCT pathway_step_id) as step_count'))
                         ->groupBy('patient_case_id')
                         ->pluck('step_count');
                     
                     $metric->avg_steps_completed = $stepCounts->count() > 0 ? $stepCounts->avg() : 0;
                 } else {
+                    $metric->avg_cost_variance = 0;
                     $metric->avg_steps_completed = 0;
                 }
             }
@@ -297,18 +373,22 @@ class ReportController extends Controller
                         'pathway_steps.description as activity',
                         DB::raw('COUNT(case_details.id) as times_performed'),
                         DB::raw('AVG(CASE 
-                            WHEN case_details.performed = 1 OR case_details.status = "completed" 
+                            WHEN case_details.performed = 1 
                             THEN 100 
                             ELSE 0 
                         END) as compliance_rate'),
-                        DB::raw('COALESCE(AVG(case_details.actual_cost), 0) as avg_actual_cost'),
+                        DB::raw('COALESCE(AVG(case_details.actual_cost * COALESCE(case_details.quantity, 1)), 0) as avg_actual_cost'),
                         DB::raw('COALESCE(AVG(pathway_steps.estimated_cost * COALESCE(pathway_steps.quantity, 1)), 0) as standard_cost'),
-                        DB::raw('COALESCE(AVG(case_details.actual_cost - (pathway_steps.estimated_cost * COALESCE(pathway_steps.quantity, 1))), 0) as avg_variance')
+                        // Variance = standard_cost - actual_cost (matching cases/show.blade.php logic)
+                        // Positive variance = standard > actual (good) = green
+                        // Negative variance = standard < actual (bad) = red
+                        DB::raw('COALESCE(AVG((pathway_steps.estimated_cost * COALESCE(pathway_steps.quantity, 1)) - (case_details.actual_cost * COALESCE(case_details.quantity, 1))), 0) as avg_variance')
                     )
                     ->join('patient_cases', 'case_details.patient_case_id', '=', 'patient_cases.id')
                     ->join('pathway_steps', 'case_details.pathway_step_id', '=', 'pathway_steps.id')
                     ->whereIn('patient_cases.id', $caseIds)
                     ->where('patient_cases.clinical_pathway_id', $request->pathway_id)
+                    ->whereNotNull('case_details.pathway_step_id') // Exclude custom steps
                     ->groupBy('pathway_steps.step_order', 'pathway_steps.description')
                     ->orderBy('pathway_steps.step_order');
                 

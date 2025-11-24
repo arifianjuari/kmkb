@@ -71,16 +71,16 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($pathwayMetrics as $metric)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $metric->pathway_name }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $metric->total_cases }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm {{ $metric->avg_compliance >= 90 ? 'text-green-600' : ($metric->avg_compliance >= 70 ? 'text-yellow-600' : 'text-red-600') }}">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $metric->pathway_name }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $metric->total_cases }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm {{ $metric->avg_compliance >= 90 ? 'text-green-600 dark:text-green-400' : ($metric->avg_compliance >= 70 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400') }} font-semibold">
                                                 {{ number_format($metric->avg_compliance, 2) }}%
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm {{ $metric->avg_cost_variance <= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                Rp{{ number_format($metric->avg_cost_variance, 2) }}
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm {{ $metric->avg_cost_variance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} font-semibold">
+                                                Rp{{ number_format($metric->avg_cost_variance, 0, ',', '.') }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($metric->avg_length_of_stay, 1) }} {{ __('days') }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($metric->avg_steps_completed, 1) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ number_format($metric->avg_length_of_stay, 1) }} {{ __('days') }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ number_format($metric->avg_steps_completed, 1) }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                 <a href="{{ route('pathways.show', $metric->pathway_id) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                                     {{ __('View Pathway') }}
@@ -119,16 +119,16 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($stepAnalysis as $step)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->day }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->activity }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->times_performed }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm {{ $step->compliance_rate >= 90 ? 'text-green-600' : ($step->compliance_rate >= 70 ? 'text-yellow-600' : 'text-red-600') }}">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $step->day }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $step->activity }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $step->times_performed }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm {{ $step->compliance_rate >= 90 ? 'text-green-600 dark:text-green-400' : ($step->compliance_rate >= 70 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400') }} font-semibold">
                                                 {{ number_format($step->compliance_rate, 2) }}%
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->avg_actual_cost, 2) }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->standard_cost, 2) }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm {{ $step->avg_variance <= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                Rp{{ number_format($step->avg_variance, 2) }}
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">Rp{{ number_format($step->avg_actual_cost, 0, ',', '.') }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">Rp{{ number_format($step->standard_cost, 0, ',', '.') }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm {{ $step->avg_variance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} font-semibold">
+                                                Rp{{ number_format($step->avg_variance, 0, ',', '.') }}
                                             </td>
                                         </tr>
                                     @endforeach
