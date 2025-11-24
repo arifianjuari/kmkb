@@ -91,8 +91,8 @@
                             <div class="sm:col-span-3">
                                 <label for="ina_cbg_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('INA CBG Code') }}</label>
                                 <div class="mt-1 relative">
-                                    <input type="text" id="ina_cbg_code" name="ina_cbg_code" value="{{ old('ina_cbg_code', $case->ina_cbg_code) }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('ina_cbg_code') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white" autocomplete="off">
-                                    <div id="cbg-code-suggestions" class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md overflow-hidden dark:bg-gray-700 hidden">
+                                    <input type="text" id="ina_cbg_code" name="ina_cbg_code" value="{{ old('ina_cbg_code', $case->ina_cbg_code) }}" required autocomplete="off" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('ina_cbg_code') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <div id="cbg-code-suggestions" class="absolute z-50 mt-1 w-full bg-white shadow-lg rounded-md overflow-hidden dark:bg-gray-700 hidden">
                                         <ul class="max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dark:bg-gray-700">
                                         </ul>
                                     </div>
@@ -101,14 +101,24 @@
                                     <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                                 @enderror
                             </div>
+                            
+                            <div class="sm:col-span-3 sm:col-start-4">
+                                <label for="additional_diagnoses" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Additional Diagnoses') }}</label>
+                                <div class="mt-1">
+                                    <textarea id="additional_diagnoses" name="additional_diagnoses" rows="3" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('additional_diagnoses') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('additional_diagnoses', $case->additional_diagnoses) }}</textarea>
+                                </div>
+                                @error('additional_diagnoses')
+                                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
                         
                         <div class="mt-6">
-                            <label for="additional_diagnoses" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Additional Diagnoses') }}</label>
+                            <label for="annotation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Annotation') }}</label>
                             <div class="mt-1">
-                                <textarea id="additional_diagnoses" name="additional_diagnoses" rows="3" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('additional_diagnoses') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('additional_diagnoses', $case->additional_diagnoses) }}</textarea>
+                                <textarea id="annotation" name="annotation" rows="3" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('annotation') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Catatan atau komentar atas kasus yang dinilai') }}">{{ old('annotation', $case->annotation) }}</textarea>
                             </div>
-                            @error('additional_diagnoses')
+                            @error('annotation')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
@@ -127,7 +137,7 @@
                             <div class="sm:col-span-3">
                                 <label for="ina_cbg_tariff" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('INA CBG Tariff') }}</label>
                                 <div class="mt-1">
-                                    <input type="number" id="ina_cbg_tariff" name="ina_cbg_tariff" step="1000" min="0" value="{{ old('ina_cbg_tariff', $case->ina_cbg_tariff) }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('ina_cbg_tariff') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <input type="number" id="ina_cbg_tariff" name="ina_cbg_tariff" step="0.01" min="0" value="{{ old('ina_cbg_tariff', $case->ina_cbg_tariff) }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('ina_cbg_tariff') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 </div>
                                 @error('ina_cbg_tariff')
                                     <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -215,6 +225,9 @@
                                             if (tariffData.tariff) {
                                                 tariffInput.value = tariffData.tariff;
                                             }
+                                        })
+                                        .catch(err => {
+                                            console.error('Failed to fetch tariff', err);
                                         });
                                 });
                                 cbgSuggestions.querySelector('ul').appendChild(li);
@@ -223,8 +236,52 @@
                         } else {
                             cbgSuggestions.classList.add('hidden');
                         }
+                    })
+                    .catch(err => {
+                        console.error('Failed to fetch CBG code suggestions', err);
+                        cbgSuggestions.classList.add('hidden');
                     });
             }, 300); // 300ms debounce
+        });
+
+        // Show initial suggestions when focusing the input (top results)
+        cbgCodeInput.addEventListener('focus', function() {
+            // If there's an existing timeout, clear it to avoid double fetch
+            if (timeout) clearTimeout(timeout);
+            const query = this.value || '';
+            fetch(`/jkn-cbg-codes/search?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    cbgSuggestions.querySelector('ul').innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(code => {
+                            const li = document.createElement('li');
+                            li.className = 'cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-gray-100 dark:hover:bg-gray-600';
+                            li.innerHTML = `
+                                <div class="flex items-center">
+                                    <span class="font-normal block truncate dark:text-white">${code.code} - ${code.name}</span>
+                                </div>
+                            `;
+                            li.addEventListener('click', function() {
+                                cbgCodeInput.value = code.code;
+                                cbgSuggestions.classList.add('hidden');
+                                fetch(`/jkn-cbg-codes/tariff?code=${encodeURIComponent(code.code)}`)
+                                    .then(response => response.json())
+                                    .then(tariffData => {
+                                        if (tariffData.tariff) {
+                                            tariffInput.value = tariffData.tariff;
+                                        }
+                                    })
+                                    .catch(err => console.error('Failed to fetch tariff', err));
+                            });
+                            cbgSuggestions.querySelector('ul').appendChild(li);
+                        });
+                        cbgSuggestions.classList.remove('hidden');
+                    } else {
+                        cbgSuggestions.classList.add('hidden');
+                    }
+                })
+                .catch(err => console.error('Failed to fetch CBG code suggestions', err));
         });
         
         // Hide suggestions when clicking outside

@@ -100,6 +100,16 @@
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
+                        
+                        <div class="sm:col-span-3 sm:col-start-4">
+                            <label for="additional_diagnoses" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Additional Diagnoses') }}</label>
+                            <div class="mt-1">
+                                <textarea id="additional_diagnoses" name="additional_diagnoses" rows="3" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('additional_diagnoses') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('additional_diagnoses') }}</textarea>
+                            </div>
+                            @error('additional_diagnoses')
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                     
                     <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6 mt-6">
@@ -112,9 +122,7 @@
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6 mt-6">
+                        
                         <div class="sm:col-span-3">
                             <label for="ina_cbg_tariff" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('INA CBG Tariff') }}</label>
                             <div class="mt-1">
@@ -127,11 +135,11 @@
                     </div>
                     
                     <div class="mt-6">
-                        <label for="additional_diagnoses" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Additional Diagnoses') }}</label>
+                        <label for="annotation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Annotation') }}</label>
                         <div class="mt-1">
-                            <textarea id="additional_diagnoses" name="additional_diagnoses" rows="3" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('additional_diagnoses') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('additional_diagnoses') }}</textarea>
+                            <textarea id="annotation" name="annotation" rows="3" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('annotation') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Catatan atau komentar atas kasus yang dinilai') }}">{{ old('annotation') }}</textarea>
                         </div>
-                        @error('additional_diagnoses')
+                        @error('annotation')
                             <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>

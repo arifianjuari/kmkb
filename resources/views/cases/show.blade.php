@@ -67,6 +67,13 @@
                         <p class="mt-1 text-sm text-gray-900 dark:text-gray-300">{{ $case->additional_diagnoses }}</p>
                     </div>
                 @endif
+                
+                @if($case->annotation)
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"><strong>{{ __('Annotation') }}</strong></label>
+                        <p class="mt-1 text-sm text-gray-900 dark:text-gray-300">{{ $case->annotation }}</p>
+                    </div>
+                @endif
             </div>
         </div>
         

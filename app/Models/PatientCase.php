@@ -76,6 +76,7 @@ class PatientCase extends Model
         'actual_total_cost',
         'ina_cbg_tariff',
         'additional_diagnoses',
+        'annotation',
         'compliance_percentage',
         'cost_variance',
         'input_by',

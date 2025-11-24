@@ -241,7 +241,7 @@ class PatientCaseController extends Controller
                 'patient_id' => 'required|string|max:255',
                 'clinical_pathway_id' => 'required|exists:clinical_pathways,id',
                 'admission_date' => 'required|date|date_format:Y-m-d',
-                'discharge_date' => 'nullable|date|date_format:Y-m-d|after:admission_date',
+                'discharge_date' => 'nullable|date|date_format:Y-m-d|after_or_equal:admission_date',
                 'primary_diagnosis' => 'required|string|max:255',
                 'ina_cbg_code' => 'required|string|max:50',
                 'actual_total_cost' => 'nullable|numeric|min:0',
@@ -279,6 +279,8 @@ class PatientCaseController extends Controller
             $case->ina_cbg_code = $request->ina_cbg_code;
             $case->actual_total_cost = $request->actual_total_cost;
             $case->ina_cbg_tariff = $request->ina_cbg_tariff;
+            $case->additional_diagnoses = $request->additional_diagnoses;
+            $case->annotation = $request->annotation;
             $case->input_by = Auth::id();
             $case->input_date = now();
             $case->hospital_id = $currentHospitalId;
@@ -505,7 +507,7 @@ class PatientCaseController extends Controller
                 'patient_id' => 'required|string|max:255',
                 'clinical_pathway_id' => 'required|exists:clinical_pathways,id',
                 'admission_date' => 'required|date',
-                'discharge_date' => 'nullable|date|after:admission_date',
+                'discharge_date' => 'nullable|date|after_or_equal:admission_date',
                 'primary_diagnosis' => 'required|string|max:255',
                 'ina_cbg_code' => 'required|string|max:50',
                 'actual_total_cost' => 'nullable|numeric|min:0',
@@ -535,6 +537,7 @@ class PatientCaseController extends Controller
                 'actual_total_cost' => $request->actual_total_cost,
                 'ina_cbg_tariff' => $request->ina_cbg_tariff,
                 'additional_diagnoses' => $request->additional_diagnoses,
+                'annotation' => $request->annotation,
             ]);
 
             // Recalculate cost variance
