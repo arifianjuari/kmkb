@@ -28,7 +28,7 @@
                         <label for="pathway_id" class="block text-sm font-medium text-gray-700">{{ __('Pathway') }}</label>
                         <select class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" id="pathway_id" name="pathway_id">
                             <option value="">{{ __('All Pathways') }}</option>
-                            @foreach($pathways as $pathway)
+                            @foreach($allPathways as $pathway)
                                 <option value="{{ $pathway->id }}" {{ request('pathway_id') == $pathway->id ? 'selected' : '' }}>
                                     {{ $pathway->name }}
                                 </option>

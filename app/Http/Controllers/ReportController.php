@@ -215,13 +215,111 @@ class ReportController extends Controller
     public function pathwayPerformance(Request $request)
     {
         try {
-            $pathways = ClinicalPathway::withCount('patientCases')
-                ->withAvg('patientCases', 'compliance_percentage')
-                ->withSum('patientCases', 'cost_variance')
-                ->get();
+            // Get all pathways for dropdown filter
+            $allPathways = ClinicalPathway::orderBy('name')->get();
+            
+            // Build base query for filtering
+            $baseQuery = PatientCase::query();
+            
+            if ($request->filled('pathway_id')) {
+                $baseQuery->where('clinical_pathway_id', $request->pathway_id);
+            }
+            
+            if ($request->filled('date_from')) {
+                $baseQuery->whereDate('admission_date', '>=', $request->date_from);
+            }
+            
+            if ($request->filled('date_to')) {
+                $baseQuery->whereDate('admission_date', '<=', $request->date_to);
+            }
+            
+            $caseIds = $baseQuery->pluck('id');
+            
+            // Build query for pathway metrics
+            $pathwayMetricsQuery = PatientCase::select(
+                    'clinical_pathways.id as pathway_id',
+                    'clinical_pathways.name as pathway_name',
+                    DB::raw('COUNT(DISTINCT patient_cases.id) as total_cases'),
+                    DB::raw('COALESCE(AVG(patient_cases.compliance_percentage), 0) as avg_compliance'),
+                    DB::raw('COALESCE(AVG(patient_cases.cost_variance), 0) as avg_cost_variance'),
+                    DB::raw('COALESCE(AVG(CASE 
+                        WHEN patient_cases.discharge_date IS NOT NULL 
+                        THEN DATEDIFF(patient_cases.discharge_date, patient_cases.admission_date)
+                        ELSE DATEDIFF(CURDATE(), patient_cases.admission_date)
+                    END), 0) as avg_length_of_stay')
+                )
+                ->join('clinical_pathways', 'patient_cases.clinical_pathway_id', '=', 'clinical_pathways.id');
+            
+            if ($caseIds->count() > 0) {
+                $pathwayMetricsQuery->whereIn('patient_cases.id', $caseIds);
+            } else {
+                // If no cases match the filter, return empty result
+                $pathwayMetricsQuery->whereRaw('1 = 0');
+            }
+            
+            $pathwayMetricsQuery->groupBy('clinical_pathways.id', 'clinical_pathways.name');
+            
+            $pathwayMetrics = $pathwayMetricsQuery->get();
+            
+            // Calculate avg_steps_completed for each pathway
+            foreach ($pathwayMetrics as $metric) {
+                $pathwayCaseIds = PatientCase::where('clinical_pathway_id', $metric->pathway_id);
                 
-            return view('reports.pathway_performance', compact('pathways'));
+                if ($caseIds->count() > 0) {
+                    $pathwayCaseIds->whereIn('id', $caseIds);
+                } else {
+                    $pathwayCaseIds->whereRaw('1 = 0');
+                }
+                
+                $pathwayCaseIds = $pathwayCaseIds->pluck('id');
+                
+                if ($pathwayCaseIds->count() > 0) {
+                    $stepCounts = CaseDetail::whereIn('patient_case_id', $pathwayCaseIds)
+                        ->where(function($query) {
+                            $query->where('performed', 1)
+                                  ->orWhere('status', 'completed');
+                        })
+                        ->select('patient_case_id', DB::raw('COUNT(*) as step_count'))
+                        ->groupBy('patient_case_id')
+                        ->pluck('step_count');
+                    
+                    $metric->avg_steps_completed = $stepCounts->count() > 0 ? $stepCounts->avg() : 0;
+                } else {
+                    $metric->avg_steps_completed = 0;
+                }
+            }
+            
+            // Get step analysis if pathway_id is selected
+            $stepAnalysis = collect([]);
+            if ($request->filled('pathway_id') && $caseIds->count() > 0) {
+                $stepAnalysisQuery = CaseDetail::select(
+                        'pathway_steps.step_order as day',
+                        'pathway_steps.description as activity',
+                        DB::raw('COUNT(case_details.id) as times_performed'),
+                        DB::raw('AVG(CASE 
+                            WHEN case_details.performed = 1 OR case_details.status = "completed" 
+                            THEN 100 
+                            ELSE 0 
+                        END) as compliance_rate'),
+                        DB::raw('COALESCE(AVG(case_details.actual_cost), 0) as avg_actual_cost'),
+                        DB::raw('COALESCE(AVG(pathway_steps.estimated_cost * COALESCE(pathway_steps.quantity, 1)), 0) as standard_cost'),
+                        DB::raw('COALESCE(AVG(case_details.actual_cost - (pathway_steps.estimated_cost * COALESCE(pathway_steps.quantity, 1))), 0) as avg_variance')
+                    )
+                    ->join('patient_cases', 'case_details.patient_case_id', '=', 'patient_cases.id')
+                    ->join('pathway_steps', 'case_details.pathway_step_id', '=', 'pathway_steps.id')
+                    ->whereIn('patient_cases.id', $caseIds)
+                    ->where('patient_cases.clinical_pathway_id', $request->pathway_id)
+                    ->groupBy('pathway_steps.step_order', 'pathway_steps.description')
+                    ->orderBy('pathway_steps.step_order');
+                
+                $stepAnalysis = $stepAnalysisQuery->get();
+            }
+                
+            return view('reports.pathway_performance', compact('allPathways', 'pathwayMetrics', 'stepAnalysis'));
         } catch (\Exception $e) {
+            \Log::error('Pathway performance report error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->back()->with('error', 'Failed to load pathway performance report: ' . $e->getMessage());
         }
     }
