@@ -77,3 +77,4 @@ php artisan view:clear
 - **Untuk development**, gunakan `npm run dev` (jangan tutup terminal)
 - **Untuk production**, selalu gunakan `npm run build` sebelum deploy
 
+

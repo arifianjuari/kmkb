@@ -37,3 +37,4 @@ class AllocationResult extends Model
     }
 }
 
+

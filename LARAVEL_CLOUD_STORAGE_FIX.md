@@ -158,3 +158,4 @@ Jika Laravel Cloud tidak menyediakan persistent storage, gunakan **Opsi 2** atau
 - **Folder structure tetap di-track** (dengan `.gitkeep`)
 - **Dengan persistent storage, file logo akan tetap ada** setelah deployment
 - **Backup manual tetap disarankan** untuk file penting
+

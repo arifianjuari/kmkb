@@ -197,8 +197,9 @@ class ReportController extends Controller
             // Following the same logic as in cases/show.blade.php
             $cases->getCollection()->transform(function ($case) {
                 // Calculate total charges (actual total cost from case details)
+                // Only count case details that are performed (performed = 1 or true)
                 // This matches the calculation in cases/show.blade.php
-                $case->total_charges = $case->caseDetails->sum(function($detail) {
+                $case->total_charges = $case->caseDetails->where('performed', 1)->sum(function($detail) {
                     return ($detail->actual_cost ?? 0) * ($detail->quantity ?? 1);
                 });
                 
@@ -337,7 +338,8 @@ class ReportController extends Controller
                     $costVariances = [];
                     foreach ($cases as $case) {
                         // Calculate total charges (actual total cost from case details)
-                        $totalCharges = $case->caseDetails->sum(function($detail) {
+                        // Only count case details that are performed (performed = 1 or true)
+                        $totalCharges = $case->caseDetails->where('performed', 1)->sum(function($detail) {
                             return ($detail->actual_cost ?? 0) * ($detail->quantity ?? 1);
                         });
                         

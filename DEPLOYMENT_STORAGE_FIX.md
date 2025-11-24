@@ -140,3 +140,4 @@ Setelah deployment, pastikan:
 - `storage/app/public/hospitals/.gitkeep` - Memastikan folder tetap ada
 - `.gitignore` - Konfigurasi untuk mengabaikan file upload tapi track folder structure
 - `storage/app/public/README.md` - Dokumentasi folder storage
+

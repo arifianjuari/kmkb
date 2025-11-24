@@ -72,3 +72,4 @@ chmod -R 775 storage/app/public/hospitals 2>/dev/null || true
 
 echo "✅ Deployment hooks completed!"
 
+

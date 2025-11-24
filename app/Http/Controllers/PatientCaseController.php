@@ -386,8 +386,10 @@ class PatientCaseController extends Controller
     private function recalculateActualTotalCost(PatientCase $case)
     {
         // Recalculate using actual_cost * quantity (default quantity to 1), treating nulls as 0
+        // Only count case details that are performed (performed = 1 or true)
         // Use a DB-level aggregation to avoid loading all rows into memory
         $totalActualCost = \App\Models\CaseDetail::where('patient_case_id', $case->id)
+            ->where('performed', 1)
             ->sum(DB::raw('COALESCE(actual_cost, 0) * COALESCE(NULLIF(quantity, 0), 1)'));
 
         // Update the actual_total_cost field (ensure decimal format)

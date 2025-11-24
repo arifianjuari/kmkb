@@ -52,3 +52,4 @@ class ExpenseCategory extends Model
     }
 }
 
+

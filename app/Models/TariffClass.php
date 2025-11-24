@@ -51,3 +51,4 @@ class TariffClass extends Model
     }
 }
 
+
