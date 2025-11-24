@@ -45,17 +45,16 @@ class PatientCaseController extends Controller
             
             $cases = $query->latest()->paginate(10);
             
-            // Recalculate compliance for cases that don't have it
+            // Recalculate compliance for all cases to ensure accuracy
+            // This ensures compliance matches the calculation used in the detail view
             $calculator = new ComplianceCalculator();
             foreach ($cases as $case) {
-                if ($case->compliance_percentage === null || $case->compliance_percentage === '') {
-                    try {
-                        $case->compliance_percentage = $calculator->computeCompliance($case);
-                        $case->save();
-                    } catch (\Exception $e) {
-                        // Log error but don't break the page
-                        Log::warning('Failed to calculate compliance for case ' . $case->id . ': ' . $e->getMessage());
-                    }
+                try {
+                    $case->compliance_percentage = $calculator->computeCompliance($case);
+                    $case->save();
+                } catch (\Exception $e) {
+                    // Log error but don't break the page
+                    Log::warning('Failed to calculate compliance for case ' . $case->id . ': ' . $e->getMessage());
                 }
             }
             
