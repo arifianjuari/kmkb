@@ -20,10 +20,45 @@ class PatientCaseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $cases = PatientCase::where('hospital_id', hospital('id'))->with(['clinicalPathway', 'inputBy'])->latest()->paginate(10);
+            $query = PatientCase::where('hospital_id', hospital('id'))
+                ->with(['clinicalPathway.steps', 'caseDetails', 'inputBy']);
+            
+            // Apply filters
+            if ($request->filled('medical_record_number')) {
+                $query->where('medical_record_number', 'like', '%' . $request->medical_record_number . '%');
+            }
+            
+            if ($request->filled('pathway_id')) {
+                $query->where('clinical_pathway_id', $request->pathway_id);
+            }
+            
+            if ($request->filled('admission_date_from')) {
+                $query->whereDate('admission_date', '>=', $request->admission_date_from);
+            }
+            
+            if ($request->filled('admission_date_to')) {
+                $query->whereDate('admission_date', '<=', $request->admission_date_to);
+            }
+            
+            $cases = $query->latest()->paginate(10);
+            
+            // Recalculate compliance for cases that don't have it
+            $calculator = new ComplianceCalculator();
+            foreach ($cases as $case) {
+                if ($case->compliance_percentage === null || $case->compliance_percentage === '') {
+                    try {
+                        $case->compliance_percentage = $calculator->computeCompliance($case);
+                        $case->save();
+                    } catch (\Exception $e) {
+                        // Log error but don't break the page
+                        Log::warning('Failed to calculate compliance for case ' . $case->id . ': ' . $e->getMessage());
+                    }
+                }
+            }
+            
             $pathways = ClinicalPathway::where('hospital_id', hospital('id'))->where('status', 'active')->get();
             return view('cases.index', compact('cases', 'pathways'));
         } catch (\Exception $e) {

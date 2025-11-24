@@ -89,7 +89,7 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        @if($case->compliance_percentage !== null)
+                                        @if($case->compliance_percentage !== null && $case->compliance_percentage !== '')
                                             <span class="{{ $case->compliance_percentage >= 90 ? 'text-green-600 dark:text-green-400' : ($case->compliance_percentage >= 70 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400') }} font-semibold">
                                                 {{ number_format($case->compliance_percentage, 2) }}%
                                             </span>
@@ -98,8 +98,8 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        @if($case->cost_variance !== null)
-                                            <span class="{{ $case->cost_variance <= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} font-semibold">
+                                        @if($case->cost_variance !== null && $case->cost_variance !== '')
+                                            <span class="{{ $case->cost_variance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} font-semibold">
                                                 Rp{{ number_format($case->cost_variance, 2) }}
                                             </span>
                                         @else
