@@ -43,15 +43,15 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <input type="checkbox" id="select-all-inap" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Tindakan</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
                         </tr>
                     </thead>
                     <tbody id="tindakan-rawat-inap-table" class="bg-white divide-y divide-gray-200">
                         <!-- Data will be loaded here via AJAX -->
                         <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            <td colspan="4" class="px-6 py-4 text-center text-gray-500">
                                 Loading data...
                             </td>
                         </tr>
@@ -155,7 +155,7 @@
         const syncButton = document.getElementById('sync-selected');
         const selectAllCheckbox = document.getElementById('select-all-inap');
         
-        tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
         syncButton.classList.add('hidden');
         selectAllCheckbox.checked = false;
         
@@ -193,9 +193,9 @@
                                         data-nama="${item.nm_perawatan}" 
                                         data-harga="${item.total_byrdrpr || 0}">
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kd_jenis_prw}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.nm_perawatan}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(item.total_byrdrpr || 0)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kd_jenis_prw}</td>
                             `;
                             tableBody.appendChild(row);
                         });

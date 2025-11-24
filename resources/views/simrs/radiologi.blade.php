@@ -42,7 +42,6 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <input type="checkbox" id="select-all-radiologi" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Pemeriksaan</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BHP</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dokter</th>
@@ -50,6 +49,7 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">KSO</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manajemen</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
                         </tr>
                     </thead>
                     <tbody id="radiologi-table" class="bg-white divide-y divide-gray-200">
@@ -160,7 +160,7 @@
         const syncButton = document.getElementById('sync-selected');
         const selectAllCheckbox = document.getElementById('select-all-radiologi');
         
-        tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
         syncButton.classList.add('hidden');
         selectAllCheckbox.checked = false;
         
@@ -206,7 +206,6 @@
                                         data-nama="${item.nm_perawatan}" 
                                         data-harga="${totalByr}">
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kd_jenis_prw}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.nm_perawatan}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(item.bhp || 0)}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(dokter)}</td>
@@ -214,6 +213,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(kso)}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(menejemen)}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(totalByr)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kd_jenis_prw}</td>
                             `;
                             tableBody.appendChild(row);
                         });

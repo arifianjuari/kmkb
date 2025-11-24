@@ -68,11 +68,11 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             <input id="select-all" type="checkbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded">
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Service Code') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Description') }}</th>
                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Standard Cost (Rp)') }}</th>
                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Purchase Price (Rp)') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Unit') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Service Code') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Source') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
                                     </tr>
@@ -83,11 +83,11 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                 <input type="checkbox" name="ids[]" value="{{ $reference->id }}" class="row-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded">
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $reference->service_code }}</td>
                                             <td class="px-6 py-4 text-sm text-gray-900">{{ $reference->service_description }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($reference->standard_cost, 0, ',', '.') }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($reference->purchase_price, 0, ',', '.') }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $reference->unit }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $reference->service_code }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $reference->source }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                 <div class="flex items-center gap-2">

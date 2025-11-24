@@ -85,7 +85,7 @@
                             <div class="sm:col-span-3">
                                 <label for="standard_cost" class="block text-sm font-medium text-gray-700">{{ __('Standard Cost') }}</label>
                                 <div class="mt-1">
-                                    <input type="number" id="standard_cost" name="standard_cost" step="100" min="0" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="standard_cost" name="standard_cost" step="1" min="0" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                             </div>
                             <div class="sm:col-span-2">
@@ -278,7 +278,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">{{ __('Standard Cost') }}</label>
-                                    <input type="number" id="ref_standard_cost" step="100" min="0" value="0" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="ref_standard_cost" step="1" min="0" value="0" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>

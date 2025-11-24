@@ -40,7 +40,6 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <input type="checkbox" id="select-all-checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Paket</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Perawatan</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total (Rp)</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Operator 1 (Rp)</th>
@@ -57,6 +56,7 @@
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Omloop (Rp)</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Omloop 4 (Rp)</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Omloop 5 (Rp)</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Paket</th>
                         </tr>
                     </thead>
                     <tbody id="operasi-table" class="bg-white divide-y divide-gray-200">
@@ -160,7 +160,7 @@
     
     function loadOperasi() {
         const tableBody = document.getElementById('operasi-table');
-        tableBody.innerHTML = '<tr><td colspan="19" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="18" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
         
         // Calculate offset based on current page
         const offset = currentPage * limit;
@@ -193,7 +193,6 @@
                                            data-name="${item.nm_perawatan}" 
                                            data-price="${item.total}">
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kode_paket}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.nm_perawatan}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.tarif_total)}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.operator1)}</td>
@@ -210,6 +209,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.omloop)}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.omloop4)}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.omloop5)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kode_paket}</td>
                             `;
                             tableBody.appendChild(row);
                         });

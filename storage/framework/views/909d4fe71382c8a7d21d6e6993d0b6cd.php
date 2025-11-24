@@ -31,19 +31,20 @@
                 <p class="mt-1 max-w-2xl text-sm text-gray-500">Data diambil secara real-time dari database SIMRS.</p>
             </div>
             <div class="border-t border-gray-200">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <input type="checkbox" id="select-all-checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Barang</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Harga beli dasar (Rp)</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ralan (Rp)</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas 3 (Rp)</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Isi</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expire</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Barang</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
@@ -56,6 +57,7 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
             
             <!-- Pagination Controls -->
@@ -163,7 +165,7 @@
     
     function loadMasterBarang() {
         const tableBody = document.getElementById('master-barang-table');
-        tableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
         
         let url = `/api/simrs/master-barang?limit=${limit}&offset=${currentPage * limit}`;
         if (currentSearch) {
@@ -180,13 +182,13 @@
             .then(response => {
                 if (response.status === 401) {
                     // Handle unauthenticated response
-                    tableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error: Anda perlu login untuk mengakses data ini.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-red-500">Error: Anda perlu login untuk mengakses data ini.</td></tr>';
                     return Promise.reject('Unauthenticated');
                 }
                 if (response.status === 400) {
                     // Handle bad request (hospital context not selected for super admin)
                     return response.json().then(data => {
-                        tableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error: ' + data.message + '</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-red-500">Error: ' + data.message + '</td></tr>';
                         return Promise.reject('Hospital context required');
                     });
                 }
@@ -210,13 +212,13 @@
                                            data-harga="${item.harga_beli_dasar}"
                                            data-kelas3="${item.kelas3 || 0}">
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kode_brng}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.nama_brng}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.harga_beli_dasar)}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${item.ralan ? formatRupiah(item.ralan) : '-'}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${item.kelas3 ? formatRupiah(item.kelas3) : '-'}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${item.isi}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.expire ? formatDate(item.expire) : '-'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kode_brng}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.status === '1' ? 'Aktif' : 'Tidak Aktif'}</td>
                             `;
                             tableBody.appendChild(row);
