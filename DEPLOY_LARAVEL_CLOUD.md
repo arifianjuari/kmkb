@@ -504,6 +504,7 @@ php artisan db:seed --force
 ### 8.5 Setup Storage Link dan Image Storage
 
 **PENTING:** Script deployment (`laravel-cloud-deploy.sh`) sudah otomatis:
+
 - Membuat folder `storage/app/public/hospitals` jika belum ada
 - Mem-backup file yang sudah ada sebelum deployment
 - Mem-restore file setelah deployment (mencegah logo hilang)
@@ -531,10 +532,12 @@ php artisan db:seed --force
    ```
 
    Seharusnya menampilkan:
+
    - Symlink `public/storage` ke `storage/app/public`
    - Folder `storage/app/public/hospitals` dengan file `.gitkeep`
 
-**Catatan:** 
+**Catatan:**
+
 - File logo dan file upload lainnya **TIDAK akan hilang** setelah deployment karena script deployment sudah mem-backup dan restore file tersebut
 - Untuk panduan lengkap tentang setup image storage, lihat file `IMAGE_STORAGE_SETUP.md`
 

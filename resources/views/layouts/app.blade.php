@@ -68,7 +68,7 @@
                 </header>
 
                 <!-- Main Content -->
-                <main class="flex-1 overflow-y-auto bg-gray-50">
+                <main class="flex-1 overflow-y-auto bg-gray-50 pt-16">
                     <!-- Page Heading -->
                     @if (isset($header))
                         <div class="bg-white shadow dark:bg-gray-800">

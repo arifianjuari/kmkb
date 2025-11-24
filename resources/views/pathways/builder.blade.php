@@ -76,7 +76,7 @@
                             </div>
 
                             <div class="sm:col-span-5">
-                                <label for="criteria" class="block text-sm font-medium text-gray-700">{{ __('Criteria (optional)') }}</label>
+                                <label for="criteria" class="block text-sm font-medium text-gray-700">{{ __('Keterangan (opsional)') }}</label>
                                 <div class="mt-1">
                                     <input type="text" id="criteria" name="criteria" placeholder="e.g., if age > 60 then ..." class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
@@ -521,7 +521,7 @@
                     category: row.querySelector('[data-field="category"]').textContent,
                     activity: row.querySelector('[data-field="activity"]').textContent,
                     description: row.querySelector('[data-field="description"]').textContent,
-                    criteria: row.querySelector('[data-field="criteria"]').textContent,
+                    annotation: row.querySelector('[data-field="criteria"]').textContent,
                     standard_cost: row.querySelector('[data-field="standard_cost"]').textContent.replace(/[.,\s]/g, ''),
                     quantity: row.querySelector('[data-field="quantity"]').textContent.replace(/[.,\s]/g, '')
                 };

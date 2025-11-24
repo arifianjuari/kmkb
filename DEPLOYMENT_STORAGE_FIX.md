@@ -20,6 +20,7 @@ Setiap kali ada commit/push baru ke GitHub dan deployment dilakukan, logo tenant
 ### 2. Deployment Script dengan Backup/Restore
 
 Script `laravel-cloud-deploy.sh` sudah diperbarui untuk:
+
 - **Backup file yang sudah ada** sebelum deployment
 - **Restore file setelah deployment** (mencegah logo hilang)
 - **Memastikan folder structure tetap ada**
@@ -27,6 +28,7 @@ Script `laravel-cloud-deploy.sh` sudah diperbarui untuk:
 ### 3. Update `.gitignore`
 
 `.gitignore` sudah diperbarui agar:
+
 - Folder structure tetap di-track (`.gitkeep` dan `README.md`)
 - File upload tetap di-ignore (benar)
 
@@ -35,12 +37,14 @@ Script `laravel-cloud-deploy.sh` sudah diperbarui untuk:
 ### Saat Deployment:
 
 1. **Backup Phase:**
+
    ```bash
    # Script mem-backup file yang sudah ada
    cp -r storage/app/public/hospitals /tmp/storage_backup/
    ```
 
 2. **Deployment Phase:**
+
    ```bash
    # Git pull/clone menghapus folder yang tidak di-track
    # Tapi folder structure tetap ada karena .gitkeep
@@ -57,12 +61,14 @@ Script `laravel-cloud-deploy.sh` sudah diperbarui untuk:
 Setelah deployment, pastikan:
 
 1. **Folder structure ada:**
+
    ```bash
    ls -la storage/app/public/hospitals/
    # Harus menampilkan .gitkeep dan file logo yang sudah ada
    ```
 
 2. **Symlink ada:**
+
    ```bash
    ls -la public/storage
    # Harus menampilkan symlink ke storage/app/public
@@ -78,17 +84,20 @@ Setelah deployment, pastikan:
 ### Logo Masih Hilang Setelah Deployment?
 
 1. **Cek apakah script deployment dijalankan:**
+
    ```bash
    # Di Laravel Cloud, pastikan script laravel-cloud-deploy.sh dijalankan
    ```
 
 2. **Cek permission folder:**
+
    ```bash
    chmod -R 775 storage/app/public
    chown -R www-data:www-data storage/app/public
    ```
 
 3. **Cek apakah symlink ada:**
+
    ```bash
    php artisan storage:link
    ```
@@ -102,12 +111,14 @@ Setelah deployment, pastikan:
 ### File Logo Tidak Bisa Diakses?
 
 1. **Cek permission:**
+
    ```bash
    ls -la storage/app/public/hospitals/
    chmod 644 storage/app/public/hospitals/*.png
    ```
 
 2. **Cek symlink:**
+
    ```bash
    php artisan storage:link --force
    ```
@@ -129,4 +140,3 @@ Setelah deployment, pastikan:
 - `storage/app/public/hospitals/.gitkeep` - Memastikan folder tetap ada
 - `.gitignore` - Konfigurasi untuk mengabaikan file upload tapi track folder structure
 - `storage/app/public/README.md` - Dokumentasi folder storage
-

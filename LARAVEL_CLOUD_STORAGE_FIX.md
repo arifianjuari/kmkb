@@ -9,6 +9,7 @@ Logo tenant hilang setiap kali ada deployment di Laravel Cloud, meskipun sudah a
 Laravel Cloud melakukan **fresh clone** setiap deployment, yang menghapus semua file yang tidak di-track oleh Git, termasuk file di `storage/app/public/hospitals/`.
 
 Script backup/restore tidak bekerja karena:
+
 1. Script mungkin tidak dijalankan di Laravel Cloud
 2. Folder `storage/app` juga ikut terhapus saat fresh clone
 3. Backup location (`storage/app/backup_*`) juga ikut terhapus
@@ -36,6 +37,7 @@ Jika persistent storage tidak tersedia, gunakan deployment hooks:
 1. **Buka Laravel Cloud Dashboard**
 2. **Pilih Environment** → **Settings** → **Deployment Hooks**
 3. **Tambahkan di "Before Deploy":**
+
    ```bash
    # Backup files ke lokasi yang persisten (di luar project directory)
    if [ -d "storage/app/public/hospitals" ]; then
@@ -60,6 +62,7 @@ Jika persistent storage tidak tersedia, gunakan deployment hooks:
 Gunakan S3 atau storage eksternal untuk file upload:
 
 1. **Update `.env`:**
+
    ```env
    FILESYSTEM_DISK=s3
    AWS_ACCESS_KEY_ID=your_key
@@ -69,6 +72,7 @@ Gunakan S3 atau storage eksternal untuk file upload:
    ```
 
 2. **Update `config/filesystems.php`:**
+
    ```php
    'disks' => [
        'public' => [
@@ -92,6 +96,7 @@ Gunakan S3 atau storage eksternal untuk file upload:
 ## Rekomendasi
 
 **Gunakan Opsi 1 (Persistent Storage)** karena:
+
 - ✅ Paling sederhana
 - ✅ Tidak perlu script tambahan
 - ✅ File benar-benar persisten
@@ -114,6 +119,7 @@ Gunakan S3 atau storage eksternal untuk file upload:
 ### Verifikasi:
 
 Setelah setup, folder `storage/app/public/hospitals` akan:
+
 - ✅ **Tidak terhapus** saat deployment
 - ✅ **Persisten** di semua deployment
 - ✅ **Otomatis tersedia** setelah deployment
@@ -123,6 +129,7 @@ Setelah setup, folder `storage/app/public/hospitals` akan:
 ### Logo Masih Hilang?
 
 1. **Cek apakah persistent storage sudah di-mount:**
+
    ```bash
    # SSH ke server
    df -h | grep hospitals
@@ -130,6 +137,7 @@ Setelah setup, folder `storage/app/public/hospitals` akan:
    ```
 
 2. **Cek permission:**
+
    ```bash
    ls -la storage/app/public/hospitals/
    chmod -R 775 storage/app/public/hospitals
@@ -150,4 +158,3 @@ Jika Laravel Cloud tidak menyediakan persistent storage, gunakan **Opsi 2** atau
 - **Folder structure tetap di-track** (dengan `.gitkeep`)
 - **Dengan persistent storage, file logo akan tetap ada** setelah deployment
 - **Backup manual tetap disarankan** untuk file penting
-

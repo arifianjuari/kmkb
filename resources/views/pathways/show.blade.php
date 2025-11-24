@@ -32,24 +32,23 @@
     </div>
 
     <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
-        <div class="px-6 py-4 border-b border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h5 class="text-base font-semibold text-gray-900">{{ __('Pathway Information') }}</h5>
+            <div class="text-xl font-semibold text-gray-900">
+                {{ $pathway->diagnosis_code }}.{{ $pathway->name }}
+            </div>
         </div>
         <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <table class="min-w-full">
                         <tr>
-                            <th class="py-2 pr-4 text-left text-sm font-medium text-gray-500">{{ __('Name') }}</th>
-                            <td class="py-2 text-sm text-gray-900">{{ $pathway->name }}</td>
-                        </tr>
-                        <tr>
-                            <th class="py-2 pr-4 text-left text-sm font-medium text-gray-500">{{ __('Diagnosis Code') }}</th>
-                            <td class="py-2 text-sm text-gray-900">{{ $pathway->diagnosis_code }}</td>
-                        </tr>
-                        <tr>
-                            <th class="py-2 pr-4 text-left text-sm font-medium text-gray-500">{{ __('Version') }}</th>
+                            <th class="py-2 pr-4 text-left text-sm font-medium text-gray-500 align-top">{{ __('Version') }}</th>
                             <td class="py-2 text-sm text-gray-900">{{ $pathway->version }}</td>
+                        </tr>
+                        <tr>
+                            <th class="py-2 pr-4 text-left text-sm font-medium text-gray-500 align-top">{{ __('Description') }}</th>
+                            <td class="py-2 text-sm text-gray-900">{{ $pathway->description }}</td>
                         </tr>
                     </table>
                 </div>
@@ -78,21 +77,61 @@
                     </table>
                 </div>
             </div>
-
-            <div class="mt-4">
-                <label class="block text-sm font-semibold text-gray-900">{{ __('Description') }}</label>
-                <p class="mt-1 text-gray-700">{{ $pathway->description }}</p>
-            </div>
         </div>
     </div>
 
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
+    <div class="bg-white shadow rounded-lg overflow-hidden" x-data="{ groupBy: 'category' }">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h5 class="text-base font-semibold text-gray-900">{{ __('Pathway Steps') }}</h5>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-600">{{ __('Group by') }}:</span>
+                <div class="flex items-center gap-2">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="radio" name="groupBy" value="category" x-model="groupBy" class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-sm text-gray-700">{{ __('Category') }}</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer ml-4">
+                        <input type="radio" name="groupBy" value="day" x-model="groupBy" class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-sm text-gray-700">{{ __('Day') }}</span>
+                    </label>
+                </div>
+            </div>
         </div>
         <div class="p-6">
             @if($pathway->steps->count() > 0)
-                <div class="overflow-x-auto">
+                @php
+                    // Define category order based on the enum values
+                    $categoryOrder = [
+                        'Administrasi',
+                        'Penilaian dan Pemantauan Medis',
+                        'Penilaian dan Pemantauan Keperawatan',
+                        'Pemeriksaan Penunjang Medik',
+                        'Tindakan Medis',
+                        'Tindakan Keperawatan',
+                        'Medikasi',
+                        'BHP',
+                        'Nutrisi',
+                        'Kegiatan',
+                        'Konsultasi dan Komunikasi Tim',
+                        'Konseling Psikososial',
+                        'Pendidikan dan Komunikasi dengan Pasien/Keluarga',
+                        'Kriteria KRS',
+                    ];
+                    
+                    // Group steps by category
+                    $stepsByCategory = $pathway->steps->groupBy('category');
+                    
+                    // Group steps by day (step_order)
+                    $stepsByDay = $pathway->steps->groupBy('step_order')->sortKeys();
+                    
+                    // Calculate total cost
+                    $totalCost = $pathway->steps->sum(function($step) {
+                        return ($step->estimated_cost ?? 0) * $step->quantity;
+                    });
+                @endphp
+
+                <!-- Group by Category -->
+                <div x-show="groupBy === 'category'" class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -105,38 +144,111 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($pathway->steps->sortBy('step_order') as $step)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <div class="flex items-center gap-2">
-                                            <span>{{ $step->service_code }}</span>
-                                            @if(method_exists($step, 'isConditional') ? $step->isConditional() : (!empty(trim($step->criteria ?? ''))))
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">{{ __('Conditional') }}</span>
-                                            @endif
-                                        </div>
+                            @foreach($categoryOrder as $category)
+                                @if($stepsByCategory->has($category) && $stepsByCategory[$category]->count() > 0)
+                                    <tr class="bg-gray-50">
+                                        <td colspan="6" class="px-6 py-3">
+                                            <h6 class="text-sm font-semibold text-gray-700">{{ $category }}</h6>
+                                        </td>
+                                    </tr>
+                                    @foreach($stepsByCategory[$category]->sortBy('step_order') as $step)
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <div class="flex items-center gap-2">
+                                                    <span>{{ $step->service_code }}</span>
+                                                    @if(method_exists($step, 'isConditional') ? $step->isConditional() : (!empty(trim($step->criteria ?? ''))))
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">{{ __('Conditional') }}</span>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-900">{{ $step->description }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-900">{{ $step->criteria }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
+                                        </tr>
+                                    @endforeach
+                                @endif
+                            @endforeach
+
+                            @if($stepsByCategory->has(null) && $stepsByCategory[null]->count() > 0)
+                                <tr class="bg-gray-50">
+                                    <td colspan="6" class="px-6 py-3">
+                                        <h6 class="text-sm font-semibold text-gray-700">{{ __('Other') }}</h6>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $step->description }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $step->criteria }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
                                 </tr>
+                                @foreach($stepsByCategory[null]->sortBy('step_order') as $step)
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <div class="flex items-center gap-2">
+                                                <span>{{ $step->service_code }}</span>
+                                                @if(method_exists($step, 'isConditional') ? $step->isConditional() : (!empty(trim($step->criteria ?? ''))))
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">{{ __('Conditional') }}</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $step->description }}</td>
+                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $step->criteria }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
+                                    </tr>
+                                @endforeach
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Group by Day -->
+                <div x-show="groupBy === 'day'" class="overflow-x-auto" style="display: none;">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Day') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Activity') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Description') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Criteria') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Standard Cost') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Full Standard Cost') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($stepsByDay as $day => $steps)
+                                <tr class="bg-gray-50">
+                                    <td colspan="6" class="px-6 py-3">
+                                        <h6 class="text-sm font-semibold text-gray-700">{{ __('Day') }} {{ $day }}</h6>
+                                    </td>
+                                </tr>
+                                @foreach($steps->sortBy('display_order') as $step)
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <div class="flex items-center gap-2">
+                                                <span>{{ $step->service_code }}</span>
+                                                @if(method_exists($step, 'isConditional') ? $step->isConditional() : (!empty(trim($step->criteria ?? ''))))
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">{{ __('Conditional') }}</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $step->description }}</td>
+                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $step->criteria }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
+                                    </tr>
+                                @endforeach
                             @endforeach
                         </tbody>
-                        <tfoot class="bg-gray-50 font-semibold">
-                            <tr>
-                                <td colspan="5" class="px-6 py-3 text-right text-sm text-gray-900">{{ __('Total Standard Cost') }}:</td>
-                                <td class="px-6 py-3 text-sm text-gray-900">
-                                    @php
-                                        $totalCost = $pathway->steps->sum(function($step) {
-                                            return ($step->estimated_cost ?? 0) * $step->quantity;
-                                        });
-                                    @endphp
-                                    Rp{{ number_format($totalCost, 0, ',', '.') }}
-                                </td>
-                            </tr>
-                        </tfoot>
                     </table>
+                </div>
+
+                <!-- Total Cost Summary -->
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <div class="flex justify-end">
+                        <div class="text-right">
+                            <span class="text-sm font-semibold text-gray-900">{{ __('Total Standard Cost') }}: </span>
+                            <span class="text-sm font-bold text-gray-900">Rp{{ number_format($totalCost, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
                 </div>
             @else
                 <p class="text-gray-600">{{ __('No steps defined for this pathway yet.') }}</p>
