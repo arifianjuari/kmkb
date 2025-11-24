@@ -15,12 +15,15 @@ class ComplianceCalculator
 
     /**
      * Compute compliance percentage for a patient case.
-     * Compliance Percentage = (Standard Steps Count / Pathway Steps Count) × 100
-     * Standard Steps Count = Case Steps Count - Custom Steps Count
-     * Pathway Steps Count = Total steps in the clinical pathway
      * 
-     * If Standard Steps Count exceeds Pathway Steps Count, compliance should decrease
-     * to penalize over-treatment rather than increase beyond 100%
+     * Compliance calculation logic (matching show.blade.php):
+     * 1. Base Compliance = (Used Pathway Steps / Pathway Steps Count) × 100
+     *    - Used Pathway Steps = case details that are performed = true AND not custom step
+     * 2. Over-treatment Penalty:
+     *    - If Standard Steps Count > Used Steps, apply penalty
+     *    - Standard Steps Count = all case details that are not custom step (regardless of performed status)
+     *    - Penalty = ((Standard Steps Count - Used Steps) / Pathway Steps Count) × 100
+     *    - Final Compliance = Base Compliance - Penalty (minimum 0)
      */
     public function computeCompliance(PatientCase $case): float
     {
@@ -29,34 +32,32 @@ class ComplianceCalculator
         // Get total pathway steps count
         $pathwayStepsCount = $case->clinicalPathway?->steps->count() ?? 0;
         
-        // Get custom steps count
-        $customStepsCount = $case->caseDetails->filter(function($detail) {
-            return $detail->isCustomStep();
-        })->count();
-        
-        // Calculate standard steps count
-        $standardStepsCount = $case->caseDetails->count() - $customStepsCount;
-
         // Handle division by zero
         if ($pathwayStepsCount === 0) {
             return 100.00;
         }
-
-        // If standard steps count exceeds pathway steps count,
-        // calculate penalty to reduce compliance instead of exceeding 100%
-        if ($standardStepsCount > $pathwayStepsCount) {
-            // Calculate how much it exceeds as a ratio
-            $excessRatio = ($standardStepsCount - $pathwayStepsCount) / $pathwayStepsCount;
-            // Calculate base compliance (100%)
-            $baseCompliance = 100.00;
-            // Apply penalty - reduce compliance by the excess ratio
-            // This ensures that significant over-treatment results in lower compliance
-            $compliance = $baseCompliance - ($excessRatio * 50); // 50% penalty factor
-            // Ensure compliance doesn't go below 0
-            return max(0, round($compliance, 2));
+        
+        // Get used pathway steps (performed = true AND not custom step)
+        $usedSteps = $case->caseDetails->filter(function($detail) {
+            return !$detail->isCustomStep() && $detail->performed;
+        })->count();
+        
+        // Get standard steps count (all case details that are not custom step, regardless of performed)
+        $standardStepsOnlyCount = $case->caseDetails->filter(function($detail) {
+            return !$detail->isCustomStep();
+        })->count();
+        
+        // Base compliance = (Used Steps / Pathway Steps Count) × 100
+        $baseCompliance = round(($usedSteps / $pathwayStepsCount) * 100, 2);
+        
+        // Over-treatment penalty (based on standard steps exceeding used steps)
+        $isOverTreatment = $standardStepsOnlyCount > $usedSteps;
+        if ($isOverTreatment) {
+            $overTreatmentCount = $standardStepsOnlyCount - $usedSteps;
+            $overTreatmentPenalty = round(($overTreatmentCount / $pathwayStepsCount) * 100, 2);
+            $baseCompliance = max(0, $baseCompliance - $overTreatmentPenalty);
         }
-
-        // Normal calculation when standard steps don't exceed pathway steps
-        return round(($standardStepsCount / $pathwayStepsCount) * 100, 2);
+        
+        return round($baseCompliance, 2);
     }
 }
