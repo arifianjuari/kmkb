@@ -61,6 +61,8 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::delete('cases/{case}/details/{detail}', [PatientCaseController::class, 'deleteCaseDetail'])->name('cases.details.delete');
     // Copy all pathway steps into case details
     Route::post('cases/{case}/details/copy-steps', [PatientCaseController::class, 'copyPathwayStepsToCaseDetails'])->name('cases.details.copy-steps');
+    // Update case annotation
+    Route::put('cases/{case}/annotation', [PatientCaseController::class, 'updateAnnotation'])->name('cases.annotation.update');
 
     // Clinical Pathways
     Route::resource('pathways', PathwayController::class);

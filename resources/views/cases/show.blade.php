@@ -67,13 +67,6 @@
                         <p class="mt-1 text-sm text-gray-900 dark:text-gray-300">{{ $case->additional_diagnoses }}</p>
                     </div>
                 @endif
-                
-                @if($case->annotation)
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"><strong>{{ __('Annotation') }}</strong></label>
-                        <p class="mt-1 text-sm text-gray-900 dark:text-gray-300">{{ $case->annotation }}</p>
-                    </div>
-                @endif
             </div>
         </div>
         
@@ -232,22 +225,20 @@
                         // Precompute compliance and labels for this section
                         $pathwayStepsCount = $case->clinicalPathway->steps->count();
                         $usedSteps = $usedPathwayStepsCount ?? 0;
-                        $standardStepsOnlyCount = $case->caseDetails->filter(function($detail) {
-                            return !$detail->isCustomStep();
+                        
+                        // Count custom steps (non-compliance penalty)
+                        $customStepsCount = $case->caseDetails->filter(function($detail) {
+                            return $detail->isCustomStep();
                         })->count();
 
-                        // Base compliance
+                        // Calculate compliance: (Used Pathway Steps - Custom Steps) / Pathway Steps Count × 100
+                        // Custom steps reduce compliance as they indicate deviation from standard pathway
                         $computedCompliance = $pathwayStepsCount > 0
-                            ? round(($usedSteps / $pathwayStepsCount) * 100, 2)
+                            ? round((($usedSteps - $customStepsCount) / $pathwayStepsCount) * 100, 2)
                             : 100.00;
-
-                        // Over-treatment penalty (based on standard steps exceeding used steps)
-                        $isOverTreatment = $standardStepsOnlyCount > $usedSteps;
-                        $overTreatmentCount = $isOverTreatment ? ($standardStepsOnlyCount - $usedSteps) : 0;
-                        if ($overTreatmentCount > 0 && $pathwayStepsCount > 0) {
-                            $overTreatmentPenalty = round(($overTreatmentCount / $pathwayStepsCount) * 100, 2);
-                            $computedCompliance = max(0, $computedCompliance - $overTreatmentPenalty);
-                        }
+                        
+                        // Ensure compliance doesn't go below 0%
+                        $computedCompliance = max(0, $computedCompliance);
 
                         // Right-bottom and right-box label type
                         $bottomLabelType = $usedSteps < $pathwayStepsCount ? 'under' : ($usedSteps > $pathwayStepsCount ? 'over' : 'equal');
@@ -292,6 +283,33 @@
                             </dd>
                         </div>
                     </dl>
+                    
+                    <!-- Annotation Section -->
+                    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <strong>{{ __('Annotation') }}</strong>
+                        </label>
+                        <div 
+                            id="annotation-editor" 
+                            data-case-id="{{ $case->id }}"
+                            contenteditable="true"
+                            class="min-h-[100px] p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 text-sm text-gray-900 dark:text-gray-300"
+                            style="white-space: pre-wrap; word-wrap: break-word;"
+                        >{{ $case->annotation ?? '' }}</div>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('Click to edit annotation. Changes are saved automatically.') }}</p>
+                        <div id="annotation-saving" class="mt-2 text-xs text-gray-500 dark:text-gray-400 hidden">
+                            <span class="inline-flex items-center">
+                                <svg class="animate-spin -ml-1 mr-2 h-3 w-3 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                {{ __('Saving...') }}
+                            </span>
+                        </div>
+                        <div id="annotation-saved" class="mt-2 text-xs text-green-600 dark:text-green-400 hidden">
+                            {{ __('Saved') }}
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -299,7 +317,7 @@
                 <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">{{ __('Pathway Information') }}</h3>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{ __('Compliance Percentage = (Used Pathway Steps / Pathway Steps Count) × 100. If Used Pathway Steps are lower than Pathway Steps Count, it is categorized as Under-treatment. If higher, it is categorized as Over-treatment.') }}
+                        {{ __('Compliance Percentage = ((Used Pathway Steps - Custom Steps) / Pathway Steps Count) × 100. Custom steps reduce compliance as they indicate deviation from standard pathway. If Used Pathway Steps are lower than Pathway Steps Count, it is categorized as Under-treatment. If higher, it is categorized as Over-treatment.') }}
                     </p>
                 </div>
                 <div class="px-4 py-5 sm:p-6">
@@ -763,6 +781,101 @@
             if (confirm(message)) {
                 document.getElementById('delete-form-' + detailId).submit();
             }
+        }
+        
+        // Annotation inline editing
+        const annotationEditor = document.getElementById('annotation-editor');
+        const annotationSaving = document.getElementById('annotation-saving');
+        const annotationSaved = document.getElementById('annotation-saved');
+        let annotationTimeout = null;
+        let annotationOriginalValue = annotationEditor ? annotationEditor.textContent.trim() : '';
+        
+        if (annotationEditor) {
+            annotationEditor.addEventListener('input', function() {
+                // Clear previous timeout
+                if (annotationTimeout) {
+                    clearTimeout(annotationTimeout);
+                }
+                
+                // Hide saved message
+                if (annotationSaved) {
+                    annotationSaved.classList.add('hidden');
+                }
+                
+                // Show saving indicator after a short delay
+                annotationTimeout = setTimeout(function() {
+                    if (annotationSaving) {
+                        annotationSaving.classList.remove('hidden');
+                    }
+                }, 500);
+                
+                // Save after user stops typing (debounce)
+                clearTimeout(annotationTimeout);
+                annotationTimeout = setTimeout(function() {
+                    updateAnnotation();
+                }, 1000); // 1 second debounce
+            });
+            
+            annotationEditor.addEventListener('blur', function() {
+                // Save immediately on blur
+                if (annotationTimeout) {
+                    clearTimeout(annotationTimeout);
+                }
+                updateAnnotation();
+            });
+        }
+        
+        function updateAnnotation() {
+            if (!annotationEditor) return;
+            
+            const caseId = annotationEditor.getAttribute('data-case-id');
+            const newValue = annotationEditor.textContent.trim();
+            
+            // Don't save if value hasn't changed
+            if (newValue === annotationOriginalValue) {
+                if (annotationSaving) {
+                    annotationSaving.classList.add('hidden');
+                }
+                return;
+            }
+            
+            fetch(`/cases/${caseId}/annotation`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    annotation: newValue
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (annotationSaving) {
+                    annotationSaving.classList.add('hidden');
+                }
+                if (annotationSaved) {
+                    annotationSaved.classList.remove('hidden');
+                }
+                annotationOriginalValue = newValue;
+                
+                // Hide saved message after 2 seconds
+                setTimeout(function() {
+                    if (annotationSaved) {
+                        annotationSaved.classList.add('hidden');
+                    }
+                }, 2000);
+            })
+            .catch(error => {
+                console.error('Error updating annotation:', error);
+                if (annotationSaving) {
+                    annotationSaving.classList.add('hidden');
+                }
+                if (annotationEditor) {
+                    annotationEditor.textContent = annotationOriginalValue;
+                }
+                alert('Failed to save annotation. Please try again.');
+            });
         }
     </script>
 @endsection

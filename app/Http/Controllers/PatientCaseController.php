@@ -745,6 +745,51 @@ class PatientCaseController extends Controller
     }
 
     /**
+     * Update the annotation for a patient case.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\PatientCase  $case
+     * @return \Illuminate\Http\Response
+     */
+    public function updateAnnotation(Request $request, PatientCase $case)
+    {
+        // Ensure the case belongs to the current hospital
+        if ($case->hospital_id !== hospital('id')) {
+            abort(404);
+        }
+        
+        try {
+            $request->validate([
+                'annotation' => 'nullable|string|max:65535',
+            ]);
+            
+            $case->annotation = $request->annotation;
+            $case->save();
+            
+            if ($request->wantsJson() || $request->isJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Annotation updated successfully.',
+                    'annotation' => $case->annotation
+                ]);
+            }
+            
+            return redirect()->back()
+                ->with('success', 'Annotation updated successfully.');
+        } catch (\Exception $e) {
+            if ($request->wantsJson() || $request->isJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update annotation: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->back()
+                ->with('error', 'Failed to update annotation: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\PatientCase  $case
