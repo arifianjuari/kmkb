@@ -214,6 +214,31 @@ class CostReferenceController extends Controller
     }
 
     /**
+     * Search cost references for autocomplete.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function search(Request $request)
+    {
+        $query = $request->get('query', '');
+        
+        if (empty($query)) {
+            return response()->json([]);
+        }
+        
+        $costReferences = CostReference::where('hospital_id', hospital('id'))
+            ->where(function($q) use ($query) {
+                $q->where('service_code', 'LIKE', "%{$query}%")
+                  ->orWhere('service_description', 'LIKE', "%{$query}%");
+            })
+            ->limit(20)
+            ->get(['id', 'service_code', 'service_description', 'standard_cost']);
+        
+        return response()->json($costReferences);
+    }
+
+    /**
      * Bulk delete selected cost references.
      *
      * @param  \Illuminate\Http\Request  $request

@@ -40,8 +40,15 @@
             
             <div>
                 <label for="service_item" class="block text-sm font-medium text-gray-700">Service Item</label>
-                <input type="text" name="service_item" id="service_item" value="{{ old('service_item') }}" 
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required>
+                <div class="mt-1 relative">
+                    <input type="text" name="service_item" id="service_item" value="{{ old('service_item') }}" 
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                        autocomplete="off" required>
+                    <div id="service-item-suggestions" class="absolute z-50 mt-1 w-full bg-white shadow-lg rounded-md overflow-hidden dark:bg-gray-700 hidden">
+                        <ul class="max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dark:bg-gray-700">
+                        </ul>
+                    </div>
+                </div>
                 @error('service_item')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -70,7 +77,7 @@
             
             <div>
                 <label for="performed" class="block text-sm font-medium text-gray-700">Performed</label>
-                <input type="checkbox" name="performed" id="performed" value="1" {{ old('performed') ? 'checked' : '' }} class="mt-1 rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                <input type="checkbox" name="performed" id="performed" value="1" {{ old('performed', true) ? 'checked' : '' }} class="mt-1 rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                 <span class="ml-2 text-sm text-gray-600">Mark as performed</span>
                 @error('performed')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -79,8 +86,8 @@
             
             <div>
                 <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
-                <input type="number" name="quantity" id="quantity" value="{{ old('quantity') }}" min="1"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" step="1"
+                <input type="number" name="quantity" id="quantity" value="{{ old('quantity', 1) }}" min="1"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" step="1">
                 @error('quantity')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -133,12 +140,12 @@
                 pathwayStepField.style.display = 'none';
                 // Clear pathway step selection
                 pathwayStepSelect.value = '';
-                // Make service item editable and required
+                // Make service item editable and required (autocomplete will still work)
                 serviceItemInput.readOnly = false;
                 serviceItemInput.required = true;
                 // Clear other fields
                 serviceCodeInput.value = '';
-                quantityInput.value = '';
+                quantityInput.value = '1'; // Set default quantity to 1
                 actualCostInput.value = '';
             } else {
                 // Show pathway step selection
@@ -148,7 +155,7 @@
                 serviceItemInput.required = false;
                 // Clear other fields
                 serviceCodeInput.value = '';
-                quantityInput.value = '';
+                quantityInput.value = '1'; // Set default quantity to 1
                 actualCostInput.value = '';
             }
         }
@@ -162,7 +169,7 @@
             if (selectedOption.value === '') {
                 serviceItemInput.value = '';
                 serviceCodeInput.value = '';
-                quantityInput.value = '';
+                quantityInput.value = customStepToggle.checked ? '1' : ''; // Set default to 1 if custom step
                 actualCostInput.value = '';
                 serviceItemInput.readOnly = !customStepToggle.checked; // Only readonly if not custom
                 serviceCodeInput.readOnly = !customStepToggle.checked; // Only readonly if not custom
@@ -174,7 +181,7 @@
                 
                 serviceItemInput.value = description || '';
                 serviceCodeInput.value = serviceCode || '';
-                quantityInput.value = quantity || 1;
+                quantityInput.value = quantity || '1';
                 actualCostInput.value = estimatedCost || 0;
                 
                 // Make fields editable after selecting a pathway step
@@ -190,6 +197,90 @@
         if (pathwayStepSelect.value !== '') {
             pathwayStepSelect.dispatchEvent(new Event('change'));
         }
+        
+        // Service Item autocomplete from Cost References
+        const serviceItemInput = document.getElementById('service_item');
+        const serviceCodeInput = document.getElementById('service_code');
+        const serviceItemSuggestions = document.getElementById('service-item-suggestions');
+        let serviceItemTimeout = null;
+        
+        serviceItemInput.addEventListener('input', function() {
+            const query = this.value;
+            
+            // Clear previous timeout
+            if (serviceItemTimeout) {
+                clearTimeout(serviceItemTimeout);
+            }
+            
+            // If query is empty, hide suggestions
+            if (!query || query.length < 2) {
+                serviceItemSuggestions.classList.add('hidden');
+                return;
+            }
+            
+            // Set new timeout for debouncing
+            serviceItemTimeout = setTimeout(function() {
+                fetch(`/cost-references/search?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Clear previous suggestions
+                        serviceItemSuggestions.querySelector('ul').innerHTML = '';
+                        
+                        // Add new suggestions
+                        if (data.length > 0) {
+                            data.forEach(item => {
+                                const li = document.createElement('li');
+                                li.className = 'cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-gray-100 dark:hover:bg-gray-600';
+                                li.innerHTML = `
+                                    <div class="flex items-center">
+                                        <span class="font-normal block truncate dark:text-white">${item.service_code} - ${item.service_description}</span>
+                                    </div>
+                                `;
+                                li.addEventListener('click', function() {
+                                    serviceItemInput.value = item.service_description;
+                                    serviceCodeInput.value = item.service_code;
+                                    serviceItemSuggestions.classList.add('hidden');
+                                });
+                                serviceItemSuggestions.querySelector('ul').appendChild(li);
+                            });
+                            serviceItemSuggestions.classList.remove('hidden');
+                        } else {
+                            serviceItemSuggestions.classList.add('hidden');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to fetch cost reference suggestions', err);
+                        serviceItemSuggestions.classList.add('hidden');
+                    });
+            }, 300); // 300ms debounce
+        });
+        
+        // Show initial suggestions when focusing the input
+        serviceItemInput.addEventListener('focus', function() {
+            if (this.value && this.value.length >= 2) {
+                serviceItemInput.dispatchEvent(new Event('input'));
+            }
+        });
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!serviceItemInput.contains(e.target) && !serviceItemSuggestions.contains(e.target)) {
+                serviceItemSuggestions.classList.add('hidden');
+            }
+        });
+        
+        // Hide suggestions on Escape key
+        serviceItemInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                serviceItemSuggestions.classList.add('hidden');
+                serviceItemInput.blur();
+            }
+        });
+        
+        // Slight delay on blur to allow click selection
+        serviceItemInput.addEventListener('blur', function() {
+            setTimeout(() => serviceItemSuggestions.classList.add('hidden'), 150);
+        });
     });
 </script>
 @endsection

@@ -57,13 +57,6 @@
             <span class="text-gray-500 dark:text-gray-400">{{ __('N/A') }}</span>
         @endif
     </td>
-    <td class="px-4 py-2 whitespace-nowrap text-sm" data-field="status" data-id="{{ $detail->id }}">
-        <select class="inline-edit-select" data-original-value="{{ $detail->status }}">
-            <option value="pending" {{ $detail->status === 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
-            <option value="completed" {{ $detail->status === 'completed' ? 'selected' : '' }}>{{ __('Completed') }}</option>
-            <option value="skipped" {{ $detail->status === 'skipped' ? 'selected' : '' }}>{{ __('Skipped') }}</option>
-        </select>
-    </td>
     <td class="px-4 py-2 whitespace-nowrap text-sm" data-field="performed" data-id="{{ $detail->id }}">
         <input type="checkbox" class="inline-edit-checkbox" {{ $detail->performed ? 'checked' : '' }} data-original-value="{{ $detail->performed ? '1' : '0' }}">
     </td>
@@ -83,6 +76,13 @@
             @endphp
             Rp{{ number_format($pathwayStandardCostTotal, 0, ',', '.') }}
         @endif
+    </td>
+    <td class="px-4 py-2 whitespace-nowrap text-sm" data-field="status" data-id="{{ $detail->id }}">
+        <select class="inline-edit-select" data-original-value="{{ $detail->status }}">
+            <option value="pending" {{ $detail->status === 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
+            <option value="completed" {{ $detail->status === 'completed' ? 'selected' : '' }}>{{ __('Completed') }}</option>
+            <option value="skipped" {{ $detail->status === 'skipped' ? 'selected' : '' }}>{{ __('Skipped') }}</option>
+        </select>
     </td>
 </tr>
 

@@ -27,7 +27,7 @@
                         </div>
                         
                         <div class="sm:col-span-3">
-                            <label for="patient_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Patient ID') }}</label>
+                            <label for="patient_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Patient Name') }}</label>
                             <div class="mt-1">
                                 <input type="text" id="patient_id" name="patient_id" value="{{ old('patient_id') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('patient_id') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             </div>

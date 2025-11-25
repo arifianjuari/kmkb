@@ -304,7 +304,7 @@ class PatientCaseController extends Controller
 
             DB::commit();
             
-            return redirect()->route('cases.index')
+            return redirect()->route('cases.show', $case)
                 ->with('success', 'Patient case created successfully.');
         } catch (\Exception $e) {
             DB::rollback();
