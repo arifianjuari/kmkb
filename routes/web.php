@@ -71,6 +71,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::post('pathways/{pathway}/version', [PathwayController::class, 'newVersion'])->name('pathways.version');
     Route::get('pathways/{pathway}/export-docx', [PathwayController::class, 'exportDocx'])->name('pathways.export-docx');
     Route::get('pathways/{pathway}/export-pdf', [PathwayController::class, 'exportPdf'])->name('pathways.export-pdf');
+    Route::post('pathways/{pathway}/recalculate-summary', [PathwayController::class, 'recalculateSummary'])->name('pathways.recalculate-summary');
     
     // Pathway Steps (nested under pathways)
     Route::prefix('pathways/{pathway}')->group(function () {
@@ -168,6 +169,23 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         // SIMRS Sync Routes
         Route::get('/sync', [App\Http\Controllers\SimrsSyncController::class, 'index'])->name('simrs.sync');
         Route::post('/sync/drugs', [App\Http\Controllers\SimrsSyncController::class, 'syncDrugs'])->name('simrs.sync.drugs');
+    });
+
+    // Service Volume (Current) placeholder routes
+    Route::prefix('service-volume-current')->group(function () {
+        Route::get('/master-barang', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'masterBarang'])->name('svc-current.master-barang');
+        Route::get('/tindakan-rawat-jalan', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'tindakanRawatJalan'])->name('svc-current.tindakan-rawat-jalan');
+        Route::get('/tindakan-rawat-jalan/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportTindakanRawatJalan'])->name('svc-current.tindakan-rawat-jalan.export');
+        Route::get('/tindakan-rawat-inap', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'tindakanRawatInap'])->name('svc-current.tindakan-rawat-inap');
+        Route::get('/tindakan-rawat-inap/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportTindakanRawatInap'])->name('svc-current.tindakan-rawat-inap.export');
+        Route::get('/laboratorium', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'laboratorium'])->name('svc-current.laboratorium');
+        Route::get('/laboratorium/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportLaboratorium'])->name('svc-current.laboratorium.export');
+        Route::get('/radiologi', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'radiologi'])->name('svc-current.radiologi');
+        Route::get('/radiologi/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportRadiologi'])->name('svc-current.radiologi.export');
+        Route::get('/operasi', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'operasi'])->name('svc-current.operasi');
+        Route::get('/operasi/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportOperasi'])->name('svc-current.operasi.export');
+        Route::get('/kamar', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'kamar'])->name('svc-current.kamar');
+        Route::get('/sync', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'sync'])->name('svc-current.sync');
     });
 
     // Audit Logs (admin only)

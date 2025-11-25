@@ -1,0 +1,1429 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
+class ServiceVolumeCurrentController extends Controller
+{
+    public function masterBarang()
+    {
+        return view('service-volume-current.master-barang');
+    }
+
+    public function tindakanRawatJalan(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedPoli = $request->input('poli');
+        $search = trim((string) $request->input('search'));
+
+        [$tindakanData, $grandTotals, $errorMessage] = $this->getTindakanRawatJalanAggregates(
+            $selectedYear,
+            $selectedPoli,
+            $search
+        );
+
+        $poliOptions = DB::connection('simrs')->select("
+            SELECT kd_poli, nm_poli
+            FROM poliklinik
+            ORDER BY nm_poli ASC
+        ");
+
+        return view('service-volume-current.tindakan-rawat-jalan', [
+            'year' => $selectedYear,
+            'poli' => $selectedPoli,
+            'search' => $search,
+            'tindakanData' => $tindakanData,
+            'grandTotals' => $grandTotals,
+            'poliOptions' => $poliOptions,
+            'availableYears' => $this->availableYears($currentYear),
+            'errorMessage' => $errorMessage,
+        ]);
+    }
+
+    public function exportTindakanRawatJalan(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedPoli = $request->input('poli');
+        $search = trim((string) $request->input('search'));
+
+        [$tindakanData, $grandTotals, $errorMessage] = $this->getTindakanRawatJalanAggregates(
+            $selectedYear,
+            $selectedPoli,
+            $search
+        );
+
+        if ($errorMessage) {
+            return redirect()->back()->withInput()->with('error', $errorMessage);
+        }
+
+        if (empty($tindakanData)) {
+            return redirect()->back()->withInput()->with('error', 'Tidak ada data untuk filter tersebut.');
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $header = [
+            'Tindakan Rawat Jalan',
+            'Harga (Rp)',
+            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
+            'Total Jumlah Tindakan',
+            'Total Pendapatan (Rp)',
+        ];
+
+        $sheet->fromArray($header, null, 'A1');
+
+        $rowIndex = 2;
+        foreach ($tindakanData as $row) {
+            $sheet->fromArray([
+                $row['nama'],
+                $row['harga'],
+                $row['jan'],
+                $row['feb'],
+                $row['mar'],
+                $row['apr'],
+                $row['may'],
+                $row['jun'],
+                $row['jul'],
+                $row['aug'],
+                $row['sep'],
+                $row['oct'],
+                $row['nov'],
+                $row['dec'],
+                $row['total_tindakan'],
+                $row['total_pendapatan'],
+            ], null, 'A' . $rowIndex);
+
+            $rowIndex++;
+        }
+
+        $sheet->fromArray([
+            'Grand Total',
+            null,
+            $grandTotals['jan'],
+            $grandTotals['feb'],
+            $grandTotals['mar'],
+            $grandTotals['apr'],
+            $grandTotals['may'],
+            $grandTotals['jun'],
+            $grandTotals['jul'],
+            $grandTotals['aug'],
+            $grandTotals['sep'],
+            $grandTotals['oct'],
+            $grandTotals['nov'],
+            $grandTotals['dec'],
+            $grandTotals['total_tindakan'],
+            $grandTotals['total_pendapatan'],
+        ], null, 'A' . $rowIndex);
+
+        foreach (range('A', 'P') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        foreach (['B', 'P'] as $currencyColumn) {
+            $sheet->getStyle($currencyColumn . '2:' . $currencyColumn . $rowIndex)
+                ->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        }
+
+        $fileName = 'service-volume-ralan-' . $selectedYear . '-' . now()->format('Ymd_His') . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    public function tindakanRawatInap(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedBangsal = array_filter((array) $request->input('bangsal', []));
+        $search = trim((string) $request->input('search'));
+
+        [$tindakanData, $grandTotals, $errorMessage] = $this->getTindakanRawatInapAggregates(
+            $selectedYear,
+            $selectedBangsal,
+            $search
+        );
+
+        $bangsalOptions = DB::connection('simrs')->select("
+            SELECT kd_bangsal, nm_bangsal
+            FROM bangsal
+            ORDER BY nm_bangsal ASC
+        ");
+
+        return view('service-volume-current.tindakan-rawat-inap', [
+            'year' => $selectedYear,
+            'bangsal' => $selectedBangsal,
+            'search' => $search,
+            'tindakanData' => $tindakanData,
+            'grandTotals' => $grandTotals,
+            'bangsalOptions' => $bangsalOptions,
+            'availableYears' => $this->availableYears($currentYear),
+            'errorMessage' => $errorMessage,
+        ]);
+    }
+
+    public function exportTindakanRawatInap(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedBangsal = array_filter((array) $request->input('bangsal', []));
+        $search = trim((string) $request->input('search'));
+
+        [$tindakanData, $grandTotals, $errorMessage] = $this->getTindakanRawatInapAggregates(
+            $selectedYear,
+            $selectedBangsal,
+            $search
+        );
+
+        if ($errorMessage) {
+            return redirect()->back()->withInput()->with('error', $errorMessage);
+        }
+
+        if (empty($tindakanData)) {
+            return redirect()->back()->withInput()->with('error', 'Tidak ada data untuk filter tersebut.');
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $header = [
+            'Tindakan Rawat Inap',
+            'Harga (Rp)',
+            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
+            'Total Jumlah Tindakan',
+            'Total Pendapatan (Rp)',
+        ];
+
+        $sheet->fromArray($header, null, 'A1');
+
+        $rowIndex = 2;
+        foreach ($tindakanData as $row) {
+            $sheet->fromArray([
+                $row['nama'],
+                $row['harga'],
+                $row['jan'],
+                $row['feb'],
+                $row['mar'],
+                $row['apr'],
+                $row['may'],
+                $row['jun'],
+                $row['jul'],
+                $row['aug'],
+                $row['sep'],
+                $row['oct'],
+                $row['nov'],
+                $row['dec'],
+                $row['total_tindakan'],
+                $row['total_pendapatan'],
+            ], null, 'A' . $rowIndex);
+
+            $rowIndex++;
+        }
+
+        $sheet->fromArray([
+            'Grand Total',
+            null,
+            $grandTotals['jan'],
+            $grandTotals['feb'],
+            $grandTotals['mar'],
+            $grandTotals['apr'],
+            $grandTotals['may'],
+            $grandTotals['jun'],
+            $grandTotals['jul'],
+            $grandTotals['aug'],
+            $grandTotals['sep'],
+            $grandTotals['oct'],
+            $grandTotals['nov'],
+            $grandTotals['dec'],
+            $grandTotals['total_tindakan'],
+            $grandTotals['total_pendapatan'],
+        ], null, 'A' . $rowIndex);
+
+        foreach (range('A', 'P') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        foreach (['B', 'P'] as $currencyColumn) {
+            $sheet->getStyle($currencyColumn . '2:' . $currencyColumn . $rowIndex)
+                ->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        }
+
+        $fileName = 'service-volume-ranap-' . $selectedYear . '-' . now()->format('Ymd_His') . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    public function operasi(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedStatus = $request->input('status');
+        if ($selectedStatus === 'all') {
+            $selectedStatus = null;
+        }
+        $selectedPoli = $request->input('poli');
+        $search = trim((string) $request->input('search'));
+
+        [$operasiData, $grandTotals, $errorMessage] = $this->getOperasiAggregates(
+            $selectedYear,
+            $selectedStatus,
+            $selectedPoli,
+            $search
+        );
+
+        $poliOptions = DB::connection('simrs')->select("
+            SELECT kd_poli, nm_poli
+            FROM poliklinik
+            ORDER BY nm_poli ASC
+        ");
+
+        return view('service-volume-current.operasi', [
+            'year' => $selectedYear,
+            'status' => $selectedStatus,
+            'poli' => $selectedPoli,
+            'search' => $search,
+            'operasiData' => $operasiData,
+            'grandTotals' => $grandTotals,
+            'poliOptions' => $poliOptions,
+            'availableYears' => $this->availableYears($currentYear),
+            'errorMessage' => $errorMessage,
+        ]);
+    }
+
+    public function exportOperasi(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedStatus = $request->input('status');
+        if ($selectedStatus === 'all') {
+            $selectedStatus = null;
+        }
+        $selectedPoli = $request->input('poli');
+        $search = trim((string) $request->input('search'));
+
+        [$operasiData, $grandTotals, $errorMessage] = $this->getOperasiAggregates(
+            $selectedYear,
+            $selectedStatus,
+            $selectedPoli,
+            $search
+        );
+
+        if ($errorMessage) {
+            return redirect()->back()->withInput()->with('error', $errorMessage);
+        }
+
+        if (empty($operasiData)) {
+            return redirect()->back()->withInput()->with('error', 'Tidak ada data untuk filter tersebut.');
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $header = [
+            'Tindakan Operasi',
+            'Harga (Rp)',
+            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
+            'Total Jumlah Operasi',
+            'Total Pendapatan (Rp)',
+        ];
+
+        $sheet->fromArray($header, null, 'A1');
+
+        $rowIndex = 2;
+        foreach ($operasiData as $row) {
+            $sheet->fromArray([
+                $row['nama'],
+                $row['harga'],
+                $row['jan'],
+                $row['feb'],
+                $row['mar'],
+                $row['apr'],
+                $row['may'],
+                $row['jun'],
+                $row['jul'],
+                $row['aug'],
+                $row['sep'],
+                $row['oct'],
+                $row['nov'],
+                $row['dec'],
+                $row['total_tindakan'],
+                $row['total_pendapatan'],
+            ], null, 'A' . $rowIndex);
+
+            $rowIndex++;
+        }
+
+        $sheet->fromArray([
+            'Grand Total',
+            null,
+            $grandTotals['jan'],
+            $grandTotals['feb'],
+            $grandTotals['mar'],
+            $grandTotals['apr'],
+            $grandTotals['may'],
+            $grandTotals['jun'],
+            $grandTotals['jul'],
+            $grandTotals['aug'],
+            $grandTotals['sep'],
+            $grandTotals['oct'],
+            $grandTotals['nov'],
+            $grandTotals['dec'],
+            $grandTotals['total_tindakan'],
+            $grandTotals['total_pendapatan'],
+        ], null, 'A' . $rowIndex);
+
+        foreach (range('A', 'P') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        foreach (['B', 'P'] as $currencyColumn) {
+            $sheet->getStyle($currencyColumn . '2:' . $currencyColumn . $rowIndex)
+                ->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        }
+
+        $fileName = 'service-volume-operasi-' . $selectedYear . '-' . now()->format('Ymd_His') . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    public function laboratorium(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedStatus = $request->input('status');
+        if ($selectedStatus === 'all') {
+            $selectedStatus = null;
+        }
+        $selectedPoli = $request->input('poli');
+        $search = trim((string) $request->input('search'));
+
+        [$laboratoriumData, $grandTotals, $errorMessage] = $this->getLaboratoriumAggregates(
+            $selectedYear,
+            $selectedStatus,
+            $selectedPoli,
+            $search
+        );
+
+        $poliOptions = DB::connection('simrs')->select("
+            SELECT kd_poli, nm_poli
+            FROM poliklinik
+            ORDER BY nm_poli ASC
+        ");
+
+        return view('service-volume-current.laboratorium', [
+            'year' => $selectedYear,
+            'status' => $selectedStatus,
+            'poli' => $selectedPoli,
+            'search' => $search,
+            'laboratoriumData' => $laboratoriumData,
+            'grandTotals' => $grandTotals,
+            'poliOptions' => $poliOptions,
+            'availableYears' => $this->availableYears($currentYear),
+            'errorMessage' => $errorMessage,
+        ]);
+    }
+
+    public function exportLaboratorium(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedStatus = $request->input('status');
+        if ($selectedStatus === 'all') {
+            $selectedStatus = null;
+        }
+        $selectedPoli = $request->input('poli');
+        $search = trim((string) $request->input('search'));
+
+        [$laboratoriumData, $grandTotals, $errorMessage] = $this->getLaboratoriumAggregates(
+            $selectedYear,
+            $selectedStatus,
+            $selectedPoli,
+            $search
+        );
+
+        if ($errorMessage) {
+            return redirect()->back()->withInput()->with('error', $errorMessage);
+        }
+
+        if (empty($laboratoriumData)) {
+            return redirect()->back()->withInput()->with('error', 'Tidak ada data untuk filter tersebut.');
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $header = [
+            'Tindakan Laboratorium',
+            'Harga (Rp)',
+            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
+            'Total Jumlah Pemeriksaan',
+            'Total Pendapatan (Rp)',
+        ];
+
+        $sheet->fromArray($header, null, 'A1');
+
+        $rowIndex = 2;
+        foreach ($laboratoriumData as $row) {
+            $sheet->fromArray([
+                $row['nama'],
+                $row['harga'],
+                $row['jan'],
+                $row['feb'],
+                $row['mar'],
+                $row['apr'],
+                $row['may'],
+                $row['jun'],
+                $row['jul'],
+                $row['aug'],
+                $row['sep'],
+                $row['oct'],
+                $row['nov'],
+                $row['dec'],
+                $row['total_tindakan'],
+                $row['total_pendapatan'],
+            ], null, 'A' . $rowIndex);
+
+            $rowIndex++;
+        }
+
+        $sheet->fromArray([
+            'Grand Total',
+            null,
+            $grandTotals['jan'],
+            $grandTotals['feb'],
+            $grandTotals['mar'],
+            $grandTotals['apr'],
+            $grandTotals['may'],
+            $grandTotals['jun'],
+            $grandTotals['jul'],
+            $grandTotals['aug'],
+            $grandTotals['sep'],
+            $grandTotals['oct'],
+            $grandTotals['nov'],
+            $grandTotals['dec'],
+            $grandTotals['total_tindakan'],
+            $grandTotals['total_pendapatan'],
+        ], null, 'A' . $rowIndex);
+
+        foreach (range('A', 'P') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        foreach (['B', 'P'] as $currencyColumn) {
+            $sheet->getStyle($currencyColumn . '2:' . $currencyColumn . $rowIndex)
+                ->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        }
+
+        $fileName = 'service-volume-laboratorium-' . $selectedYear . '-' . now()->format('Ymd_His') . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    public function radiologi(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedStatus = $request->input('status');
+        if ($selectedStatus === 'all') {
+            $selectedStatus = null;
+        }
+        $selectedPoli = $request->input('poli');
+        $search = trim((string) $request->input('search'));
+
+        [$radiologiData, $grandTotals, $errorMessage] = $this->getRadiologiAggregates(
+            $selectedYear,
+            $selectedStatus,
+            $selectedPoli,
+            $search
+        );
+
+        $poliOptions = DB::connection('simrs')->select("
+            SELECT kd_poli, nm_poli
+            FROM poliklinik
+            ORDER BY nm_poli ASC
+        ");
+
+        return view('service-volume-current.radiologi', [
+            'year' => $selectedYear,
+            'status' => $selectedStatus,
+            'poli' => $selectedPoli,
+            'search' => $search,
+            'radiologiData' => $radiologiData,
+            'grandTotals' => $grandTotals,
+            'poliOptions' => $poliOptions,
+            'availableYears' => $this->availableYears($currentYear),
+            'errorMessage' => $errorMessage,
+        ]);
+    }
+
+    public function exportRadiologi(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedStatus = $request->input('status');
+        if ($selectedStatus === 'all') {
+            $selectedStatus = null;
+        }
+        $selectedPoli = $request->input('poli');
+        $search = trim((string) $request->input('search'));
+
+        [$radiologiData, $grandTotals, $errorMessage] = $this->getRadiologiAggregates(
+            $selectedYear,
+            $selectedStatus,
+            $selectedPoli,
+            $search
+        );
+
+        if ($errorMessage) {
+            return redirect()->back()->withInput()->with('error', $errorMessage);
+        }
+
+        if (empty($radiologiData)) {
+            return redirect()->back()->withInput()->with('error', 'Tidak ada data untuk filter tersebut.');
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $header = [
+            'Tindakan Radiologi',
+            'Harga (Rp)',
+            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
+            'Total Jumlah Pemeriksaan',
+            'Total Pendapatan (Rp)',
+        ];
+
+        $sheet->fromArray($header, null, 'A1');
+
+        $rowIndex = 2;
+        foreach ($radiologiData as $row) {
+            $sheet->fromArray([
+                $row['nama'],
+                $row['harga'],
+                $row['jan'],
+                $row['feb'],
+                $row['mar'],
+                $row['apr'],
+                $row['may'],
+                $row['jun'],
+                $row['jul'],
+                $row['aug'],
+                $row['sep'],
+                $row['oct'],
+                $row['nov'],
+                $row['dec'],
+                $row['total_tindakan'],
+                $row['total_pendapatan'],
+            ], null, 'A' . $rowIndex);
+
+            $rowIndex++;
+        }
+
+        $sheet->fromArray([
+            'Grand Total',
+            null,
+            $grandTotals['jan'],
+            $grandTotals['feb'],
+            $grandTotals['mar'],
+            $grandTotals['apr'],
+            $grandTotals['may'],
+            $grandTotals['jun'],
+            $grandTotals['jul'],
+            $grandTotals['aug'],
+            $grandTotals['sep'],
+            $grandTotals['oct'],
+            $grandTotals['nov'],
+            $grandTotals['dec'],
+            $grandTotals['total_tindakan'],
+            $grandTotals['total_pendapatan'],
+        ], null, 'A' . $rowIndex);
+
+        foreach (range('A', 'P') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        foreach (['B', 'P'] as $currencyColumn) {
+            $sheet->getStyle($currencyColumn . '2:' . $currencyColumn . $rowIndex)
+                ->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        }
+
+        $fileName = 'service-volume-radiologi-' . $selectedYear . '-' . now()->format('Ymd_His') . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    public function kamar()
+    {
+        return view('service-volume-current.kamar');
+    }
+
+    public function sync()
+    {
+        return view('service-volume-current.sync');
+    }
+
+    private function getTindakanRawatInapAggregates(int $selectedYear, array $selectedBangsal, string $search): array
+    {
+        $tindakanData = [];
+        $errorMessage = null;
+        $grandTotals = [
+            'jan' => 0,
+            'feb' => 0,
+            'mar' => 0,
+            'apr' => 0,
+            'may' => 0,
+            'jun' => 0,
+            'jul' => 0,
+            'aug' => 0,
+            'sep' => 0,
+            'oct' => 0,
+            'nov' => 0,
+            'dec' => 0,
+            'total_tindakan' => 0,
+            'total_pendapatan' => 0,
+        ];
+
+        try {
+            $bindings = [$selectedYear];
+
+            $sql = "
+                SELECT
+                    tu.kd_jenis_prw AS kode_tindakan,
+                    tu.nm_perawatan AS nama_tindakan,
+                    tu.tarif_master AS harga,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 1 THEN 1 ELSE 0 END) AS jan,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 2 THEN 1 ELSE 0 END) AS feb,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 3 THEN 1 ELSE 0 END) AS mar,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 4 THEN 1 ELSE 0 END) AS apr,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 5 THEN 1 ELSE 0 END) AS may,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 6 THEN 1 ELSE 0 END) AS jun,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 7 THEN 1 ELSE 0 END) AS jul,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 8 THEN 1 ELSE 0 END) AS aug,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 9 THEN 1 ELSE 0 END) AS sep,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 10 THEN 1 ELSE 0 END) AS oct,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 11 THEN 1 ELSE 0 END) AS nov,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 12 THEN 1 ELSE 0 END) AS `dec`,
+                    SUM(tu.jumlah) AS total_tindakan,
+                    SUM(tu.biaya_rawat) AS total_pendapatan
+                FROM (
+                    SELECT
+                        rid.no_rawat,
+                        rid.tgl_perawatan,
+                        rid.kd_jenis_prw,
+                        jpi.nm_perawatan,
+                        jpi.total_byrdrpr AS tarif_master,
+                        1 AS jumlah,
+                        rid.biaya_rawat
+                    FROM rawat_inap_dr rid
+                    INNER JOIN jns_perawatan_inap jpi ON jpi.kd_jenis_prw = rid.kd_jenis_prw
+
+                    UNION ALL
+
+                    SELECT
+                        rip.no_rawat,
+                        rip.tgl_perawatan,
+                        rip.kd_jenis_prw,
+                        jpi.nm_perawatan,
+                        jpi.total_byrdrpr AS tarif_master,
+                        1 AS jumlah,
+                        rip.biaya_rawat
+                    FROM rawat_inap_pr rip
+                    INNER JOIN jns_perawatan_inap jpi ON jpi.kd_jenis_prw = rip.kd_jenis_prw
+
+                    UNION ALL
+
+                    SELECT
+                        ridp.no_rawat,
+                        ridp.tgl_perawatan,
+                        ridp.kd_jenis_prw,
+                        jpi.nm_perawatan,
+                        jpi.total_byrdrpr AS tarif_master,
+                        1 AS jumlah,
+                        ridp.biaya_rawat
+                    FROM rawat_inap_drpr ridp
+                    INNER JOIN jns_perawatan_inap jpi ON jpi.kd_jenis_prw = ridp.kd_jenis_prw
+                ) AS tu
+                LEFT JOIN kamar_inap ran ON ran.no_rawat = tu.no_rawat
+                    AND DATE(tu.tgl_perawatan) BETWEEN ran.tgl_masuk AND COALESCE(ran.tgl_keluar, '9999-12-31')
+                LEFT JOIN kamar k ON k.kd_kamar = ran.kd_kamar
+                LEFT JOIN bangsal b ON b.kd_bangsal = k.kd_bangsal
+                WHERE YEAR(tu.tgl_perawatan) = ?
+            ";
+
+            if (!empty($selectedBangsal)) {
+                $placeholders = implode(',', array_fill(0, count($selectedBangsal), '?'));
+                $sql .= " AND b.kd_bangsal IN ($placeholders) ";
+                $bindings = array_merge($bindings, $selectedBangsal);
+            }
+
+            if ($search !== '') {
+                $sql .= " AND tu.nm_perawatan LIKE ? ";
+                $bindings[] = '%' . $search . '%';
+            }
+
+            $sql .= "
+                GROUP BY tu.kd_jenis_prw, tu.nm_perawatan, tu.tarif_master
+                ORDER BY tu.nm_perawatan ASC
+            ";
+
+            $rows = DB::connection('simrs')->select($sql, $bindings);
+
+            foreach ($rows as $row) {
+                $tindakanData[] = [
+                    'kode' => $row->kode_tindakan,
+                    'nama' => $row->nama_tindakan,
+                    'harga' => (float) $row->harga,
+                    'jan' => (int) $row->jan,
+                    'feb' => (int) $row->feb,
+                    'mar' => (int) $row->mar,
+                    'apr' => (int) $row->apr,
+                    'may' => (int) $row->may,
+                    'jun' => (int) $row->jun,
+                    'jul' => (int) $row->jul,
+                    'aug' => (int) $row->aug,
+                    'sep' => (int) $row->sep,
+                    'oct' => (int) $row->oct,
+                    'nov' => (int) $row->nov,
+                    'dec' => (int) $row->dec,
+                    'total_tindakan' => (int) $row->total_tindakan,
+                    'total_pendapatan' => (float) $row->total_pendapatan,
+                ];
+
+                $grandTotals['jan'] += (int) $row->jan;
+                $grandTotals['feb'] += (int) $row->feb;
+                $grandTotals['mar'] += (int) $row->mar;
+                $grandTotals['apr'] += (int) $row->apr;
+                $grandTotals['may'] += (int) $row->may;
+                $grandTotals['jun'] += (int) $row->jun;
+                $grandTotals['jul'] += (int) $row->jul;
+                $grandTotals['aug'] += (int) $row->aug;
+                $grandTotals['sep'] += (int) $row->sep;
+                $grandTotals['oct'] += (int) $row->oct;
+                $grandTotals['nov'] += (int) $row->nov;
+                $grandTotals['dec'] += (int) $row->dec;
+                $grandTotals['total_tindakan'] += (int) $row->total_tindakan;
+                $grandTotals['total_pendapatan'] += (float) $row->total_pendapatan;
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Failed to load tindakan rawat inap volume', [
+                'year' => $selectedYear,
+                'bangsal' => $selectedBangsal,
+                'search' => $search,
+                'message' => $exception->getMessage(),
+            ]);
+            $errorMessage = 'Gagal memuat data dari SIMRS. Silakan coba lagi atau hubungi administrator.';
+        }
+
+        return [$tindakanData, $grandTotals, $errorMessage];
+    }
+
+    private function getLaboratoriumAggregates(int $selectedYear, ?string $selectedStatus, ?string $selectedPoli, string $search): array
+    {
+        $laboratoriumData = [];
+        $errorMessage = null;
+        $grandTotals = [
+            'jan' => 0,
+            'feb' => 0,
+            'mar' => 0,
+            'apr' => 0,
+            'may' => 0,
+            'jun' => 0,
+            'jul' => 0,
+            'aug' => 0,
+            'sep' => 0,
+            'oct' => 0,
+            'nov' => 0,
+            'dec' => 0,
+            'total_tindakan' => 0,
+            'total_pendapatan' => 0,
+        ];
+
+        try {
+            $bindings = [$selectedYear];
+
+            $sql = "
+                SELECT
+                    jpl.kd_jenis_prw,
+                    jpl.nm_perawatan,
+                    jpl.total_byr AS harga,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 1 THEN 1 ELSE 0 END) AS jan,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 2 THEN 1 ELSE 0 END) AS feb,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 3 THEN 1 ELSE 0 END) AS mar,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 4 THEN 1 ELSE 0 END) AS apr,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 5 THEN 1 ELSE 0 END) AS may,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 6 THEN 1 ELSE 0 END) AS jun,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 7 THEN 1 ELSE 0 END) AS jul,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 8 THEN 1 ELSE 0 END) AS aug,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 9 THEN 1 ELSE 0 END) AS sep,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 10 THEN 1 ELSE 0 END) AS oct,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 11 THEN 1 ELSE 0 END) AS nov,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 12 THEN 1 ELSE 0 END) AS `dec`,
+                    COUNT(*) AS total_tindakan,
+                    SUM(pl.biaya) AS total_pendapatan
+                FROM periksa_lab pl
+                INNER JOIN jns_perawatan_lab jpl ON jpl.kd_jenis_prw = pl.kd_jenis_prw
+                LEFT JOIN reg_periksa reg ON reg.no_rawat = pl.no_rawat
+                WHERE YEAR(pl.tgl_periksa) = ?
+            ";
+
+            if ($selectedStatus) {
+                $sql .= " AND pl.status = ? ";
+                $bindings[] = $selectedStatus;
+            }
+
+            if ($selectedPoli) {
+                $sql .= " AND reg.kd_poli = ? ";
+                $bindings[] = $selectedPoli;
+            }
+
+            if ($search !== '') {
+                $sql .= " AND jpl.nm_perawatan LIKE ? ";
+                $bindings[] = '%' . $search . '%';
+            }
+
+            $sql .= "
+                GROUP BY jpl.kd_jenis_prw, jpl.nm_perawatan, jpl.total_byr
+                ORDER BY jpl.nm_perawatan ASC
+            ";
+
+            $rows = DB::connection('simrs')->select($sql, $bindings);
+
+            foreach ($rows as $row) {
+                $laboratoriumData[] = [
+                    'kode' => $row->kd_jenis_prw,
+                    'nama' => $row->nm_perawatan,
+                    'harga' => (float) $row->harga,
+                    'jan' => (int) $row->jan,
+                    'feb' => (int) $row->feb,
+                    'mar' => (int) $row->mar,
+                    'apr' => (int) $row->apr,
+                    'may' => (int) $row->may,
+                    'jun' => (int) $row->jun,
+                    'jul' => (int) $row->jul,
+                    'aug' => (int) $row->aug,
+                    'sep' => (int) $row->sep,
+                    'oct' => (int) $row->oct,
+                    'nov' => (int) $row->nov,
+                    'dec' => (int) $row->dec,
+                    'total_tindakan' => (int) $row->total_tindakan,
+                    'total_pendapatan' => (float) $row->total_pendapatan,
+                ];
+
+                $grandTotals['jan'] += (int) $row->jan;
+                $grandTotals['feb'] += (int) $row->feb;
+                $grandTotals['mar'] += (int) $row->mar;
+                $grandTotals['apr'] += (int) $row->apr;
+                $grandTotals['may'] += (int) $row->may;
+                $grandTotals['jun'] += (int) $row->jun;
+                $grandTotals['jul'] += (int) $row->jul;
+                $grandTotals['aug'] += (int) $row->aug;
+                $grandTotals['sep'] += (int) $row->sep;
+                $grandTotals['oct'] += (int) $row->oct;
+                $grandTotals['nov'] += (int) $row->nov;
+                $grandTotals['dec'] += (int) $row->dec;
+                $grandTotals['total_tindakan'] += (int) $row->total_tindakan;
+                $grandTotals['total_pendapatan'] += (float) $row->total_pendapatan;
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Failed to load laboratorium volume', [
+                'year' => $selectedYear,
+                'status' => $selectedStatus,
+                'poli' => $selectedPoli,
+                'search' => $search,
+                'message' => $exception->getMessage(),
+            ]);
+            $errorMessage = 'Gagal memuat data laboratorium dari SIMRS. Silakan coba lagi atau hubungi administrator.';
+        }
+
+        return [$laboratoriumData, $grandTotals, $errorMessage];
+    }
+
+    private function getRadiologiAggregates(int $selectedYear, ?string $selectedStatus, ?string $selectedPoli, string $search): array
+    {
+        $radiologiData = [];
+        $errorMessage = null;
+        $grandTotals = [
+            'jan' => 0,
+            'feb' => 0,
+            'mar' => 0,
+            'apr' => 0,
+            'may' => 0,
+            'jun' => 0,
+            'jul' => 0,
+            'aug' => 0,
+            'sep' => 0,
+            'oct' => 0,
+            'nov' => 0,
+            'dec' => 0,
+            'total_tindakan' => 0,
+            'total_pendapatan' => 0,
+        ];
+
+        try {
+            $bindings = [$selectedYear];
+
+            $sql = "
+                SELECT
+                    jpr.kd_jenis_prw,
+                    jpr.nm_perawatan,
+                    jpr.total_byr AS harga,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 1 THEN 1 ELSE 0 END) AS jan,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 2 THEN 1 ELSE 0 END) AS feb,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 3 THEN 1 ELSE 0 END) AS mar,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 4 THEN 1 ELSE 0 END) AS apr,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 5 THEN 1 ELSE 0 END) AS may,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 6 THEN 1 ELSE 0 END) AS jun,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 7 THEN 1 ELSE 0 END) AS jul,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 8 THEN 1 ELSE 0 END) AS aug,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 9 THEN 1 ELSE 0 END) AS sep,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 10 THEN 1 ELSE 0 END) AS oct,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 11 THEN 1 ELSE 0 END) AS nov,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 12 THEN 1 ELSE 0 END) AS `dec`,
+                    COUNT(*) AS total_tindakan,
+                    SUM(pr.biaya) AS total_pendapatan
+                FROM periksa_radiologi pr
+                INNER JOIN jns_perawatan_radiologi jpr ON jpr.kd_jenis_prw = pr.kd_jenis_prw
+                LEFT JOIN reg_periksa reg ON reg.no_rawat = pr.no_rawat
+                WHERE YEAR(pr.tgl_periksa) = ?
+            ";
+
+            if ($selectedStatus) {
+                $sql .= " AND pr.status = ? ";
+                $bindings[] = $selectedStatus;
+            }
+
+            if ($selectedPoli) {
+                $sql .= " AND reg.kd_poli = ? ";
+                $bindings[] = $selectedPoli;
+            }
+
+            if ($search !== '') {
+                $sql .= " AND jpr.nm_perawatan LIKE ? ";
+                $bindings[] = '%' . $search . '%';
+            }
+
+            $sql .= "
+                GROUP BY jpr.kd_jenis_prw, jpr.nm_perawatan, jpr.total_byr
+                ORDER BY jpr.nm_perawatan ASC
+            ";
+
+            $rows = DB::connection('simrs')->select($sql, $bindings);
+
+            foreach ($rows as $row) {
+                $radiologiData[] = [
+                    'kode' => $row->kd_jenis_prw,
+                    'nama' => $row->nm_perawatan,
+                    'harga' => (float) $row->harga,
+                    'jan' => (int) $row->jan,
+                    'feb' => (int) $row->feb,
+                    'mar' => (int) $row->mar,
+                    'apr' => (int) $row->apr,
+                    'may' => (int) $row->may,
+                    'jun' => (int) $row->jun,
+                    'jul' => (int) $row->jul,
+                    'aug' => (int) $row->aug,
+                    'sep' => (int) $row->sep,
+                    'oct' => (int) $row->oct,
+                    'nov' => (int) $row->nov,
+                    'dec' => (int) $row->dec,
+                    'total_tindakan' => (int) $row->total_tindakan,
+                    'total_pendapatan' => (float) $row->total_pendapatan,
+                ];
+
+                $grandTotals['jan'] += (int) $row->jan;
+                $grandTotals['feb'] += (int) $row->feb;
+                $grandTotals['mar'] += (int) $row->mar;
+                $grandTotals['apr'] += (int) $row->apr;
+                $grandTotals['may'] += (int) $row->may;
+                $grandTotals['jun'] += (int) $row->jun;
+                $grandTotals['jul'] += (int) $row->jul;
+                $grandTotals['aug'] += (int) $row->aug;
+                $grandTotals['sep'] += (int) $row->sep;
+                $grandTotals['oct'] += (int) $row->oct;
+                $grandTotals['nov'] += (int) $row->nov;
+                $grandTotals['dec'] += (int) $row->dec;
+                $grandTotals['total_tindakan'] += (int) $row->total_tindakan;
+                $grandTotals['total_pendapatan'] += (float) $row->total_pendapatan;
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Failed to load radiologi volume', [
+                'year' => $selectedYear,
+                'status' => $selectedStatus,
+                'poli' => $selectedPoli,
+                'search' => $search,
+                'message' => $exception->getMessage(),
+            ]);
+            $errorMessage = 'Gagal memuat data radiologi dari SIMRS. Silakan coba lagi atau hubungi administrator.';
+        }
+
+        return [$radiologiData, $grandTotals, $errorMessage];
+    }
+
+    private function getOperasiAggregates(int $selectedYear, ?string $selectedStatus, ?string $selectedPoli, string $search): array
+    {
+        $operasiData = [];
+        $errorMessage = null;
+        $grandTotals = [
+            'jan' => 0,
+            'feb' => 0,
+            'mar' => 0,
+            'apr' => 0,
+            'may' => 0,
+            'jun' => 0,
+            'jul' => 0,
+            'aug' => 0,
+            'sep' => 0,
+            'oct' => 0,
+            'nov' => 0,
+            'dec' => 0,
+            'total_tindakan' => 0,
+            'total_pendapatan' => 0,
+        ];
+
+        try {
+            $bindings = [$selectedYear];
+
+            $tarifExpression = "
+                COALESCE(po.operator1, 0) +
+                COALESCE(po.operator2, 0) +
+                COALESCE(po.operator3, 0) +
+                COALESCE(po.asisten_operator1, 0) +
+                COALESCE(po.asisten_operator2, 0) +
+                COALESCE(po.asisten_operator3, 0) +
+                COALESCE(po.instrumen, 0) +
+                COALESCE(po.dokter_anak, 0) +
+                COALESCE(po.dokter_anestesi, 0) +
+                COALESCE(po.asisten_anestesi, 0) +
+                COALESCE(po.asisten_anestesi2, 0) +
+                COALESCE(po.perawat_luar, 0) +
+                COALESCE(po.bagian_rs, 0) +
+                COALESCE(po.omloop, 0) +
+                COALESCE(po.omloop4, 0) +
+                COALESCE(po.omloop5, 0)
+            ";
+
+            $biayaExpression = "
+                COALESCE(o.biayaoperator1, 0) +
+                COALESCE(o.biayaoperator2, 0) +
+                COALESCE(o.biayaoperator3, 0) +
+                COALESCE(o.biayaasisten_operator1, 0) +
+                COALESCE(o.biayaasisten_operator2, 0) +
+                COALESCE(o.biayaasisten_operator3, 0) +
+                COALESCE(o.biayainstrumen, 0) +
+                COALESCE(o.biayadokter_anak, 0) +
+                COALESCE(o.biayaperawaat_resusitas, 0) +
+                COALESCE(o.biayadokter_anestesi, 0) +
+                COALESCE(o.biayaasisten_anestesi, 0) +
+                COALESCE(o.biayaasisten_anestesi2, 0) +
+                COALESCE(o.biayabidan, 0) +
+                COALESCE(o.biayabidan2, 0) +
+                COALESCE(o.biayabidan3, 0) +
+                COALESCE(o.biayaperawat_luar, 0) +
+                COALESCE(o.biayaalat, 0) +
+                COALESCE(o.biayasewaok, 0) +
+                COALESCE(o.akomodasi, 0) +
+                COALESCE(o.bagian_rs, 0) +
+                COALESCE(o.biaya_omloop, 0) +
+                COALESCE(o.biaya_omloop2, 0) +
+                COALESCE(o.biaya_omloop3, 0) +
+                COALESCE(o.biaya_omloop4, 0) +
+                COALESCE(o.biaya_omloop5, 0) +
+                COALESCE(o.biayasarpras, 0) +
+                COALESCE(o.biaya_dokter_pjanak, 0) +
+                COALESCE(o.biaya_dokter_umum, 0)
+            ";
+
+            $sql = "
+                SELECT
+                    opu.kode_paket,
+                    opu.nama_operasi,
+                    opu.tarif_master AS harga,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 1 THEN opu.jumlah ELSE 0 END) AS jan,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 2 THEN opu.jumlah ELSE 0 END) AS feb,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 3 THEN opu.jumlah ELSE 0 END) AS mar,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 4 THEN opu.jumlah ELSE 0 END) AS apr,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 5 THEN opu.jumlah ELSE 0 END) AS may,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 6 THEN opu.jumlah ELSE 0 END) AS jun,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 7 THEN opu.jumlah ELSE 0 END) AS jul,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 8 THEN opu.jumlah ELSE 0 END) AS aug,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 9 THEN opu.jumlah ELSE 0 END) AS sep,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 10 THEN opu.jumlah ELSE 0 END) AS oct,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 11 THEN opu.jumlah ELSE 0 END) AS nov,
+                    SUM(CASE WHEN MONTH(opu.tgl_operasi) = 12 THEN opu.jumlah ELSE 0 END) AS `dec`,
+                    SUM(opu.jumlah) AS total_tindakan,
+                    SUM(opu.total_biaya) AS total_pendapatan
+                FROM (
+                    SELECT
+                        o.kode_paket,
+                        COALESCE(po.nm_perawatan, CONCAT('Paket ', o.kode_paket)) AS nama_operasi,
+                        {$tarifExpression} AS tarif_master,
+                        o.tgl_operasi,
+                        o.status,
+                        reg.kd_poli,
+                        1 AS jumlah,
+                        {$biayaExpression} AS total_biaya
+                    FROM operasi o
+                    LEFT JOIN paket_operasi po ON po.kode_paket = o.kode_paket
+                    LEFT JOIN reg_periksa reg ON reg.no_rawat = o.no_rawat
+                ) AS opu
+                WHERE YEAR(opu.tgl_operasi) = ?
+            ";
+
+            if ($selectedStatus) {
+                $sql .= " AND opu.status = ? ";
+                $bindings[] = $selectedStatus;
+            }
+
+            if ($selectedPoli) {
+                $sql .= " AND opu.kd_poli = ? ";
+                $bindings[] = $selectedPoli;
+            }
+
+            if ($search !== '') {
+                $sql .= " AND opu.nama_operasi LIKE ? ";
+                $bindings[] = '%' . $search . '%';
+            }
+
+            $sql .= "
+                GROUP BY opu.kode_paket, opu.nama_operasi, opu.tarif_master
+                ORDER BY opu.nama_operasi ASC
+            ";
+
+            $rows = DB::connection('simrs')->select($sql, $bindings);
+
+            foreach ($rows as $row) {
+                $operasiData[] = [
+                    'kode' => $row->kode_paket,
+                    'nama' => $row->nama_operasi,
+                    'harga' => (float) $row->harga,
+                    'jan' => (int) $row->jan,
+                    'feb' => (int) $row->feb,
+                    'mar' => (int) $row->mar,
+                    'apr' => (int) $row->apr,
+                    'may' => (int) $row->may,
+                    'jun' => (int) $row->jun,
+                    'jul' => (int) $row->jul,
+                    'aug' => (int) $row->aug,
+                    'sep' => (int) $row->sep,
+                    'oct' => (int) $row->oct,
+                    'nov' => (int) $row->nov,
+                    'dec' => (int) $row->dec,
+                    'total_tindakan' => (int) $row->total_tindakan,
+                    'total_pendapatan' => (float) $row->total_pendapatan,
+                ];
+
+                $grandTotals['jan'] += (int) $row->jan;
+                $grandTotals['feb'] += (int) $row->feb;
+                $grandTotals['mar'] += (int) $row->mar;
+                $grandTotals['apr'] += (int) $row->apr;
+                $grandTotals['may'] += (int) $row->may;
+                $grandTotals['jun'] += (int) $row->jun;
+                $grandTotals['jul'] += (int) $row->jul;
+                $grandTotals['aug'] += (int) $row->aug;
+                $grandTotals['sep'] += (int) $row->sep;
+                $grandTotals['oct'] += (int) $row->oct;
+                $grandTotals['nov'] += (int) $row->nov;
+                $grandTotals['dec'] += (int) $row->dec;
+                $grandTotals['total_tindakan'] += (int) $row->total_tindakan;
+                $grandTotals['total_pendapatan'] += (float) $row->total_pendapatan;
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Failed to load operasi volume', [
+                'year' => $selectedYear,
+                'status' => $selectedStatus,
+                'poli' => $selectedPoli,
+                'search' => $search,
+                'message' => $exception->getMessage(),
+            ]);
+            $errorMessage = 'Gagal memuat data operasi dari SIMRS. Silakan coba lagi atau hubungi administrator.';
+        }
+
+        return [$operasiData, $grandTotals, $errorMessage];
+    }
+    private function getTindakanRawatJalanAggregates(int $selectedYear, ?string $selectedPoli, string $search): array
+    {
+        $tindakanData = [];
+        $errorMessage = null;
+        $grandTotals = [
+            'jan' => 0,
+            'feb' => 0,
+            'mar' => 0,
+            'apr' => 0,
+            'may' => 0,
+            'jun' => 0,
+            'jul' => 0,
+            'aug' => 0,
+            'sep' => 0,
+            'oct' => 0,
+            'nov' => 0,
+            'dec' => 0,
+            'total_tindakan' => 0,
+            'total_pendapatan' => 0,
+        ];
+
+        try {
+            $bindings = [$selectedYear];
+
+            $sql = "
+                SELECT
+                    tu.kd_jenis_prw AS kode_tindakan,
+                    tu.nm_perawatan AS nama_tindakan,
+                    tu.tarif_master AS harga,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 1 THEN 1 ELSE 0 END) AS jan,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 2 THEN 1 ELSE 0 END) AS feb,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 3 THEN 1 ELSE 0 END) AS mar,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 4 THEN 1 ELSE 0 END) AS apr,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 5 THEN 1 ELSE 0 END) AS may,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 6 THEN 1 ELSE 0 END) AS jun,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 7 THEN 1 ELSE 0 END) AS jul,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 8 THEN 1 ELSE 0 END) AS aug,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 9 THEN 1 ELSE 0 END) AS sep,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 10 THEN 1 ELSE 0 END) AS oct,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 11 THEN 1 ELSE 0 END) AS nov,
+                    SUM(CASE WHEN MONTH(tu.tgl_perawatan) = 12 THEN 1 ELSE 0 END) AS `dec`,
+                    SUM(tu.jumlah) AS total_tindakan,
+                    SUM(tu.biaya_rawat) AS total_pendapatan
+                FROM (
+                    SELECT
+                        rjd.no_rawat,
+                        rjd.tgl_perawatan,
+                        rjd.kd_jenis_prw,
+                        jp.nm_perawatan,
+                        jp.total_byrdrpr AS tarif_master,
+                        1 AS jumlah,
+                        rjd.biaya_rawat
+                    FROM rawat_jl_dr rjd
+                    INNER JOIN jns_perawatan jp ON jp.kd_jenis_prw = rjd.kd_jenis_prw
+
+                    UNION ALL
+
+                    SELECT
+                        rjp.no_rawat,
+                        rjp.tgl_perawatan,
+                        rjp.kd_jenis_prw,
+                        jp.nm_perawatan,
+                        jp.total_byrdrpr AS tarif_master,
+                        1 AS jumlah,
+                        rjp.biaya_rawat
+                    FROM rawat_jl_pr rjp
+                    INNER JOIN jns_perawatan jp ON jp.kd_jenis_prw = rjp.kd_jenis_prw
+                ) AS tu
+                INNER JOIN reg_periksa reg ON reg.no_rawat = tu.no_rawat
+                LEFT JOIN poliklinik p ON p.kd_poli = reg.kd_poli
+                WHERE YEAR(tu.tgl_perawatan) = ?
+            ";
+
+            if ($selectedPoli) {
+                $sql .= " AND reg.kd_poli = ? ";
+                $bindings[] = $selectedPoli;
+            }
+
+            if ($search !== '') {
+                $sql .= " AND tu.nm_perawatan LIKE ? ";
+                $bindings[] = '%' . $search . '%';
+            }
+
+            $sql .= "
+                GROUP BY tu.kd_jenis_prw, tu.nm_perawatan, tu.tarif_master
+                ORDER BY tu.nm_perawatan ASC
+            ";
+
+            $rows = DB::connection('simrs')->select($sql, $bindings);
+
+            foreach ($rows as $row) {
+                $tindakanData[] = [
+                    'kode' => $row->kode_tindakan,
+                    'nama' => $row->nama_tindakan,
+                    'harga' => (float) $row->harga,
+                    'jan' => (int) $row->jan,
+                    'feb' => (int) $row->feb,
+                    'mar' => (int) $row->mar,
+                    'apr' => (int) $row->apr,
+                    'may' => (int) $row->may,
+                    'jun' => (int) $row->jun,
+                    'jul' => (int) $row->jul,
+                    'aug' => (int) $row->aug,
+                    'sep' => (int) $row->sep,
+                    'oct' => (int) $row->oct,
+                    'nov' => (int) $row->nov,
+                    'dec' => (int) $row->dec,
+                    'total_tindakan' => (int) $row->total_tindakan,
+                    'total_pendapatan' => (float) $row->total_pendapatan,
+                ];
+
+                $grandTotals['jan'] += (int) $row->jan;
+                $grandTotals['feb'] += (int) $row->feb;
+                $grandTotals['mar'] += (int) $row->mar;
+                $grandTotals['apr'] += (int) $row->apr;
+                $grandTotals['may'] += (int) $row->may;
+                $grandTotals['jun'] += (int) $row->jun;
+                $grandTotals['jul'] += (int) $row->jul;
+                $grandTotals['aug'] += (int) $row->aug;
+                $grandTotals['sep'] += (int) $row->sep;
+                $grandTotals['oct'] += (int) $row->oct;
+                $grandTotals['nov'] += (int) $row->nov;
+                $grandTotals['dec'] += (int) $row->dec;
+                $grandTotals['total_tindakan'] += (int) $row->total_tindakan;
+                $grandTotals['total_pendapatan'] += (float) $row->total_pendapatan;
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Failed to load tindakan rawat jalan volume', [
+                'year' => $selectedYear,
+                'poli' => $selectedPoli,
+                'search' => $search,
+                'message' => $exception->getMessage(),
+            ]);
+            $errorMessage = 'Gagal memuat data dari SIMRS. Silakan coba lagi atau hubungi administrator.';
+        }
+
+        return [$tindakanData, $grandTotals, $errorMessage];
+    }
+
+    private function availableYears(int $currentYear, int $range = 5): array
+    {
+        $years = [];
+        for ($i = 0; $i < $range; $i++) {
+            $years[] = $currentYear - $i;
+        }
+
+        return $years;
+    }
+}
+

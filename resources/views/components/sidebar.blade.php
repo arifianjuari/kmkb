@@ -401,6 +401,58 @@
                         </div>
                     </div>
                 @endif
+
+                <!-- Service Volume (Current) Group (Admin only) -->
+                @if($isAdmin)
+                    <div class="mb-1">
+                        <button @click="toggleGroup('svcCurrent')"
+                                class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:bg-slate-700 hover:text-white transition-colors">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v4m-4 4h8m-4-2v4m-4 4h12m-6-2v4" />
+                                </svg>
+                                <span x-show="!collapsed" class="truncate">Service Volume (Current)</span>
+                            </div>
+                            <svg x-show="!collapsed" class="w-4 h-4 transition-transform" :class="isGroupOpen('svcCurrent') ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                        <div x-show="!collapsed && isGroupOpen('svcCurrent')" class="ml-8 mt-1 space-y-1">
+                            <a href="{{ route('svc-current.master-barang') }}"
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('svc-current.master-barang') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
+                                <span class="truncate">Master Barang</span>
+                            </a>
+                            <a href="{{ route('svc-current.tindakan-rawat-jalan') }}"
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('svc-current.tindakan-rawat-jalan') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
+                                <span class="truncate">Tindakan Rawat Jalan</span>
+                            </a>
+                            <a href="{{ route('svc-current.tindakan-rawat-inap') }}"
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('svc-current.tindakan-rawat-inap') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
+                                <span class="truncate">Tindakan Rawat Inap</span>
+                            </a>
+                            <a href="{{ route('svc-current.laboratorium') }}"
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('svc-current.laboratorium') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
+                                <span class="truncate">Laboratorium</span>
+                            </a>
+                            <a href="{{ route('svc-current.radiologi') }}"
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('svc-current.radiologi') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
+                                <span class="truncate">Radiologi</span>
+                            </a>
+                            <a href="{{ route('svc-current.operasi') }}"
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('svc-current.operasi') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
+                                <span class="truncate">Operasi</span>
+                            </a>
+                            <a href="{{ route('svc-current.kamar') }}"
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('svc-current.kamar') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
+                                <span class="truncate">Kamar</span>
+                            </a>
+                            <a href="{{ route('svc-current.sync') }}"
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('svc-current.sync') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
+                                <span class="truncate">Sync Management</span>
+                            </a>
+                        </div>
+                    </div>
+                @endif
             @else
                 <!-- Superadmin Menu -->
                 <a href="{{ route('hospitals.index') }}" 
