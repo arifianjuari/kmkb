@@ -79,26 +79,35 @@ if (!function_exists('hospital_storage_path')) {
 
 if (!function_exists('uploads_disk')) {
     /**
-     * Get the disk name for uploads (S3 if credentials available, otherwise public).
-     *
+     * Get the disk name for uploads.
+     * 
+     * Jika Object Storage dikonfigurasi dengan disk name "public" di Laravel Cloud,
+     * maka disk "public" akan otomatis menggunakan S3.
+     * 
      * @return string
      */
     function uploads_disk(): string
     {
         // Check if AWS credentials are available
         // Try to read from config first (works after config cache), then fallback to env
-        $awsKey = config('filesystems.disks.uploads.key') 
+        $awsKey = config('filesystems.disks.public.key') 
+                ?? config('filesystems.disks.uploads.key') 
                 ?? config('filesystems.disks.s3.key') 
                 ?? env('AWS_ACCESS_KEY_ID');
         
-        // If key exists and not empty, use uploads disk (S3), otherwise use public disk (local)
-        return !empty($awsKey) ? 'uploads' : 'public';
+        // Jika credentials ada, gunakan disk "public" (yang sudah dikonfigurasi sebagai S3 di Laravel Cloud)
+        // Jika tidak ada, gunakan disk "public" (local storage)
+        // Catatan: Laravel Cloud akan otomatis meng-override disk "public" menjadi S3 jika bucket di-attach dengan disk name "public"
+        return 'public';
     }
 }
 
 if (!function_exists('storage_url')) {
     /**
      * Get the URL for a file in uploads storage.
+     * 
+     * Jika menggunakan Object Storage (S3), URL akan dihasilkan dari bucket endpoint.
+     * Jika menggunakan local storage, URL akan dihasilkan dari APP_URL/storage.
      *
      * @param string $path
      * @return string
@@ -106,6 +115,12 @@ if (!function_exists('storage_url')) {
     function storage_url(string $path): string
     {
         $disk = uploads_disk();
-        return \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
+        
+        try {
+            return \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
+        } catch (\Exception $e) {
+            // Fallback ke local storage jika error
+            return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+        }
     }
 }

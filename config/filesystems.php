@@ -49,6 +49,9 @@ return [
             'throw' => false,
         ],
 
+        // Disk "public" - akan otomatis di-override oleh Laravel Cloud menjadi S3
+        // jika bucket di-attach dengan disk name "public"
+        // Laravel Cloud akan meng-inject credentials dan mengubah driver ke 's3' secara otomatis
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
