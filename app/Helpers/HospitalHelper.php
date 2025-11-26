@@ -89,16 +89,26 @@ if (!function_exists('uploads_disk')) {
     function uploads_disk(): string
     {
         // Check if AWS credentials are available
-        // Try to read from config first (works after config cache), then fallback to env
         $awsKey = config('filesystems.disks.public.key') 
                 ?? config('filesystems.disks.uploads.key') 
                 ?? config('filesystems.disks.s3.key') 
                 ?? env('AWS_ACCESS_KEY_ID');
         
-        // Jika credentials ada, gunakan disk "public" (yang sudah dikonfigurasi sebagai S3 di Laravel Cloud)
-        // Jika tidak ada, gunakan disk "public" (local storage)
-        // Catatan: Laravel Cloud akan otomatis meng-override disk "public" menjadi S3 jika bucket di-attach dengan disk name "public"
-        return 'public';
+        // Cek apakah disk "public" sudah di-override menjadi S3 oleh Laravel Cloud
+        $publicDiskDriver = config('filesystems.disks.public.driver');
+        
+        // Jika credentials ada DAN disk "public" sudah menggunakan driver 's3', gunakan 'public'
+        // Jika credentials ada tapi disk "public" masih 'local', gunakan 's3' langsung
+        // Jika credentials tidak ada, gunakan 'public' (local storage)
+        if (!empty($awsKey)) {
+            if ($publicDiskDriver === 's3') {
+                return 'public'; // Disk "public" sudah di-override menjadi S3
+            } else {
+                return 's3'; // Gunakan disk "s3" langsung karena credentials ada
+            }
+        }
+        
+        return 'public'; // Fallback ke local storage
     }
 }
 
@@ -116,11 +126,40 @@ if (!function_exists('storage_url')) {
     {
         $disk = uploads_disk();
         
+        // Normalize path - hapus prefix yang tidak perlu
+        $path = ltrim($path, '/');
+        $path = str_replace('storage/', '', $path); // Hapus prefix storage/ jika ada
+        
         try {
-            return \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
+            $storage = \Illuminate\Support\Facades\Storage::disk($disk);
+            $diskConfig = config("filesystems.disks.{$disk}");
+            $isS3 = ($diskConfig['driver'] ?? null) === 's3';
+            
+            if ($isS3) {
+                // Untuk S3, gunakan url() yang akan menghasilkan URL dari bucket endpoint
+                // Cek apakah file ada
+                if ($storage->exists($path)) {
+                    return $storage->url($path);
+                } else {
+                    // Jika file tidak ada di S3, coba cek di local storage sebagai fallback
+                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+                        return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+                    }
+                    // Jika tidak ada di kedua tempat, return URL S3 anyway (mungkin file belum dimigrasi)
+                    return $storage->url($path);
+                }
+            } else {
+                // Untuk local storage
+                return $storage->url($path);
+            }
         } catch (\Exception $e) {
             // Fallback ke local storage jika error
-            return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+            try {
+                return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+            } catch (\Exception $e2) {
+                // Jika masih error, return path as-is dengan prefix /storage/
+                return asset('storage/' . ltrim($path, '/'));
+            }
         }
     }
 }
