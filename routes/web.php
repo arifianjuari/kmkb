@@ -11,7 +11,12 @@ use App\Http\Controllers\CostReferenceController;
 use App\Http\Controllers\HospitalController;
 use App\Http\Controllers\ReferenceController;
 use App\Http\Controllers\MigrateStorageController;
+use App\Http\Controllers\UploadProxyController;
 use Illuminate\Support\Facades\Route;
+Route::get('/uploads/{path}', UploadProxyController::class)
+    ->where('path', '.*')
+    ->name('uploads.proxy');
+
 
 /*
 --------------------------------------------------------------------------

@@ -57,8 +57,7 @@ use Illuminate\Support\Facades\Storage;
             @if($existsInDisk || $existsInPublic)
                 <img src="{{ $imageUrl }}" 
                      alt="{{ $reference->title }}"
-                     class="w-full h-auto object-cover max-h-[600px] object-center"
-                     onerror="this.onerror=null; this.src='{{ Storage::disk('public')->url($imagePath) }}';">
+                     class="w-full h-auto object-cover max-h-[600px] object-center">
             @else
                 <div class="p-8 text-center text-gray-500">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
