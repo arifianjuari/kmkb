@@ -127,8 +127,8 @@ if (!function_exists('storage_url')) {
         $disk = uploads_disk();
         
         // Normalize path - hapus prefix yang tidak perlu
-        $path = ltrim($path, '/');
-        $path = str_replace('storage/', '', $path); // Hapus prefix storage/ jika ada
+        $normalizedPath = ltrim($path, '/');
+        $normalizedPath = str_replace('storage/', '', $normalizedPath); // Hapus prefix storage/ jika ada
         
         try {
             $storage = \Illuminate\Support\Facades\Storage::disk($disk);
@@ -137,28 +137,50 @@ if (!function_exists('storage_url')) {
             
             if ($isS3) {
                 // Untuk S3, gunakan url() yang akan menghasilkan URL dari bucket endpoint
-                // Cek apakah file ada
-                if ($storage->exists($path)) {
-                    return $storage->url($path);
+                // Cek apakah file ada di S3
+                if ($storage->exists($normalizedPath)) {
+                    $url = $storage->url($normalizedPath);
+                    // Pastikan URL tidak mengandung double slashes
+                    $url = preg_replace('#([^:])//+#', '$1/', $url);
+                    return $url;
                 } else {
                     // Jika file tidak ada di S3, coba cek di local storage sebagai fallback
-                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
-                        return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+                    $publicStorage = \Illuminate\Support\Facades\Storage::disk('public');
+                    if ($publicStorage->exists($normalizedPath)) {
+                        return $publicStorage->url($normalizedPath);
                     }
                     // Jika tidak ada di kedua tempat, return URL S3 anyway (mungkin file belum dimigrasi)
-                    return $storage->url($path);
+                    // Tapi pastikan URL valid
+                    $url = $storage->url($normalizedPath);
+                    $url = preg_replace('#([^:])//+#', '$1/', $url);
+                    return $url;
                 }
             } else {
                 // Untuk local storage
-                return $storage->url($path);
+                $url = $storage->url($normalizedPath);
+                // Pastikan URL tidak mengandung double slashes
+                $url = preg_replace('#([^:])//+#', '$1/', $url);
+                return $url;
             }
         } catch (\Exception $e) {
+            // Log error jika debug mode
+            if (config('app.debug')) {
+                \Log::warning('storage_url error', [
+                    'path' => $path,
+                    'normalized_path' => $normalizedPath ?? null,
+                    'disk' => $disk,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+            
             // Fallback ke local storage jika error
             try {
-                return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+                $url = \Illuminate\Support\Facades\Storage::disk('public')->url($normalizedPath ?? $path);
+                $url = preg_replace('#([^:])//+#', '$1/', $url);
+                return $url;
             } catch (\Exception $e2) {
                 // Jika masih error, return path as-is dengan prefix /storage/
-                return asset('storage/' . ltrim($path, '/'));
+                return asset('storage/' . ltrim($normalizedPath ?? $path, '/'));
             }
         }
     }

@@ -46,10 +46,32 @@ use Illuminate\Support\Facades\Storage;
 
     <!-- Image Section -->
     @if($reference->image_path)
+        @php
+            $imagePath = $reference->image_path;
+            $imageUrl = storage_url($imagePath);
+            $disk = uploads_disk();
+            $existsInDisk = Storage::disk($disk)->exists($imagePath);
+            $existsInPublic = Storage::disk('public')->exists($imagePath);
+        @endphp
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-            <img src="{{ storage_url($reference->image_path) }}" 
-                 alt="{{ $reference->title }}"
-                 class="w-full h-auto object-cover max-h-[600px] object-center">
+            @if($existsInDisk || $existsInPublic)
+                <img src="{{ $imageUrl }}" 
+                     alt="{{ $reference->title }}"
+                     class="w-full h-auto object-cover max-h-[600px] object-center"
+                     onerror="this.onerror=null; this.src='{{ Storage::disk('public')->url($imagePath) }}';">
+            @else
+                <div class="p-8 text-center text-gray-500">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p class="mt-2 text-sm">Gambar tidak ditemukan</p>
+                    <p class="text-xs text-gray-400 mt-1">Path: {{ $imagePath }}</p>
+                    @if(config('app.debug'))
+                        <p class="text-xs text-gray-400 mt-1">Disk: {{ $disk }}</p>
+                        <p class="text-xs text-gray-400">URL: {{ $imageUrl }}</p>
+                    @endif
+                </div>
+            @endif
         </div>
     @endif
 
