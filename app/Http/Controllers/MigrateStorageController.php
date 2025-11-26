@@ -15,8 +15,8 @@ class MigrateStorageController extends Controller
      */
     public function index()
     {
-        // Only allow authenticated admin users
-        if (!Auth::check() || !Auth::user()->can('viewAny', \App\Models\Hospital::class)) {
+        // Only allow authenticated admin or superadmin users
+        if (!Auth::check() || (!Auth::user()->hasRole('admin') && !Auth::user()->isSuperadmin())) {
             abort(403);
         }
 
@@ -30,12 +30,14 @@ class MigrateStorageController extends Controller
      */
     public function migrate(Request $request)
     {
-        // Only allow authenticated admin users
-        if (!Auth::check() || !Auth::user()->can('viewAny', \App\Models\Hospital::class)) {
+        // Only allow authenticated admin or superadmin users
+        if (!Auth::check() || (!Auth::user()->hasRole('admin') && !Auth::user()->isSuperadmin())) {
             abort(403);
         }
 
-        if (!env('AWS_ACCESS_KEY_ID')) {
+        // Check if Object Storage is configured by checking config instead of env
+        $awsKey = config('filesystems.disks.uploads.key') ?? config('filesystems.disks.s3.key');
+        if (!$awsKey) {
             return response()->json([
                 'success' => false,
                 'message' => 'Object Storage belum dikonfigurasi. Pastikan credentials AWS sudah di-set.'

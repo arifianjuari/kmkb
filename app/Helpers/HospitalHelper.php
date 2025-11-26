@@ -85,7 +85,9 @@ if (!function_exists('uploads_disk')) {
      */
     function uploads_disk(): string
     {
-        return env('AWS_ACCESS_KEY_ID') ? 'uploads' : 'public';
+        // Check config instead of env (works after config cache)
+        $awsKey = config('filesystems.disks.uploads.key') ?? config('filesystems.disks.s3.key');
+        return $awsKey ? 'uploads' : 'public';
     }
 }
 

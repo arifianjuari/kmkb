@@ -5,11 +5,15 @@
     <div class="bg-white shadow-sm rounded-lg p-6">
         <h1 class="text-2xl font-bold text-gray-900 mb-4">Migrasi File ke Object Storage</h1>
         
-        @if(!env('AWS_ACCESS_KEY_ID'))
+        @php
+            $awsKey = config('filesystems.disks.uploads.key') ?? config('filesystems.disks.s3.key');
+        @endphp
+        @if(!$awsKey)
             <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
                 <p class="text-yellow-800">
                     <strong>⚠️ Object Storage belum dikonfigurasi.</strong><br>
-                    Pastikan credentials AWS sudah di-set di Laravel Cloud Dashboard.
+                    Pastikan credentials AWS sudah di-set di Laravel Cloud Dashboard.<br>
+                    Setelah setup, jalankan: <code>php artisan config:clear && php artisan config:cache</code>
                 </p>
             </div>
         @endif

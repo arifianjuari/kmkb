@@ -14,9 +14,12 @@ class MigrateToObjectStorage extends Command
 
     public function handle()
     {
-        if (!env('AWS_ACCESS_KEY_ID')) {
+        // Check if Object Storage is configured by checking config instead of env
+        $awsKey = config('filesystems.disks.uploads.key') ?? config('filesystems.disks.s3.key');
+        if (!$awsKey) {
             $this->error('❌ Object Storage belum dikonfigurasi. Pastikan credentials AWS sudah di-set.');
             $this->info('💡 Setup Object Storage di Laravel Cloud Dashboard → Environment → Infrastructure → Add bucket');
+            $this->info('💡 Setelah setup, jalankan: php artisan config:clear && php artisan config:cache');
             return 1;
         }
 
