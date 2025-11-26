@@ -72,17 +72,18 @@ return [
         // Disk untuk uploads (hospitals & references)
         // Menggunakan S3/R2 (Laravel Object Storage) jika credentials tersedia
         // Helper function uploads_disk() akan menentukan disk mana yang digunakan
+        // Jika credentials tidak ada, helper function akan return 'public' bukan 'uploads'
         'uploads' => [
             'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'key' => env('AWS_ACCESS_KEY_ID', null),
+            'secret' => env('AWS_SECRET_ACCESS_KEY', null),
             'region' => env('AWS_DEFAULT_REGION', 'auto'),
-            'bucket' => env('AWS_BUCKET'),
-            'url' => env('AWS_URL'),
-            'endpoint' => env('AWS_ENDPOINT'),
+            'bucket' => env('AWS_BUCKET', null),
+            'url' => env('AWS_URL', null),
+            'endpoint' => env('AWS_ENDPOINT', null),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'visibility' => 'public',
-            'throw' => false,
+            'throw' => false, // Don't throw exception if connection fails
         ],
 
     ],
