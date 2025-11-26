@@ -55,6 +55,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dashboard APIs
     Route::get('dashboard/summary', [App\Http\Controllers\Api\DashboardController::class, 'summary']);
     Route::get('dashboard/trends', [App\Http\Controllers\Api\DashboardController::class, 'trends']);
+    
+    // Unit Cost APIs
+    Route::get('unit-cost', [App\Http\Controllers\Api\UnitCostController::class, 'getUnitCost']);
+    Route::get('unit-cost/versions', [App\Http\Controllers\Api\UnitCostController::class, 'getVersions']);
 });
 
 // Public APIs (if any)

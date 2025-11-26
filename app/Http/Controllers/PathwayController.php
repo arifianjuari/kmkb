@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ClinicalPathway;
 use App\Models\PathwayStep;
+use App\Services\UnitCostService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,12 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class PathwayController extends Controller
 {
+    protected $unitCostService;
+
+    public function __construct(UnitCostService $unitCostService)
+    {
+        $this->unitCostService = $unitCostService;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -48,7 +55,8 @@ class PathwayController extends Controller
      */
     public function create()
     {
-        return view('pathways.create');
+        $versions = $this->unitCostService->getAvailableVersions();
+        return view('pathways.create', compact('versions'));
     }
 
     /**
@@ -77,6 +85,7 @@ class PathwayController extends Controller
             $pathway->version = $request->version;
             $pathway->effective_date = $request->effective_date;
             $pathway->status = $request->status;
+            $pathway->unit_cost_version = $request->unit_cost_version;
             $pathway->created_by = Auth::id();
             $pathway->hospital_id = hospital('id');
             $pathway->save();
@@ -107,7 +116,8 @@ class PathwayController extends Controller
         }
         
         $pathway->load(['steps', 'creator']);
-        return view('pathways.show', compact('pathway'));
+        $versions = $this->unitCostService->getAvailableVersions();
+        return view('pathways.show', compact('pathway', 'versions'));
     }
 
     /**
@@ -363,7 +373,8 @@ class PathwayController extends Controller
             abort(404);
         }
         
-        return view('pathways.edit', compact('pathway'));
+        $versions = $this->unitCostService->getAvailableVersions();
+        return view('pathways.edit', compact('pathway', 'versions'));
     }
 
     /**
@@ -496,6 +507,118 @@ class PathwayController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Failed to create new version: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Recalculate pathway summary with unit cost.
+     *
+     * @param Request $request
+     * @param ClinicalPathway $pathway
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function recalculateSummary(Request $request, ClinicalPathway $pathway)
+    {
+        $request->validate([
+            'version' => 'nullable|string|max:100',
+            'mode' => 'nullable|in:simulation,rebaseline',
+        ]);
+
+        $version = $request->input('version', $pathway->unit_cost_version);
+        $mode = $request->input('mode', 'simulation'); // 'simulation' or 'rebaseline'
+
+        DB::beginTransaction();
+        try {
+            $steps = $pathway->steps()->with('costReference')->get();
+            $estimatedTotalCost = 0;
+            $estimatedTotalTariff = 0;
+            $updatedSteps = [];
+
+            foreach ($steps as $step) {
+                if (!$step->cost_reference_id) {
+                    // Skip steps without cost reference
+                    continue;
+                }
+
+                // Get unit cost for this step
+                $unitCostData = $this->unitCostService->getUnitCost(
+                    $step->cost_reference_id,
+                    $version
+                );
+
+                $unitCost = $unitCostData['unit_cost'];
+                $quantity = $step->quantity ?? 1;
+                $stepCost = $unitCost * $quantity;
+
+                $estimatedTotalCost += $stepCost;
+
+                // If mode is rebaseline, update the step
+                if ($mode === 'rebaseline') {
+                    $step->unit_cost_applied = $unitCost;
+                    $step->source_unit_cost_version = $unitCostData['version_label'];
+                    $step->estimated_cost = $stepCost;
+                    $step->save();
+                }
+
+                $updatedSteps[] = [
+                    'id' => $step->id,
+                    'unit_cost' => $unitCost,
+                    'quantity' => $quantity,
+                    'total_cost' => $stepCost,
+                    'version' => $unitCostData['version_label'],
+                ];
+            }
+
+            // Update or create pathway_tariff_summaries
+            $summary = DB::table('pathway_tariff_summaries')
+                ->where('clinical_pathway_id', $pathway->id)
+                ->where('unit_cost_calculation_version', $version)
+                ->first();
+
+            if ($summary) {
+                DB::table('pathway_tariff_summaries')
+                    ->where('id', $summary->id)
+                    ->update([
+                        'estimated_total_cost' => $estimatedTotalCost,
+                        'estimated_total_tariff' => $estimatedTotalTariff,
+                        'updated_at' => now(),
+                    ]);
+            } else {
+                DB::table('pathway_tariff_summaries')->insert([
+                    'hospital_id' => $pathway->hospital_id,
+                    'clinical_pathway_id' => $pathway->id,
+                    'unit_cost_calculation_version' => $version,
+                    'estimated_total_cost' => $estimatedTotalCost,
+                    'estimated_total_tariff' => $estimatedTotalTariff,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'mode' => $mode,
+                'version' => $version,
+                'estimated_total_cost' => $estimatedTotalCost,
+                'estimated_total_tariff' => $estimatedTotalTariff,
+                'steps' => $updatedSteps,
+                'message' => $mode === 'rebaseline' 
+                    ? 'Pathway summary recalculated and steps updated.' 
+                    : 'Pathway summary recalculated (simulation mode).',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to recalculate pathway summary', [
+                'pathway_id' => $pathway->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to recalculate summary: ' . $e->getMessage(),
+            ], 500);
         }
     }
 

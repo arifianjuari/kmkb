@@ -11,22 +11,38 @@
 # Backup existing uploaded files to persistent location
 # Using /tmp might not work, so we use a location outside project directory
 BACKUP_BASE="/home/forge/storage_backup"
-BACKUP_DIR="$BACKUP_BASE/hospitals_$(date +%Y%m%d_%H%M%S)"
+BACKUP_DIR="$BACKUP_BASE/uploads_$(date +%Y%m%d_%H%M%S)"
+BACKUP_NEEDED=false
 
+# Backup hospitals
 if [ -d "storage/app/public/hospitals" ] && [ "$(ls -A storage/app/public/hospitals 2>/dev/null | grep -v '^\.gitkeep$')" ]; then
     echo "💾 Backing up hospital logos..."
-    mkdir -p "$BACKUP_DIR"
-    find storage/app/public/hospitals -type f ! -name '.gitkeep' -exec cp {} "$BACKUP_DIR/" \; 2>/dev/null
-    if [ "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]; then
-        echo "✅ Backup created: $BACKUP_DIR"
-        # Keep only last 3 backups
-        ls -dt "$BACKUP_BASE"/hospitals_* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
-    else
-        echo "ℹ️  No files to backup"
-        rmdir "$BACKUP_DIR" 2>/dev/null || true
+    mkdir -p "$BACKUP_DIR/hospitals"
+    find storage/app/public/hospitals -type f ! -name '.gitkeep' -exec cp {} "$BACKUP_DIR/hospitals/" \; 2>/dev/null
+    if [ "$(ls -A "$BACKUP_DIR/hospitals" 2>/dev/null)" ]; then
+        echo "✅ Hospitals backup created"
+        BACKUP_NEEDED=true
     fi
+fi
+
+# Backup references
+if [ -d "storage/app/public/references" ] && [ "$(ls -A storage/app/public/references 2>/dev/null | grep -v '^\.gitkeep$')" ]; then
+    echo "💾 Backing up reference images..."
+    mkdir -p "$BACKUP_DIR/references"
+    find storage/app/public/references -type f ! -name '.gitkeep' -exec cp {} "$BACKUP_DIR/references/" \; 2>/dev/null
+    if [ "$(ls -A "$BACKUP_DIR/references" 2>/dev/null)" ]; then
+        echo "✅ References backup created"
+        BACKUP_NEEDED=true
+    fi
+fi
+
+if [ "$BACKUP_NEEDED" = true ]; then
+    echo "✅ Backup created: $BACKUP_DIR"
+    # Keep only last 3 backups
+    ls -dt "$BACKUP_BASE"/uploads_* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
 else
     echo "ℹ️  No existing files to backup"
+    rmdir "$BACKUP_DIR" 2>/dev/null || true
 fi
 
 # ============================================
@@ -35,25 +51,50 @@ fi
 # Copy script ini ke "After Deploy" hook di Laravel Cloud
 
 # Restore backed up files
-echo "📥 Restoring hospital logos..."
+echo "📥 Restoring uploaded files..."
 mkdir -p storage/app/public/hospitals
+mkdir -p storage/app/public/references
 
 # Find latest backup
-LATEST_BACKUP=$(ls -dt "$BACKUP_BASE"/hospitals_* 2>/dev/null | head -1)
+LATEST_BACKUP=$(ls -dt "$BACKUP_BASE"/uploads_* 2>/dev/null | head -1)
+restored_total=0
 
-if [ -n "$LATEST_BACKUP" ] && [ -d "$LATEST_BACKUP" ] && [ "$(ls -A "$LATEST_BACKUP" 2>/dev/null)" ]; then
-    restored_count=0
-    for file in "$LATEST_BACKUP"/*; do
-        if [ -f "$file" ]; then
-            filename=$(basename "$file")
-            if [ ! -f "storage/app/public/hospitals/$filename" ]; then
-                cp "$file" "storage/app/public/hospitals/" 2>/dev/null && restored_count=$((restored_count + 1)) || true
+if [ -n "$LATEST_BACKUP" ] && [ -d "$LATEST_BACKUP" ]; then
+    # Restore hospitals
+    if [ -d "$LATEST_BACKUP/hospitals" ] && [ "$(ls -A "$LATEST_BACKUP/hospitals" 2>/dev/null)" ]; then
+        restored_count=0
+        for file in "$LATEST_BACKUP/hospitals"/*; do
+            if [ -f "$file" ]; then
+                filename=$(basename "$file")
+                if [ ! -f "storage/app/public/hospitals/$filename" ]; then
+                    cp "$file" "storage/app/public/hospitals/" 2>/dev/null && restored_count=$((restored_count + 1)) || true
+                fi
             fi
+        done
+        if [ $restored_count -gt 0 ]; then
+            echo "✅ Restored $restored_count hospital file(s)"
+            restored_total=$((restored_total + restored_count))
         fi
-    done
-    if [ $restored_count -gt 0 ]; then
-        echo "✅ Restored $restored_count file(s) from $LATEST_BACKUP"
-    else
+    fi
+    
+    # Restore references
+    if [ -d "$LATEST_BACKUP/references" ] && [ "$(ls -A "$LATEST_BACKUP/references" 2>/dev/null)" ]; then
+        restored_count=0
+        for file in "$LATEST_BACKUP/references"/*; do
+            if [ -f "$file" ]; then
+                filename=$(basename "$file")
+                if [ ! -f "storage/app/public/references/$filename" ]; then
+                    cp "$file" "storage/app/public/references/" 2>/dev/null && restored_count=$((restored_count + 1)) || true
+                fi
+            fi
+        done
+        if [ $restored_count -gt 0 ]; then
+            echo "✅ Restored $restored_count reference file(s)"
+            restored_total=$((restored_total + restored_count))
+        fi
+    fi
+    
+    if [ $restored_total -eq 0 ]; then
         echo "ℹ️  All files already exist, no restore needed"
     fi
 else
@@ -62,6 +103,7 @@ fi
 
 # Ensure .gitkeep exists
 touch storage/app/public/hospitals/.gitkeep
+touch storage/app/public/references/.gitkeep
 
 # Create storage link
 echo "🔗 Creating storage link..."
@@ -69,6 +111,7 @@ php artisan storage:link --force 2>/dev/null || php artisan storage:link
 
 # Set permissions
 chmod -R 775 storage/app/public/hospitals 2>/dev/null || true
+chmod -R 775 storage/app/public/references 2>/dev/null || true
 
 echo "✅ Deployment hooks completed!"
 

@@ -26,6 +26,9 @@ class CaseDetail extends Model
         'actual_cost',
         'service_date',
         'hospital_id',
+        'cost_reference_id',
+        'unit_cost_applied',
+        'tariff_applied',
     ];
 
     /**
@@ -36,6 +39,8 @@ class CaseDetail extends Model
     protected $casts = [
         'quantity' => 'integer',
         'actual_cost' => 'decimal:2',
+        'unit_cost_applied' => 'decimal:2',
+        'tariff_applied' => 'decimal:2',
         'service_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

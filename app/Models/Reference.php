@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Reference extends Model
 {
@@ -20,6 +21,7 @@ class Reference extends Model
         'title',
         'slug',
         'content',
+        'image_path',
         'status',
         'is_pinned',
         'published_at',
@@ -46,6 +48,14 @@ class Reference extends Model
     public function hospital(): BelongsTo
     {
         return $this->belongsTo(Hospital::class);
+    }
+
+    /**
+     * Tags relationship.
+     */
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class, 'reference_tag');
     }
 }
 

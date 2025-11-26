@@ -16,9 +16,9 @@
             </a>
         </div>
         <div class="px-6 py-6">
-            <form action="{{ route('references.store') }}" method="POST">
+            <form action="{{ route('references.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                @include('references.partials.form', ['reference' => $reference, 'statusOptions' => $statusOptions])
+                @include('references.partials.form', ['reference' => $reference, 'statusOptions' => $statusOptions, 'tags' => $tags ?? collect()])
 
                 <div class="mt-8 flex justify-end space-x-3">
                     <a href="{{ route('references.index') }}"

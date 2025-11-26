@@ -86,6 +86,8 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     
     // Cost References
     Route::get('cost-references/export', [CostReferenceController::class, 'export'])->name('cost-references.export');
+    Route::get('cost-references/template', [CostReferenceController::class, 'downloadTemplate'])->name('cost-references.template');
+    Route::post('cost-references/import', [CostReferenceController::class, 'import'])->name('cost-references.import');
     Route::delete('cost-references/bulk-destroy', [CostReferenceController::class, 'bulkDestroy'])->name('cost-references.bulk-destroy');
     Route::get('cost-references/search', [CostReferenceController::class, 'search'])->name('cost-references.search');
     Route::resource('cost-references', CostReferenceController::class);

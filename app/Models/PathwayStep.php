@@ -25,6 +25,9 @@ class PathwayStep extends Model
         'estimated_cost',
         'quantity',
         'cost_reference_id',
+        'unit_cost_applied',
+        'source_unit_cost_version',
+        'tariff_applied',
     ];
 
     /**
@@ -36,6 +39,8 @@ class PathwayStep extends Model
         'display_order' => 'integer',
         'estimated_cost' => 'decimal:0',
         'quantity' => 'integer',
+        'unit_cost_applied' => 'decimal:2',
+        'tariff_applied' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

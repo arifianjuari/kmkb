@@ -372,22 +372,108 @@
         const refUnit = document.getElementById('ref_unit');
         const refSource = document.getElementById('ref_source');
         const addRefError = document.getElementById('add-ref-error');
-        function applyActivitySelection() {
+        
+        // Unit cost version from pathway
+        const pathwayUnitCostVersion = @json($pathway->unit_cost_version ?? null);
+        
+        // Function to fetch unit cost from API
+        async function fetchUnitCost(serviceId, version = null) {
+            if (!serviceId) return null;
+            
+            try {
+                const url = new URL('/api/unit-cost', window.location.origin);
+                url.searchParams.append('serviceId', serviceId);
+                if (version) {
+                    url.searchParams.append('version', version);
+                } else if (pathwayUnitCostVersion) {
+                    url.searchParams.append('version', pathwayUnitCostVersion);
+                }
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch unit cost');
+                }
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching unit cost:', error);
+                return null;
+            }
+        }
+        
+        // Function to show unit cost warning
+        function showUnitCostWarning(message) {
+            let warningDiv = document.getElementById('unit-cost-warning');
+            if (!warningDiv) {
+                warningDiv = document.createElement('div');
+                warningDiv.id = 'unit-cost-warning';
+                warningDiv.className = 'mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800';
+                const stdCostInput = document.getElementById('standard_cost');
+                if (stdCostInput && stdCostInput.parentElement) {
+                    stdCostInput.parentElement.appendChild(warningDiv);
+                }
+            }
+            warningDiv.textContent = message;
+            warningDiv.classList.remove('hidden');
+        }
+        
+        // Function to hide unit cost warning
+        function hideUnitCostWarning() {
+            const warningDiv = document.getElementById('unit-cost-warning');
+            if (warningDiv) {
+                warningDiv.classList.add('hidden');
+            }
+        }
+        
+        async function applyActivitySelection() {
             const code = (activityInput.value || '').trim();
             const ref = costRefMap[code];
             const stdCostInput = document.getElementById('standard_cost');
             const descInput = document.getElementById('description');
+            
             if (ref) {
                 if (hiddenCostId) hiddenCostId.value = ref.id || '';
-                if (stdCostInput) stdCostInput.value = ref.cost || '';
                 if (descInput) descInput.value = ref.desc || '';
                 if (addRefPrompt) addRefPrompt.classList.add('hidden');
+                
+                // Fetch unit cost from API
+                if (ref.id) {
+                    hideUnitCostWarning();
+                    const unitCostData = await fetchUnitCost(ref.id);
+                    
+                    if (unitCostData) {
+                        if (unitCostData.fallback_used) {
+                            // Using standard cost as fallback
+                            if (stdCostInput) stdCostInput.value = unitCostData.unit_cost || ref.cost || '';
+                            showUnitCostWarning('Belum ada unit cost resmi – menggunakan Standard Cost dari Cost References');
+                        } else {
+                            // Using unit cost
+                            if (stdCostInput) stdCostInput.value = Math.round(unitCostData.unit_cost) || ref.cost || '';
+                            hideUnitCostWarning();
+                        }
+                    } else {
+                        // Fallback to standard cost if API fails
+                        if (stdCostInput) stdCostInput.value = ref.cost || '';
+                    }
+                } else {
+                    // No cost reference ID, use standard cost
+                    if (stdCostInput) stdCostInput.value = ref.cost || '';
+                    hideUnitCostWarning();
+                }
             } else {
                 if (hiddenCostId) hiddenCostId.value = '';
                 // Only clear when the field is blank to avoid wiping custom entries while typing
                 if (code === '') {
                     if (stdCostInput) stdCostInput.value = '';
                     if (descInput) descInput.value = '';
+                    hideUnitCostWarning();
                 }
             }
             recalcCreateTotal();
@@ -558,24 +644,50 @@
         
         // Handle cost reference changes
         document.querySelectorAll('.cost-reference-select').forEach(select => {
-            select.addEventListener('change', function() {
+            select.addEventListener('change', async function() {
                 const stepId = this.getAttribute('data-step-id');
                 const selectedOption = this.options[this.selectedIndex];
+                const selectedValue = this.value;
                 
                 if (selectedOption && selectedOption.dataset) {
                     const costCell = document.querySelector(`tr[data-step-id="${stepId}"] [data-field="standard_cost"]`);
-                    if (selectedOption.dataset.cost && costCell) {
-                        costCell.textContent = formatInt(selectedOption.dataset.cost);
-                    }
                     const activityCell = document.querySelector(`tr[data-step-id="${stepId}"] [data-field="activity"]`);
+                    const descCell = document.querySelector(`tr[data-step-id="${stepId}"] [data-field="description"]`);
+                    const row = document.querySelector(`tr[data-step-id="${stepId}"]`);
+                    
+                    // Update activity and description from selected option
                     if (activityCell && selectedOption.dataset.code) {
                         activityCell.textContent = selectedOption.dataset.code;
                     }
-                    const descCell = document.querySelector(`tr[data-step-id="${stepId}"] [data-field="description"]`);
                     if (descCell && selectedOption.dataset.desc) {
                         descCell.textContent = selectedOption.dataset.desc;
                     }
-                    const row = document.querySelector(`tr[data-step-id="${stepId}"]`);
+                    
+                    // Fetch unit cost from API if cost reference is selected
+                    if (selectedValue && costCell) {
+                        const unitCostData = await fetchUnitCost(selectedValue);
+                        
+                        if (unitCostData) {
+                            if (unitCostData.fallback_used) {
+                                // Using standard cost as fallback
+                                costCell.textContent = formatInt(unitCostData.unit_cost || selectedOption.dataset.cost || 0);
+                                // Show warning in console or could add visual indicator
+                                console.log('Using standard cost fallback for step ' + stepId);
+                            } else {
+                                // Using unit cost
+                                costCell.textContent = formatInt(unitCostData.unit_cost || 0);
+                            }
+                        } else {
+                            // Fallback to standard cost if API fails
+                            if (selectedOption.dataset.cost) {
+                                costCell.textContent = formatInt(selectedOption.dataset.cost);
+                            }
+                        }
+                    } else if (selectedOption.dataset.cost && costCell) {
+                        // No cost reference selected, use standard cost
+                        costCell.textContent = formatInt(selectedOption.dataset.cost);
+                    }
+                    
                     if (row) recalcRowTotal(row);
                 }
             });

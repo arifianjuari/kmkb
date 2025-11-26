@@ -2,13 +2,81 @@
     $user = auth()->user();
     $isSuperadmin = $user?->isSuperadmin();
     $isAdmin = $user?->hasRole(\App\Models\User::ROLE_ADMIN);
+    
+    // Determine which groups should be open based on active routes
+    $openGroups = [];
+    
+    // Master Data group
+    if (request()->routeIs('cost-references.*') || 
+        request()->routeIs('jkn-cbg-codes.*') || 
+        request()->routeIs('cost-centers.*') || 
+        request()->routeIs('expense-categories.*') || 
+        request()->routeIs('allocation-drivers.*') || 
+        request()->routeIs('tariff-classes.*')) {
+        $openGroups['master-data'] = true;
+    }
+    
+    // GL & Expenses group
+    if (request()->routeIs('gl-expenses.*') || 
+        request()->routeIs('driver-statistics.*') || 
+        request()->routeIs('service-volumes.*')) {
+        $openGroups['gl-expenses'] = true;
+    }
+    
+    // Allocation group
+    if (request()->routeIs('allocation-maps.*') || 
+        request()->routeIs('allocation-results.*')) {
+        $openGroups['allocation'] = true;
+    }
+    
+    // Unit Cost group
+    if (request()->routeIs('unit-cost.*') || 
+        request()->routeIs('unit-cost-results.*')) {
+        $openGroups['unit-cost'] = true;
+    }
+    
+    // Tariff group
+    if (request()->routeIs('tariff.*') || 
+        request()->routeIs('tariff-simulation.*') || 
+        request()->routeIs('tariff-explorer.*')) {
+        $openGroups['tariff'] = true;
+    }
+    
+    // Reports group
+    if (request()->routeIs('reports.*')) {
+        $openGroups['reports'] = true;
+    }
+    
+    // Admin group
+    if (request()->routeIs('users.*') || 
+        request()->routeIs('audit-logs.*') || 
+        request()->routeIs('roles.*') || 
+        request()->routeIs('api-tokens.*') || 
+        request()->routeIs('settings.*')) {
+        $openGroups['admin'] = true;
+    }
+    
+    // SIMRS group
+    if (request()->routeIs('simrs.*')) {
+        $openGroups['simrs'] = true;
+    }
+    
+    // Service Volume (Current) group
+    if (request()->routeIs('svc-current.*')) {
+        $openGroups['svcCurrent'] = true;
+    }
 @endphp
 
 <aside 
     x-data="{ 
         collapsed: false,
-        openGroups: {},
+        openGroups: @js($openGroups),
+        initialOpenGroups: @js($openGroups),
         toggleGroup(group) {
+            // Don't allow closing if a menu item in this group is active (was initially open)
+            if (this.openGroups[group] && this.initialOpenGroups[group]) {
+                return; // Keep it open - menu item in this group is active
+            }
             this.openGroups[group] = !this.openGroups[group];
         },
         isGroupOpen(group) {
@@ -23,10 +91,24 @@
         }
     }"
     :class="collapsed ? 'w-16' : 'w-64'"
-    class="fixed left-0 top-0 h-screen bg-slate-800 text-white transition-all duration-300 ease-in-out overflow-hidden flex flex-col shadow-lg"
+    class="fixed left-0 top-0 h-screen bg-slate-800 text-white transition-all duration-300 ease-in-out overflow-visible flex flex-col shadow-lg z-40"
 >
+    <!-- Expand Button - Outside Sidebar -->
+    <button @click="toggleCollapse()" 
+            x-show="collapsed"
+            class="fixed top-4 bg-white/80 backdrop-blur-sm hover:bg-white/90 rounded-md transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 z-50"
+            style="left: 68px; width: 36px; height: 36px;"
+            :title="'Expand Sidebar'">
+        <svg class="w-5 h-5 text-gray-600 transition-all duration-200" 
+             fill="none" 
+             stroke="currentColor" 
+             viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+        </svg>
+    </button>
+
     <!-- Sidebar Header -->
-    <div class="flex items-center justify-between min-h-16 py-3 px-4 border-b border-slate-700 bg-slate-800">
+    <div :class="collapsed ? 'px-1 gap-1' : 'px-4'" class="flex items-center justify-between min-h-16 py-3 border-b border-slate-700 bg-slate-800 relative">
         @php
             $logoPath = hospital('logo_path');
             $isAbsoluteUrl = $logoPath && (Str::startsWith($logoPath, ['http://', 'https://']));
@@ -43,17 +125,22 @@
             @endif
             <span class="text-lg font-semibold break-words min-w-0 leading-tight">{{ hospital('name') ?? config('app.name', 'Laravel') }}</span>
         </a>
-        <a href="{{ route('dashboard') }}" x-show="collapsed" class="flex items-center justify-center w-full">
+        <a href="{{ route('dashboard') }}" x-show="collapsed" class="flex items-center justify-center flex-1 min-w-0 max-w-[18px]">
             @if($isAbsoluteUrl || ($normalizedPath && Storage::disk('public')->exists($normalizedPath)))
-                <img src="{{ $isAbsoluteUrl ? $logoPath : Storage::disk('public')->url($normalizedPath) }}" alt="{{ hospital('name') }}" class="h-8 w-auto" />
+                <img src="{{ $isAbsoluteUrl ? $logoPath : Storage::disk('public')->url($normalizedPath) }}" alt="{{ hospital('name') }}" class="h-4 w-auto max-w-full" />
             @else
-                <x-hospital-avatar name="{{ hospital('name') }}" color="{{ hospital('theme_color') }}" size="8" class="block" />
+                <x-hospital-avatar name="{{ hospital('name') }}" color="{{ hospital('theme_color') }}" size="4" class="block" />
             @endif
         </a>
-        <button @click="toggleCollapse()" class="p-1.5 rounded-md hover:bg-slate-700 transition-colors flex-shrink-0 ml-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path :class="collapsed ? 'hidden' : ''" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                <path :class="collapsed ? '' : 'hidden'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+        <button @click="toggleCollapse()" 
+                x-show="!collapsed"
+                class="p-1.5 hover:bg-slate-700 ml-2 rounded-md transition-all duration-200 flex-shrink-0 relative z-10 flex items-center justify-center"
+                :title="'Collapse Sidebar'">
+            <svg class="w-5 h-5 transition-all duration-200" 
+                 fill="none" 
+                 stroke="currentColor" 
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
             </svg>
         </button>
     </div>

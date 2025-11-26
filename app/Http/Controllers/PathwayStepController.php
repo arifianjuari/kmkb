@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PathwayStep;
 use App\Models\CostReference;
 use App\Models\ClinicalPathway;
+use App\Services\UnitCostService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,12 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class PathwayStepController extends Controller
 {
+    protected $unitCostService;
+
+    public function __construct(UnitCostService $unitCostService)
+    {
+        $this->unitCostService = $unitCostService;
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -48,10 +55,13 @@ class PathwayStepController extends Controller
         $step->category = $request->category;
         $step->service_code = $request->activity;
         $step->description = $request->description;
-        $step->estimated_cost = $request->standard_cost;
         $step->quantity = $request->input('quantity', 1);
         $step->criteria = $request->criteria ?? '';
         $step->cost_reference_id = $request->cost_reference_id;
+        
+        // Auto-fill unit cost if cost_reference_id is provided
+        $this->fillUnitCostForStep($step, $pathway, $request->standard_cost);
+        
         $step->save();
         
         Log::info('PathwayStep created', ['step_id' => $step->id]);
@@ -99,10 +109,13 @@ class PathwayStepController extends Controller
             $step->category = $validatedData['category'];
             $step->service_code = $validatedData['activity'];
             $step->description = $validatedData['description'];
-            $step->estimated_cost = $validatedData['standard_cost'];
             $step->quantity = $validatedData['quantity'] ?? 1;
             $step->criteria = $validatedData['criteria'] ?? '';
             $step->cost_reference_id = $validatedData['cost_reference_id'] ?? null;
+            
+            // Auto-fill unit cost if cost_reference_id is provided
+            $this->fillUnitCostForStep($step, $pathway, $validatedData['standard_cost']);
+            
             $step->save();
 
             return response()->json([
@@ -380,5 +393,41 @@ class PathwayStepController extends Controller
         }
 
         return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Helper method to fill unit cost for a pathway step.
+     *
+     * @param PathwayStep $step
+     * @param ClinicalPathway $pathway
+     * @param float|null $fallbackCost Fallback cost if unit cost is not available
+     * @return void
+     */
+    protected function fillUnitCostForStep(PathwayStep $step, ClinicalPathway $pathway, $fallbackCost = null)
+    {
+        if ($step->cost_reference_id) {
+            // Get unit cost version from pathway, or use latest
+            $version = $pathway->unit_cost_version;
+            
+            // Get unit cost from service
+            $unitCostData = $this->unitCostService->getUnitCost(
+                $step->cost_reference_id,
+                $version
+            );
+            
+            // Set unit cost applied and version
+            $step->unit_cost_applied = $unitCostData['unit_cost'];
+            $step->source_unit_cost_version = $unitCostData['version_label'];
+            
+            // Set estimated cost = unit_cost_applied * quantity
+            $step->estimated_cost = $unitCostData['unit_cost'] * ($step->quantity ?? 1);
+        } else {
+            // No cost reference, use fallback cost if provided
+            if ($fallbackCost !== null) {
+                $step->estimated_cost = $fallbackCost;
+            }
+            $step->unit_cost_applied = null;
+            $step->source_unit_cost_version = null;
+        }
     }
 }

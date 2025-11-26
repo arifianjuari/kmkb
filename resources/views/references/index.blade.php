@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 space-y-6">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
@@ -50,29 +53,50 @@
                     @foreach($references as $reference)
                         <article class="border border-gray-200 rounded-lg p-5 hover:border-indigo-200 transition">
                             <div class="flex flex-wrap items-start justify-between gap-3">
-                                <div class="flex-1 min-w-0">
-                                    <a href="{{ route('references.show', $reference) }}" class="text-lg font-semibold text-gray-900 hover:text-indigo-600">
-                                        {{ $reference->title }}
-                                    </a>
-                                    <div class="mt-1 text-sm text-gray-500">
-                                        {{ __('Ditulis oleh') }} {{ $reference->author->name ?? '—' }} ·
-                                        {{ optional($reference->published_at)->translatedFormat('d M Y H:i') ?? __('Belum dipublikasikan') }}
-                                    </div>
-                                    <div class="mt-2 flex items-center gap-2 flex-wrap text-xs font-medium">
-                                        <span class="px-2 py-1 rounded-full {{ $reference->status === \App\Models\Reference::STATUS_PUBLISHED ? 'bg-green-100 text-green-800' : ($reference->status === \App\Models\Reference::STATUS_ARCHIVED ? 'bg-gray-100 text-gray-700' : 'bg-yellow-100 text-yellow-800') }}">
-                                            {{ ucfirst($reference->status) }}
-                                        </span>
-                                        @if($reference->is_pinned)
-                                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-800 rounded-full">
-                                                {{ __('Disematkan') }}
-                                            </span>
+                                <div class="flex-1 min-w-0 flex gap-4">
+                                    @if($reference->image_path)
+                                        <div class="flex-shrink-0">
+                                            <a href="{{ route('references.show', $reference) }}">
+                                                <img src="{{ Storage::disk('public')->url($reference->image_path) }}" 
+                                                     alt="{{ $reference->title }}"
+                                                     class="w-24 h-24 object-cover rounded-lg border border-gray-200">
+                                            </a>
+                                        </div>
+                                    @endif
+                                    <div class="flex-1 min-w-0">
+                                        <a href="{{ route('references.show', $reference) }}" class="text-lg font-semibold text-gray-900 hover:text-indigo-600">
+                                            {{ $reference->title }}
+                                        </a>
+                                        <div class="mt-1 text-sm text-gray-500">
+                                            {{ __('Ditulis oleh') }} {{ $reference->author->name ?? '—' }} ·
+                                            {{ optional($reference->published_at)->translatedFormat('d M Y H:i') ?? __('Belum dipublikasikan') }}
+                                        </div>
+                                        @if($reference->tags && $reference->tags->count() > 0)
+                                            <div class="mt-2 flex items-center gap-1 flex-wrap">
+                                                @foreach($reference->tags as $tag)
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" 
+                                                          style="background-color: {{ $tag->color }}20; color: {{ $tag->color }};">
+                                                        {{ $tag->name }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
                                         @endif
-                                        <span class="inline-flex items-center gap-1 text-gray-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-3.333 0-6.222 2-8 4 1.778 2 4.667 4 8 4s6.222-2 8-4c-1.778-2-4.667-4-8-4Zm0 0v.01M12 12v.01" />
-                                            </svg>
-                                            {{ $reference->view_count }} {{ __('kali dibaca') }}
-                                        </span>
+                                        <div class="mt-2 flex items-center gap-2 flex-wrap text-xs font-medium">
+                                            <span class="px-2 py-1 rounded-full {{ $reference->status === \App\Models\Reference::STATUS_PUBLISHED ? 'bg-green-100 text-green-800' : ($reference->status === \App\Models\Reference::STATUS_ARCHIVED ? 'bg-gray-100 text-gray-700' : 'bg-yellow-100 text-yellow-800') }}">
+                                                {{ ucfirst($reference->status) }}
+                                            </span>
+                                            @if($reference->is_pinned)
+                                                <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-800 rounded-full">
+                                                    {{ __('Disematkan') }}
+                                                </span>
+                                            @endif
+                                            <span class="inline-flex items-center gap-1 text-gray-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-3.333 0-6.222 2-8 4 1.778 2 4.667 4 8 4s6.222-2 8-4c-1.778-2-4.667-4-8-4Zm0 0v.01M12 12v.01" />
+                                                </svg>
+                                                {{ $reference->view_count }} {{ __('kali dibaca') }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 

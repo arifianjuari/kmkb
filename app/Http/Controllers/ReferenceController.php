@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reference;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ReferenceController extends Controller
@@ -23,7 +25,7 @@ class ReferenceController extends Controller
         $search = $request->string('search')->toString();
         $status = $request->string('status')->toString();
 
-        $references = Reference::with('author')
+        $references = Reference::with(['author', 'tags'])
             ->where('hospital_id', hospital('id'))
             ->when($status && $status !== 'all', function ($query) use ($status) {
                 $query->where('status', $status);
@@ -55,9 +57,14 @@ class ReferenceController extends Controller
      */
     public function create()
     {
+        $tags = Tag::where('hospital_id', hospital('id'))
+            ->orderBy('name')
+            ->get();
+
         return view('references.create', [
             'reference' => new Reference(),
             'statusOptions' => $this->statusOptions(),
+            'tags' => $tags,
         ]);
     }
 
@@ -73,7 +80,19 @@ class ReferenceController extends Controller
         $data['slug'] = $this->generateUniqueSlug($data['title']);
         $data['published_at'] = $this->resolvePublishedAt($data['status'], $request->input('published_at'));
 
-        Reference::create($data);
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = Str::slug($data['title']) . '-' . time() . '.' . $image->getClientOriginalExtension();
+            Storage::disk('public')->makeDirectory('references');
+            $image->storeAs('references', $imageName, 'public');
+            $data['image_path'] = 'references/' . $imageName;
+        }
+
+        $reference = Reference::create($data);
+
+        // Handle tags
+        $this->syncTags($reference, $request->input('tags', []));
 
         return redirect()->route('references.index')
             ->with('success', 'Referensi berhasil dibuat.');
@@ -87,7 +106,7 @@ class ReferenceController extends Controller
         $reference->increment('view_count');
 
         return view('references.show', [
-            'reference' => $reference->fresh(['author']),
+            'reference' => $reference->fresh(['author', 'tags']),
         ]);
     }
 
@@ -96,9 +115,14 @@ class ReferenceController extends Controller
      */
     public function edit(Reference $reference)
     {
+        $tags = Tag::where('hospital_id', hospital('id'))
+            ->orderBy('name')
+            ->get();
+
         return view('references.edit', [
-            'reference' => $reference,
+            'reference' => $reference->load('tags'),
             'statusOptions' => $this->statusOptions(),
+            'tags' => $tags,
         ]);
     }
 
@@ -120,7 +144,30 @@ class ReferenceController extends Controller
             $reference->published_at
         );
 
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($reference->image_path && Storage::disk('public')->exists($reference->image_path)) {
+                Storage::disk('public')->delete($reference->image_path);
+            }
+
+            $image = $request->file('image');
+            $imageName = Str::slug($data['title']) . '-' . time() . '.' . $image->getClientOriginalExtension();
+            Storage::disk('public')->makeDirectory('references');
+            $image->storeAs('references', $imageName, 'public');
+            $data['image_path'] = 'references/' . $imageName;
+        } elseif ($request->has('remove_image') && $request->boolean('remove_image')) {
+            // Remove image if requested
+            if ($reference->image_path && Storage::disk('public')->exists($reference->image_path)) {
+                Storage::disk('public')->delete($reference->image_path);
+            }
+            $data['image_path'] = null;
+        }
+
         $reference->update($data);
+
+        // Handle tags
+        $this->syncTags($reference, $request->input('tags', []));
 
         return redirect()->route('references.index')
             ->with('success', 'Referensi berhasil diperbarui.');
@@ -131,6 +178,11 @@ class ReferenceController extends Controller
      */
     public function destroy(Reference $reference)
     {
+        // Delete image if exists
+        if ($reference->image_path && Storage::disk('public')->exists($reference->image_path)) {
+            Storage::disk('public')->delete($reference->image_path);
+        }
+
         $reference->delete();
 
         return redirect()->route('references.index')
@@ -145,13 +197,19 @@ class ReferenceController extends Controller
         return $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'content' => ['required', 'string'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:5120'], // Max 5MB
+            'remove_image' => ['nullable', 'boolean'],
             'status' => ['required', 'in:' . implode(',', array_keys($this->statusOptions()))],
             'is_pinned' => ['nullable', 'boolean'],
             'published_at' => ['nullable', 'date'],
+            'tags' => ['nullable', 'array'],
+            'tags.*' => ['nullable', 'string'],
         ], [], [
             'title' => 'judul',
             'content' => 'konten',
+            'image' => 'gambar',
             'status' => 'status',
+            'tags' => 'tag',
         ]);
     }
 
@@ -199,6 +257,39 @@ class ReferenceController extends Controller
         }
 
         return $existing ?? now();
+    }
+
+    /**
+     * Sync tags for a reference.
+     */
+    protected function syncTags(Reference $reference, array $tagInputs): void
+    {
+        $tagIds = [];
+
+        foreach ($tagInputs as $tagInput) {
+            if (empty(trim($tagInput))) {
+                continue;
+            }
+
+            // Check if tag exists by name
+            $tag = Tag::where('hospital_id', hospital('id'))
+                ->where('name', trim($tagInput))
+                ->first();
+
+            // If tag doesn't exist, create it
+            if (!$tag) {
+                $tag = Tag::create([
+                    'hospital_id' => hospital('id'),
+                    'name' => trim($tagInput),
+                    'slug' => Str::slug(trim($tagInput)),
+                ]);
+            }
+
+            $tagIds[] = $tag->id;
+        }
+
+        // Sync tags
+        $reference->tags()->sync($tagIds);
     }
 }
 

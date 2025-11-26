@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\CostReference;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class CostReferenceController extends Controller
 {
@@ -260,5 +263,172 @@ class CostReferenceController extends Controller
 
         return redirect()->route('cost-references.index')
             ->with('success', $deleted > 0 ? 'Selected cost references deleted successfully.' : 'No cost references were deleted.');
+    }
+
+    /**
+     * Download template Excel file for importing cost references.
+     *
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public function downloadTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Headers
+        $headers = ['Service Code', 'Service Description', 'Standard Cost', 'Unit', 'Source'];
+        $sheet->fromArray($headers, null, 'A1');
+
+        // Example row
+        $exampleRow = [
+            'SRV001',
+            'Contoh Layanan',
+            '100000',
+            'Kali',
+            'Manual'
+        ];
+        $sheet->fromArray([$exampleRow], null, 'A2');
+
+        // Format standard cost column
+        $sheet->getStyle('C2:C100')
+            ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+
+        // Auto size columns
+        foreach (range('A', 'E') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Style header row
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E3F2FD']
+            ]
+        ];
+        $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
+
+        $filename = 'cost_references_template.xlsx';
+        $headers = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control' => 'max-age=0',
+        ];
+
+        return response()->stream(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, 200, $headers);
+    }
+
+    /**
+     * Import cost references from Excel file.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $spreadsheet = IOFactory::load($file->getRealPath());
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+
+            // Skip header row
+            array_shift($rows);
+
+            $imported = 0;
+            $updated = 0;
+            $errors = [];
+
+            DB::beginTransaction();
+
+            foreach ($rows as $index => $row) {
+                // Skip empty rows
+                if (empty(array_filter($row))) {
+                    continue;
+                }
+
+                try {
+                    // Expected format: Service Code, Service Description, Standard Cost, Unit, Source
+                    $serviceCode = trim($row[0] ?? '');
+                    $serviceDescription = trim($row[1] ?? '');
+                    $standardCost = isset($row[2]) ? (float) str_replace([','], [''], (string) $row[2]) : 0;
+                    $unit = trim($row[3] ?? '');
+                    $source = trim($row[4] ?? 'Manual');
+
+                    // Validation
+                    if (empty($serviceCode) || empty($serviceDescription)) {
+                        $errors[] = "Baris " . ($index + 2) . ": Service Code dan Service Description wajib diisi";
+                        continue;
+                    }
+
+                    if ($standardCost < 0) {
+                        $errors[] = "Baris " . ($index + 2) . ": Standard Cost tidak boleh negatif";
+                        continue;
+                    }
+
+                    if (empty($unit)) {
+                        $errors[] = "Baris " . ($index + 2) . ": Unit wajib diisi";
+                        continue;
+                    }
+
+                    // Check if cost reference exists (by service_code and hospital_id)
+                    $existing = CostReference::where('hospital_id', hospital('id'))
+                        ->where('service_code', $serviceCode)
+                        ->first();
+
+                    $data = [
+                        'service_code' => $serviceCode,
+                        'service_description' => $serviceDescription,
+                        'standard_cost' => $standardCost,
+                        'unit' => $unit,
+                        'source' => $source,
+                        'hospital_id' => hospital('id'),
+                    ];
+
+                    if ($existing) {
+                        // Update existing
+                        $existing->update($data);
+                        $updated++;
+                    } else {
+                        // Create new
+                        CostReference::create($data);
+                        $imported++;
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
+                    continue;
+                }
+            }
+
+            DB::commit();
+
+            $message = "Import berhasil: {$imported} data baru ditambahkan";
+            if ($updated > 0) {
+                $message .= ", {$updated} data diperbarui";
+            }
+            if (!empty($errors)) {
+                $message .= ". Terjadi " . count($errors) . " error: " . implode('; ', array_slice($errors, 0, 5));
+                if (count($errors) > 5) {
+                    $message .= " dan " . (count($errors) - 5) . " error lainnya";
+                }
+            }
+
+            return redirect()->route('cost-references.index')
+                ->with('success', $message)
+                ->with('import_errors', $errors);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Cost reference import failed', ['error' => $e->getMessage()]);
+            return redirect()->route('cost-references.index')
+                ->with('error', 'Import gagal: ' . $e->getMessage());
+        }
     }
 }

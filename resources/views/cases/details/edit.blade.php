@@ -81,7 +81,7 @@
             <div>
                 <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
                 <input type="number" name="quantity" id="quantity" value="{{ old('quantity') ?? $detail->quantity }}" min="1"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" step="1"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" step="1">
                 @error('quantity')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -90,7 +90,7 @@
             <div>
                 <label for="actual_cost" class="block text-sm font-medium text-gray-700">Actual Cost</label>
                 <input type="number" name="actual_cost" id="actual_cost" value="{{ old('actual_cost') ?? $detail->actual_cost }}" min="0"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" step="1000"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" step="1000">
                 @error('actual_cost')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -127,6 +127,65 @@
         const customStepToggle = document.getElementById('custom_step_toggle');
         const pathwayStepField = document.getElementById('pathway_step_field');
         
+        // Unit cost version from case
+        const caseUnitCostVersion = @json($case->unit_cost_version ?? null);
+        
+        // Function to fetch unit cost from API
+        async function fetchUnitCost(serviceId, version = null) {
+            if (!serviceId) return null;
+            
+            try {
+                const url = new URL('/api/unit-cost', window.location.origin);
+                url.searchParams.append('serviceId', serviceId);
+                if (version) {
+                    url.searchParams.append('version', version);
+                } else if (caseUnitCostVersion) {
+                    url.searchParams.append('version', caseUnitCostVersion);
+                }
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch unit cost');
+                }
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching unit cost:', error);
+                return null;
+            }
+        }
+        
+        // Function to show unit cost warning
+        function showUnitCostWarning(message) {
+            let warningDiv = document.getElementById('unit-cost-warning');
+            if (!warningDiv) {
+                warningDiv = document.createElement('div');
+                warningDiv.id = 'unit-cost-warning';
+                warningDiv.className = 'mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800';
+                const actualCostInput = document.getElementById('actual_cost');
+                if (actualCostInput && actualCostInput.parentElement) {
+                    actualCostInput.parentElement.appendChild(warningDiv);
+                }
+            }
+            warningDiv.textContent = message;
+            warningDiv.classList.remove('hidden');
+        }
+        
+        // Function to hide unit cost warning
+        function hideUnitCostWarning() {
+            const warningDiv = document.getElementById('unit-cost-warning');
+            if (warningDiv) {
+                warningDiv.classList.add('hidden');
+            }
+        }
+        
         // Function to toggle between standard and custom steps
         function toggleCustomStep() {
             if (customStepToggle.checked) {
@@ -149,7 +208,7 @@
         // Add event listener to the toggle
         customStepToggle.addEventListener('change', toggleCustomStep);
         
-        pathwayStepSelect.addEventListener('change', function() {
+        pathwayStepSelect.addEventListener('change', async function() {
             const selectedOption = this.options[this.selectedIndex];
             
             if (selectedOption.value === '') {
@@ -157,20 +216,48 @@
                 serviceCodeInput.value = '';
                 quantityInput.value = '';
                 actualCostInput.value = '';
-                serviceItemInput.readOnly = !customStepToggle.checked; // Only readonly if not custom
-                serviceCodeInput.readOnly = !customStepToggle.checked; // Only readonly if not custom
-                quantityInput.readOnly = !customStepToggle.checked; // Only readonly if not custom
-                actualCostInput.readOnly = !customStepToggle.checked; // Only readonly if not custom
+                serviceItemInput.readOnly = !customStepToggle.checked;
+                serviceCodeInput.readOnly = !customStepToggle.checked;
+                quantityInput.readOnly = !customStepToggle.checked;
+                actualCostInput.readOnly = !customStepToggle.checked;
+                hideUnitCostWarning();
             } else {
                 const description = selectedOption.getAttribute('data-description');
                 const quantity = selectedOption.getAttribute('data-quantity');
                 const estimatedCost = selectedOption.getAttribute('data-estimated-cost');
                 const serviceCode = selectedOption.getAttribute('data-service-code');
+                const costReferenceId = selectedOption.getAttribute('data-cost-reference-id');
                 
                 serviceItemInput.value = description || '';
                 serviceCodeInput.value = serviceCode || '';
                 quantityInput.value = quantity || 1;
+                
+                // Fetch unit cost from API if cost reference ID is available
+                if (costReferenceId) {
+                    hideUnitCostWarning();
+                    const unitCostData = await fetchUnitCost(costReferenceId);
+                    
+                    if (unitCostData) {
+                        if (unitCostData.fallback_used) {
+                            // Using standard cost as fallback
+                            actualCostInput.value = unitCostData.unit_cost || estimatedCost || 0;
+                            showUnitCostWarning('Belum ada unit cost resmi – menggunakan Standard Cost dari Cost References');
+                        } else {
+                            // Using unit cost
+                            const qty = parseFloat(quantityInput.value) || 1;
+                            actualCostInput.value = Math.round((unitCostData.unit_cost || 0) * qty);
+                            hideUnitCostWarning();
+                        }
+                    } else {
+                        // Fallback to estimated cost if API fails
+                        actualCostInput.value = estimatedCost || 0;
+                        hideUnitCostWarning();
+                    }
+                } else {
+                    // No cost reference, use estimated cost
                 actualCostInput.value = estimatedCost || 0;
+                    hideUnitCostWarning();
+                }
                 
                 // Make fields editable after selecting a pathway step
                 serviceItemInput.readOnly = false;
@@ -179,6 +266,29 @@
                 actualCostInput.readOnly = false;
             }
         });
+        
+        // Update actual cost when quantity changes
+        if (quantityInput && actualCostInput) {
+            let lastUnitCost = null;
+            
+            quantityInput.addEventListener('change', async function() {
+                const selectedOption = pathwayStepSelect.options[pathwayStepSelect.selectedIndex];
+                const costReferenceId = selectedOption ? selectedOption.getAttribute('data-cost-reference-id') : null;
+                
+                if (costReferenceId && lastUnitCost === null) {
+                    // Fetch unit cost if not already stored
+                    const unitCostData = await fetchUnitCost(costReferenceId);
+                    if (unitCostData && !unitCostData.fallback_used) {
+                        lastUnitCost = unitCostData.unit_cost;
+                    }
+                }
+                
+                if (lastUnitCost !== null) {
+                    const qty = parseFloat(this.value) || 1;
+                    actualCostInput.value = Math.round(lastUnitCost * qty);
+                }
+            });
+        }
         
         // Initialize on page load
         toggleCustomStep();

@@ -7,6 +7,7 @@ use App\Models\ClinicalPathway;
 use App\Models\CaseDetail;
 use App\Models\PathwayStep;
 use App\Services\ComplianceCalculator;
+use App\Services\UnitCostService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,12 @@ use Carbon\Carbon;
 
 class PatientCaseController extends Controller
 {
+    protected $unitCostService;
+
+    public function __construct(UnitCostService $unitCostService)
+    {
+        $this->unitCostService = $unitCostService;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -191,7 +198,10 @@ class PatientCaseController extends Controller
             ->orderBy('step_order')
             ->get();
         
-        return view('cases.details.create', compact('case', 'steps'));
+        // Load cost references for autocomplete
+        $costReferences = \App\Models\CostReference::where('hospital_id', hospital('id'))->get();
+        
+        return view('cases.details.create', compact('case', 'steps', 'costReferences'));
     }
 
     /**
@@ -342,13 +352,28 @@ class PatientCaseController extends Controller
                 'status' => 'required|in:pending,completed,skipped',
                 'performed' => 'nullable|boolean',
                 'quantity' => 'nullable|integer|min:1',
-                'actual_cost' => 'nullable|numeric|min:0',
+                'actual_cost' => 'required|numeric|min:0',
                 'service_date' => 'nullable|date',
+            ], [
+                'service_item.required' => 'Kolom Service Item harus diisi.',
+                'status.required' => 'Kolom Status harus diisi.',
+                'status.in' => 'Status harus salah satu dari: pending, completed, atau skipped.',
+                'quantity.integer' => 'Quantity harus berupa angka.',
+                'quantity.min' => 'Quantity minimal 1.',
+                'actual_cost.required' => 'Kolom Actual Cost harus diisi.',
+                'actual_cost.numeric' => 'Actual Cost harus berupa angka.',
+                'actual_cost.min' => 'Actual Cost tidak boleh negatif.',
+                'service_date.date' => 'Service Date harus berupa tanggal yang valid.',
             ]);
             
             // Set default value for performed field if not provided
             if (!isset($validatedData['performed'])) {
                 $validatedData['performed'] = false;
+            }
+            
+            // Set default quantity to 1 if not provided
+            if (!isset($validatedData['quantity']) || $validatedData['quantity'] === null) {
+                $validatedData['quantity'] = 1;
             }
             
             // Log the validated data for debugging
@@ -357,6 +382,9 @@ class PatientCaseController extends Controller
             // Add the patient_case_id to the validated data
             $validatedData['patient_case_id'] = $case->id;
             $validatedData['hospital_id'] = hospital('id');
+            
+            // Auto-fill unit cost if cost_reference_id is available
+            $this->fillUnitCostForCaseDetail($validatedData, $case);
             
             // Log before creating the case detail
             \Illuminate\Support\Facades\Log::info('Creating Case Detail with Data: ', $validatedData);
@@ -372,9 +400,38 @@ class PatientCaseController extends Controller
             
             return redirect()->route('cases.show', $case)
                 ->with('success', 'Case detail added successfully.');
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()
-                ->with('error', 'Failed to add case detail: ' . $e->getMessage())
+                ->withErrors($e->errors())
+                ->withInput()
+                ->with('error', 'Mohon periksa kembali data yang diisi. Beberapa kolom wajib belum diisi atau formatnya tidak sesuai.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle database errors more gracefully
+            $errorMessage = 'Terjadi kesalahan saat menyimpan data.';
+            
+            if (str_contains($e->getMessage(), 'cannot be null')) {
+                $errorMessage = 'Mohon lengkapi semua kolom yang wajib diisi.';
+            } elseif (str_contains($e->getMessage(), 'foreign key constraint')) {
+                $errorMessage = 'Data yang dipilih tidak valid. Silakan pilih ulang.';
+            }
+            
+            \Illuminate\Support\Facades\Log::error('Database error in storeCaseDetail: ', [
+                'error' => $e->getMessage(),
+                'case_id' => $case->id,
+            ]);
+            
+            return redirect()->back()
+                ->with('error', $errorMessage)
+                ->withInput();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in storeCaseDetail: ', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'case_id' => $case->id,
+            ]);
+            
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.')
                 ->withInput();
         }
     }
@@ -645,8 +702,15 @@ class PatientCaseController extends Controller
                     'status' => 'required|in:pending,completed,skipped',
                     'performed' => 'nullable|boolean',
                     'quantity' => 'nullable|integer|min:1',
-                    'actual_cost' => 'nullable|numeric|min:0',
+                    'actual_cost' => 'required|numeric|min:0',
                     'service_date' => 'nullable|date',
+                ], [
+                    'service_item.required' => 'Kolom Service Item harus diisi.',
+                    'status.required' => 'Kolom Status harus diisi.',
+                    'status.in' => 'Status harus salah satu dari: pending, completed, atau skipped.',
+                    'actual_cost.required' => 'Kolom Actual Cost harus diisi.',
+                    'actual_cost.numeric' => 'Actual Cost harus berupa angka.',
+                    'actual_cost.min' => 'Actual Cost tidak boleh negatif.',
                 ]);
                 
                 // Explicitly set pathway_step_id to null for custom steps
@@ -660,8 +724,17 @@ class PatientCaseController extends Controller
                     'status' => 'required|in:pending,completed,skipped',
                     'performed' => 'nullable|boolean',
                     'quantity' => 'nullable|integer|min:1',
-                    'actual_cost' => 'nullable|numeric|min:0',
+                    'actual_cost' => 'required|numeric|min:0',
                     'service_date' => 'nullable|date',
+                ], [
+                    'pathway_step_id.required' => 'Kolom Pathway Step harus diisi.',
+                    'pathway_step_id.exists' => 'Pathway Step yang dipilih tidak valid.',
+                    'service_item.required' => 'Kolom Service Item harus diisi.',
+                    'status.required' => 'Kolom Status harus diisi.',
+                    'status.in' => 'Status harus salah satu dari: pending, completed, atau skipped.',
+                    'actual_cost.required' => 'Kolom Actual Cost harus diisi.',
+                    'actual_cost.numeric' => 'Actual Cost harus berupa angka.',
+                    'actual_cost.min' => 'Actual Cost tidak boleh negatif.',
                 ]);
             }
             
@@ -671,6 +744,9 @@ class PatientCaseController extends Controller
             }
             
             $validatedData['hospital_id'] = hospital('id');
+            
+            // Auto-fill unit cost if cost_reference_id is available
+            $this->fillUnitCostForCaseDetail($validatedData, $case);
             
             // Log before updating the case detail
             \Illuminate\Support\Facades\Log::info('Updating Case Detail with Data: ', $validatedData);
@@ -916,5 +992,46 @@ class PatientCaseController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Helper method to fill unit cost for a case detail.
+     *
+     * @param array $validatedData
+     * @param PatientCase $case
+     * @return void
+     */
+    protected function fillUnitCostForCaseDetail(array &$validatedData, PatientCase $case)
+    {
+        // Get cost_reference_id from pathway_step if not directly provided
+        if (!isset($validatedData['cost_reference_id']) && isset($validatedData['pathway_step_id'])) {
+            $pathwayStep = PathwayStep::find($validatedData['pathway_step_id']);
+            if ($pathwayStep && $pathwayStep->cost_reference_id) {
+                $validatedData['cost_reference_id'] = $pathwayStep->cost_reference_id;
+            }
+        }
+
+        // Auto-fill unit cost if cost_reference_id is available
+        if (isset($validatedData['cost_reference_id']) && $validatedData['cost_reference_id']) {
+            // Get unit cost version from case, or use latest
+            $version = $case->unit_cost_version;
+            
+            // Get unit cost from service
+            $unitCostData = $this->unitCostService->getUnitCost(
+                $validatedData['cost_reference_id'],
+                $version
+            );
+            
+            // Set unit cost applied
+            $validatedData['unit_cost_applied'] = $unitCostData['unit_cost'];
+            
+            // Set actual_cost to unit_cost_applied if not provided or if it's 0
+            if (!isset($validatedData['actual_cost']) || $validatedData['actual_cost'] == 0) {
+                $quantity = $validatedData['quantity'] ?? 1;
+                $validatedData['actual_cost'] = $unitCostData['unit_cost'] * $quantity;
+            }
+            
+            // Note: tariff_applied can be filled from final_tariffs if needed in the future
+        }
     }
 }

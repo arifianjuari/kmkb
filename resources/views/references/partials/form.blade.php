@@ -1,3 +1,6 @@
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
 <div class="space-y-6">
     <div>
         <label for="title" class="block text-sm font-medium text-gray-700">{{ __('Judul') }}</label>
@@ -53,6 +56,80 @@
     </div>
 
     <div>
+        <label for="image" class="block text-sm font-medium text-gray-700">{{ __('Gambar (JPEG/PNG)') }}</label>
+        <div class="mt-1">
+            @if(isset($reference) && $reference->image_path)
+                <div class="mb-3">
+                    <img src="{{ Storage::disk('public')->url($reference->image_path) }}" 
+                         alt="Preview" 
+                         class="max-w-xs h-auto rounded-lg border border-gray-300">
+                    <div class="mt-2 flex items-center">
+                        <input id="remove_image" name="remove_image" type="checkbox" value="1"
+                            class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                        <label for="remove_image" class="ml-2 text-sm text-red-600">
+                            {{ __('Hapus gambar') }}
+                        </label>
+                    </div>
+                </div>
+            @endif
+            <input type="file" name="image" id="image" accept="image/jpeg,image/png,image/jpg"
+                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+        </div>
+        <p class="mt-2 text-sm text-gray-500">
+            {{ __('Format: JPEG atau PNG. Maksimal ukuran: 5MB.') }}
+        </p>
+        @error('image')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div>
+        <label for="tags" class="block text-sm font-medium text-gray-700">{{ __('Tag') }}</label>
+        <div class="mt-1">
+            <div id="tags-container" class="flex flex-wrap gap-2 mb-2">
+                @if(isset($reference) && $reference->tags)
+                    @foreach($reference->tags as $tag)
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 tag-item" data-tag-id="{{ $tag->id }}">
+                            {{ $tag->name }}
+                            <button type="button" class="ml-2 text-indigo-600 hover:text-indigo-800 remove-tag" aria-label="Hapus tag">
+                                ×
+                            </button>
+                        </span>
+                    @endforeach
+                @endif
+            </div>
+            <div class="flex gap-2">
+                <input type="text" 
+                       id="tag-input" 
+                       placeholder="{{ __('Ketik tag dan tekan Enter') }}"
+                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                @if(isset($tags) && $tags->count() > 0)
+                    <select id="tag-select" 
+                            class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        <option value="">{{ __('Pilih tag yang sudah ada') }}</option>
+                        @foreach($tags as $tag)
+                            <option value="{{ $tag->name }}">{{ $tag->name }}</option>
+                        @endforeach
+                    </select>
+                @endif
+            </div>
+            <div id="tags-inputs" class="hidden">
+                @if(isset($reference) && $reference->tags)
+                    @foreach($reference->tags as $tag)
+                        <input type="hidden" name="tags[]" value="{{ $tag->name }}">
+                    @endforeach
+                @endif
+            </div>
+        </div>
+        <p class="mt-2 text-sm text-gray-500">
+            {{ __('Tambahkan tag untuk memudahkan pencarian. Tekan Enter untuk menambahkan tag baru.') }}
+        </p>
+        @error('tags')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div>
         <label for="reference-content" class="block text-sm font-medium text-gray-700">{{ __('Konten') }}</label>
         <div class="mt-1">
             <textarea id="reference-content" name="content" rows="12"
@@ -67,4 +144,92 @@
         @enderror
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tagInput = document.getElementById('tag-input');
+    const tagSelect = document.getElementById('tag-select');
+    const tagsContainer = document.getElementById('tags-container');
+    const tagsInputs = document.getElementById('tags-inputs');
+    const existingTags = new Set();
+
+    // Initialize existing tags
+    document.querySelectorAll('.tag-item').forEach(item => {
+        const tagName = item.textContent.trim().replace('×', '').trim();
+        existingTags.add(tagName);
+    });
+
+    function addTag(tagName) {
+        tagName = tagName.trim();
+        if (!tagName || existingTags.has(tagName)) {
+            return;
+        }
+
+        existingTags.add(tagName);
+
+        // Create visual tag
+        const tagSpan = document.createElement('span');
+        tagSpan.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 tag-item';
+        tagSpan.innerHTML = tagName + 
+            '<button type="button" class="ml-2 text-indigo-600 hover:text-indigo-800 remove-tag" aria-label="Hapus tag">×</button>';
+        
+        // Add remove handler
+        tagSpan.querySelector('.remove-tag').addEventListener('click', function() {
+            removeTag(tagName, tagSpan);
+        });
+
+        tagsContainer.appendChild(tagSpan);
+
+        // Create hidden input
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'tags[]';
+        hiddenInput.value = tagName;
+        tagsInputs.appendChild(hiddenInput);
+
+        // Clear input
+        tagInput.value = '';
+        if (tagSelect) tagSelect.value = '';
+    }
+
+    function removeTag(tagName, tagSpan) {
+        existingTags.delete(tagName);
+        tagSpan.remove();
+        
+        // Remove hidden input
+        const hiddenInputs = tagsInputs.querySelectorAll('input[value="' + tagName + '"]');
+        hiddenInputs.forEach(input => input.remove());
+    }
+
+    // Handle Enter key in tag input
+    if (tagInput) {
+        tagInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTag(tagInput.value);
+            }
+        });
+    }
+
+    // Handle tag select change
+    if (tagSelect) {
+        tagSelect.addEventListener('change', function(e) {
+            if (e.target.value) {
+                addTag(e.target.value);
+            }
+        });
+    }
+
+    // Handle remove tag buttons
+    document.querySelectorAll('.remove-tag').forEach(button => {
+        button.addEventListener('click', function() {
+            const tagItem = this.closest('.tag-item');
+            const tagName = tagItem.textContent.trim().replace('×', '').trim();
+            removeTag(tagName, tagItem);
+        });
+    });
+});
+</script>
+@endpush
 

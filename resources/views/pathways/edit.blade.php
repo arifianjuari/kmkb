@@ -85,6 +85,22 @@
                         </div>
                     </div>
                     
+                    <div class="mt-6">
+                        <label for="unit_cost_version" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Default Unit Cost Version') }}</label>
+                        <div class="mt-1">
+                            <select id="unit_cost_version" name="unit_cost_version" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('unit_cost_version') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="">{{ __('Pilih versi unit cost default') }}</option>
+                                @foreach($versions ?? [] as $version)
+                                    <option value="{{ $version }}" {{ old('unit_cost_version', $pathway->unit_cost_version) == $version ? 'selected' : '' }}>{{ $version }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Versi unit cost yang akan digunakan sebagai default saat menambah step baru di pathway ini.') }}</p>
+                        @error('unit_cost_version')
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
                     <div class="mt-6 flex justify-end space-x-2">
                         <a href="{{ route('pathways.index') }}" class="btn-secondary">
                             {{ __('Cancel') }}

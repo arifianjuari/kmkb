@@ -9,18 +9,29 @@ echo "🚀 Starting deployment process..."
 # This prevents logo and other uploaded files from being lost
 echo "💾 Backing up existing uploaded files..."
 BACKUP_DIR="storage/app/backup_$(date +%Y%m%d_%H%M%S)"
+BACKUP_NEEDED=false
+
+# Backup hospitals folder
 if [ -d "storage/app/public/hospitals" ] && [ "$(ls -A storage/app/public/hospitals 2>/dev/null | grep -v '^\.gitkeep$')" ]; then
-    # Backup existing files (excluding .gitkeep)
-    mkdir -p "$BACKUP_DIR"
-    find storage/app/public/hospitals -type f ! -name '.gitkeep' -exec cp {} "$BACKUP_DIR/" \; 2>/dev/null || true
-    if [ "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]; then
-        echo "✅ Backup created in $BACKUP_DIR"
-    else
-        echo "ℹ️  No files to backup (only .gitkeep exists)"
-        rmdir "$BACKUP_DIR" 2>/dev/null || true
-        BACKUP_DIR=""
+    mkdir -p "$BACKUP_DIR/hospitals"
+    find storage/app/public/hospitals -type f ! -name '.gitkeep' -exec cp {} "$BACKUP_DIR/hospitals/" \; 2>/dev/null || true
+    if [ "$(ls -A "$BACKUP_DIR/hospitals" 2>/dev/null)" ]; then
+        echo "✅ Hospitals backup created"
+        BACKUP_NEEDED=true
     fi
-else
+fi
+
+# Backup references folder
+if [ -d "storage/app/public/references" ] && [ "$(ls -A storage/app/public/references 2>/dev/null | grep -v '^\.gitkeep$')" ]; then
+    mkdir -p "$BACKUP_DIR/references"
+    find storage/app/public/references -type f ! -name '.gitkeep' -exec cp {} "$BACKUP_DIR/references/" \; 2>/dev/null || true
+    if [ "$(ls -A "$BACKUP_DIR/references" 2>/dev/null)" ]; then
+        echo "✅ References backup created"
+        BACKUP_NEEDED=true
+    fi
+fi
+
+if [ "$BACKUP_NEEDED" = false ]; then
     echo "ℹ️  No existing files to backup"
     BACKUP_DIR=""
 fi
@@ -28,6 +39,7 @@ fi
 # Ensure required storage directories exist and are writable
 echo "📁 Creating storage directories..."
 mkdir -p storage/app/public/hospitals
+mkdir -p storage/app/public/references
 mkdir -p storage/framework/cache
 mkdir -p storage/framework/sessions
 mkdir -p storage/framework/views
@@ -36,22 +48,47 @@ chmod -R 775 storage bootstrap/cache
 
 # Restore backed up files if they exist
 echo "📥 Restoring backed up files..."
-if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ] && [ "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]; then
-    # Restore files that were backed up
-    restored_count=0
-    for file in "$BACKUP_DIR"/*; do
-        if [ -f "$file" ]; then
-            filename=$(basename "$file")
-            if [ ! -f "storage/app/public/hospitals/$filename" ]; then
-                cp "$file" "storage/app/public/hospitals/" 2>/dev/null && restored_count=$((restored_count + 1)) || true
+if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ]; then
+    restored_total=0
+    
+    # Restore hospitals
+    if [ -d "$BACKUP_DIR/hospitals" ] && [ "$(ls -A "$BACKUP_DIR/hospitals" 2>/dev/null)" ]; then
+        restored_count=0
+        for file in "$BACKUP_DIR/hospitals"/*; do
+            if [ -f "$file" ]; then
+                filename=$(basename "$file")
+                if [ ! -f "storage/app/public/hospitals/$filename" ]; then
+                    cp "$file" "storage/app/public/hospitals/" 2>/dev/null && restored_count=$((restored_count + 1)) || true
+                fi
             fi
+        done
+        if [ $restored_count -gt 0 ]; then
+            echo "✅ Restored $restored_count hospital file(s)"
+            restored_total=$((restored_total + restored_count))
         fi
-    done
-    if [ $restored_count -gt 0 ]; then
-        echo "✅ Restored $restored_count file(s)"
-    else
+    fi
+    
+    # Restore references
+    if [ -d "$BACKUP_DIR/references" ] && [ "$(ls -A "$BACKUP_DIR/references" 2>/dev/null)" ]; then
+        restored_count=0
+        for file in "$BACKUP_DIR/references"/*; do
+            if [ -f "$file" ]; then
+                filename=$(basename "$file")
+                if [ ! -f "storage/app/public/references/$filename" ]; then
+                    cp "$file" "storage/app/public/references/" 2>/dev/null && restored_count=$((restored_count + 1)) || true
+                fi
+            fi
+        done
+        if [ $restored_count -gt 0 ]; then
+            echo "✅ Restored $restored_count reference file(s)"
+            restored_total=$((restored_total + restored_count))
+        fi
+    fi
+    
+    if [ $restored_total -eq 0 ]; then
         echo "ℹ️  All files already exist, no restore needed"
     fi
+    
     # Cleanup backup (keep latest backup for safety)
     # Remove backups older than 7 days
     find storage/app -type d -name "backup_*" -mtime +7 -exec rm -rf {} \; 2>/dev/null || true
@@ -61,6 +98,7 @@ fi
 
 # Ensure .gitkeep exists (prevents folder from being deleted by git clean)
 touch storage/app/public/hospitals/.gitkeep
+touch storage/app/public/references/.gitkeep
 
 # Create storage link (only if it doesn't exist)
 echo "🔗 Creating storage link..."

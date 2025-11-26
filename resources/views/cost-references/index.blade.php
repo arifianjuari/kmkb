@@ -19,6 +19,12 @@
                         </a>
                     @endif
                 </form>
+                <a href="{{ route('cost-references.template') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    {{ __('Download Template') }}
+                </a>
+                <button type="button" onclick="openImportModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    {{ __('Import Excel') }}
+                </button>
                 <a href="{{ route('cost-references.export') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     {{ __('Export Excel') }}
                 </a>
@@ -40,6 +46,47 @@
                         <p class="text-sm font-medium text-green-800">
                             {{ session('success') }}
                         </p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 rounded-md bg-red-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-red-800">
+                            {{ session('error') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('import_errors') && count(session('import_errors')) > 0)
+            <div class="mb-6 rounded-md bg-yellow-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">
+                            {{ __('Import Errors') }}
+                        </h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <ul class="list-disc list-inside space-y-1">
+                                @foreach(session('import_errors') as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -129,6 +176,57 @@
         </div>
     </div>
 </div>
+
+<!-- Import Modal -->
+<div id="importModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">{{ __('Import Cost References') }}</h3>
+                <button onclick="closeImportModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form action="{{ route('cost-references.import') }}" method="POST" enctype="multipart/form-data" id="importForm">
+                @csrf
+                <div class="mb-4">
+                    <label for="file" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ __('Pilih File Excel') }}
+                    </label>
+                    <input type="file" name="file" id="file" accept=".xlsx,.xls,.csv" required
+                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    <p class="mt-1 text-xs text-gray-500">
+                        {{ __('Format yang didukung: .xlsx, .xls, .csv (Maks: 10MB)') }}
+                    </p>
+                </div>
+                
+                <div class="mb-4 p-3 bg-blue-50 rounded-md">
+                    <p class="text-sm text-blue-800">
+                        <strong>{{ __('Format File:') }}</strong><br>
+                        {{ __('Kolom: Service Code, Service Description, Standard Cost, Unit, Source') }}
+                    </p>
+                    <a href="{{ route('cost-references.template') }}" class="text-sm text-blue-600 hover:text-blue-800 underline mt-2 inline-block">
+                        {{ __('Download Template Excel') }}
+                    </a>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3">
+                    <button type="button" onclick="closeImportModal()" 
+                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        {{ __('Batal') }}
+                    </button>
+                    <button type="submit" 
+                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        {{ __('Import') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -182,5 +280,22 @@
         // Initialize state
         updateButtonState();
     });
+
+    function openImportModal() {
+        document.getElementById('importModal').classList.remove('hidden');
+    }
+
+    function closeImportModal() {
+        document.getElementById('importModal').classList.add('hidden');
+        document.getElementById('importForm').reset();
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('importModal');
+        if (event.target == modal) {
+            closeImportModal();
+        }
+    }
 </script>
 @endpush

@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
 <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8 space-y-6">
     <div class="flex items-center justify-between">
         <div>
@@ -28,7 +31,23 @@
         <span class="px-2 py-1 rounded-full bg-gray-100 text-gray-700">
             {{ $reference->view_count }} {{ __('kali dibaca') }}
         </span>
+        @if($reference->tags && $reference->tags->count() > 0)
+            @foreach($reference->tags as $tag)
+                <span class="px-2 py-1 rounded-full text-xs font-medium" 
+                      style="background-color: {{ $tag->color }}20; color: {{ $tag->color }};">
+                    {{ $tag->name }}
+                </span>
+            @endforeach
+        @endif
     </div>
+
+    @if($reference->image_path)
+        <div class="mt-6">
+            <img src="{{ Storage::disk('public')->url($reference->image_path) }}" 
+                 alt="{{ $reference->title }}"
+                 class="w-full h-auto rounded-lg border border-gray-200 shadow-sm">
+        </div>
+    @endif
 
     <div class="bg-white shadow sm:rounded-lg">
         <div class="px-6 py-6 markdown-content">

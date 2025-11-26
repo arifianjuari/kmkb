@@ -178,22 +178,22 @@
                                     </td>
                                 </tr>
                                 @foreach($stepsByCategory[null]->sortBy('step_order') as $step)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <div class="flex items-center gap-2">
-                                                <span>{{ $step->service_code }}</span>
-                                                @if(method_exists($step, 'isConditional') ? $step->isConditional() : (!empty(trim($step->criteria ?? ''))))
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">{{ __('Conditional') }}</span>
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $step->description }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $step->criteria }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
-                                    </tr>
-                                @endforeach
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex items-center gap-2">
+                                            <span>{{ $step->service_code }}</span>
+                                            @if(method_exists($step, 'isConditional') ? $step->isConditional() : (!empty(trim($step->criteria ?? ''))))
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">{{ __('Conditional') }}</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $step->description }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $step->criteria }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
+                                </tr>
+                            @endforeach
                             @endif
                         </tbody>
                     </table>
@@ -250,6 +250,74 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Recalculate Summary Section -->
+                @auth
+                @if(auth()->user()?->hasRole('mutu') || auth()->user()?->hasRole('admin'))
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">{{ __('Recalculate Pathway Summary') }}</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <form id="recalculate-summary-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="recalc_version" class="block text-sm font-medium text-gray-700 mb-2">{{ __('Unit Cost Version') }}</label>
+                                    <select id="recalc_version" name="version" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">{{ __('Use pathway default') }}</option>
+                                        @foreach($versions ?? [] as $version)
+                                            <option value="{{ $version }}" {{ $pathway->unit_cost_version == $version ? 'selected' : '' }}>{{ $version }}</option>
+                                        @endforeach
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500">{{ __('Pilih versi unit cost untuk perhitungan. Kosongkan untuk menggunakan versi default pathway.') }}</p>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Mode') }}</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="radio" name="mode" value="simulation" checked class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                                            <span class="text-sm text-gray-700">{{ __('Simulasi') }}</span>
+                                            <span class="ml-2 text-xs text-gray-500">(Preview tanpa update data)</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio" name="mode" value="rebaseline" class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                                            <span class="text-sm text-gray-700">{{ __('Re-baseline') }}</span>
+                                            <span class="ml-2 text-xs text-gray-500">(Update semua step dengan unit cost baru)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-4">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    {{ __('Recalculate') }}
+                                </button>
+                                <div id="recalc-loading" class="hidden text-sm text-gray-600">
+                                    <span class="inline-block animate-spin mr-2">⏳</span>
+                                    {{ __('Calculating...') }}
+                                </div>
+                            </div>
+                            
+                            <div id="recalc-result" class="hidden mt-4 p-4 bg-white border border-gray-200 rounded-lg">
+                                <h5 class="text-sm font-semibold text-gray-900 mb-2">{{ __('Hasil Perhitungan') }}</h5>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-700">{{ __('Estimated Total Cost') }}:</span>
+                                        <span class="font-semibold text-gray-900" id="recalc-total-cost">Rp0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-700">{{ __('Estimated Total Tariff') }}:</span>
+                                        <span class="font-semibold text-gray-900" id="recalc-total-tariff">Rp0</span>
+                                    </div>
+                                    <div class="mt-2 pt-2 border-t border-gray-200">
+                                        <p class="text-xs text-gray-600" id="recalc-message"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                @endif
+                @endauth
             @else
                 <p class="text-gray-600">{{ __('No steps defined for this pathway yet.') }}</p>
             @endif
@@ -262,4 +330,80 @@
         </div>
     </div>
 </div>
+
+@auth
+@if(auth()->user()?->hasRole('mutu') || auth()->user()?->hasRole('admin'))
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const recalcForm = document.getElementById('recalculate-summary-form');
+        if (!recalcForm) return;
+        
+        recalcForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const version = formData.get('version') || '';
+            const mode = formData.get('mode') || 'simulation';
+            
+            const loadingDiv = document.getElementById('recalc-loading');
+            const resultDiv = document.getElementById('recalc-result');
+            const totalCostSpan = document.getElementById('recalc-total-cost');
+            const totalTariffSpan = document.getElementById('recalc-total-tariff');
+            const messageP = document.getElementById('recalc-message');
+            
+            // Show loading
+            loadingDiv.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+            
+            try {
+                const url = '{{ route("pathways.recalculate-summary", $pathway) }}';
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        version: version || null,
+                        mode: mode
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Format numbers
+                    const formatCurrency = (num) => {
+                        return 'Rp' + new Intl.NumberFormat('id-ID').format(Math.round(num || 0));
+                    };
+                    
+                    totalCostSpan.textContent = formatCurrency(data.estimated_total_cost);
+                    totalTariffSpan.textContent = formatCurrency(data.estimated_total_tariff);
+                    messageP.textContent = data.message || 'Perhitungan berhasil.';
+                    
+                    resultDiv.classList.remove('hidden');
+                    
+                    // If rebaseline mode, reload page to show updated data
+                    if (mode === 'rebaseline') {
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to recalculate summary'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menghitung ulang summary.');
+            } finally {
+                loadingDiv.classList.add('hidden');
+            }
+        });
+    });
+</script>
+@endsection
+@endif
+@endauth
 @endsection

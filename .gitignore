@@ -167,3 +167,7 @@ mix-manifest.json
 
 # Laravel Horizon
 /horizon
+
+# Development/Demo Seeders (jangan push ke GitHub)
+database/seeders/UnitCostIntegrationDemoSeeder.php
+database/seeders/README_UNIT_COST_DEMO.md
