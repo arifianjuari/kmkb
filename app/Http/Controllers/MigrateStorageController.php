@@ -116,15 +116,22 @@ class MigrateStorageController extends Controller
             return 'failed';
         }
         
+        // Cek apakah Object Storage tersedia
+        $uploadDisk = uploads_disk();
+        if ($uploadDisk === 'public') {
+            // Object Storage tidak tersedia, skip migration
+            return 'skipped';
+        }
+        
         // Cek apakah sudah ada di Object Storage
-        if (Storage::disk('uploads')->exists($normalizedPath)) {
+        if (Storage::disk($uploadDisk)->exists($normalizedPath)) {
             return 'skipped';
         }
         
         // Upload ke Object Storage
         try {
             $content = Storage::disk('public')->get($normalizedPath);
-            Storage::disk('uploads')->put($normalizedPath, $content);
+            Storage::disk($uploadDisk)->put($normalizedPath, $content);
             return 'migrated';
         } catch (\Exception $e) {
             return 'failed';

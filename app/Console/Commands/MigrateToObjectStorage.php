@@ -97,8 +97,15 @@ class MigrateToObjectStorage extends Command
             return 'failed';
         }
         
+        // Cek apakah Object Storage tersedia
+        $uploadDisk = uploads_disk();
+        if ($uploadDisk === 'public') {
+            $this->line("⏭️  Object Storage tidak tersedia, skip: {$path}");
+            return 'skipped';
+        }
+        
         // Cek apakah sudah ada di Object Storage
-        if (Storage::disk('uploads')->exists($normalizedPath)) {
+        if (Storage::disk($uploadDisk)->exists($normalizedPath)) {
             $this->line("✓ Already in Object Storage: {$path}");
             return 'skipped';
         }
@@ -111,7 +118,7 @@ class MigrateToObjectStorage extends Command
         // Upload ke Object Storage
         try {
             $content = Storage::disk('public')->get($normalizedPath);
-            Storage::disk('uploads')->put($normalizedPath, $content);
+            Storage::disk($uploadDisk)->put($normalizedPath, $content);
             $this->info("✅ Migrated: {$path}");
             return 'migrated';
         } catch (\Exception $e) {

@@ -85,9 +85,14 @@ if (!function_exists('uploads_disk')) {
      */
     function uploads_disk(): string
     {
-        // Check config instead of env (works after config cache)
-        $awsKey = config('filesystems.disks.uploads.key') ?? config('filesystems.disks.s3.key');
-        return $awsKey ? 'uploads' : 'public';
+        // Check if AWS credentials are available
+        // Try to read from config first (works after config cache), then fallback to env
+        $awsKey = config('filesystems.disks.uploads.key') 
+                ?? config('filesystems.disks.s3.key') 
+                ?? env('AWS_ACCESS_KEY_ID');
+        
+        // If key exists and not empty, use uploads disk (S3), otherwise use public disk (local)
+        return !empty($awsKey) ? 'uploads' : 'public';
     }
 }
 
