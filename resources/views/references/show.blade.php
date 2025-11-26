@@ -4,53 +4,60 @@
 @php
 use Illuminate\Support\Facades\Storage;
 @endphp
-<div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8 space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-semibold text-gray-900">{{ $reference->title }}</h1>
-            <p class="mt-2 text-sm text-gray-500">
-                {{ __('Ditulis oleh') }} {{ $reference->author->name ?? '—' }}
-                · {{ optional($reference->published_at)->translatedFormat('d M Y H:i') ?? __('Belum dipublikasikan') }}
-            </p>
-        </div>
-        <a href="{{ route('references.index') }}"
-           class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            {{ __('Kembali') }}
-        </a>
-    </div>
+<div class="min-h-screen bg-gray-50 -mx-4 sm:-mx-6 lg:-mx-8 -mt-6">
+    <!-- Header Section -->
+    <div class="bg-white border-b border-gray-200 sticky top-16 z-20 shadow-sm">
+        <div class="px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-3xl font-semibold text-gray-900">{{ $reference->title }}</h1>
+                    <p class="mt-2 text-sm text-gray-500">
+                        {{ __('Ditulis oleh') }} {{ $reference->author->name ?? '—' }}
+                        · {{ optional($reference->published_at)->translatedFormat('d M Y H:i') ?? __('Belum dipublikasikan') }}
+                    </p>
+                </div>
+                <a href="{{ route('references.index') }}"
+                   class="ml-4 inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    {{ __('Kembali') }}
+                </a>
+            </div>
 
-    <div class="flex flex-wrap items-center gap-2 text-xs font-medium">
-        <span class="px-2 py-1 rounded-full {{ $reference->status === \App\Models\Reference::STATUS_PUBLISHED ? 'bg-green-100 text-green-800' : ($reference->status === \App\Models\Reference::STATUS_ARCHIVED ? 'bg-gray-100 text-gray-700' : 'bg-yellow-100 text-yellow-800') }}">
-            {{ ucfirst($reference->status) }}
-        </span>
-        @if($reference->is_pinned)
-            <span class="px-2 py-1 rounded-full bg-indigo-100 text-indigo-800">
-                {{ __('Disematkan') }}
-            </span>
-        @endif
-        <span class="px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-            {{ $reference->view_count }} {{ __('kali dibaca') }}
-        </span>
-        @if($reference->tags && $reference->tags->count() > 0)
-            @foreach($reference->tags as $tag)
-                <span class="px-2 py-1 rounded-full text-xs font-medium" 
-                      style="background-color: {{ $tag->color }}20; color: {{ $tag->color }};">
-                    {{ $tag->name }}
+            <div class="mt-4 flex flex-wrap items-center gap-2 text-xs font-medium">
+                <span class="px-2 py-1 rounded-full {{ $reference->status === \App\Models\Reference::STATUS_PUBLISHED ? 'bg-green-100 text-green-800' : ($reference->status === \App\Models\Reference::STATUS_ARCHIVED ? 'bg-gray-100 text-gray-700' : 'bg-yellow-100 text-yellow-800') }}">
+                    {{ ucfirst($reference->status) }}
                 </span>
-            @endforeach
-        @endif
+                @if($reference->is_pinned)
+                    <span class="px-2 py-1 rounded-full bg-indigo-100 text-indigo-800">
+                        {{ __('Disematkan') }}
+                    </span>
+                @endif
+                <span class="px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                    {{ $reference->view_count }} {{ __('kali dibaca') }}
+                </span>
+                @if($reference->tags && $reference->tags->count() > 0)
+                    @foreach($reference->tags as $tag)
+                        <span class="px-2 py-1 rounded-full text-xs font-medium" 
+                              style="background-color: {{ $tag->color }}20; color: {{ $tag->color }};">
+                            {{ $tag->name }}
+                        </span>
+                    @endforeach
+                @endif
+            </div>
+        </div>
     </div>
 
+    <!-- Image Section -->
     @if($reference->image_path)
-        <div class="mt-6">
+        <div class="w-full bg-gray-100">
             <img src="{{ Storage::disk('public')->url($reference->image_path) }}" 
                  alt="{{ $reference->title }}"
-                 class="w-full h-auto rounded-lg border border-gray-200 shadow-sm">
+                 class="w-full h-auto object-cover max-h-[600px] object-center">
         </div>
     @endif
 
-    <div class="bg-white shadow sm:rounded-lg">
-        <div class="px-6 py-6 markdown-content">
+    <!-- Content Section -->
+    <div class="w-full bg-white">
+        <div class="px-4 sm:px-6 lg:px-8 py-8 max-w-none markdown-content">
             @php
                 // Convert single line breaks to <br> tags for better readability
                 $content = $reference->content ?? '';
@@ -71,8 +78,9 @@ use Illuminate\Support\Facades\Storage;
 @push('styles')
 <style>
 .markdown-content {
-    line-height: 1;
+    line-height: 1.75;
     color: #374151;
+    max-width: 100%;
 }
 
 .markdown-content h1 {
@@ -253,6 +261,16 @@ use Illuminate\Support\Facades\Storage;
     margin-bottom: 2em;
     max-width: 100%;
     height: auto;
+    border-radius: 0.5rem;
+}
+
+/* Ensure content doesn't overflow on very wide screens */
+@media (min-width: 1280px) {
+    .markdown-content {
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
 }
 </style>
 @endpush

@@ -384,16 +384,6 @@
                     </div>
                 </div>
 
-                @can('viewAny', \App\Models\Reference::class)
-                    <a href="{{ route('references.index') }}" 
-                       class="flex items-center px-3 py-2 text-sm font-medium rounded-lg mb-1 transition-colors {{ request()->routeIs('references.*') ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-slate-700 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h12M4 17h8" />
-                        </svg>
-                        <span x-show="!collapsed" class="truncate">{{ __('Referensi') }}</span>
-                    </a>
-                @endcan
-
                 <!-- System Administration Group (Admin only) -->
                 @if($isAdmin)
                     <div class="mb-1">
@@ -540,6 +530,17 @@
                         </div>
                     </div>
                 @endif
+
+                <!-- References (Last Menu) -->
+                @can('viewAny', \App\Models\Reference::class)
+                    <a href="{{ route('references.index') }}" 
+                       class="flex items-center px-3 py-2 text-sm font-medium rounded-lg mb-1 transition-colors {{ request()->routeIs('references.*') ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-slate-700 hover:text-white' }}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h12M4 17h8" />
+                        </svg>
+                        <span x-show="!collapsed" class="truncate">{{ __('Referensi') }}</span>
+                    </a>
+                @endcan
             @else
                 <!-- Superadmin Menu -->
                 <a href="{{ route('hospitals.index') }}" 

@@ -24,6 +24,7 @@ class ReferenceController extends Controller
     {
         $search = $request->string('search')->toString();
         $status = $request->string('status')->toString();
+        $tagId = $request->integer('tag');
 
         $references = Reference::with(['author', 'tags'])
             ->where('hospital_id', hospital('id'))
@@ -36,18 +37,29 @@ class ReferenceController extends Controller
                         ->orWhere('content', 'like', "%{$search}%");
                 });
             })
+            ->when($tagId, function ($query) use ($tagId) {
+                $query->whereHas('tags', function ($q) use ($tagId) {
+                    $q->where('tags.id', $tagId);
+                });
+            })
             ->orderByDesc('is_pinned')
             ->orderByDesc('published_at')
             ->orderByDesc('created_at')
             ->paginate(10)
             ->withQueryString();
 
+        $tags = Tag::where('hospital_id', hospital('id'))
+            ->orderBy('name')
+            ->get();
+
         return view('references.index', [
             'references' => $references,
             'statusOptions' => $this->statusOptions(includeAll: true),
+            'tags' => $tags,
             'filters' => [
                 'search' => $search,
                 'status' => $status ?: 'all',
+                'tag' => $tagId,
             ],
         ]);
     }
