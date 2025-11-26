@@ -57,9 +57,9 @@
                                     $normalizedPath = ltrim(Str::after($logoPath, '/storage/'), '/');
                                 }
                             @endphp
-                            @if($isAbsoluteUrl || ($normalizedPath && Storage::disk('public')->exists($normalizedPath)))
+                            @if($isAbsoluteUrl || ($normalizedPath && Storage::disk(uploads_disk())->exists($normalizedPath)))
                                 <div class="mb-2">
-                                    <img src="{{ $isAbsoluteUrl ? $logoPath : Storage::disk('public')->url($normalizedPath) }}" alt="{{ $hospital->name }}" class="h-16 w-16 rounded-full">
+                                    <img src="{{ $isAbsoluteUrl ? $logoPath : storage_url($normalizedPath) }}" alt="{{ $hospital->name }}" class="h-16 w-16 rounded-full">
                                 </div>
                             @elseif($logoPath)
                                 <div class="mb-2">

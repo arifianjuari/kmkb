@@ -76,3 +76,29 @@ if (!function_exists('hospital_storage_path')) {
         return storage_path("{$tenantPath}/{$path}");
     }
 }
+
+if (!function_exists('uploads_disk')) {
+    /**
+     * Get the disk name for uploads (S3 if credentials available, otherwise public).
+     *
+     * @return string
+     */
+    function uploads_disk(): string
+    {
+        return env('AWS_ACCESS_KEY_ID') ? 'uploads' : 'public';
+    }
+}
+
+if (!function_exists('storage_url')) {
+    /**
+     * Get the URL for a file in uploads storage.
+     *
+     * @param string $path
+     * @return string
+     */
+    function storage_url(string $path): string
+    {
+        $disk = uploads_disk();
+        return \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
+    }
+}

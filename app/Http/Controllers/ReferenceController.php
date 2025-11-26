@@ -96,8 +96,14 @@ class ReferenceController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imageName = Str::slug($data['title']) . '-' . time() . '.' . $image->getClientOriginalExtension();
-            Storage::disk('public')->makeDirectory('references');
-            $image->storeAs('references', $imageName, 'public');
+            $uploadDisk = $this->getUploadDisk();
+            
+            // S3 doesn't need makeDirectory, but local does
+            if ($uploadDisk === 'public') {
+                Storage::disk($uploadDisk)->makeDirectory('references');
+            }
+            
+            $image->storeAs('references', $imageName, $uploadDisk);
             $data['image_path'] = 'references/' . $imageName;
         }
 
@@ -157,21 +163,28 @@ class ReferenceController extends Controller
         );
 
         // Handle image upload
+        $uploadDisk = $this->getUploadDisk();
+        
         if ($request->hasFile('image')) {
             // Delete old image if exists
-            if ($reference->image_path && Storage::disk('public')->exists($reference->image_path)) {
-                Storage::disk('public')->delete($reference->image_path);
+            if ($reference->image_path && Storage::disk($uploadDisk)->exists($reference->image_path)) {
+                Storage::disk($uploadDisk)->delete($reference->image_path);
             }
 
             $image = $request->file('image');
             $imageName = Str::slug($data['title']) . '-' . time() . '.' . $image->getClientOriginalExtension();
-            Storage::disk('public')->makeDirectory('references');
-            $image->storeAs('references', $imageName, 'public');
+            
+            // S3 doesn't need makeDirectory, but local does
+            if ($uploadDisk === 'public') {
+                Storage::disk($uploadDisk)->makeDirectory('references');
+            }
+            
+            $image->storeAs('references', $imageName, $uploadDisk);
             $data['image_path'] = 'references/' . $imageName;
         } elseif ($request->has('remove_image') && $request->boolean('remove_image')) {
             // Remove image if requested
-            if ($reference->image_path && Storage::disk('public')->exists($reference->image_path)) {
-                Storage::disk('public')->delete($reference->image_path);
+            if ($reference->image_path && Storage::disk($uploadDisk)->exists($reference->image_path)) {
+                Storage::disk($uploadDisk)->delete($reference->image_path);
             }
             $data['image_path'] = null;
         }
@@ -191,8 +204,9 @@ class ReferenceController extends Controller
     public function destroy(Reference $reference)
     {
         // Delete image if exists
-        if ($reference->image_path && Storage::disk('public')->exists($reference->image_path)) {
-            Storage::disk('public')->delete($reference->image_path);
+        $uploadDisk = $this->getUploadDisk();
+        if ($reference->image_path && Storage::disk($uploadDisk)->exists($reference->image_path)) {
+            Storage::disk($uploadDisk)->delete($reference->image_path);
         }
 
         $reference->delete();
@@ -269,6 +283,14 @@ class ReferenceController extends Controller
         }
 
         return $existing ?? now();
+    }
+
+    /**
+     * Get the upload disk to use (S3 if credentials available, otherwise public).
+     */
+    protected function getUploadDisk(): string
+    {
+        return uploads_disk();
     }
 
     /**

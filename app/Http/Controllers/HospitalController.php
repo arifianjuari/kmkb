@@ -91,9 +91,14 @@ class HospitalController extends Controller
             try {
                 $logo = $request->file('logo');
                 $logoName = Str::slug($request->name) . '-' . time() . '.' . $logo->getClientOriginalExtension();
-                // Ensure directory and store on public disk
-                Storage::disk('public')->makeDirectory('hospitals');
-                $logo->storeAs('hospitals', $logoName, 'public');
+                $uploadDisk = uploads_disk();
+                
+                // S3 doesn't need makeDirectory, but local does
+                if ($uploadDisk === 'public') {
+                    Storage::disk($uploadDisk)->makeDirectory('hospitals');
+                }
+                
+                $logo->storeAs('hospitals', $logoName, $uploadDisk);
                 $data['logo_path'] = 'hospitals/' . $logoName;
             } catch (\Throwable $e) {
                 Log::error('Hospital logo upload failed on store()', [
@@ -164,15 +169,22 @@ class HospitalController extends Controller
         // Handle logo upload
         if ($request->hasFile('logo')) {
             try {
+                $uploadDisk = uploads_disk();
+                
                 // Delete old logo if exists
-                if ($hospital->logo_path && Storage::disk('public')->exists($hospital->logo_path)) {
-                    Storage::disk('public')->delete($hospital->logo_path);
+                if ($hospital->logo_path && Storage::disk($uploadDisk)->exists($hospital->logo_path)) {
+                    Storage::disk($uploadDisk)->delete($hospital->logo_path);
                 }
 
                 $logo = $request->file('logo');
                 $logoName = Str::slug($request->name) . '-' . time() . '.' . $logo->getClientOriginalExtension();
-                Storage::disk('public')->makeDirectory('hospitals');
-                $logo->storeAs('hospitals', $logoName, 'public');
+                
+                // S3 doesn't need makeDirectory, but local does
+                if ($uploadDisk === 'public') {
+                    Storage::disk($uploadDisk)->makeDirectory('hospitals');
+                }
+                
+                $logo->storeAs('hospitals', $logoName, $uploadDisk);
                 $data['logo_path'] = 'hospitals/' . $logoName;
             } catch (\Throwable $e) {
                 Log::error('Hospital logo upload failed on update()', [
@@ -197,8 +209,9 @@ class HospitalController extends Controller
     public function destroy(Hospital $hospital)
     {
         // Delete logo if exists
-        if ($hospital->logo_path && Storage::disk('public')->exists($hospital->logo_path)) {
-            Storage::disk('public')->delete($hospital->logo_path);
+        $uploadDisk = uploads_disk();
+        if ($hospital->logo_path && Storage::disk($uploadDisk)->exists($hospital->logo_path)) {
+            Storage::disk($uploadDisk)->delete($hospital->logo_path);
         }
 
         $hospital->delete();

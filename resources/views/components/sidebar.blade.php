@@ -108,7 +108,7 @@
     </button>
 
     <!-- Sidebar Header -->
-    <div :class="collapsed ? 'px-1 gap-1' : 'px-4'" class="flex items-center justify-between min-h-16 py-3 border-b border-slate-700 bg-slate-800 relative">
+    <div :class="collapsed ? 'px-2' : 'px-4'" class="flex items-center justify-between min-h-16 py-3 border-b border-slate-700 bg-slate-800 relative">
         @php
             $logoPath = hospital('logo_path');
             $isAbsoluteUrl = $logoPath && (Str::startsWith($logoPath, ['http://', 'https://']));
@@ -118,18 +118,18 @@
             }
         @endphp
         <a href="{{ route('dashboard') }}" x-show="!collapsed" class="flex items-start space-x-3 min-w-0 flex-1">
-            @if($isAbsoluteUrl || ($normalizedPath && Storage::disk('public')->exists($normalizedPath)))
-                <img src="{{ $isAbsoluteUrl ? $logoPath : Storage::disk('public')->url($normalizedPath) }}" alt="{{ hospital('name') }}" class="h-8 w-auto flex-shrink-0 mt-0.5" />
+            @if($isAbsoluteUrl || ($normalizedPath && Storage::disk(uploads_disk())->exists($normalizedPath)))
+                <img src="{{ $isAbsoluteUrl ? $logoPath : storage_url($normalizedPath) }}" alt="{{ hospital('name') }}" class="h-8 w-auto flex-shrink-0 mt-0.5" />
             @else
                 <x-hospital-avatar name="{{ hospital('name') }}" color="{{ hospital('theme_color') }}" size="8" class="block flex-shrink-0 mt-0.5" />
             @endif
             <span class="text-lg font-semibold break-words min-w-0 leading-tight">{{ hospital('name') ?? config('app.name', 'Laravel') }}</span>
         </a>
-        <a href="{{ route('dashboard') }}" x-show="collapsed" class="flex items-center justify-center flex-1 min-w-0 max-w-[18px]">
-            @if($isAbsoluteUrl || ($normalizedPath && Storage::disk('public')->exists($normalizedPath)))
-                <img src="{{ $isAbsoluteUrl ? $logoPath : Storage::disk('public')->url($normalizedPath) }}" alt="{{ hospital('name') }}" class="h-4 w-auto max-w-full" />
+        <a href="{{ route('dashboard') }}" x-show="collapsed" class="flex items-center justify-center w-full h-full min-w-0">
+            @if($isAbsoluteUrl || ($normalizedPath && Storage::disk(uploads_disk())->exists($normalizedPath)))
+                <img src="{{ $isAbsoluteUrl ? $logoPath : storage_url($normalizedPath) }}" alt="{{ hospital('name') }}" class="h-8 w-auto max-h-8 max-w-[3rem] object-contain" />
             @else
-                <x-hospital-avatar name="{{ hospital('name') }}" color="{{ hospital('theme_color') }}" size="4" class="block" />
+                <x-hospital-avatar name="{{ hospital('name') }}" color="{{ hospital('theme_color') }}" size="8" class="block flex-shrink-0" />
             @endif
         </a>
         <button @click="toggleCollapse()" 

@@ -6,34 +6,34 @@ use Illuminate\Support\Facades\Storage;
 @endphp
 <div class="min-h-screen bg-gray-50 -mx-4 sm:-mx-6 lg:-mx-8 -mt-6">
     <!-- Header Section -->
-    <div class="bg-white border-b border-gray-200 sticky top-16 z-20 shadow-sm">
+    <div class="reference-header bg-white border-b border-gray-200 shadow-sm">
         <div class="px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <h1 class="text-3xl font-semibold text-gray-900">{{ $reference->title }}</h1>
-                    <p class="mt-2 text-sm text-gray-500">
-                        {{ __('Ditulis oleh') }} {{ $reference->author->name ?? '—' }}
-                        · {{ optional($reference->published_at)->translatedFormat('d M Y H:i') ?? __('Belum dipublikasikan') }}
-                    </p>
-                </div>
-                <a href="{{ route('references.index') }}"
+            <h1 class="text-3xl font-semibold text-gray-900">{{ $reference->title }}</h1>
+            <p class="mt-2 text-sm text-gray-500">
+                {{ __('Ditulis oleh') }} {{ $reference->author->name ?? '—' }}
+                · {{ optional($reference->published_at)->translatedFormat('d M Y H:i') ?? __('Belum dipublikasikan') }}
+            </p>
+        </div>
+        <a href="{{ route('references.index') }}"
                    class="ml-4 inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    {{ __('Kembali') }}
-                </a>
-            </div>
+            {{ __('Kembali') }}
+        </a>
+    </div>
 
             <div class="mt-4 flex flex-wrap items-center gap-2 text-xs font-medium">
-                <span class="px-2 py-1 rounded-full {{ $reference->status === \App\Models\Reference::STATUS_PUBLISHED ? 'bg-green-100 text-green-800' : ($reference->status === \App\Models\Reference::STATUS_ARCHIVED ? 'bg-gray-100 text-gray-700' : 'bg-yellow-100 text-yellow-800') }}">
-                    {{ ucfirst($reference->status) }}
-                </span>
-                @if($reference->is_pinned)
-                    <span class="px-2 py-1 rounded-full bg-indigo-100 text-indigo-800">
-                        {{ __('Disematkan') }}
-                    </span>
-                @endif
-                <span class="px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                    {{ $reference->view_count }} {{ __('kali dibaca') }}
-                </span>
+        <span class="px-2 py-1 rounded-full {{ $reference->status === \App\Models\Reference::STATUS_PUBLISHED ? 'bg-green-100 text-green-800' : ($reference->status === \App\Models\Reference::STATUS_ARCHIVED ? 'bg-gray-100 text-gray-700' : 'bg-yellow-100 text-yellow-800') }}">
+            {{ ucfirst($reference->status) }}
+        </span>
+        @if($reference->is_pinned)
+            <span class="px-2 py-1 rounded-full bg-indigo-100 text-indigo-800">
+                {{ __('Disematkan') }}
+            </span>
+        @endif
+        <span class="px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+            {{ $reference->view_count }} {{ __('kali dibaca') }}
+        </span>
                 @if($reference->tags && $reference->tags->count() > 0)
                     @foreach($reference->tags as $tag)
                         <span class="px-2 py-1 rounded-full text-xs font-medium" 
@@ -49,7 +49,7 @@ use Illuminate\Support\Facades\Storage;
     <!-- Image Section -->
     @if($reference->image_path)
         <div class="w-full bg-gray-100">
-            <img src="{{ Storage::disk('public')->url($reference->image_path) }}" 
+            <img src="{{ storage_url($reference->image_path) }}" 
                  alt="{{ $reference->title }}"
                  class="w-full h-auto object-cover max-h-[600px] object-center">
         </div>
@@ -77,6 +77,14 @@ use Illuminate\Support\Facades\Storage;
 
 @push('styles')
 <style>
+/* Ensure header stays below navigation (64px = h-16) */
+.reference-header {
+    position: sticky;
+    top: 64px;
+    z-index: 25;
+    background-color: white;
+}
+
 .markdown-content {
     line-height: 1.75;
     color: #374151;

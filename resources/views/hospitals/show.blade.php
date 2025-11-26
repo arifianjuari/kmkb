@@ -18,7 +18,7 @@
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center mb-6">
                 @if($hospital->logo_path)
-                    <img src="{{ Storage::disk('public')->url($hospital->logo_path) }}" alt="{{ $hospital->name }}" class="h-20 w-20 rounded-full mr-6">
+                    <img src="{{ storage_url($hospital->logo_path) }}" alt="{{ $hospital->name }}" class="h-20 w-20 rounded-full mr-6">
                 @else
                     <x-hospital-avatar name="{{ $hospital->name }}" color="{{ $hospital->theme_color }}" size="20" class="mr-6" />
                 @endif
