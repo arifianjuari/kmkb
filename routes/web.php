@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CostReferenceController;
 use App\Http\Controllers\HospitalController;
 use App\Http\Controllers\ReferenceController;
+use App\Http\Controllers\MigrateStorageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -194,6 +195,10 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::resource('audit-logs', AuditLogController::class)->only(['index', 'show', 'destroy']);
         Route::delete('audit-logs', [AuditLogController::class, 'clear'])->name('audit-logs.clear');
+        
+        // Migration routes (temporary - remove after migration is complete)
+        Route::get('migrate-storage', [MigrateStorageController::class, 'index'])->name('migrate-storage.index');
+        Route::post('migrate-storage', [MigrateStorageController::class, 'migrate'])->name('migrate-storage');
     });
 });
 

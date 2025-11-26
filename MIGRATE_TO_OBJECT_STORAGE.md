@@ -2,15 +2,47 @@
 
 Script ini untuk memigrasikan file dari local storage ke Object Storage (S3/R2 bucket).
 
-## Cara Menggunakan
+## Cara Menggunakan (Tanpa SSH)
 
-### 1. Jalankan di Laravel Cloud SSH Terminal
+Karena Laravel Cloud tidak menyediakan SSH, gunakan salah satu metode berikut:
 
+### Metode 1: Artisan Command (RECOMMENDED)
+
+Laravel Cloud biasanya menyediakan cara untuk menjalankan Artisan commands. Cek di Laravel Cloud Dashboard apakah ada fitur "Run Command" atau "Artisan".
+
+Jika tersedia, jalankan:
 ```bash
-php artisan tinker
+php artisan storage:migrate-to-s3
 ```
 
-### 2. Copy dan paste script berikut:
+Atau dengan dry-run untuk melihat file yang akan dimigrasi:
+```bash
+php artisan storage:migrate-to-s3 --dry-run
+```
+
+### Metode 2: Via Web Interface (Temporary Route)
+
+1. Login sebagai admin
+2. Akses route: `POST /migrate-storage`
+3. Atau buat tombol di admin panel untuk trigger migrasi
+
+**⚠️ PENTING:** Hapus route ini setelah migrasi selesai untuk keamanan!
+
+### Metode 3: Via Deployment Hook (Automatic)
+
+Tambahkan di Laravel Cloud Deployment Hook (After Deploy):
+
+```bash
+php artisan storage:migrate-to-s3
+```
+
+Ini akan otomatis memigrasikan file setiap deploy (hanya file yang belum dimigrasi).
+
+---
+
+## Metode Alternatif (Jika Artisan Command tidak tersedia)
+
+### Via Tinker (jika ada akses)
 
 ```php
 use Illuminate\Support\Facades\Storage;
