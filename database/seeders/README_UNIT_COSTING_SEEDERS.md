@@ -26,20 +26,40 @@ Seeder-seeder ini dibuat untuk menghasilkan data yang diperlukan dalam proses pe
 ### 2. AllocationDriversTableSeeder
 **Tabel**: `allocation_drivers`
 
-**Fungsi**: Membuat driver alokasi yang digunakan untuk mengalokasikan biaya dari support centers ke revenue centers.
+**Fungsi**: Membuat driver alokasi yang digunakan untuk mengalokasikan biaya dari support centers ke revenue centers. Driver ini dirancang sesuai dengan best practice rumah sakit di Indonesia.
 
 **Data yang dibuat**:
-- 10 allocation drivers:
-  - Luas Lantai (m²)
-  - Jumlah Karyawan (FTE)
-  - Jumlah Pasien
-  - Jumlah Tempat Tidur
-  - Volume Laundry (kg)
-  - Jam Layanan
-  - Jumlah Kunjungan
-  - Jumlah Tindakan
-  - Konsumsi Listrik (kWh)
-  - Konsumsi Air (m³)
+- **18 allocation drivers** yang dikelompokkan sebagai berikut:
+
+  **Gedung & Infrastruktur (3 driver)**:
+  - Luas Lantai (m²) - untuk alokasi biaya gedung, depresiasi, listrik, AC, kebersihan, keamanan, maintenance
+  - Konsumsi Listrik (kWh) - untuk alokasi biaya listrik secara akurat
+  - Konsumsi Air (m³) - untuk alokasi biaya air secara akurat
+
+  **SDM & Administrasi (4 driver)**:
+  - Jumlah Karyawan (FTE) - untuk alokasi biaya SDM, kantin, pelatihan, administrasi umum
+  - Jumlah Pasien Rawat Inap - untuk alokasi biaya medical record, administrasi rawat inap
+  - Jumlah Pasien Rawat Jalan - untuk alokasi biaya administrasi rawat jalan, pendaftaran
+  - Jumlah Kunjungan - untuk alokasi biaya administrasi, pendaftaran, kasir
+
+  **Rawat Inap (3 driver)**:
+  - Jumlah Tempat Tidur (TT) - untuk alokasi biaya perawatan, housekeeping, maintenance ruangan
+  - Jumlah Kamar - untuk alokasi biaya housekeeping, maintenance ruangan
+  - Bed Days (hari) - untuk alokasi biaya perawatan, laundry, makanan, BHP (lebih akurat)
+
+  **Laundry (1 driver)**:
+  - Volume Laundry (kg) - untuk alokasi biaya laundry secara proporsional
+
+  **Operasional Medis (5 driver)**:
+  - Jumlah Tindakan - untuk alokasi biaya operasional, BHP medis, peralatan medis
+  - Jumlah Pemeriksaan - untuk alokasi biaya laboratorium, radiologi, unit diagnostik
+  - Jumlah Sample - untuk alokasi biaya laboratorium (bahan lab, reagen)
+  - Jam Operasi - untuk alokasi biaya OK/Bedah, anestesi, peralatan operasi
+  - Jam Layanan - untuk alokasi biaya operasional umum dan overhead
+
+  **Depresiasi & Peralatan (2 driver)**:
+  - Jam Pakai Alat - untuk alokasi biaya depresiasi peralatan medis secara proporsional
+  - Jumlah Unit Alat - untuk alokasi biaya depresiasi dan maintenance peralatan
 
 **Dependencies**: `HospitalsTableSeeder`
 
@@ -183,7 +203,7 @@ ServiceVolumesTableSeeder
 Setelah semua seeder dijalankan, Anda akan memiliki:
 
 1. **34 Expense Categories** - Kategori pengeluaran untuk klasifikasi biaya
-2. **10 Allocation Drivers** - Driver untuk alokasi biaya
+2. **18 Allocation Drivers** - Driver untuk alokasi biaya (sesuai best practice RS Indonesia)
 3. **~765 GL Expenses** - Data pengeluaran riil per cost center (3 bulan)
 4. **~957 Driver Statistics** - Data driver per cost center (3 bulan)
 5. **~13 Allocation Maps** - Mapping alokasi dengan step sequence

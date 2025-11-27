@@ -38,22 +38,8 @@
         </div>
         <div id="allocation-drivers-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
             <p class="mb-2">
-                <span class="font-semibold">Allocation Driver</span> adalah daftar driver/statistik yang digunakan untuk membagi biaya overhead ke cost center lain.
+                <span class="font-semibold">Allocation Driver</span> adalah dasar pembagi biaya untuk memindahkan biaya unit support ke unit layanan (revenue). Pilih driver yang paling mencerminkan konsumsi sumber daya, misalnya luas area (m²), jumlah pegawai (FTE), kg linen, atau jumlah set steril. Driver akan digunakan pada Allocation Maps dan Run Allocation.
             </p>
-            <div class="mb-2">
-                <p class="font-semibold mb-1">Contoh isi:</p>
-                <ul class="list-disc list-inside space-y-1 ml-2">
-                    <li>Luas ruangan (m²) per cost center</li>
-                    <li>Jumlah pegawai (FTE)</li>
-                    <li>Kilo laundry</li>
-                    <li>Jumlah meal pasien</li>
-                    <li>Jam pemakaian alat, dll</li>
-                </ul>
-            </div>
-            <div>
-                <p class="font-semibold mb-1">Peran di sistem:</p>
-                <p class="ml-2">Digunakan di Allocation Maps untuk menentukan cara pembagian biaya support → revenue center.</p>
-            </div>
         </div>
         
         @if(session('success'))

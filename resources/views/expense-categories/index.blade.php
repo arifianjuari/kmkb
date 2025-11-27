@@ -8,18 +8,15 @@
         'variable' => __('Variable'),
         'semi_variable' => __('Semi Variable'),
     ];
-
-    $costTypeCounts = [
-        'all' => $expenseCategories->count(),
-        'fixed' => $expenseCategories->where('cost_type', 'fixed')->count(),
-        'variable' => $expenseCategories->where('cost_type', 'variable')->count(),
-        'semi_variable' => $expenseCategories->where('cost_type', 'semi_variable')->count(),
+    
+    $allocationCategoryTabs = [
+        'all' => __('All Categories'),
+        'gaji' => __('Gaji'),
+        'bhp_medis' => __('BHP Medis'),
+        'bhp_non_medis' => __('BHP Non Medis'),
+        'depresiasi' => __('Depresiasi'),
+        'lain_lain' => __('Lain-lain'),
     ];
-
-    $initialTab = request('cost_type') ?: 'all';
-    if (! array_key_exists($initialTab, $costTypeTabs)) {
-        $initialTab = 'all';
-    }
 @endphp
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
@@ -122,22 +119,60 @@
             </div>
         @endif
         
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg" x-data="{ activeTab: {{ json_encode($initialTab) }} }" x-cloak>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
             <div class="px-4 py-5 sm:p-6">
-                <div class="flex flex-wrap items-center gap-2 mb-6">
-                    @foreach($costTypeTabs as $key => $label)
-                        <button
-                            type="button"
-                            @click="activeTab = '{{ $key }}'"
-                            :class="activeTab === '{{ $key }}' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'"
-                            class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500"
-                        >
-                            <span>{{ $label }}</span>
-                            <span class="text-xs font-semibold text-gray-500" :class="activeTab === '{{ $key }}' ? 'text-white/80' : ''">
-                                {{ $costTypeCounts[$key] }}
-                            </span>
-                        </button>
-                    @endforeach
+                <div class="mb-6 space-y-4">
+                    {{-- Cost Type Tabs (Indigo) --}}
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">{{ __('Cost Type') }}</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            @foreach($costTypeTabs as $key => $label)
+                                @php
+                                    $isActive = ($key === 'all' && !$costType) || ($key === $costType);
+                                    $urlParams = request()->except('cost_type', 'page');
+                                    if ($key !== 'all') {
+                                        $urlParams['cost_type'] = $key;
+                                    }
+                                    $tabUrl = route('expense-categories.index', $urlParams);
+                                @endphp
+                                <a
+                                    href="{{ $tabUrl }}"
+                                    class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 {{ $isActive ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
+                                >
+                                    <span>{{ $label }}</span>
+                                    <span class="text-xs font-semibold {{ $isActive ? 'text-white/80' : 'text-gray-500' }}">
+                                        {{ $costTypeCounts[$key] ?? 0 }}
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                    
+                    {{-- Allocation Category Tabs (Emerald/Green) --}}
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">{{ __('Allocation Category') }}</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            @foreach($allocationCategoryTabs as $key => $label)
+                                @php
+                                    $isActive = ($key === 'all' && !$allocationCategory) || ($key === $allocationCategory);
+                                    $urlParams = request()->except('allocation_category', 'page');
+                                    if ($key !== 'all') {
+                                        $urlParams['allocation_category'] = $key;
+                                    }
+                                    $tabUrl = route('expense-categories.index', $urlParams);
+                                @endphp
+                                <a
+                                    href="{{ $tabUrl }}"
+                                    class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 {{ $isActive ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
+                                >
+                                    <span>{{ $label }}</span>
+                                    <span class="text-xs font-semibold {{ $isActive ? 'text-white/80' : 'text-gray-500' }}">
+                                        {{ $allocationCategoryCounts[$key] ?? 0 }}
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
                 @if($expenseCategories->count() > 0)
                     <div class="overflow-x-auto">
@@ -154,7 +189,7 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($expenseCategories as $category)
-                                    <tr x-show="activeTab === 'all' || activeTab === '{{ $category->cost_type }}'">
+                                    <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $category->account_code }}</td>
                                         <td class="px-6 py-4 text-sm text-gray-900">{{ $category->account_name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ucfirst(str_replace('_', ' ', $category->cost_type)) }}</td>

@@ -55,7 +55,26 @@
                         </div>
                         
                         <div class="col-span-12">
-                            <label for="allocation_category" class="block text-sm font-medium text-gray-700">{{ __('Allocation Category') }} <span class="text-red-500">*</span></label>
+                            <div class="flex items-center gap-2 mb-1">
+                                <label for="allocation_category" class="block text-sm font-medium text-gray-700">
+                                    {{ __('Allocation Category') }} <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative inline-flex" x-data="{ showTooltip: false }" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false">
+                                    <span class="inline-flex items-center justify-center w-4 h-4 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full hover:bg-indigo-50 cursor-help">i</span>
+                                    <div x-show="showTooltip" 
+                                         x-transition:enter="transition ease-out duration-200"
+                                         x-transition:enter-start="opacity-0 scale-95"
+                                         x-transition:enter-end="opacity-100 scale-100"
+                                         x-transition:leave="transition ease-in duration-150"
+                                         x-transition:leave-start="opacity-100 scale-100"
+                                         x-transition:leave-end="opacity-0 scale-95"
+                                         class="absolute left-0 bottom-full mb-2 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-2xl z-50 pointer-events-none"
+                                         style="display: none; background-color: rgba(17, 24, 39, 0.95); backdrop-filter: blur(4px);">
+                                        <p class="leading-relaxed text-white font-normal">Kelompok besar jenis biaya yang digunakan untuk memetakan GL Expenses ke struktur costing. Kategori ini membantu sistem menghasilkan breakdown unit cost (gaji, BHP medis, BHP non-medis, depresiasi, overhead), serta memastikan alokasi biaya dan analisis berjalan konsisten.</p>
+                                        <div class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style="border-top-color: rgba(17, 24, 39, 0.95);"></div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="mt-1">
                                 <select id="allocation_category" name="allocation_category" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                     <option value="">{{ __('Select Allocation Category') }}</option>

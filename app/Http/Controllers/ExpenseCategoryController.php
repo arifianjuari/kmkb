@@ -16,7 +16,10 @@ class ExpenseCategoryController extends Controller
         $allocationCategory = $request->get('allocation_category');
         $isActive = $request->get('is_active');
         
-        $query = ExpenseCategory::where('hospital_id', hospital('id'));
+        $baseQuery = ExpenseCategory::where('hospital_id', hospital('id'));
+        
+        // Build query for filtering
+        $query = clone $baseQuery;
         
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -39,7 +42,53 @@ class ExpenseCategoryController extends Controller
         
         $expenseCategories = $query->latest()->paginate(15)->appends($request->query());
         
-        return view('expense-categories.index', compact('expenseCategories', 'search', 'costType', 'allocationCategory', 'isActive'));
+        // Calculate counts for cost type tabs (considering other filters but not cost_type)
+        $costTypeCountQuery = clone $baseQuery;
+        if ($search) {
+            $costTypeCountQuery->where(function($q) use ($search) {
+                $q->where('account_code', 'LIKE', "%{$search}%")
+                  ->orWhere('account_name', 'LIKE', "%{$search}%");
+            });
+        }
+        if ($allocationCategory) {
+            $costTypeCountQuery->where('allocation_category', $allocationCategory);
+        }
+        if ($isActive !== null && $isActive !== '') {
+            $costTypeCountQuery->where('is_active', $isActive);
+        }
+        
+        $costTypeCounts = [
+            'all' => $costTypeCountQuery->count(),
+            'fixed' => (clone $costTypeCountQuery)->where('cost_type', 'fixed')->count(),
+            'variable' => (clone $costTypeCountQuery)->where('cost_type', 'variable')->count(),
+            'semi_variable' => (clone $costTypeCountQuery)->where('cost_type', 'semi_variable')->count(),
+        ];
+        
+        // Calculate counts for allocation category tabs (considering other filters but not allocation_category)
+        $allocationCountQuery = clone $baseQuery;
+        if ($search) {
+            $allocationCountQuery->where(function($q) use ($search) {
+                $q->where('account_code', 'LIKE', "%{$search}%")
+                  ->orWhere('account_name', 'LIKE', "%{$search}%");
+            });
+        }
+        if ($costType) {
+            $allocationCountQuery->where('cost_type', $costType);
+        }
+        if ($isActive !== null && $isActive !== '') {
+            $allocationCountQuery->where('is_active', $isActive);
+        }
+        
+        $allocationCategoryCounts = [
+            'all' => $allocationCountQuery->count(),
+            'gaji' => (clone $allocationCountQuery)->where('allocation_category', 'gaji')->count(),
+            'bhp_medis' => (clone $allocationCountQuery)->where('allocation_category', 'bhp_medis')->count(),
+            'bhp_non_medis' => (clone $allocationCountQuery)->where('allocation_category', 'bhp_non_medis')->count(),
+            'depresiasi' => (clone $allocationCountQuery)->where('allocation_category', 'depresiasi')->count(),
+            'lain_lain' => (clone $allocationCountQuery)->where('allocation_category', 'lain_lain')->count(),
+        ];
+        
+        return view('expense-categories.index', compact('expenseCategories', 'search', 'costType', 'allocationCategory', 'isActive', 'costTypeCounts', 'allocationCategoryCounts'));
     }
 
     public function create()
