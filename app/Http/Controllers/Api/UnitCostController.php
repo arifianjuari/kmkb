@@ -51,4 +51,64 @@ class UnitCostController extends Controller
 
         return response()->json($versions);
     }
+
+    /**
+     * Get unit cost calculations by cost reference ID.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getByCostReference(Request $request): JsonResponse
+    {
+        $request->validate([
+            'cost_reference_id' => 'required|exists:cost_references,id',
+        ]);
+
+        $costReferenceId = $request->input('cost_reference_id');
+        $hospitalId = hospital('id');
+
+        $unitCosts = \App\Models\UnitCostCalculation::where('hospital_id', $hospitalId)
+            ->where('cost_reference_id', $costReferenceId)
+            ->orderBy('period_year', 'desc')
+            ->orderBy('period_month', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'version_label' => $item->version_label,
+                    'period_year' => $item->period_year,
+                    'period_month' => $item->period_month,
+                    'total_unit_cost' => (float) $item->total_unit_cost,
+                ];
+            });
+
+        return response()->json($unitCosts);
+    }
+
+    /**
+     * Get single unit cost calculation by ID.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function show($id): JsonResponse
+    {
+        $hospitalId = hospital('id');
+
+        $unitCost = \App\Models\UnitCostCalculation::where('hospital_id', $hospitalId)
+            ->findOrFail($id);
+
+        return response()->json([
+            'id' => $unitCost->id,
+            'version_label' => $unitCost->version_label,
+            'period_year' => $unitCost->period_year,
+            'period_month' => $unitCost->period_month,
+            'cost_reference_id' => $unitCost->cost_reference_id,
+            'total_unit_cost' => (float) $unitCost->total_unit_cost,
+            'direct_cost_material' => (float) $unitCost->direct_cost_material,
+            'direct_cost_labor' => (float) $unitCost->direct_cost_labor,
+            'indirect_cost_overhead' => (float) $unitCost->indirect_cost_overhead,
+        ]);
+    }
 }

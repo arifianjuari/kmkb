@@ -3,8 +3,19 @@
 @section('content')
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">{{ __('Cost Centers') }}</h2>
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Cost Centers') }}</h2>
+                <button
+                    type="button"
+                    class="flex-shrink-0 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full w-5 h-5 flex items-center justify-center hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                    onclick="const p = document.getElementById('cost-centers-help'); if (p) { p.classList.toggle('hidden'); }"
+                    aria-label="{{ __('What is Cost Center?') }}"
+                    title="{{ __('What is Cost Center?') }}"
+                >
+                    i
+                </button>
+            </div>
             <div class="flex items-center space-x-2">
                 <form method="GET" action="{{ route('cost-centers.index') }}" class="flex items-center space-x-2">
                     <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('Search...') }}" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
@@ -33,6 +44,31 @@
                 <a href="{{ route('cost-centers.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                     {{ __('Add New Cost Center') }}
                 </a>
+            </div>
+        </div>
+        <div id="cost-centers-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
+            <p class="mb-2">
+                <span class="font-semibold">Cost Center</span> adalah daftar unit organisasi rumah sakit yang menjadi penampung biaya (cost pool).
+            </p>
+            <div class="mb-2">
+                <p class="font-semibold mb-1">Isi utama:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>Kode & nama cost center (Lab, OK, RI Kebidanan, Laundry, IPSRS, Manajemen, dll)</li>
+                    <li>Kategori:
+                        <ul class="list-circle list-inside ml-4 space-y-0.5">
+                            <li><span class="font-medium">Revenue center</span> - unit pelayanan langsung pasien</li>
+                            <li><span class="font-medium">Support/overhead center</span> - unit penunjang (laundry, CSSD, Gizi)</li>
+                        </ul>
+                    </li>
+                    <li>Tipe pelayanan (rawat inap, rawat jalan, penunjang, manajemen, dll)</li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-semibold mb-1">Peran di sistem:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>Semua biaya GL di-tag ke salah satu cost center</li>
+                    <li>Menjadi basis alokasi & perhitungan unit cost</li>
+                </ul>
             </div>
         </div>
         

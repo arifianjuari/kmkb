@@ -3,8 +3,19 @@
 @section('content')
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">{{ __('Expense Categories') }}</h2>
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Expense Categories') }}</h2>
+                <button
+                    type="button"
+                    class="flex-shrink-0 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full w-5 h-5 flex items-center justify-center hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                    onclick="const p = document.getElementById('expense-categories-help'); if (p) { p.classList.toggle('hidden'); }"
+                    aria-label="{{ __('What is Expense Category?') }}"
+                    title="{{ __('What is Expense Category?') }}"
+                >
+                    i
+                </button>
+            </div>
             <div class="flex items-center space-x-2">
                 <form method="GET" action="{{ route('expense-categories.index') }}" class="flex items-center space-x-2">
                     <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('Search...') }}" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
@@ -43,6 +54,14 @@
                     {{ __('Add New Expense Category') }}
                 </a>
             </div>
+        </div>
+        <div id="expense-categories-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
+            <p class="mb-1">
+                <span class="font-semibold">Expense Category</span> adalah pengelompokan akun biaya (beban) rumah sakit, misalnya gaji, BHP medis, BHP non medis, depresiasi, dan biaya lain-lain.
+            </p>
+            <p>
+                Kode 4 digit dengan awalan angka <span class="font-mono">5</span> mengikuti struktur chart of accounts, di mana <span class="font-mono">5xxx</span> berarti akun biaya (expenses), dan dua digit berikutnya (mis. <span class="font-mono">51xx</span>, <span class="font-mono">52xx</span>) membedakan kelompok seperti gaji, BHP medis, BHP non medis, depresiasi, dan lain-lain.
+            </p>
         </div>
         
         @if(session('success'))

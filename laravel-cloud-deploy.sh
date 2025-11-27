@@ -53,16 +53,16 @@ if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ]; then
     
     # Restore hospitals
     if [ -d "$BACKUP_DIR/hospitals" ] && [ "$(ls -A "$BACKUP_DIR/hospitals" 2>/dev/null)" ]; then
-        restored_count=0
+    restored_count=0
         for file in "$BACKUP_DIR/hospitals"/*; do
-            if [ -f "$file" ]; then
-                filename=$(basename "$file")
-                if [ ! -f "storage/app/public/hospitals/$filename" ]; then
-                    cp "$file" "storage/app/public/hospitals/" 2>/dev/null && restored_count=$((restored_count + 1)) || true
-                fi
+        if [ -f "$file" ]; then
+            filename=$(basename "$file")
+            if [ ! -f "storage/app/public/hospitals/$filename" ]; then
+                cp "$file" "storage/app/public/hospitals/" 2>/dev/null && restored_count=$((restored_count + 1)) || true
             fi
-        done
-        if [ $restored_count -gt 0 ]; then
+        fi
+    done
+    if [ $restored_count -gt 0 ]; then
             echo "✅ Restored $restored_count hospital file(s)"
             restored_total=$((restored_total + restored_count))
         fi

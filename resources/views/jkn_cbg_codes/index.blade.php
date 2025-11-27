@@ -3,11 +3,44 @@
 @section('content')
 <section class="mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('JKN CBG Codes') }}</h2>
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white whitespace-nowrap">{{ __('JKN CBG Codes') }}</h2>
+                <button
+                    type="button"
+                    class="flex-shrink-0 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full w-5 h-5 flex items-center justify-center hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors dark:text-indigo-400 dark:border-indigo-600 dark:hover:bg-indigo-900"
+                    onclick="const p = document.getElementById('jkn-cbg-codes-help'); if (p) { p.classList.toggle('hidden'); }"
+                    aria-label="{{ __('What is JKN CBG Code?') }}"
+                    title="{{ __('What is JKN CBG Code?') }}"
+                >
+                    i
+                </button>
+            </div>
             <a href="{{ route('jkn-cbg-codes.create') }}" class="btn-primary">
                 {{ __('Add New CBG Code') }}
             </a>
+        </div>
+        <div id="jkn-cbg-codes-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3 dark:bg-indigo-900 dark:border-indigo-700 dark:text-indigo-100">
+            <p class="mb-2">
+                <span class="font-semibold">JKN CBG Code</span> adalah master data kode INA-CBG (JKN) dan informasi dasarnya.
+            </p>
+            <div class="mb-2">
+                <p class="font-semibold mb-1">Isi utama:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>Kode CBG</li>
+                    <li>Deskripsi CBG</li>
+                    <li>Tarif paket INA-CBG per kelas / rumah sakit</li>
+                    <li>(Opsional) jenis kasus, severity, dll</li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-semibold mb-1">Peran di sistem:</p>
+                <p class="ml-2">Menjadi referensi untuk:</p>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                    <li>Tarif Comparison (tarif RS vs INA-CBG)</li>
+                    <li>Analisis Case Variance dan Pathway Performance berdasarkan CBG</li>
+                </ul>
+            </div>
         </div>
 
         @if(session('success'))

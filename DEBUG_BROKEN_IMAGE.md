@@ -35,15 +35,15 @@ echo "AWS Key: " . (!empty($key) ? "SET" : "NOT SET") . "\n";
 $ref = \App\Models\Reference::whereNotNull('image_path')->first();
 if ($ref) {
     echo "Image Path: {$ref->image_path}\n";
-    
+
     $disk = uploads_disk();
     $exists = \Illuminate\Support\Facades\Storage::disk($disk)->exists($ref->image_path);
     echo "Exists in disk '{$disk}': " . ($exists ? "YES" : "NO") . "\n";
-    
+
     // Cek di local storage juga
     $existsLocal = \Illuminate\Support\Facades\Storage::disk('public')->exists($ref->image_path);
     echo "Exists in local 'public': " . ($existsLocal ? "YES" : "NO") . "\n";
-    
+
     // Cek URL yang dihasilkan
     $url = storage_url($ref->image_path);
     echo "Generated URL: {$url}\n";
@@ -53,6 +53,7 @@ if ($ref) {
 ### 3. Cek URL yang Dihasilkan
 
 Buka browser console dan cek:
+
 - URL gambar yang dihasilkan
 - Error message (404, 403, CORS, dll)
 - Network tab untuk melihat request/response
@@ -82,6 +83,7 @@ if ($exists) {
 **Gejala:** File ada di local storage tapi tidak ada di Object Storage
 
 **Solusi:** Jalankan migrasi:
+
 - Via web: `https://kmkb.online/migrate-storage`
 - Via command: `php artisan storage:migrate-to-s3`
 
@@ -89,7 +91,8 @@ if ($exists) {
 
 **Gejala:** `config('filesystems.disks.public.driver')` masih `'local'` padahal credentials ada
 
-**Solusi:** 
+**Solusi:**
+
 - Pastikan bucket sudah di-attach ke environment dengan disk name "public"
 - Clear config cache: `php artisan config:clear && php artisan config:cache`
 
@@ -97,7 +100,8 @@ if ($exists) {
 
 **Gejala:** URL yang dihasilkan tidak mengarah ke bucket endpoint
 
-**Solusi:** 
+**Solusi:**
+
 - Cek apakah `storage_url()` menggunakan disk yang benar
 - Cek apakah path sudah dinormalisasi dengan benar
 
@@ -106,6 +110,7 @@ if ($exists) {
 **Gejala:** File ada tapi tidak bisa diakses (403 Forbidden)
 
 **Solusi:**
+
 - Pastikan bucket visibility adalah "Public"
 - Cek CORS policy di bucket settings
 
@@ -114,6 +119,7 @@ if ($exists) {
 Jika masih broken setelah semua langkah di atas:
 
 1. **Clear semua cache:**
+
    ```bash
    php artisan config:clear
    php artisan cache:clear
@@ -122,6 +128,7 @@ Jika masih broken setelah semua langkah di atas:
    ```
 
 2. **Rebuild cache:**
+
    ```bash
    php artisan config:cache
    php artisan route:cache
@@ -129,10 +136,10 @@ Jika masih broken setelah semua langkah di atas:
    ```
 
 3. **Verifikasi migrasi:**
+
    - Pastikan semua file sudah dimigrasi ke Object Storage
    - Cek apakah file ada di bucket via Laravel Cloud dashboard
 
 4. **Test upload baru:**
    - Upload gambar baru untuk test
    - Cek apakah gambar baru bisa tampil
-

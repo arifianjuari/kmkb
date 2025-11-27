@@ -3,8 +3,19 @@
 @section('content')
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">{{ __('GL Expenses') }}</h2>
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('GL Expenses') }}</h2>
+                <button
+                    type="button"
+                    class="flex-shrink-0 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full w-5 h-5 flex items-center justify-center hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                    onclick="const p = document.getElementById('gl-expenses-help'); if (p) { p.classList.toggle('hidden'); }"
+                    aria-label="{{ __('What is GL Expense?') }}"
+                    title="{{ __('What is GL Expense?') }}"
+                >
+                    i
+                </button>
+            </div>
             <div class="flex items-center space-x-2">
                 <a href="{{ route('gl-expenses.import') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
                     {{ __('Import Excel') }}
@@ -15,6 +26,27 @@
                 <a href="{{ route('gl-expenses.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                     {{ __('Add New GL Expense') }}
                 </a>
+            </div>
+        </div>
+        <div id="gl-expenses-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
+            <p class="mb-2">
+                <span class="font-semibold">GL Expenses</span> adalah modul untuk mengimpor/menginput data biaya riil dari sistem akuntansi (GL) per periode.
+            </p>
+            <div class="mb-2">
+                <p class="font-semibold mb-1">Isi utama:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>Periode (bulan/tahun)</li>
+                    <li>Cost center</li>
+                    <li>Expense category (dan akun GL)</li>
+                    <li>Nilai biaya</li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-semibold mb-1">Peran di sistem:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>Menjadi total biaya awal tiap cost center sebelum dialokasikan</li>
+                    <li>Di sinilah biaya overhead pertama kali masuk (di cost center support)</li>
+                </ul>
             </div>
         </div>
         

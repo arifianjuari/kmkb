@@ -129,6 +129,32 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::get('driver-statistics/export', [App\Http\Controllers\DriverStatisticController::class, 'export'])->name('driver-statistics.export');
     Route::resource('driver-statistics', App\Http\Controllers\DriverStatisticController::class);
 
+    // Allocation Maps
+    Route::resource('allocation-maps', App\Http\Controllers\AllocationMapController::class);
+
+    // Run Allocation
+    Route::get('allocation/run', [App\Http\Controllers\AllocationController::class, 'runForm'])->name('allocation.run.form');
+    Route::post('allocation/run', [App\Http\Controllers\AllocationController::class, 'run'])->name('allocation.run');
+
+    // Allocation Results
+    Route::get('allocation-results/export', [App\Http\Controllers\AllocationResultController::class, 'export'])->name('allocation-results.export');
+    Route::resource('allocation-results', App\Http\Controllers\AllocationResultController::class);
+
+    // Tariff Simulation
+    Route::get('tariff-simulation', [App\Http\Controllers\TariffSimulationController::class, 'index'])->name('tariff-simulation.index');
+    Route::post('tariff-simulation/simulate', [App\Http\Controllers\TariffSimulationController::class, 'simulate'])->name('tariff-simulation.simulate');
+    Route::get('tariff-simulation/preview', [App\Http\Controllers\TariffSimulationController::class, 'preview'])->name('tariff-simulation.preview');
+    Route::get('tariff-simulation/export', [App\Http\Controllers\TariffSimulationController::class, 'export'])->name('tariff-simulation.export');
+
+    // Final Tariffs
+    Route::get('final-tariffs/export', [App\Http\Controllers\FinalTariffController::class, 'export'])->name('final-tariffs.export');
+    Route::resource('final-tariffs', App\Http\Controllers\FinalTariffController::class);
+
+    // Tariff Explorer
+    Route::get('tariff-explorer', [App\Http\Controllers\TariffExplorerController::class, 'index'])->name('tariff-explorer.index');
+    Route::get('tariff-explorer/{finalTariff}', [App\Http\Controllers\TariffExplorerController::class, 'show'])->name('tariff-explorer.show');
+    Route::get('tariff-explorer/compare/{serviceId}', [App\Http\Controllers\TariffExplorerController::class, 'compare'])->name('tariff-explorer.compare');
+
     // Service Volumes
     Route::get('service-volumes/import', [App\Http\Controllers\ServiceVolumeController::class, 'importForm'])->name('service-volumes.import');
     Route::post('service-volumes/import', [App\Http\Controllers\ServiceVolumeController::class, 'import'])->name('service-volumes.import.process');

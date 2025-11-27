@@ -3,8 +3,19 @@
 @section('content')
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">{{ __('Driver Statistics') }}</h2>
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Driver Statistics') }}</h2>
+                <button
+                    type="button"
+                    class="flex-shrink-0 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full w-5 h-5 flex items-center justify-center hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                    onclick="const p = document.getElementById('driver-statistics-help'); if (p) { p.classList.toggle('hidden'); }"
+                    aria-label="{{ __('What is Driver Statistics?') }}"
+                    title="{{ __('What is Driver Statistics?') }}"
+                >
+                    i
+                </button>
+            </div>
             <div class="flex items-center space-x-2">
                 <a href="{{ route('driver-statistics.import') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
                     {{ __('Import Excel') }}
@@ -15,6 +26,24 @@
                 <a href="{{ route('driver-statistics.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                     {{ __('Add New Driver Statistic') }}
                 </a>
+            </div>
+        </div>
+        <div id="driver-statistics-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
+            <p class="mb-2">
+                <span class="font-semibold">Driver Statistics</span> adalah input angka driver aktual per cost center untuk periode yang sama dengan GL.
+            </p>
+            <div class="mb-2">
+                <p class="font-semibold mb-1">Contoh:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>Laundry: total kg per unit</li>
+                    <li>Gizi: jumlah meal</li>
+                    <li>IPSRS: jam layanan/maintenance</li>
+                    <li>Manajemen: FTE per unit</li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-semibold mb-1">Peran di sistem:</p>
+                <p class="ml-2">Digunakan oleh modul Allocation untuk menghitung porsi biaya overhead yang dibagikan ke tiap cost center.</p>
             </div>
         </div>
         

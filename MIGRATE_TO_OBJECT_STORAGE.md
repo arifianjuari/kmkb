@@ -11,11 +11,13 @@ Karena Laravel Cloud tidak menyediakan SSH, gunakan salah satu metode berikut:
 Laravel Cloud biasanya menyediakan cara untuk menjalankan Artisan commands. Cek di Laravel Cloud Dashboard apakah ada fitur "Run Command" atau "Artisan".
 
 Jika tersedia, jalankan:
+
 ```bash
 php artisan storage:migrate-to-s3
 ```
 
 Atau dengan dry-run untuk melihat file yang akan dimigrasi:
+
 ```bash
 php artisan storage:migrate-to-s3 --dry-run
 ```
@@ -63,33 +65,33 @@ $failed = 0;
 
 foreach ($hospitals as $hospital) {
     $path = $hospital->logo_path;
-    
+
     // Skip jika sudah absolute URL (sudah di Object Storage)
     if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
         continue;
     }
-    
+
     // Normalize path
     $normalizedPath = $path;
     if (str_starts_with($path, '/storage/') || str_starts_with($path, 'storage/')) {
         $normalizedPath = ltrim(str_after($path, '/storage/'), '/');
     }
-    
+
     // Cek apakah file ada di local storage
     if (!Storage::disk('public')->exists($normalizedPath)) {
         echo "⚠️  File tidak ditemukan: {$path}\n";
         $failed++;
         continue;
     }
-    
+
     // Upload ke Object Storage
     try {
         $content = Storage::disk('public')->get($normalizedPath);
         Storage::disk('uploads')->put($normalizedPath, $content);
-        
+
         // Update path di database (optional, karena helper function sudah handle)
         // $hospital->update(['logo_path' => $normalizedPath]);
-        
+
         echo "✅ Migrated: {$path}\n";
         $migrated++;
     } catch (\Exception $e) {
@@ -102,30 +104,30 @@ foreach ($hospitals as $hospital) {
 $references = \App\Models\Reference::whereNotNull('image_path')->get();
 foreach ($references as $reference) {
     $path = $reference->image_path;
-    
+
     // Skip jika sudah absolute URL
     if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
         continue;
     }
-    
+
     // Normalize path
     $normalizedPath = $path;
     if (str_starts_with($path, '/storage/') || str_starts_with($path, 'storage/')) {
         $normalizedPath = ltrim(str_after($path, '/storage/'), '/');
     }
-    
+
     // Cek apakah file ada di local storage
     if (!Storage::disk('public')->exists($normalizedPath)) {
         echo "⚠️  File tidak ditemukan: {$path}\n";
         $failed++;
         continue;
     }
-    
+
     // Upload ke Object Storage
     try {
         $content = Storage::disk('public')->get($normalizedPath);
         Storage::disk('uploads')->put($normalizedPath, $content);
-        
+
         echo "✅ Migrated: {$path}\n";
         $migrated++;
     } catch (\Exception $e) {
@@ -167,14 +169,14 @@ class MigrateToObjectStorage extends Command
         }
 
         $this->info('🚀 Memulai migrasi file ke Object Storage...');
-        
+
         $migrated = 0;
         $failed = 0;
 
         // Migrate hospitals
         $hospitals = Hospital::whereNotNull('logo_path')->get();
         $this->info("Found {$hospitals->count()} hospitals with logos");
-        
+
         foreach ($hospitals as $hospital) {
             $result = $this->migrateFile($hospital->logo_path, 'hospital');
             if ($result) {
@@ -187,7 +189,7 @@ class MigrateToObjectStorage extends Command
         // Migrate references
         $references = Reference::whereNotNull('image_path')->get();
         $this->info("Found {$references->count()} references with images");
-        
+
         foreach ($references as $reference) {
             $result = $this->migrateFile($reference->image_path, 'reference');
             if ($result) {
@@ -200,7 +202,7 @@ class MigrateToObjectStorage extends Command
         $this->info("\n📊 Summary:");
         $this->info("✅ Migrated: {$migrated}");
         $this->info("❌ Failed: {$failed}");
-        
+
         return 0;
     }
 
@@ -210,25 +212,25 @@ class MigrateToObjectStorage extends Command
         if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
             return true;
         }
-        
+
         // Normalize path
         $normalizedPath = $path;
         if (str_starts_with($path, '/storage/') || str_starts_with($path, 'storage/')) {
             $normalizedPath = ltrim(str_after($path, '/storage/'), '/');
         }
-        
+
         // Cek apakah file ada di local storage
         if (!Storage::disk('public')->exists($normalizedPath)) {
             $this->warn("⚠️  File tidak ditemukan: {$path}");
             return false;
         }
-        
+
         // Cek apakah sudah ada di Object Storage
         if (Storage::disk('uploads')->exists($normalizedPath)) {
             $this->info("✓ Already in Object Storage: {$path}");
             return true;
         }
-        
+
         // Upload ke Object Storage
         try {
             $content = Storage::disk('public')->get($normalizedPath);
@@ -244,6 +246,7 @@ class MigrateToObjectStorage extends Command
 ```
 
 Kemudian jalankan:
+
 ```bash
 php artisan storage:migrate-to-s3
 ```
@@ -251,6 +254,7 @@ php artisan storage:migrate-to-s3
 ## Setelah Migrasi
 
 Setelah semua file berhasil dimigrasi ke Object Storage:
+
 1. File baru akan otomatis tersimpan di Object Storage
 2. File tidak akan hilang lagi saat deploy
 3. Backup local storage tidak diperlukan lagi (tapi tetap ada sebagai safety net)
@@ -258,6 +262,7 @@ Setelah semua file berhasil dimigrasi ke Object Storage:
 ## Verifikasi
 
 Cek apakah file sudah di Object Storage:
+
 ```php
 php artisan tinker
 ```
@@ -272,4 +277,3 @@ echo Storage::disk('uploads')->exists($path) ? 'EXISTS in S3' : 'NOT in S3';
 echo "\n";
 echo Storage::disk('uploads')->url($path);
 ```
-

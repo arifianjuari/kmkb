@@ -3,8 +3,19 @@
 @section('content')
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">{{ __('Allocation Drivers') }}</h2>
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Allocation Drivers') }}</h2>
+                <button
+                    type="button"
+                    class="flex-shrink-0 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full w-5 h-5 flex items-center justify-center hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                    onclick="const p = document.getElementById('allocation-drivers-help'); if (p) { p.classList.toggle('hidden'); }"
+                    aria-label="{{ __('What is Allocation Driver?') }}"
+                    title="{{ __('What is Allocation Driver?') }}"
+                >
+                    i
+                </button>
+            </div>
             <div class="flex items-center space-x-2">
                 <form method="GET" action="{{ route('allocation-drivers.index') }}" class="flex items-center space-x-2">
                     <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('Search...') }}" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
@@ -23,6 +34,25 @@
                 <a href="{{ route('allocation-drivers.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                     {{ __('Add New Allocation Driver') }}
                 </a>
+            </div>
+        </div>
+        <div id="allocation-drivers-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
+            <p class="mb-2">
+                <span class="font-semibold">Allocation Driver</span> adalah daftar driver/statistik yang digunakan untuk membagi biaya overhead ke cost center lain.
+            </p>
+            <div class="mb-2">
+                <p class="font-semibold mb-1">Contoh isi:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>Luas ruangan (m²) per cost center</li>
+                    <li>Jumlah pegawai (FTE)</li>
+                    <li>Kilo laundry</li>
+                    <li>Jumlah meal pasien</li>
+                    <li>Jam pemakaian alat, dll</li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-semibold mb-1">Peran di sistem:</p>
+                <p class="ml-2">Digunakan di Allocation Maps untuk menentukan cara pembagian biaya support → revenue center.</p>
             </div>
         </div>
         

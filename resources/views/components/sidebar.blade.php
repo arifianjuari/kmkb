@@ -69,9 +69,22 @@
 
 <aside 
     x-data="{ 
-        collapsed: false,
+        collapsed: (() => {
+            // Load state from localStorage on initialization
+            const savedState = localStorage.getItem('sidebarCollapsed');
+            return savedState === 'true' ? true : false;
+        })(),
         openGroups: @js($openGroups),
         initialOpenGroups: @js($openGroups),
+        init() {
+            // Set initial state from localStorage
+            const savedState = localStorage.getItem('sidebarCollapsed');
+            this.collapsed = savedState === 'true' ? true : false;
+            // Store state globally for navbar access
+            window.sidebarCollapsed = this.collapsed;
+            // Dispatch event to parent to sync main content margin
+            window.dispatchEvent(new CustomEvent('sidebar-toggle', { detail: { collapsed: this.collapsed } }));
+        },
         toggleGroup(group) {
             // Don't allow closing if a menu item in this group is active (was initially open)
             if (this.openGroups[group] && this.initialOpenGroups[group]) {
@@ -84,6 +97,8 @@
         },
         toggleCollapse() {
             this.collapsed = !this.collapsed;
+            // Save state to localStorage
+            localStorage.setItem('sidebarCollapsed', this.collapsed.toString());
             // Store state globally for navbar access
             window.sidebarCollapsed = this.collapsed;
             // Dispatch event to parent to sync main content margin
@@ -251,15 +266,18 @@
                             </svg>
                         </button>
                         <div x-show="!collapsed && isGroupOpen('allocation')" class="ml-8 mt-1 space-y-1">
-                            <span class="flex items-center px-3 py-2 text-sm text-gray-500 cursor-not-allowed">
+                            <a href="{{ route('allocation-maps.index') }}" 
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('allocation-maps.*') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
                                 <span class="truncate">Allocation Maps</span>
-                            </span>
-                            <span class="flex items-center px-3 py-2 text-sm text-gray-500 cursor-not-allowed">
+                            </a>
+                            <a href="{{ route('allocation.run.form') }}" 
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('allocation.run.*') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
                                 <span class="truncate">Run Allocation</span>
-                            </span>
-                            <span class="flex items-center px-3 py-2 text-sm text-gray-500 cursor-not-allowed">
+                            </a>
+                            <a href="{{ route('allocation-results.index') }}" 
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('allocation-results.*') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
                                 <span class="truncate">Allocation Results</span>
-                            </span>
+                            </a>
                         </div>
                     </div>
                 @endif
@@ -310,15 +328,18 @@
                             </svg>
                         </button>
                         <div x-show="!collapsed && isGroupOpen('tariff')" class="ml-8 mt-1 space-y-1">
-                            <span class="flex items-center px-3 py-2 text-sm text-gray-500 cursor-not-allowed">
+                            <a href="{{ route('tariff-simulation.index') }}" 
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('tariff-simulation.*') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
                                 <span class="truncate">Tariff Simulation</span>
-                            </span>
-                            <span class="flex items-center px-3 py-2 text-sm text-gray-500 cursor-not-allowed">
+                            </a>
+                            <a href="{{ route('final-tariffs.index') }}" 
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('final-tariffs.*') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
                                 <span class="truncate">Final Tariffs</span>
-                            </span>
-                            <span class="flex items-center px-3 py-2 text-sm text-gray-500 cursor-not-allowed">
+                            </a>
+                            <a href="{{ route('tariff-explorer.index') }}" 
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('tariff-explorer.*') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-slate-700 hover:text-white' }}">
                                 <span class="truncate">Tariff Explorer</span>
-                            </span>
+                            </a>
                         </div>
                     </div>
                 @endif
@@ -560,27 +581,5 @@
             @endif
         @endauth
     </nav>
-
-    <!-- Sidebar Footer -->
-    <div class="border-t border-slate-700 p-4 bg-slate-800">
-        @auth
-            <div class="flex items-center space-x-3" x-show="!collapsed">
-                <div class="flex-shrink-0">
-                    <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                    </div>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-white truncate">{{ auth()->user()->name }}</p>
-                    <p class="text-xs text-gray-400 truncate">{{ auth()->user()->email }}</p>
-                </div>
-            </div>
-            <div x-show="collapsed" class="flex justify-center">
-                <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
-                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                </div>
-            </div>
-        @endauth
-    </div>
 </aside>
 

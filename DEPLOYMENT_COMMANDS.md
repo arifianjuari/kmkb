@@ -131,6 +131,7 @@ Backup/restore local storage masih diperlukan untuk:
 ### ⚠️ Masalah: Gambar Hilang Setelah Deploy
 
 **Penyebab:**
+
 - File masih tersimpan di local storage (bukan Object Storage)
 - Local storage terhapus saat fresh clone deployment
 - Backup/restore tidak bekerja dengan sempurna
@@ -138,11 +139,13 @@ Backup/restore local storage masih diperlukan untuk:
 **Solusi:**
 
 1. **Migrasi File ke Object Storage (RECOMMENDED)**
+
    - Jalankan script migrasi (lihat `MIGRATE_TO_OBJECT_STORAGE.md`)
    - Setelah migrasi, file baru akan otomatis tersimpan di Object Storage
    - File tidak akan hilang lagi saat deploy
 
 2. **Verifikasi Object Storage Setup**
+
    - Pastikan credentials AWS sudah di-set di Laravel Cloud
    - Pastikan bucket sudah di-attach ke environment
    - Test upload file baru - seharusnya tersimpan di bucket

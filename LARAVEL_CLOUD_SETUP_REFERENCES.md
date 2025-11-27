@@ -1,6 +1,28 @@
 # Setup Cepat: Upload Gambar References di Laravel Cloud
 
-## 🚀 Langkah-Langkah Setup
+## ⚠️ PENTING: Mencegah Gambar Hilang Saat Deploy
+
+**Gambar akan hilang setiap deploy jika tidak di-setup!** Gunakan salah satu solusi berikut:
+
+### 🎯 Solusi TERBAIK: Persistent Storage (RECOMMENDED)
+
+**Ini adalah solusi PERMANEN** - gambar tidak akan hilang lagi setelah setup ini.
+
+1. **Login ke Laravel Cloud Dashboard**
+2. **Pilih Environment → Settings → Storage**
+3. **Tambahkan Persistent Storage:**
+   - **Path**: `/storage/app/public/hospitals` (untuk logo tenant)
+   - **Path**: `/storage/app/public/references` (untuk gambar artikel)
+   - **Size**: Sesuai kebutuhan (minimal 1GB untuk hospitals, 2GB untuk references)
+4. **Klik Save**
+
+Setelah ini, gambar **TIDAK AKAN HILANG** lagi saat deploy!
+
+📖 **Lihat dokumentasi lengkap:** `SOLUSI_GAMBAR_HILANG_SAAT_DEPLOY.md`
+
+---
+
+## 🚀 Langkah-Langkah Setup (Jika Belum Pakai Persistent Storage)
 
 ### 1. Setup After Deploy Hook (WAJIB)
 

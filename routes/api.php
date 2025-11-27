@@ -59,6 +59,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Unit Cost APIs
     Route::get('unit-cost', [App\Http\Controllers\Api\UnitCostController::class, 'getUnitCost']);
     Route::get('unit-cost/versions', [App\Http\Controllers\Api\UnitCostController::class, 'getVersions']);
+    Route::get('unit-costs', [App\Http\Controllers\Api\UnitCostController::class, 'getByCostReference']);
+    Route::get('unit-costs/{id}', [App\Http\Controllers\Api\UnitCostController::class, 'show']);
 });
 
 // Public APIs (if any)

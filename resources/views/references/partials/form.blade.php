@@ -60,7 +60,7 @@ use Illuminate\Support\Facades\Storage;
         <div class="mt-1">
             @if(isset($reference) && $reference->image_path)
                 <div class="mb-3">
-                    <img src="{{ Storage::disk('public')->url($reference->image_path) }}" 
+                    <img src="{{ storage_url($reference->image_path) }}" 
                          alt="Preview" 
                          class="max-w-xs h-auto rounded-lg border border-gray-300">
                     <div class="mt-2 flex items-center">

@@ -3,8 +3,19 @@
 @section('content')
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">{{ __('Cost References') }}</h2>
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Cost References') }}</h2>
+                <button
+                    type="button"
+                    class="flex-shrink-0 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full w-5 h-5 flex items-center justify-center hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                    onclick="const p = document.getElementById('cost-references-help'); if (p) { p.classList.toggle('hidden'); }"
+                    aria-label="{{ __('What is Cost Reference?') }}"
+                    title="{{ __('What is Cost Reference?') }}"
+                >
+                    i
+                </button>
+            </div>
             <div class="flex items-center space-x-2">
                 <form method="GET" action="{{ route('cost-references.index') }}" class="flex items-center space-x-2">
                     <div class="relative">
@@ -31,6 +42,30 @@
                 <a href="{{ route('cost-references.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     {{ __('Add New Cost Reference') }}
                 </a>
+            </div>
+        </div>
+        <div id="cost-references-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
+            <p class="mb-2">
+                <span class="font-semibold">Cost Reference</span> adalah "buku besar" daftar layanan & item di rumah sakit yang bisa muncul di pathway, unit cost, dan tarif.
+            </p>
+            <div class="mb-2">
+                <p class="font-semibold mb-1">Isi utama:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>Kode & nama layanan/item (tindakan, lab, obat, BMHP, paket, dll)</li>
+                    <li>Jenis (service vs barang/material)</li>
+                    <li>Cost center utama yang bertanggung jawab</li>
+                    <li>Satuan (per kali, per hari, per botol, dst)</li>
+                    <li>(Opsional) mapping ke pathway / kategori klinis</li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-semibold mb-1">Peran di sistem:</p>
+                <p class="ml-2">Menjadi kunci (ID) yang menghubungkan:</p>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                    <li>Perhitungan unit cost</li>
+                    <li>Clinical pathway</li>
+                    <li>Tarif (termasuk mapping ke INA-CBG)</li>
+                </ul>
             </div>
         </div>
         
