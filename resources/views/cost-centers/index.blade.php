@@ -48,26 +48,35 @@
         </div>
         <div id="cost-centers-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
             <p class="mb-2">
-                <span class="font-semibold">Cost Center</span> adalah daftar unit organisasi rumah sakit yang menjadi penampung biaya (cost pool).
+                <span class="font-semibold">Cost center</span> (pusat biaya) adalah unit organisasi di rumah sakit tempat biaya dikumpulkan dan dicatat. Fokusnya bukan siapa yang membayar, tetapi biaya itu lahir di unit mana.
             </p>
             <div class="mb-2">
-                <p class="font-semibold mb-1">Isi utama:</p>
-                <ul class="list-disc list-inside space-y-1 ml-2">
-                    <li>Kode & nama cost center (Lab, OK, RI Kebidanan, Laundry, IPSRS, Manajemen, dll)</li>
-                    <li>Kategori:
-                        <ul class="list-circle list-inside ml-4 space-y-0.5">
-                            <li><span class="font-medium">Revenue center</span> - unit pelayanan langsung pasien</li>
-                            <li><span class="font-medium">Support/overhead center</span> - unit penunjang (laundry, CSSD, Gizi)</li>
+                <p class="font-semibold mb-1">Klasifikasi utama:</p>
+                <ol class="list-decimal list-inside space-y-2 ml-2">
+                    <li>
+                        <span class="font-semibold">Pusat biaya produksi (revenue / unit produksi)</span>
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li>Unit yang langsung melayani pasien dan menghasilkan pendapatan</li>
+                            <li>Contoh: rawat inap, rawat jalan, kamar operasi, ICU, laboratorium, radiologi</li>
+                            <li>Biaya melekat: gaji perawat/DPJP di unit tersebut, obat & BHP pasien, alat medis, dll</li>
+                            <li>Dari sini dihitung unit cost layanan (tarif dasar klinis)</li>
                         </ul>
                     </li>
-                    <li>Tipe pelayanan (rawat inap, rawat jalan, penunjang, manajemen, dll)</li>
-                </ul>
+                    <li>
+                        <span class="font-semibold">Pusat biaya penunjang (support / overhead)</span>
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li>Unit yang tidak langsung melayani pasien dan tidak menghasilkan pendapatan, tetapi menopang unit produksi</li>
+                            <li>Contoh: direksi & manajemen, administrasi, keuangan, laundry, gizi, IPSRS, IT, keamanan, dll</li>
+                            <li>Biaya (gaji manajemen, ATK, listrik kantor, biaya laundry, dll.) akan dialokasikan ke unit produksi sebagai overhead</li>
+                        </ul>
+                    </li>
+                </ol>
             </div>
             <div>
-                <p class="font-semibold mb-1">Peran di sistem:</p>
+                <p class="font-semibold mb-1">Konsekuensi di KMKB & webapp:</p>
                 <ul class="list-disc list-inside space-y-1 ml-2">
-                    <li>Semua biaya GL di-tag ke salah satu cost center</li>
-                    <li>Menjadi basis alokasi & perhitungan unit cost</li>
+                    <li>Setiap unit di RS harus diberi kode cost center</li>
+                    <li>Biaya dikumpulkan per cost center → biaya unit penunjang dialokasikan ke unit produksi → total biaya unit produksi dipakai untuk menghitung unit cost per layanan dan dibandingkan dengan tarif (INA-CBG, tarif internal, dll.)</li>
                 </ul>
             </div>
         </div>

@@ -1,4 +1,5 @@
 # **Dokumen Kebutuhan Bisnis (BRD)**
+
 ### **Proyek: Pengembangan Aplikasi Web Kendali Mutu Kendali Biaya (KMKB) Berbasis Clinical Pathway**
 
 ---
@@ -6,33 +7,35 @@
 ## 1. Tujuan Proyek dan Ruang Lingkup
 
 ### **1.1. Tujuan Proyek**
-Proyek ini bertujuan untuk membangun sebuah aplikasi web **Kendali Mutu Kendali Biaya (KMKB)** yang berbasis *clinical pathway* (jalur klinis). Tujuannya adalah untuk meningkatkan kualitas pelayanan kesehatan sekaligus mengendalikan biaya perawatan di rumah sakit.
 
-*Clinical pathway* akan digunakan sebagai instrumen standar untuk:
-- Memastikan pelayanan medis sesuai dengan panduan berbasis bukti.
-- Mengurangi variasi yang tidak perlu dalam tata laksana pasien.
-- Mendorong perawatan kesehatan yang lebih efisien dan bernilai tinggi.
+Proyek ini bertujuan membangun aplikasi web **Kendali Mutu Kendali Biaya (KMKB)** yang menyatukan modul costing, manajemen tarif, dan _clinical pathway_ dalam satu platform operasional rumah sakit. Tujuan bisnisnya:
 
-Dengan meningkatkan kepatuhan terhadap *clinical pathway*, diharapkan mutu layanan akan meningkat dan selisih negatif antara biaya riil rumah sakit dengan tarif paket **INA-CBG** (tarif klaim BPJS Kesehatan) dapat berkurang.
+- Meningkatkan akurasi penetapan biaya dan tarif melalui perhitungan unit cost berbasis data GL serta _service volume_.
+- Menstandardisasi jalur klinis, memantau kepatuhan, dan mengendalikan variansi biaya terhadap pathway maupun tarif INA-CBG.
+- Menyajikan _insight_ real-time bagi manajemen untuk pengambilan keputusan mutu-biaya.
 
 ### **1.2. Ruang Lingkup**
 
 #### **Dalam Cakupan (In-Scope)**
-- **Pilot Project**: Implementasi awal terbatas pada satu rumah sakit.
-- **Pengguna Utama**: Aplikasi difokuskan untuk **Unit Klaim** dan **Tim Mutu**.
-- **Fungsionalitas Inti**:
-    - Digitalisasi *clinical pathway* dari format naratif ke format terstruktur.
-    - Pencatatan data pelayanan aktual pasien untuk perbandingan dengan *pathway*.
-    - Perhitungan otomatis kepatuhan terhadap *pathway*.
-    - Analisis selisih biaya antara biaya riil dan tarif INA-CBG.
-    - Penyediaan laporan dan *dashboard* Indikator Kinerja Kunci (KPI).
-- **Arsitektur**: Sistem akan dibangun sebagai aplikasi mandiri (*standalone*) namun dirancang fleksibel dengan API dan struktur data yang siap untuk integrasi di masa depan dengan Sistem Informasi Rumah Sakit (HIS/SIMRS) dan sistem BPJS Kesehatan.
+
+- **Pilot Multi-tenant**: Implementasi awal untuk satu rumah sakit namun siap ekspansi multi RS melalui seleksi `hospital_id`.
+- **Master Data Costing & Tariff**: Pengelolaan Cost Center, Expense Category, Allocation Driver, Tariff Class, Cost Reference, dan kode INA-CBG.
+- **GL & Operational Data Intake**: Input manual maupun impor CSV/XLSX untuk GL Expenses, Driver Statistics, Service Volumes, serta konversi data SIMRS.
+- **Cost Allocation & Unit Cost Engine**: Step-down allocation, perhitungan unit cost versi ganda, audit trail per cost center.
+- **Tariff Management Suite**: Simulasi markup, penetapan final tariff bersertifikat SK, dan Tariff Explorer untuk perbandingan INA-CBG.
+- **Clinical Pathway Builder & Repository**: Versi, duplikasi, impor langkah, ekspor PDF/DOCX, dan kalkulasi estimasi biaya pathway.
+- **Patient Case Management**: Upload massal kasus, sinkronisasi langkah pathway → case detail, kalkulasi kepatuhan dan variansi biaya.
+- **Dashboard & Reports**: KPI costing, compliance, cost variance, pathway performance, serta ekspor PDF/Excel.
+- **SIMRS Data Hub**: Viewer data master SIMRS dan modul sinkronisasi batch (obat, tindakan, kamar, dsb).
+- **System Administration & Audit**: Role-based access, manajemen user/hospital, audit log, dan pengaturan penyimpanan.
 
 #### **Di Luar Cakupan (Out-of-Scope) Tahap Awal**
-- Integrasi langsung dan *real-time* dengan HIS/SIMRS atau sistem BPJS Kesehatan.
-- Fitur klinis mendalam seperti *Computerized Physician Order Entry* (CPOE) atau rekam medis elektronik penuh.
-- Integrasi *real-time* dengan perangkat medis.
-- Dukungan untuk multi-rumah sakit (akan dirancang arsitekturnya, namun tidak diimplementasikan penuh di awal).
+
+- Integrasi _real-time_ dua arah dengan HIS/SIMRS atau BPJS (current scope masih batch/pull).
+- Modul klinis lanjutan seperti CPOE, e-prescribing, rekam medis elektronik penuh, atau manajemen tindakan harian.
+- Notifikasi eksternal (SMS/WhatsApp) dan approval workflow lintas platform.
+- Analitik prediktif berbasis ML, benchmarking antar RS, serta automasi costing lintas multi +100 fasilitas.
+- Integrasi perangkat medis atau pembacaan data IoT.
 
 ---
 
@@ -40,168 +43,232 @@ Dengan meningkatkan kepatuhan terhadap *clinical pathway*, diharapkan mutu layan
 
 ### **2.1. Peran Pengguna (User Roles)**
 
-#### **Tim Mutu Rumah Sakit**
-Bertanggung jawab menyusun, memelihara, dan memonitor *clinical pathway*.
-- **Menyusun/Memperbarui Pathway**: Menggunakan fitur **Pathway Builder** untuk mengubah *pathway* naratif menjadi format digital terstruktur.
-- **Monitoring Kepatuhan**: Memantau KPI kepatuhan dan variansi melalui *dashboard* untuk analisis dan audit klinis.
-- **Pelaporan**: Menyiapkan laporan rutin terkait mutu dan biaya untuk keperluan akreditasi (misalnya JCI) dan laporan manajemen.
+| Peran                           | Kebutuhan Bisnis                                                                    | Modul Utama                                                        |
+| ------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **Superadmin**                  | Membuat tenant rumah sakit, mengatur lisensi, melakukan _troubleshooting_ lintas RS | Hospitals, Users, Audit Logs                                       |
+| **Admin RS / Administrator IT** | Mengatur akses pengguna, master data dasar, konfigurasi SIMRS dan storage           | Master Data, Users, SIMRS, Settings                                |
+| **Financial Manager**           | Menyetujui GL, menjalankan allocation & unit cost, menyetujui tarif                 | GL & Expenses, Allocation, Unit Cost, Tariff Final                 |
+| **Costing Analyst**             | Input data costing, menjalankan simulasi, analisis hasil                            | Master Data, GL, Allocation, Unit Cost, Tariff Simulation, Reports |
+| **Pathway Designer / Tim Mutu** | Membangun, menggandakan, dan memperbarui pathway                                    | Clinical Pathways, Cost References, Reports                        |
+| **Medical Committee**           | Review dan approval pathway, evaluasi varian klinis                                 | Clinical Pathways (approval), Reports                              |
+| **Case Manager / Unit Klaim**   | Input kasus pasien, unggah Excel, pantau kepatuhan dan variansi                     | Patient Cases, Reports, Tariff Explorer                            |
+| **Auditor & Manajemen**         | Membaca KPI, audit trail, dan laporan untuk pengambilan keputusan                   | Dashboard, Reports, Audit Logs                                     |
 
-#### **Unit Klaim (Billing/Case Mix Team)**
-Bertanggung jawab mengelola tagihan pasien, klaim BPJS, dan memantau aspek biaya.
-- **Input Data Kasus**: Memasukkan data pelayanan pasien secara manual atau melalui unggahan file (misal, Excel).
-- **Analisis Biaya**: Menggunakan sistem untuk menghitung selisih antara biaya riil dengan tarif INA-CBG.
-- **Analisis Kepatuhan**: Menganalisis kepatuhan kasus terhadap *pathway* dan mencatat justifikasi jika ada varian.
-- **Pelaporan Biaya**: Memonitor tren biaya dan melaporkan area yang sering melampaui tarif kepada manajemen.
+Catatan: peran lama seperti Tim Mutu dan Unit Klaim dipetakan ke Pathway Designer dan Case Manager agar selaras dengan implementasi modul akses role-based di aplikasi.
 
-#### **Manajemen Rumah Sakit**
-Pengguna pasif yang mengonsumsi *insight* dari sistem untuk pengambilan keputusan strategis.
-- **Mengawasi KPI**: Memantau metrik kunci seperti *cost per case*, tingkat kepatuhan, dan efisiensi biaya melalui *dashboard* dan laporan.
-- **Pengambilan Keputusan**: Menggunakan data untuk menentukan fokus perbaikan mutu, pengendalian biaya, dan alokasi anggaran.
+### **2.2. Alur Kerja End-to-End**
 
-#### **Administrator IT**
-Bertanggung jawab atas pengelolaan teknis dan pemeliharaan sistem.
-- **Manajemen Pengguna**: Mengelola akun pengguna dan hak akses.
-- **Konfigurasi Awal**: Melakukan pengaturan awal sistem, termasuk *master data*.
-- **Pemeliharaan dan Keamanan**: Memantau log aktivitas (*audit trail*) dan memastikan integritas serta keamanan data.
-
-### **2.2. Alur Kerja Utama (Main Workflow)**
-1.  **Perancangan Pathway**: Tim Mutu mendefinisikan dan memasukkan *clinical pathway* ke dalam sistem menggunakan **Pathway Builder**.
-2.  **Input Data Kasus Pasien**: Setelah pasien selesai dirawat, Unit Klaim menginput detail pelayanan dan biaya yang diterima pasien ke dalam sistem.
-3.  **Kalkulasi Otomatis oleh Sistem**: Sistem secara otomatis:
-    - **Mengukur Kepatuhan**: Membandingkan layanan yang diberikan dengan standar di *pathway* dan menghasilkan persentase kepatuhan.
-    - **Menghitung Selisih Biaya**: Menjumlahkan biaya riil dan membandingkannya dengan tarif INA-CBG, lalu menampilkan selisihnya.
-4.  **Review dan Tindak Lanjut**: Tim Mutu dan Unit Klaim mereview kasus dengan kepatuhan rendah atau selisih biaya signifikan, serta mencatat justifikasi varian.
-5.  **Analisis via Dashboard KPI**: Manajemen dan tim terkait memantau KPI secara kumulatif untuk mengidentifikasi area yang memerlukan perbaikan.
-6.  **Peningkatan Berkesinambungan**: Berdasarkan *insight* yang didapat, Tim Mutu memperbarui *pathway* atau melakukan pelatihan, sementara manajemen mengambil langkah strategis untuk efisiensi biaya.
+1. **Persiapan Hospital & User** – Superadmin memilih hospital aktif, Admin menyiapkan user role, tarif dasar, dan preferensi sistem.
+2. **Master Data Costing** – Cost Center, Expense Category, Allocation Driver, Tariff Class, Cost Reference, serta JKN-CBG diinput atau diimpor dari template.
+3. **Pengambilan Data Operasional** – GL Expenses, Driver Statistics, dan Service Volume diimpor per periode (tersedia form import + validasi). Data referensi dapat disejajarkan dengan sumber SIMRS.
+4. **Cost Allocation** – Allocation map dengan step sequence disiapkan; modul run allocation mengeksekusi step-down engine dan menghasilkan Allocation Result versi tertentu.
+5. **Unit Cost Calculation** – Data hasil allocation + service volume dihitung menjadi unit cost version. Audit trail breakdown direct/indirect disimpan.
+6. **Tariff Simulation & Finalization** – Unit cost dipakai sebagai basis markup; modul final tariff mengikat hasil, menambahkan metadata SK, masa berlaku, dan integrasi dengan Tariff Explorer.
+7. **Clinical Pathway Engineering** – Tim Mutu membuat/menyalin pathway, melampirkan langkah-langkah, mengaitkan cost reference dan estimasi biaya, lalu mengekspor atau mengirim ke komite.
+8. **Patient Case Recording** – Unit Klaim menginput/upload kasus, menyalin langkah pathway ke detail kasus, dan mencatat layanan aktual berserta biaya.
+9. **Compliance & Variance Analysis** – Engine menghitung persentase kepatuhan, gap layanan, dan selisih biaya vs pathway maupun INA-CBG, ditampilkan di halaman kasus dan laporan analitik.
+10. **Dashboard & Reporting** – Semua peran membaca KPI, menjalankan ekspor PDF/Excel, dan menindaklanjuti temuan (misal update pathway atau retarif).
 
 ---
 
 ## 3. Fitur Fungsional
 
-### **3.1. Fitur Utama**
+### **3.1. Gambaran Modul Inti**
 
-#### **Pathway Builder (Penyusun Clinical Pathway)**
-Fitur untuk membuat, mengedit, dan menyimpan *clinical pathway* dalam format digital terstruktur, lengkap dengan tahapan, kriteria mutu, dan estimasi biaya.
+- **Master Data Costing & Tariff**: CRUD lengkap + impor/ekspor untuk seluruh referensi biaya.
+- **Financial Data Intake**: GL, driver statistic, service volume dengan template, validasi, dan histori impor.
+- **Costing Engine**: Allocation + unit cost per versi periode.
+- **Tariff Management**: Simulasi, finalisasi, eksplorasi, serta perbandingan INA-CBG.
+- **Clinical Pathway**: Builder, versi, duplikasi, ekspor dokumen, dan kalkulasi estimasi biaya.
+- **Patient Case & Compliance**: Input manual/upload, auto-copy langkah, KPI kepatuhan, dan variansi biaya.
+- **Analytics & Dashboard**: Widget KPI, laporan compliance, cost variance, pathway performance, dan dashboard laporan.
+- **SIMRS Data Hub**: Viewer dataset SIMRS (tindakan, lab, kamar, dsb) + modul sinkronisasi obat/layanan.
+- **System Administration & Audit**: Hospitals, users, roles, audit log, migrasi storage, dan API readiness.
 
-#### **Manajemen Referensi Biaya (CRUD)**
-Modul untuk mengelola *master data* referensi biaya (`CostReference`) yang akan digunakan sebagai acuan dalam penyusunan estimasi biaya pada *pathway*.
+### **3.2. Detail Modul**
 
-#### **Unggah Data Biaya dan Tarif**
-- **Unggah Biaya Sampel Kasus**: Mengimpor data historis kasus pasien untuk analisis awal.
-- **Master Tarif & Unit Cost**: Memelihara database internal berisi tarif komponen layanan sebagai referensi perhitungan biaya.
+#### **3.2.1 Dashboard & Insight**
 
-#### **Dashboard & Laporan KPI**
-*Dashboard* interaktif dengan antarmuka modern (Tailwind CSS 3.x, *dark mode*) yang menampilkan KPI utama seperti:
-- Persentase kepatuhan *pathway*.
-- Selisih biaya rata-rata per diagnosa (vs. INA-CBG).
-- Jumlah kasus *over/under budget*.
-- Rata-rata *Length of Stay* (LOS) vs. target.
+- Dashboard utama menampilkan ringkasan cost, compliance, tarif, dan aktivitas terakhir.
+- Superadmin memiliki dashboard tersendiri untuk memantau tenant.
+- Tersedia shortcut ke laporan dan modul prioritas berbasis peran.
 
-#### **Kalkulasi Kepatuhan Pathway**
-Fitur *backend* yang secara otomatis membandingkan layanan yang diterima pasien dengan standar *pathway* dan menghasilkan:
-- *Checklist* kepatuhan per langkah.
-- Persentase kepatuhan total.
-- Daftar varian (layanan di luar *pathway* atau yang terlewat).
+#### **3.2.2 Master Data Costing & Klinik**
 
-#### **Kalkulasi Selisih Biaya**
-Sistem secara otomatis menghitung selisih biaya aktual terhadap:
-- **Estimasi Pathway**: Untuk mengukur apakah kasus *over/under budget* dari rencana.
-- **Tarif INA-CBG**: Untuk mengukur profitabilitas kasus bagi rumah sakit.
+- **Cost Centers**: Hierarki support vs revenue center, ekspor, dan visual parent-child.
+- **Expense Categories**: Penandaan jenis biaya (fixed/variable) dan kelompok alokasi.
+- **Allocation Drivers**: Penyimpanan satuan driver, import/export, dan validasi nilai.
+- **Tariff Classes**: Pengelompokan kelas layanan (VIP, Kelas I-III, dsb) untuk unit cost & tarif.
+- **Cost References**: Pemetaan item biaya ke cost center, kategori, dan referensi SIMRS; mendukung bulk import, pencarian cepat, dan bulk delete.
+- **JKN CBG Codes**: Pencarian tarif dasar INA-CBG, metadata diagnosa, dan endpoint pencarian untuk modul lain.
 
-#### **Mekanisme Rekonsiliasi Pathway dan Billing**
-Fitur untuk memetakan item pada data *billing* rumah sakit ke langkah-langkah *clinical pathway* untuk validasi kepatuhan yang lebih akurat.
+#### **3.2.3 GL & Expense Management**
 
-#### **Jejak Audit (Audit Trail)**
-Mencatat semua aktivitas penting dalam sistem (siapa, kapan, apa) untuk tujuan keamanan, akuntabilitas, dan audit.
+- CRUD GL Expenses per periode dengan filter cost center/kategori.
+- Form import CSV/XLSX, validasi duplikasi, serta laporan kategori yang belum terisi.
+- Modul Driver Statistics dan Service Volumes mengikuti pola serupa (template, import/export, filter).
 
-### **3.2. Fitur Pendukung**
+#### **3.2.4 Cost Allocation Engine**
 
-#### **Manajemen Pengguna & Hak Akses**
-Modul untuk mengatur pengguna, peran (*role*), dan hak akses berdasarkan prinsip *least privilege*, termasuk peran **Superadmin** untuk pengelolaan multi-tenant.
+- Pengelolaan allocation map dengan step sequence, driver yang dipakai, dan preview flow.
+- Form **Run Allocation** menampilkan konfigurasi sebelum diproses, memberikan ringkasan hasil, jumlah step, dan peringatan selisih.
+- Allocation Result dapat dilihat, difilter, diekspor, dan dibanding antar versi/periode.
 
-#### **Master Data Klinik**
-Pengelolaan *master data* pendukung seperti diagnosa (ICD-10), prosedur (ICD-9 CM), dan unit layanan.
+#### **3.2.5 Unit Costing**
 
-#### **Notifikasi & Pengingat (Opsional di MVP)**
-Sistem dapat mengirim notifikasi internal jika ada *pathway* yang perlu diperbarui atau jika KPI berada di bawah ambang batas tertentu.
+- Service volume diverifikasi sebelum kalkulasi.
+- Modul kalkulasi memproduksi dataset unit cost ber-versi, menyimpan status proses, dan merekam ringkasan direct/indirect cost.
+- Halaman hasil menampilkan breakdown per layanan, audit trail cost center, serta ekspor ke Excel/PDF.
+
+#### **3.2.6 Tariff Management Suite**
+
+- **Tariff Simulation**: Memilih versi unit cost, menerapkan margin global/per layanan, membuat beberapa skenario, dan mengekspor hasil.
+- **Final Tariffs**: Menyimpan tarif resmi per layanan+kelas, metadata SK, masa berlaku, serta relasi ke hasil unit cost.
+- **Tariff Explorer**: Antarmuka pencarian tarif, histori perubahan, dan komparasi internal vs INA-CBG.
+
+#### **3.2.7 Clinical Pathway Management**
+
+- CRUD pathway dengan status (Draft, Review, Approved, Archived), versi, dan fitur duplikasi.
+- Pathway Builder mendukung reorder drag-and-drop, impor template langkah, dan pengaturan mandatory/optional.
+- Tersedia ekspor PDF dan DOCX, serta tombol recalculation untuk merangkum estimasi biaya.
+
+#### **3.2.8 Patient Case Management**
+
+- Daftar kasus dengan filter pathway, periode, diagnosa.
+- Form upload Excel untuk banyak kasus sekaligus.
+- Auto-copy semua langkah pathway ke detail kasus; masing-masing langkah dapat ditandai dilakukan/tidak, menambahkan layanan tambahan di luar pathway, dan memberi anotasi.
+- Sistem menghitung kepatuhan (%) dan variansi biaya terhadap estimasi pathway, unit cost, dan INA-CBG.
+
+#### **3.2.9 Analytics & Reporting**
+
+- Halaman Reports menyediakan:
+  - Compliance Report (per pathway dan tren).
+  - Cost Variance Report.
+  - Pathway Performance (LOS, cost efficiency).
+  - Dashboard laporan dengan komponen visual tambahan.
+- Proses ekspor asynchronous (generate + download) untuk PDF/Excel.
+
+#### **3.2.10 SIMRS Integration & Service Volume Current**
+
+- Viewer data SIMRS: master barang, tindakan rawat jalan/inap, lab, radiologi, operasi, kamar.
+- Modul sync obat/layanan dengan log status dan histori error.
+- Halaman service-volume-current memantau data kapasitas aktual per layanan serta menyediakan ekspor per kategori.
+
+#### **3.2.11 System Administration & Audit**
+
+- Manajemen hospital (Superadmin), pemilihan RS aktif, migrasi storage, serta modul khusus audit log (filter user/aksi/model).
+- Pengaturan password user, reset, dan assignment role.
+- Audit log dapat dibersihkan sesuai kebijakan retensi.
+
+#### **3.2.12 Integrasi & Otomasi**
+
+- Endpoint pencarian Cost Reference, JKN-CBG, dan Tariff Explorer dapat dimanfaatkan modul eksternal.
+- SIMRS sync menyiapkan pondasi API-ready untuk transfer data otomatis.
+- Struktur kode service-layer (AllocationService, UnitCostService, TariffService) memudahkan pembuatan job background bila volume data meningkat.
+
+### **3.3. Fitur Pendukung**
+
+- **Knowledge Reference**: Modul referensi internal (guideline, regulasi) untuk membantu tim costing & mutu.
+- **Migrate Storage Wizard**: Utilitas admin untuk memindahkan file evidence/pathway ke storage baru.
+- **Template Management**: Download template Excel untuk semua modul import agar input standar.
+- **Audit & Logging**: Semua transaksi penting tercatat di `audit_logs` dan dapat diaudit oleh peran khusus.
 
 ---
 
 ## 4. Struktur Data dan Basis Data
 
 ### **4.1. Model Entitas Relasional (ERD)**
-Struktur data dirancang menggunakan RDBMS dengan entitas utama sebagai berikut:
-- **`ClinicalPathway`**: Merepresentasikan satu *clinical pathway* untuk diagnosis tertentu.
-- **`PathwayStep`**: Langkah atau tahapan spesifik dalam sebuah `ClinicalPathway`.
-- **`PatientCase`**: Satu episode perawatan pasien yang dievaluasi.
-- **`CaseDetail`**: Rincian layanan yang diberikan pada `PatientCase` untuk mengukur kepatuhan.
-- **`CostReference`**: Master data tarif atau biaya standar layanan.
-- **`User`**: Data pengguna sistem beserta perannya.
-- **`AuditLog`**: Log untuk mencatat semua aktivitas penting.
-- **Entitas Tambahan**: Termasuk `canonical_services` dan `service_map` untuk mendukung mekanisme rekonsiliasi.
 
-### **4.2. Catatan Implementasi Terkini (Agustus 2025)**
-- **Pathway Builder**: Mendukung *drag-and-drop* untuk mengubah urutan langkah (`display_order`) dan impor massal langkah-langkah *pathway* melalui template Excel/CSV.
-- **Manajemen Referensi Biaya**: Modul CRUD penuh telah tersedia dengan *pagination* dan validasi.
-- **Seeder Pengguna**: Disediakan *seeder* untuk membuat akun *default* per peran guna memudahkan pengujian.
+Entitas utama aplikasi:
+
+- **Hospital** – Multi-tenant key; seluruh tabel operasional memiliki `hospital_id`.
+- **User, Role, Permission** – Manajemen akses berbasis peran; relasi ke hospital aktif.
+- **CostCenter**, **ExpenseCategory**, **AllocationDriver**, **TariffClass** – Master costing.
+- **GlExpense**, **DriverStatistic**, **ServiceVolume** – Data operasional per periode.
+- **AllocationMap**, **AllocationResult** – Engine step-down.
+- **UnitCostCalculation**, **UnitCostResult** – Versi hasil unit cost dan detail breakdown.
+- **CostReference**, **Reference** – Metadata layanan & knowledge base.
+- **FinalTariff**, **TariffSimulationResult** – Data tarif resmi dan hasil simulasi.
+- **ClinicalPathway**, **PathwayStep**, **PathwayTariffSummary** – Repository pathway dan ringkasan biaya.
+- **PatientCase**, **CaseDetail**, **CaseAnnotation** – Data episode pasien dan kegiatan per langkah.
+- **JknCbgCode**, **Simrs\* tables** – Referensi INA-CBG dan data impor SIMRS.
+- **AuditLog** – Jejak aktivitas.
+
+### **4.2. Catatan Implementasi Terkini (November 2025)**
+
+- Seluruh modul Master Data (Cost Center, Expense Category, Allocation Driver, Tariff Class, Cost Reference, JKN CBG) telah tersedia dengan fitur impor, ekspor, dan pencarian (`routes/web.php`).
+- GL Expenses, Driver Statistics, Service Volumes menyediakan form import, validasi, serta ekspor.
+- Allocation engine telah diimplementasikan penuh pada `AllocationService`, termasuk validasi prerequisite, step sequence, summary, dan logging proses.
+- Unit cost calculation menggunakan `UnitCostCalculationService` untuk menggabungkan hasil allocation dan service volume, menyediakan versi berbeda.
+- Modul Tariff Simulation, Final Tariff, dan Tariff Explorer hadir di UI (folder `resources/views/tariff-*`) dan mendukung ekspor.
+- Clinical Pathway builder mendukung duplikasi, versi baru, impor template langkah, serta ekspor PDF/DOCX.
+- Patient Case module mendukung upload Excel, copy langkah pathway otomatis, dan anotasi kasus.
+- Reports (compliance, cost variance, pathway performance) serta dashboard laporan telah aktif dengan kemampuan ekspor.
+- SIMRS integration menampilkan data raw (master barang, tindakan, kamar, dll) dan modul sync obat/layanan.
+- Audit log, migrasi storage, dan hospital selector aktif untuk kebutuhan admin & superadmin.
+
+### **4.3. Integrasi Data Eksternal**
+
+- Koneksi SIMRS via konfigurasi database terpisah (diatur oleh Admin) dengan endpoint viewer & sync.
+- Template import mengikuti struktur standar agar bisa dihasilkan dari sistem HIS atau spreadsheet internal.
+- Tariff Explorer dapat dibandingkan dengan tarif resmi INA-CBG dari tabel JKN CBG.
 
 ---
 
 ## 5. Standar Acuan
 
-Sistem ini dikembangkan dengan mengacu pada beberapa standar mutu, biaya, dan teknis, antara lain:
-- **ISO 7101:2023**: Standar sistem manajemen mutu untuk organisasi pelayanan kesehatan.
-- **Standar Akreditasi JCI**: Standar internasional untuk mutu dan keselamatan pasien.
-- **INA-CBG**: Sistem tarif paket JKN sebagai *benchmark* utama pengendalian biaya.
-- **Regulasi Kemenkes RI**: Pedoman nasional terkait penerapan *clinical pathway*.
-- **Prinsip Keamanan Informasi**: Mengacu pada praktik terbaik seperti OWASP dan standar ISO 27001.
+- **ISO 7101:2023** – Standar sistem manajemen mutu pelayanan kesehatan.
+- **Standar Akreditasi JCI** – Menjamin keselamatan pasien dan governance mutu.
+- **INA-CBG & Regulasi BPJS** – Acuan perbandingan tarif dan metodologi costing.
+- **Regulasi Kemenkes (KMK Clinical Pathway)** – Pedoman penyusunan pathway.
+- **OWASP & ISO 27001** – Kerangka keamanan informasi (auth, CSRF, encryption, audit).
 
 ---
 
 ## 6. Komponen Teknis (Kebutuhan Non-Fungsional)
 
-- **Platform & Stack Teknologi**:
-    - **Backend**: PHP dengan framework Laravel (LTS).
-    - **Frontend**: Tailwind CSS 3.x dan Alpine.js.
-    - **Database**: MySQL atau MariaDB.
-    - **Server**: Linux dengan stack LAMP/LEMP.
-- **Arsitektur Aplikasi**:
-    - **Modular**: Dibangun dengan modul yang terpisah (*low coupling, high cohesion*) untuk kemudahan pengembangan.
-    - **Multi-tenant**: Dirancang sejak awal untuk mendukung banyak rumah sakit dengan pemisahan data berbasis `hospital_id` (tanpa subdomain).
-- **Keamanan Aplikasi**:
-    - Otentikasi dan otorisasi berbasis peran.
-    - Validasi input dan proteksi CSRF.
-    - *Password hashing* (bcrypt/argon2).
-    - Pencatatan *audit trail* yang komprehensif.
-    - Koneksi wajib menggunakan HTTPS (SSL).
-- **Extensibility & Skalabilitas**:
-    - Desain **API-Ready** untuk integrasi di masa depan.
-    - Kode yang terdokumentasi dengan baik mengikuti standar PSR.
-    - Optimasi *query* untuk menangani volume data yang besar.
+- **Stack Teknis**:
+  - Backend: Laravel LTS (PHP 8.x), Artisan command untuk batch job.
+  - Frontend: Blade + Tailwind CSS 3.x + Alpine.js, layout responsif & dark mode.
+  - Database: MySQL/MariaDB dengan dukungan SQLite untuk testing.
+- **Arsitektur**:
+  - Modular service layer (AllocationService, UnitCostService, TariffService, ComplianceCalculator).
+  - Multi-tenant via `hospital_id` + middleware `set.hospital`.
+  - API-ready: route pencarian (cost reference, JKN CBG, tarif) dapat dibuka sebagai endpoint JSON.
+- **Keamanan & Audit**:
+  - Role-based access (Spatie Permission).
+  - Proteksi CSRF, hashing password (bcrypt/argon2), verifikasi email.
+  - Audit log setiap CRUD penting + pencatatan export.
+- **Kinerja & Skalabilitas**:
+  - Import menggunakan chunking + validasi baris, siap dipindahkan ke queue workers.
+  - Allocation/unit cost berjalan dalam transaksi database untuk konsistensi.
+  - Rekomendasi pemisahan storage (object storage) tersedia dalam panduan deployment.
+- **Operasional**:
+  - CLI & dokumen deployment (Laravel Cloud, object storage) telah disediakan.
+  - Monitoring kesalahan melalui log, disertai panduan troubleshooting storage & gambar.
 
 ---
 
 ## 7. Roadmap Pengembangan
 
-Pengembangan akan dilakukan secara bertahap dengan pendekatan *agile*.
+| Tahap                                             | Fokus                                                                                  | Status                    |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------- |
+| **Tahap 1 – MVP Costing & Pathway**               | Pathway builder, patient case, dashboard dasar                                         | ✅ Selesai                |
+| **Tahap 2 – Master Data & Tariff Suite**          | Cost center, GL intake, allocation, unit cost, tariff simulation/final                 | ✅ Selesai                |
+| **Tahap 3 – Integrasi & Pelaporan Lanjut**        | SIMRS viewer & sync, advanced reports, tariff explorer                                 | ✅ Selesai (iterasi awal) |
+| **Tahap 4 – Penguatan Operasional**               | API token, system settings lanjutan, job queue untuk import besar, notifikasi internal | ⚙️ Sedang berjalan        |
+| **Tahap 5 – Analitik Prediktif & Multi-RS Scale** | Benchmark lintas RS, predictive alert, otomatisasi retarif                             | ⏳ Direncanakan           |
 
-- **Tahap 1: MVP (Minimum Viable Product) (3-4 bulan)**
-  Fokus pada fungsionalitas inti: *Pathway Builder* sederhana, input data manual, kalkulasi dasar, dan *dashboard* statis untuk validasi konsep oleh pengguna.
-
-- **Tahap 2: Peningkatan Fitur & Stabilitas (2-3 bulan)**
-  Menyempurnakan UI/UX (refactor ke Tailwind CSS, *dark mode*), menambah fitur unggah data massal, laporan yang lebih canggih, dan penguatan keamanan.
-
-- **Tahap 3: Integrasi Dasar (3-6 bulan)**
-  Mulai menghubungkan aplikasi dengan sistem lain seperti HIS/SIMRS untuk menarik data secara otomatis dan mengurangi input manual.
-
-- **Tahap 4: Pengayaan Fitur Lanjutan (3 bulan)**
-  Menambahkan modul analitik prediktif, *benchmarking* antar unit, dan akses terbatas untuk para klinisi.
-
-- **Tahap 5: Skalabilitas dan Pemeliharaan Berkelanjutan**
-  Fokus pada perbaikan *bug*, pembaruan teknologi, dan persiapan untuk implementasi di rumah sakit lain (*roll-out*).
+Catatan: setiap tahap mengikuti pendekatan _agile_, sehingga backlog dapat diatur ulang sesuai temuan lapangan.
 
 ---
 
 ## 8. Kesimpulan
 
-Dokumen ini menguraikan kebutuhan bisnis untuk aplikasi KMKB yang bertujuan menjadi alat digital strategis bagi rumah sakit. Dengan aplikasi ini, rumah sakit dapat menstandardisasi mutu layanan klinis dan mengendalikan biaya secara efektif. Implementasi yang sukses diharapkan dapat meningkatkan efisiensi operasional, kualitas perawatan pasien, dan mendorong budaya perbaikan berkelanjutan.
+Aplikasi KMKB kini mencakup siklus penuh costing → tariff → pathway → monitoring kasus, lengkap dengan integrasi data dan kontrol akses multi-tenant. Dengan platform ini, rumah sakit dapat:
+
+- Menstandarkan biaya dan tarif berbasis data aktual.
+- Mengurangi variansi klinis melalui pathway yang dapat diaudit.
+- Mengambil keputusan cepat lewat KPI, laporan, dan jejak audit terpadu.
+
+Fase berikutnya berfokus pada otomasi lanjutan dan prediksi sehingga manfaat mutu-biaya dapat terus ditingkatkan.

@@ -643,4 +643,16 @@ class PathwayController extends Controller
         }
         return $currentVersion . '-copy';
     }
+
+    /**
+     * Pathway Cost Summary view
+     */
+    public function summary(ClinicalPathway $pathway)
+    {
+        return view('pathways.summary', [
+            'title' => 'Pathway Cost Summary',
+            'message' => 'Fitur untuk melihat ringkasan biaya pathway (estimated total cost, estimated total tariff, breakdown by step) sedang dalam tahap pengembangan.',
+            'pathway' => $pathway
+        ]);
+    }
 }

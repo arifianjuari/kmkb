@@ -737,4 +737,650 @@ Menu diurutkan berdasarkan workflow:
 
 ---
 
+## 5. Struktur Menu Revisi (Revised Menu Structure)
+
+Struktur menu yang direvisi dengan pengelompokan berdasarkan workflow dan peningkatan UX.
+
+---
+
+### 5.1 Dashboard
+
+**Icon:** 📊  
+**Route:** `/dashboard`  
+**Akses:** Semua role (kecuali Superadmin melihat dashboard berbeda)  
+**Deskripsi:** Ringkasan eksekutif dan KPI utama
+
+**Submenu:** Tidak ada (single page)
+
+**Widget/Konten:**
+
+- Executive KPIs
+- Costing & Tariff Overview
+- Clinical Pathway Compliance
+- Case Variance Alerts
+- Total Cost Overview
+- Unit Cost Trends
+- Recent Activities
+
+---
+
+### 5.2 Setup
+
+**Icon:** ⚙️  
+**Route:** `/setup` (parent route, dropdown menu)  
+**Akses:** Admin, Financial Manager, Costing Analyst  
+**Deskripsi:** Konfigurasi awal dan pengaturan data master
+
+**Submenu:**
+
+#### 5.2.1 Costing Setup
+
+- **Route:** `/setup/costing`
+- **Akses:** Admin, Financial Manager, Costing Analyst
+- **Submenu:**
+  - **Cost Centers** (`/setup/costing/cost-centers`)
+    - List, Create/Edit, Set Parent-Child, Set Type (Support/Revenue), Import/Export
+  - **Expense Categories** (`/setup/costing/expense-categories`)
+    - List, Create/Edit, Set Cost Type, Set Allocation Category, Import/Export
+  - **Allocation Drivers** (`/setup/costing/allocation-drivers`)
+    - List, Create/Edit, Set Unit Measurement, Import/Export
+  - **Tariff Classes** (`/setup/costing/tariff-classes`)
+    - List, Create/Edit, Set Active/Inactive, Import/Export
+
+#### 5.2.2 Service Catalog
+
+- **Route:** `/setup/service-catalog`
+- **Akses:** Admin, Financial Manager, Costing Analyst
+- **Submenu:**
+  - **Service Items** (`/setup/service-catalog/service-items`) - formerly Cost References
+    - List, Create/Edit, Link to Cost Center & Expense Category, SIMRS Sync, Import/Export, Bulk Operations
+  - **SIMRS-linked Items** (`/setup/service-catalog/simrs-linked`)
+    - View SIMRS-linked services, Sync status, Link/Unlink items
+  - **Import/Export** (`/setup/service-catalog/import-export`)
+    - Bulk import template, Export service catalog, Sync management
+
+#### 5.2.3 JKN / INA-CBG Codes
+
+- **Route:** `/setup/jkn-cbg-codes`
+- **Akses:** Semua role (read), Admin (CRUD)
+- **Submenu:**
+  - **CBG List** (`/setup/jkn-cbg-codes/list`)
+    - List JKN CBG Codes, Create/Edit, Search, Import/Export
+  - **Base Tariff Reference** (`/setup/jkn-cbg-codes/base-tariff`)
+    - View Base Tariff, Compare with Internal Tariff, Tariff History
+
+#### 5.2.4 SIMRS Integration
+
+- **Route:** `/setup/simrs-integration`
+- **Akses:** Admin, Financial Manager
+- **Submenu:**
+  - **Connection Settings** (`/setup/simrs-integration/settings`)
+    - Configure SIMRS Database Connection, Test Connection, Set Sync Schedule
+  - **Data Sources** (`/setup/simrs-integration/data-sources`)
+    - Master Barang, Tindakan Rawat Jalan, Tindakan Rawat Inap, Laboratorium, Radiologi, Operasi, Kamar
+  - **Sync Management** (`/setup/simrs-integration/sync`)
+    - Manual Sync, Sync History, Sync Status, Error Logs
+
+---
+
+### 5.3 Data Input
+
+**Icon:** 📥  
+**Route:** `/data-input` (parent route)  
+**Akses:** Financial Manager, Costing Analyst  
+**Deskripsi:** Input dan pengelolaan data operasional
+
+**Submenu:**
+
+#### 5.3.1 GL Expenses
+
+- **Route:** `/data-input/gl-expenses`
+- **Akses:** Financial Manager, Costing Analyst
+- **Fitur:**
+  - List GL Expenses (filter by period, cost center, category)
+  - Create/Edit GL Expense Entry
+  - Import from CSV/XLSX
+  - Validate Completeness
+  - Missing Cost Categories Report
+  - Export to Excel
+
+#### 5.3.2 Driver Statistics
+
+- **Route:** `/data-input/driver-statistics`
+- **Akses:** Financial Manager, Costing Analyst
+- **Fitur:**
+  - List Driver Statistics (filter by period, cost center, driver)
+  - Create/Edit Driver Statistics
+  - Bulk Input by Period
+  - Import from CSV/XLSX
+  - Export to Excel
+
+#### 5.3.3 Service Volumes
+
+- **Route:** `/data-input/service-volumes`
+- **Akses:** Financial Manager, Costing Analyst
+- **Fitur:**
+  - List Service Volumes (filter by period, service, tariff class)
+  - Create/Edit Service Volume
+  - Bulk Input by Period
+  - Import from CSV/XLSX
+  - Export to Excel
+
+#### 5.3.4 Import Center
+
+- **Route:** `/data-input/import-center`
+- **Akses:** Financial Manager, Costing Analyst
+- **Deskripsi:** Pusat import data untuk semua modul data input
+- **Fitur:**
+  - Quick Import GL Expenses
+  - Quick Import Driver Statistics
+  - Quick Import Service Volumes
+  - Import History & Status
+  - Template Download
+  - Validation Summary
+
+---
+
+### 5.4 Costing Process
+
+**Icon:** 🔄  
+**Route:** `/costing-process` (parent route)  
+**Akses:** Costing Analyst, Financial Manager  
+**Deskripsi:** Proses costing dari validasi hingga perhitungan unit cost
+
+**Submenu:**
+
+#### 5.4.1 Pre-Allocation Check
+
+- **Route:** `/costing-process/pre-allocation-check`
+- **Akses:** Costing Analyst, Financial Manager
+- **Submenu:**
+  - **GL Completeness** (`/costing-process/pre-allocation-check/gl-completeness`)
+    - Check GL data completeness, Missing entries report, Period validation
+  - **Driver Completeness** (`/costing-process/pre-allocation-check/driver-completeness`)
+    - Check driver statistics completeness, Missing drivers report, Validation summary
+  - **Service Volume Completeness** (`/costing-process/pre-allocation-check/service-volume-completeness`)
+    - Check service volume completeness, Missing volumes report, Validation summary
+  - **Mapping Validation** (`/costing-process/pre-allocation-check/mapping-validation`)
+    - Validate cost center mappings, Validate expense category mappings, Validate allocation driver mappings
+
+#### 5.4.2 Allocation Engine
+
+- **Route:** `/costing-process/allocation`
+- **Akses:** Costing Analyst, Financial Manager
+- **Submenu:**
+  - **Allocation Maps** (`/costing-process/allocation/maps`)
+    - List Allocation Maps, Create/Edit Allocation Map, Set Source Cost Center, Set Allocation Driver, Set Step Sequence, Visual Flow Diagram
+  - **Run Allocation** (`/costing-process/allocation/run`)
+    - Select Period (Month/Year), Preview Allocation Configuration, Run Allocation Engine, View Progress, Version Management
+  - **Allocation Results** (`/costing-process/allocation/results`)
+    - List Allocation Results (filter by period, version), View by Source/Target Cost Center, View by Allocation Step, Summary Report, Export to Excel/PDF, Compare Versions
+
+#### 5.4.3 Unit Cost Engine
+
+- **Route:** `/costing-process/unit-cost`
+- **Akses:** Costing Analyst, Financial Manager
+- **Submenu:**
+  - **Calculate Unit Cost** (`/costing-process/unit-cost/calculate`)
+    - Select Period (Month/Year), Select Version Label, Preview Configuration, Run Unit Cost Calculation, View Progress, Version Management
+  - **Unit Cost Results** (`/costing-process/unit-cost/results`)
+    - List Unit Cost Results (filter by version, period, service), View Breakdown (Direct Material, Direct Labor, Overhead), Audit Trail by Cost Center, Compare Versions, Export to Excel/PDF
+  - **Compare Unit Cost Versions** (`/costing-process/unit-cost/compare`)
+    - Select multiple versions, Side-by-side comparison, Variance analysis, Export comparison report
+
+---
+
+### 5.5 Tariff Management
+
+**Icon:** 💵  
+**Route:** `/tariffs` (parent route)  
+**Akses:** Financial Manager, Admin  
+**Deskripsi:** Pengaturan dan pengelolaan tariff
+
+**Submenu:**
+
+#### 5.5.1 Tariff Simulation
+
+- **Route:** `/tariffs/simulation`
+- **Akses:** Financial Manager, Costing Analyst
+- **Fitur:**
+  - Select Unit Cost Version
+  - Set Margin Percentage (global or per service)
+  - Preview Tariff Calculation
+  - Compare Scenarios
+  - Export Simulation Results
+
+#### 5.5.2 Tariff Structure Setup
+
+- **Route:** `/tariffs/structure`
+- **Akses:** Financial Manager, Admin
+- **Deskripsi:** Setup struktur tarif (Jasa Sarana, Jasa Pelayanan, dll)
+- **Fitur:**
+  - Define Tariff Components (Jasa Sarana, Jasa Pelayanan, dll)
+  - Set Component Rules
+  - Link to Unit Cost
+  - Component Templates
+
+#### 5.5.3 Final Tariffs
+
+- **Route:** `/tariffs/final`
+- **Akses:** Financial Manager, Admin
+- **Fitur:**
+  - List Final Tariffs (filter by service, class, effective date)
+  - Create/Edit Final Tariff
+  - Link to Unit Cost Calculation
+  - Set SK Number
+  - Set Effective/Expired Date
+  - Approval Workflow
+  - Export to Excel/PDF
+
+#### 5.5.4 Tariff Explorer
+
+- **Route:** `/tariffs/explorer`
+- **Akses:** Semua role (read)
+- **Fitur:**
+  - Search Tariffs by Service/Code
+  - Filter by Tariff Class
+  - View Tariff History
+  - Compare Internal vs INA-CBG
+  - Export to Excel
+
+#### 5.5.5 Tariff vs INA-CBG Comparison
+
+- **Route:** `/tariffs/comparison`
+- **Akses:** Financial Manager, Admin
+- **Fitur:**
+  - Compare Internal Tariff vs INA-CBG
+  - Margin Analysis
+  - Gap Analysis Report
+  - Export Comparison Report
+
+---
+
+### 5.6 Clinical Pathways
+
+**Icon:** 🏥  
+**Route:** `/pathways` (parent route)  
+**Akses:** Pathway Designer, Medical Committee, Admin  
+**Deskripsi:** Pengelolaan clinical pathways
+
+**Submenu:**
+
+#### 5.6.1 Pathway Repository
+
+- **Route:** `/pathways`
+- **Akses:** Semua role (read), Pathway Designer (CRUD)
+- **Fitur:**
+  - List Pathways (filter by status, diagnosis, version)
+  - Create/Edit Pathway Header
+  - Duplicate Pathway
+  - Version Management
+  - Status Filter (Draft/Review/Approved/Archived)
+
+#### 5.6.2 Pathway Builder
+
+- **Route:** `/pathways/{id}/builder`
+- **Akses:** Pathway Designer, Medical Committee
+- **Fitur:**
+  - Visual Pathway Builder
+  - Add/Edit/Delete Steps
+  - Link Steps to Cost References
+  - Auto-fill Estimated Cost
+  - Set Step Order
+  - Set Mandatory/Optional
+  - Import Steps from Template
+
+#### 5.6.3 Pathway Cost Summary
+
+- **Route:** `/pathways/{id}/summary`
+- **Akses:** Semua role (read)
+- **Fitur:**
+  - View Estimated Total Cost
+  - View Estimated Total Tariff
+  - Breakdown by Step
+  - Compare with Unit Cost Version
+  - Export to PDF/DOCX
+
+#### 5.6.4 Pathway Approval
+
+- **Route:** `/pathways/{id}/approval`
+- **Akses:** Medical Committee, Admin
+- **Fitur:**
+  - Review Pathway
+  - Approve/Reject Pathway
+  - Add Comments
+  - Approval History
+
+#### 5.6.5 Template Import/Export
+
+- **Route:** `/pathways/templates`
+- **Akses:** Pathway Designer, Admin
+- **Fitur:**
+  - Export Pathway Template
+  - Import Pathway Template
+  - Template Library
+  - Bulk Import Pathways
+
+---
+
+### 5.7 Patient Cases
+
+**Icon:** 👤  
+**Route:** `/cases` (parent route)  
+**Akses:** Case Manager, Medical Records, Costing Analyst  
+**Deskripsi:** Pengelolaan patient cases dan tracking
+
+**Submenu:**
+
+#### 5.7.1 Case Registration
+
+- **Route:** `/cases`
+- **Akses:** Semua role (read), Case Manager (CRUD)
+- **Fitur:**
+  - List Patient Cases (filter by pathway, diagnosis, period)
+  - Create New Case
+  - Link to Clinical Pathway
+  - Upload Cases from Excel
+  - Export to Excel
+
+#### 5.7.2 Case Details
+
+- **Route:** `/cases/{id}/details`
+- **Akses:** Case Manager, Medical Records
+- **Fitur:**
+  - View Case Information
+  - Add/Edit Case Details (services performed)
+  - Generate Planned Steps from Pathway
+  - Mark Services as Performed
+  - Auto-fill Unit Cost & Tariff
+  - Track Service Dates
+
+#### 5.7.3 Case Costing
+
+- **Route:** `/cases/{id}/costing`
+- **Akses:** Case Manager, Costing Analyst
+- **Fitur:**
+  - View Case Cost Breakdown
+  - Compare with Pathway Estimate
+  - Compare with Unit Cost
+  - Cost Variance Analysis
+  - Export Cost Report
+
+#### 5.7.4 Case Variance Analysis
+
+- **Route:** `/cases/{id}/variance`
+- **Akses:** Semua role (read)
+- **Fitur:**
+  - View Planned vs Actual Steps
+  - View Cost Comparison
+  - View Compliance Percentage
+  - View Cost Variance
+  - View Tariff Comparison
+  - Export Analysis Report
+
+---
+
+### 5.8 Analytics & Improvement
+
+**Icon:** 📈  
+**Route:** `/analytics` (parent route)  
+**Akses:** Semua role (berbeda per report)  
+**Deskripsi:** Laporan, analitik, dan continuous improvement
+
+**Submenu:**
+
+#### 5.8.1 Cost Center Performance
+
+- **Route:** `/analytics/cost-center-performance`
+- **Akses:** Financial Manager, Admin
+- **Fitur:**
+  - Pre/Post Allocation Cost Report
+  - Cost by Expense Category
+  - Trend Analysis
+  - Export to Excel/PDF
+
+#### 5.8.2 Allocation Summary
+
+- **Route:** `/analytics/allocation-summary`
+- **Akses:** Costing Analyst, Financial Manager
+- **Fitur:**
+  - Allocation Summary by Period
+  - Allocation Flow Diagram
+  - Compare Versions
+  - Export to Excel/PDF
+
+#### 5.8.3 Unit Cost Summary
+
+- **Route:** `/analytics/unit-cost-summary`
+- **Akses:** Costing Analyst, Financial Manager
+- **Fitur:**
+  - Unit Cost by Department
+  - Unit Cost Trend
+  - Breakdown Analysis
+  - Export to Excel/PDF
+
+#### 5.8.4 Tariff Analytics
+
+- **Route:** `/analytics/tariff-analytics`
+- **Akses:** Financial Manager, Admin
+- **Fitur:**
+  - Internal vs INA-CBG Comparison
+  - Tariff by Class
+  - Margin Analysis
+  - Export to Excel/PDF
+
+#### 5.8.5 Pathway Compliance Dashboard
+
+- **Route:** `/analytics/pathway-compliance`
+- **Akses:** Semua role
+- **Fitur:**
+  - Compliance by Pathway
+  - Compliance Trend
+  - Compliance by Department
+  - Export to Excel/PDF
+
+#### 5.8.6 Case Variance Dashboard
+
+- **Route:** `/analytics/case-variance`
+- **Akses:** Semua role
+- **Fitur:**
+  - Cost Variance by Pathway
+  - Cost Variance Trend
+  - Variance by Department
+  - Export to Excel/PDF
+
+#### 5.8.7 LOS Analysis
+
+- **Route:** `/analytics/los-analysis`
+- **Akses:** Semua role
+- **Fitur:**
+  - Length of Stay by Pathway
+  - LOS Trend Analysis
+  - LOS vs Cost Correlation
+  - Export to Excel/PDF
+
+#### 5.8.8 Continuous Improvement (AI-ready)
+
+- **Route:** `/analytics/continuous-improvement`
+- **Akses:** Financial Manager, Admin
+- **Deskripsi:** Modul untuk continuous improvement dengan persiapan AI/ML
+- **Fitur:**
+  - Anomaly Detection
+  - Cost Optimization Suggestions
+  - Pathway Optimization Recommendations
+  - Predictive Analytics (future)
+  - AI Insights (future)
+
+---
+
+### 5.9 System Administration
+
+**Icon:** ⚙️  
+**Route:** `/admin` (parent route)  
+**Akses:** Admin, Superadmin  
+**Deskripsi:** Pengaturan sistem dan administrasi
+
+**Submenu:**
+
+#### 5.9.1 Hospitals (Superadmin only)
+
+- **Route:** `/admin/hospitals`
+- **Akses:** Superadmin
+- **Fitur:**
+  - List Hospitals
+  - Create/Edit Hospital
+  - Set Hospital Configuration
+  - Hospital Selection
+
+#### 5.9.2 Users
+
+- **Route:** `/admin/users`
+- **Akses:** Admin, Superadmin
+- **Fitur:**
+  - List Users
+  - Create/Edit User
+  - Assign Roles
+  - Change Password
+  - Set Active/Inactive
+
+#### 5.9.3 Roles & Permissions
+
+- **Route:** `/admin/roles`
+- **Akses:** Admin, Superadmin
+- **Fitur:**
+  - List Roles
+  - Create/Edit Role
+  - Assign Permissions
+  - Role Hierarchy
+
+#### 5.9.4 Audit Logs
+
+- **Route:** `/admin/audit-logs`
+- **Akses:** Admin, Auditor
+- **Fitur:**
+  - List Audit Logs (filter by user, action, model, date)
+  - View Log Details
+  - Export Logs
+  - Clear Old Logs
+
+#### 5.9.5 API Tokens
+
+- **Route:** `/admin/api-tokens`
+- **Akses:** Admin
+- **Fitur:**
+  - List API Tokens
+  - Create/Revoke Token
+  - Set Token Permissions
+  - Token Usage Logs
+
+#### 5.9.6 System Settings
+
+- **Route:** `/admin/settings`
+- **Akses:** Admin
+- **Fitur:**
+  - General Settings
+  - Financial Year Settings
+  - Currency Settings
+  - Integration Settings (SIMRS)
+  - Backup Settings
+
+---
+
+## 6. Role-Based Menu Visibility (Revised Structure)
+
+### 6.1 Superadmin
+
+- Dashboard (Superadmin View)
+- System Administration (Hospitals, Users, Audit Logs, System Settings)
+
+### 6.2 Admin
+
+- Dashboard
+- Setup (semua)
+- Data Input (read)
+- Costing Process (read)
+- Tariff Management (semua)
+- Clinical Pathways (read)
+- Patient Cases (read)
+- Analytics & Improvement (semua)
+- System Administration (kecuali Hospitals)
+
+### 6.3 Financial Manager
+
+- Dashboard
+- Setup (Costing Setup, Service Catalog, JKN/INA-CBG Codes, SIMRS Integration - read)
+- Data Input (semua)
+- Costing Process (semua)
+- Tariff Management (semua)
+- Clinical Pathways (read only)
+- Patient Cases (read only)
+- Analytics & Improvement (semua)
+
+### 6.4 Costing Analyst
+
+- Dashboard
+- Setup (Costing Setup, Service Catalog, JKN/INA-CBG Codes - read)
+- Data Input (semua)
+- Costing Process (semua)
+- Tariff Management (Simulation only)
+- Clinical Pathways (read only)
+- Patient Cases (read only)
+- Analytics & Improvement (Cost Center, Allocation, Unit Cost, Compliance, Variance)
+
+### 6.5 Medical Committee
+
+- Dashboard
+- Setup (JKN/INA-CBG Codes - read only)
+- Clinical Pathways (read, approve)
+- Patient Cases (read only)
+- Analytics & Improvement (Compliance, Variance, Pathway Performance)
+
+### 6.6 Pathway Designer
+
+- Dashboard
+- Setup (Service Catalog, JKN/INA-CBG Codes - read only)
+- Clinical Pathways (CRUD)
+- Patient Cases (read only)
+- Analytics & Improvement (Compliance, Variance, Pathway Performance)
+
+### 6.7 Case Manager
+
+- Dashboard
+- Setup (Service Catalog, JKN/INA-CBG Codes - read only)
+- Clinical Pathways (read only)
+- Patient Cases (CRUD)
+- Analytics & Improvement (Compliance, Variance - own cases)
+
+### 6.8 Auditor
+
+- Dashboard (read only)
+- Analytics & Improvement (semua - read only)
+- System Administration (Audit Logs - read only)
+
+---
+
+## 7. Perbandingan Struktur Menu
+
+### 7.1 Perubahan Utama
+
+| Aspek               | Struktur Lama                   | Struktur Revisi                                    | Keuntungan                                    |
+| ------------------- | ------------------------------- | -------------------------------------------------- | --------------------------------------------- |
+| **Pengelompokan**   | Master Data terpisah            | Setup (Costing Setup, Service Catalog, JKN, SIMRS) | Lebih logis, semua konfigurasi di satu tempat |
+| **Data Input**      | GL & Expense Management         | Data Input + Import Center                         | Lebih jelas, ada pusat import                 |
+| **Costing Process** | Allocation & Unit Cost terpisah | Costing Process dengan Pre-Allocation Check        | Alur lebih jelas, validasi sebelum proses     |
+| **Analytics**       | Reports & Analytics             | Analytics & Improvement                            | Fokus pada improvement, siap untuk AI/ML      |
+| **System Admin**    | Terpisah di akhir               | Tetap terpisah (penting)                           | Konsisten dengan best practice                |
+
+### 7.2 Route Mapping
+
+| Menu Lama                  | Route Lama                  | Menu Baru                            | Route Baru                    |
+| -------------------------- | --------------------------- | ------------------------------------ | ----------------------------- |
+| Master Data > Cost Centers | `/master-data/cost-centers` | Setup > Costing Setup > Cost Centers | `/setup/costing/cost-centers` |
+| GL & Expense Management    | `/gl-expenses`              | Data Input > GL Expenses             | `/data-input/gl-expenses`     |
+| Cost Allocation            | `/allocation`               | Costing Process > Allocation Engine  | `/costing-process/allocation` |
+| Unit Costing               | `/unit-cost`                | Costing Process > Unit Cost Engine   | `/costing-process/unit-cost`  |
+| Reports & Analytics        | `/reports`                  | Analytics & Improvement              | `/analytics`                  |
+
+---
+
 **Dokumen ini akan diupdate seiring dengan perkembangan development.**

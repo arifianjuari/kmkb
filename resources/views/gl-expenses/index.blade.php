@@ -30,22 +30,35 @@
         </div>
         <div id="gl-expenses-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
             <p class="mb-2">
-                <span class="font-semibold">GL Expenses</span> adalah modul untuk mengimpor/menginput data biaya riil dari sistem akuntansi (GL) per periode.
+                <span class="font-semibold">GL Expenses</span> = data biaya dari laporan keuangan RS (General Ledger).
+            </p>
+            <p class="mb-2">
+                Digunakan sebagai dasar menghitung direct cost dan overhead dalam unit cost.
             </p>
             <div class="mb-2">
-                <p class="font-semibold mb-1">Isi utama:</p>
+                <p class="font-semibold mb-1">🔹 Apa saja isinya?</p>
                 <ul class="list-disc list-inside space-y-1 ml-2">
-                    <li>Periode (bulan/tahun)</li>
-                    <li>Cost center</li>
-                    <li>Expense category (dan akun GL)</li>
-                    <li>Nilai biaya</li>
+                    <li>Gaji & tunjangan</li>
+                    <li>Obat/BHP</li>
+                    <li>Utilitas (listrik, air, gas)</li>
+                    <li>Pemeliharaan</li>
+                    <li>ATK & operasional</li>
+                    <li>Depresiasi</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <p class="font-semibold mb-1">🔹 Bagaimana dipakai?</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>Biaya di cost center layanan → direct cost</li>
+                    <li>Biaya di cost center support → overhead untuk dialokasikan</li>
                 </ul>
             </div>
             <div>
-                <p class="font-semibold mb-1">Peran di sistem:</p>
+                <p class="font-semibold mb-1">🔹 Harus dipastikan:</p>
                 <ul class="list-disc list-inside space-y-1 ml-2">
-                    <li>Menjadi total biaya awal tiap cost center sebelum dialokasikan</li>
-                    <li>Di sinilah biaya overhead pertama kali masuk (di cost center support)</li>
+                    <li>GL lengkap untuk semua cost center</li>
+                    <li>Mapping kategori & cost center benar</li>
+                    <li>Periode GL sesuai periode costing</li>
                 </ul>
             </div>
         </div>

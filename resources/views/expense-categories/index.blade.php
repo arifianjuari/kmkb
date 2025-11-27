@@ -1,6 +1,26 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $costTypeTabs = [
+        'all' => __('All Cost Types'),
+        'fixed' => __('Fixed'),
+        'variable' => __('Variable'),
+        'semi_variable' => __('Semi Variable'),
+    ];
+
+    $costTypeCounts = [
+        'all' => $expenseCategories->count(),
+        'fixed' => $expenseCategories->where('cost_type', 'fixed')->count(),
+        'variable' => $expenseCategories->where('cost_type', 'variable')->count(),
+        'semi_variable' => $expenseCategories->where('cost_type', 'semi_variable')->count(),
+    ];
+
+    $initialTab = request('cost_type') ?: 'all';
+    if (! array_key_exists($initialTab, $costTypeTabs)) {
+        $initialTab = 'all';
+    }
+@endphp
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
         <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
@@ -59,9 +79,17 @@
             <p class="mb-1">
                 <span class="font-semibold">Expense Category</span> adalah pengelompokan akun biaya (beban) rumah sakit, misalnya gaji, BHP medis, BHP non medis, depresiasi, dan biaya lain-lain.
             </p>
-            <p>
+            <p class="mb-2">
                 Kode 4 digit dengan awalan angka <span class="font-mono">5</span> mengikuti struktur chart of accounts, di mana <span class="font-mono">5xxx</span> berarti akun biaya (expenses), dan dua digit berikutnya (mis. <span class="font-mono">51xx</span>, <span class="font-mono">52xx</span>) membedakan kelompok seperti gaji, BHP medis, BHP non medis, depresiasi, dan lain-lain.
             </p>
+            <div>
+                <p class="font-semibold mb-1">Cost type menjelaskan perilaku biaya terhadap volume layanan:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li><span class="font-semibold">Fixed Cost (FC)</span>: tidak berubah signifikan ketika volume pasien naik/turun (gaji tetap, depresiasi alat, sewa gedung)</li>
+                    <li><span class="font-semibold">Variable Cost (VC)</span>: naik-turun sebanding dengan jumlah tindakan/pasien (BHP, obat, bahan sekali pakai, makan pasien)</li>
+                    <li><span class="font-semibold">Semi Fixed Cost</span>: awalnya tetap, lalu loncat ke level baru setelah melewati batas volume tertentu (misal menambah 1 perawat ketika pasien &gt; 5)</li>
+                </ul>
+            </div>
         </div>
         
         @if(session('success'))
@@ -94,8 +122,23 @@
             </div>
         @endif
         
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg" x-data="{ activeTab: {{ json_encode($initialTab) }} }" x-cloak>
             <div class="px-4 py-5 sm:p-6">
+                <div class="flex flex-wrap items-center gap-2 mb-6">
+                    @foreach($costTypeTabs as $key => $label)
+                        <button
+                            type="button"
+                            @click="activeTab = '{{ $key }}'"
+                            :class="activeTab === '{{ $key }}' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'"
+                            class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500"
+                        >
+                            <span>{{ $label }}</span>
+                            <span class="text-xs font-semibold text-gray-500" :class="activeTab === '{{ $key }}' ? 'text-white/80' : ''">
+                                {{ $costTypeCounts[$key] }}
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
                 @if($expenseCategories->count() > 0)
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -111,7 +154,7 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($expenseCategories as $category)
-                                    <tr>
+                                    <tr x-show="activeTab === 'all' || activeTab === '{{ $category->cost_type }}'">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $category->account_code }}</td>
                                         <td class="px-6 py-4 text-sm text-gray-900">{{ $category->account_name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ucfirst(str_replace('_', ' ', $category->cost_type)) }}</td>

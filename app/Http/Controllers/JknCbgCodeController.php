@@ -157,4 +157,15 @@ class JknCbgCodeController extends Controller
             'name' => null
         ]);
     }
+
+    /**
+     * Base Tariff Reference view
+     */
+    public function baseTariff()
+    {
+        return view('setup.jkn-cbg-codes.base-tariff', [
+            'title' => 'Base Tariff Reference',
+            'message' => 'Fitur untuk melihat base tariff reference dan perbandingan dengan internal tariff sedang dalam tahap pengembangan.'
+        ]);
+    }
 }

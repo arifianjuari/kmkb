@@ -231,6 +231,164 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         Route::get('migrate-storage', [MigrateStorageController::class, 'index'])->name('migrate-storage.index');
         Route::post('migrate-storage', [MigrateStorageController::class, 'migrate'])->name('migrate-storage');
     });
+
+    // ============================================
+    // NEW MENU STRUCTURE ROUTES (Revised Structure)
+    // ============================================
+
+    // Setup Routes
+    Route::prefix('setup')->group(function () {
+        // Costing Setup
+        Route::prefix('costing')->group(function () {
+            Route::get('cost-centers', function () { return redirect()->route('cost-centers.index'); })->name('setup.costing.cost-centers');
+            Route::get('expense-categories', function () { return redirect()->route('expense-categories.index'); })->name('setup.costing.expense-categories');
+            Route::get('allocation-drivers', function () { return redirect()->route('allocation-drivers.index'); })->name('setup.costing.allocation-drivers');
+            Route::get('tariff-classes', function () { return redirect()->route('tariff-classes.index'); })->name('setup.costing.tariff-classes');
+        });
+
+        // Service Catalog
+        Route::prefix('service-catalog')->group(function () {
+            Route::get('service-items', function () { return redirect()->route('cost-references.index'); })->name('setup.service-catalog.service-items');
+            Route::get('simrs-linked', [App\Http\Controllers\Setup\ServiceCatalogController::class, 'simrsLinked'])->name('setup.service-catalog.simrs-linked');
+            Route::get('import-export', [App\Http\Controllers\Setup\ServiceCatalogController::class, 'importExport'])->name('setup.service-catalog.import-export');
+        });
+
+        // JKN / INA-CBG Codes
+        Route::prefix('jkn-cbg-codes')->group(function () {
+            Route::get('list', function () { return redirect()->route('jkn-cbg-codes.index'); })->name('setup.jkn-cbg-codes.list');
+            Route::get('base-tariff', [App\Http\Controllers\JknCbgCodeController::class, 'baseTariff'])->name('setup.jkn-cbg-codes.base-tariff');
+        });
+
+        // SIMRS Integration
+        Route::prefix('simrs-integration')->group(function () {
+            Route::get('settings', [App\Http\Controllers\Setup\SimrsIntegrationController::class, 'settings'])->name('setup.simrs-integration.settings');
+            Route::get('data-sources', function () { return redirect()->route('simrs.master-barang'); })->name('setup.simrs-integration.data-sources');
+            Route::get('sync', function () { return redirect()->route('simrs.sync'); })->name('setup.simrs-integration.sync');
+        });
+    });
+
+    // Data Input Routes
+    Route::prefix('data-input')->group(function () {
+        Route::get('gl-expenses', function () { return redirect()->route('gl-expenses.index'); })->name('data-input.gl-expenses');
+        Route::get('driver-statistics', function () { return redirect()->route('driver-statistics.index'); })->name('data-input.driver-statistics');
+        Route::get('service-volumes', function () { return redirect()->route('service-volumes.index'); })->name('data-input.service-volumes');
+        Route::get('import-center', [App\Http\Controllers\DataInput\ImportCenterController::class, 'index'])->name('data-input.import-center');
+    });
+
+    // Costing Process Routes
+    Route::prefix('costing-process')->group(function () {
+        // Pre-Allocation Check
+        Route::prefix('pre-allocation-check')->group(function () {
+            Route::get('gl-completeness', [App\Http\Controllers\CostingProcess\PreAllocationCheckController::class, 'glCompleteness'])->name('costing-process.pre-allocation-check.gl-completeness');
+            Route::get('driver-completeness', [App\Http\Controllers\CostingProcess\PreAllocationCheckController::class, 'driverCompleteness'])->name('costing-process.pre-allocation-check.driver-completeness');
+            Route::get('service-volume-completeness', [App\Http\Controllers\CostingProcess\PreAllocationCheckController::class, 'serviceVolumeCompleteness'])->name('costing-process.pre-allocation-check.service-volume-completeness');
+            Route::get('mapping-validation', [App\Http\Controllers\CostingProcess\PreAllocationCheckController::class, 'mappingValidation'])->name('costing-process.pre-allocation-check.mapping-validation');
+        });
+
+        // Allocation Engine
+        Route::prefix('allocation')->group(function () {
+            Route::get('maps', function () { return redirect()->route('allocation-maps.index'); })->name('costing-process.allocation.maps');
+            Route::get('run', function () { return redirect()->route('allocation.run.form'); })->name('costing-process.allocation.run');
+            Route::get('results', function () { return redirect()->route('allocation-results.index'); })->name('costing-process.allocation.results');
+        });
+
+        // Unit Cost Engine
+        Route::prefix('unit-cost')->group(function () {
+            Route::get('calculate', [App\Http\Controllers\CostingProcess\UnitCostController::class, 'calculate'])->name('costing-process.unit-cost.calculate');
+            Route::get('results', [App\Http\Controllers\CostingProcess\UnitCostController::class, 'results'])->name('costing-process.unit-cost.results');
+            Route::get('compare', [App\Http\Controllers\CostingProcess\UnitCostController::class, 'compare'])->name('costing-process.unit-cost.compare');
+        });
+    });
+
+    // Tariff Management Routes
+    Route::prefix('tariffs')->group(function () {
+        Route::get('simulation', function () { return redirect()->route('tariff-simulation.index'); })->name('tariffs.simulation');
+        Route::get('structure', [App\Http\Controllers\Tariff\TariffStructureController::class, 'index'])->name('tariffs.structure');
+        Route::get('final', function () { return redirect()->route('final-tariffs.index'); })->name('tariffs.final');
+        Route::get('explorer', function () { return redirect()->route('tariff-explorer.index'); })->name('tariffs.explorer');
+        Route::get('comparison', [App\Http\Controllers\Tariff\TariffComparisonController::class, 'index'])->name('tariffs.comparison');
+    });
+
+    // Clinical Pathways Additional Routes
+    Route::prefix('pathways')->group(function () {
+        Route::get('{pathway}/summary', [PathwayController::class, 'summary'])->name('pathways.summary');
+        Route::get('{pathway}/approval', [App\Http\Controllers\Pathway\PathwayApprovalController::class, 'show'])->name('pathways.approval');
+        Route::get('templates', [App\Http\Controllers\Pathway\PathwayTemplateController::class, 'index'])->name('pathways.templates');
+    });
+
+    // Patient Cases Additional Routes
+    Route::prefix('cases')->group(function () {
+        Route::get('{case}/costing', [App\Http\Controllers\PatientCase\CaseCostingController::class, 'show'])->name('cases.costing');
+        Route::get('{case}/variance', function ($case) { return redirect()->route('cases.show', $case); })->name('cases.variance');
+    });
+
+    // Analytics Routes
+    Route::prefix('analytics')->group(function () {
+        Route::get('cost-center-performance', [App\Http\Controllers\Analytics\CostCenterPerformanceController::class, 'index'])->name('analytics.cost-center-performance');
+        Route::get('allocation-summary', [App\Http\Controllers\Analytics\AllocationSummaryController::class, 'index'])->name('analytics.allocation-summary');
+        Route::get('unit-cost-summary', [App\Http\Controllers\Analytics\UnitCostSummaryController::class, 'index'])->name('analytics.unit-cost-summary');
+        Route::get('tariff-analytics', [App\Http\Controllers\Analytics\TariffAnalyticsController::class, 'index'])->name('analytics.tariff-analytics');
+        Route::get('pathway-compliance', function () { return redirect()->route('reports.compliance'); })->name('analytics.pathway-compliance');
+        Route::get('case-variance', function () { return redirect()->route('reports.cost-variance'); })->name('analytics.case-variance');
+        Route::get('los-analysis', function () { return redirect()->route('reports.pathway-performance'); })->name('analytics.los-analysis');
+        Route::get('continuous-improvement', [App\Http\Controllers\Analytics\ContinuousImprovementController::class, 'index'])->name('analytics.continuous-improvement');
+    });
+});
+
+// ============================================
+// BACKWARD COMPATIBILITY REDIRECTS
+// ============================================
+Route::middleware(['auth', 'set.hospital'])->group(function () {
+    // Master Data redirects (if any direct routes exist)
+    Route::get('master-data/{any}', function ($any) {
+        return redirect()->route("setup.costing.{$any}");
+    })->where('any', '.*');
+
+    // GL & Expenses redirects
+    Route::get('gl-expenses/{any?}', function ($any = null) {
+        if ($any) {
+            return redirect()->route("gl-expenses.{$any}");
+        }
+        return redirect()->route('data-input.gl-expenses');
+    })->where('any', '.*');
+
+    // Allocation redirects
+    Route::get('allocation/{any?}', function ($any = null) {
+        if ($any === 'run') {
+            return redirect()->route('costing-process.allocation.run');
+        }
+        return redirect()->route('costing-process.allocation.maps');
+    })->where('any', '.*');
+
+    // Unit Cost redirects
+    Route::get('unit-cost/{any?}', function ($any = null) {
+        if ($any === 'calculate') {
+            return redirect()->route('costing-process.unit-cost.calculate');
+        } elseif ($any === 'results') {
+            return redirect()->route('costing-process.unit-cost.results');
+        }
+        return redirect()->route('costing-process.unit-cost.calculate');
+    })->where('any', '.*');
+
+    // Reports redirects
+    Route::get('reports/{any?}', function ($any = null) {
+        if ($any === 'compliance') {
+            return redirect()->route('analytics.pathway-compliance');
+        } elseif ($any === 'cost-variance') {
+            return redirect()->route('analytics.case-variance');
+        } elseif ($any === 'pathway-performance') {
+            return redirect()->route('analytics.los-analysis');
+        }
+        return redirect()->route('analytics.pathway-compliance');
+    })->where('any', '.*');
+
+    // SIMRS redirects
+    Route::get('simrs/{any?}', function ($any = null) {
+        if ($any === 'sync') {
+            return redirect()->route('setup.simrs-integration.sync');
+        }
+        return redirect()->route('setup.simrs-integration.data-sources');
+    })->where('any', '.*');
 });
 
 require __DIR__.'/auth.php';
