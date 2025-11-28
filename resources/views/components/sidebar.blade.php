@@ -2,6 +2,7 @@
     $user = auth()->user();
     $isSuperadmin = $user?->isSuperadmin();
     $isAdmin = $user?->hasRole(\App\Models\User::ROLE_ADMIN);
+    $isObserver = $user?->isObserver();
     
     // Determine which groups should be open based on active routes
     $openGroups = [];
@@ -210,7 +211,7 @@
 
             @if(!$isSuperadmin)
                 <!-- Setup Group -->
-                @if($isAdmin || $user->hasRole('manajemen'))
+                @if($isAdmin || $user->hasRole('manajemen') || $isObserver)
                     <div class="mb-1">
                         <button @click="toggleGroup('setup')" 
                                 class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:bg-slate-700 hover:text-white transition-colors">
@@ -327,7 +328,7 @@
                 @endif
 
                 <!-- Data Input Group -->
-                @if($isAdmin || $user->hasRole('manajemen'))
+                @if($isAdmin || $user->hasRole('manajemen') || $isObserver)
                     <div class="mb-1">
                         <button @click="toggleGroup('data-input')" 
                                 class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:bg-slate-700 hover:text-white transition-colors">
@@ -363,7 +364,7 @@
                 @endif
 
                 <!-- Costing Process Group -->
-                @if($isAdmin || $user->hasRole('manajemen'))
+                @if($isAdmin || $user->hasRole('manajemen') || $isObserver)
                     <div class="mb-1">
                         <button @click="toggleGroup('costing-process')" 
                                 class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:bg-slate-700 hover:text-white transition-colors">
@@ -459,7 +460,7 @@
                 @endif
 
                 <!-- Tariff Management Group -->
-                @if($isAdmin || $user->hasRole('manajemen'))
+                @if($isAdmin || $user->hasRole('manajemen') || $isObserver)
                     <div class="mb-1">
                         <button @click="toggleGroup('tariff')" 
                                 class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:bg-slate-700 hover:text-white transition-colors">
@@ -614,8 +615,8 @@
                     </div>
                 </div>
 
-                <!-- System Administration Group (Admin only) -->
-                @if($isAdmin)
+                <!-- System Administration Group (Admin and Observer) -->
+                @if($isAdmin || $isObserver)
                     <div class="mb-1">
                         <button @click="toggleGroup('admin')" 
                                 class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:bg-slate-700 hover:text-white transition-colors">
@@ -653,8 +654,8 @@
                     </div>
                 @endif
 
-                <!-- SIMRS Integration Group (Admin only) -->
-                @if($isAdmin)
+                <!-- SIMRS Integration Group (Admin and Observer) -->
+                @if($isAdmin || $isObserver)
                     <div class="mb-1">
                         <button @click="toggleGroup('simrs')" 
                                 class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:bg-slate-700 hover:text-white transition-colors">
@@ -709,8 +710,8 @@
                     </div>
                 @endif
 
-                <!-- Service Volume (Current) Group (Admin only) -->
-                @if($isAdmin)
+                <!-- Service Volume (Current) Group (Admin and Observer) -->
+                @if($isAdmin || $isObserver)
                     <div class="mb-1">
                         <button @click="toggleGroup('svcCurrent')"
                                 class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:bg-slate-700 hover:text-white transition-colors">
