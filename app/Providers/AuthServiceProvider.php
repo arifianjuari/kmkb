@@ -25,6 +25,10 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        // Gate untuk melihat status costing (hanya admin dan costing team)
+        Gate::define('viewCostingStatus', function ($user) {
+            return $user->isSuperadmin() || 
+                   in_array($user->role, ['admin', 'mutu'], true);
+        });
     }
 }

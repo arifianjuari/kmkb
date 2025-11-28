@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+<div class="max-w-7xl mx-auto">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{{ __('Add New Expense Category') }}</h2>
             <a href="{{ route('expense-categories.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
@@ -22,7 +22,7 @@
                         <div class="col-span-12 md:col-span-6">
                             <label for="account_code" class="block text-sm font-medium text-gray-700">{{ __('Account Code') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <input type="text" id="account_code" name="account_code" value="{{ old('account_code') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <input type="text" id="account_code" name="account_code" value="{{ old('account_code') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 @error('account_code')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -32,7 +32,7 @@
                         <div class="col-span-12 md:col-span-6">
                             <label for="cost_type" class="block text-sm font-medium text-gray-700">{{ __('Cost Type') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <select id="cost_type" name="cost_type" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <select id="cost_type" name="cost_type" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                     <option value="">{{ __('Select Cost Type') }}</option>
                                     <option value="fixed" {{ old('cost_type') == 'fixed' ? 'selected' : '' }}>{{ __('Fixed') }}</option>
                                     <option value="variable" {{ old('cost_type') == 'variable' ? 'selected' : '' }}>{{ __('Variable') }}</option>
@@ -47,7 +47,7 @@
                         <div class="col-span-12">
                             <label for="account_name" class="block text-sm font-medium text-gray-700">{{ __('Account Name') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <input type="text" id="account_name" name="account_name" value="{{ old('account_name') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <input type="text" id="account_name" name="account_name" value="{{ old('account_name') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 @error('account_name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -60,7 +60,7 @@
                                     {{ __('Allocation Category') }} <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative inline-flex" x-data="{ showTooltip: false }" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false">
-                                    <span class="inline-flex items-center justify-center w-4 h-4 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full hover:bg-indigo-50 cursor-help">i</span>
+                                    <span class="inline-flex items-center justify-center w-4 h-4 text-xs font-semibold text-biru-dongker-800 border border-biru-dongker-400 rounded-full hover:bg-biru-dongker-200 cursor-help">i</span>
                                     <div x-show="showTooltip" 
                                          x-transition:enter="transition ease-out duration-200"
                                          x-transition:enter-start="opacity-0 scale-95"
@@ -76,7 +76,7 @@
                                 </div>
                             </div>
                             <div class="mt-1">
-                                <select id="allocation_category" name="allocation_category" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <select id="allocation_category" name="allocation_category" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                     <option value="">{{ __('Select Allocation Category') }}</option>
                                     <option value="gaji" {{ old('allocation_category') == 'gaji' ? 'selected' : '' }}>{{ __('Gaji') }}</option>
                                     <option value="bhp_medis" {{ old('allocation_category') == 'bhp_medis' ? 'selected' : '' }}>{{ __('BHP Medis') }}</option>
@@ -92,14 +92,14 @@
                         
                         <div class="col-span-12">
                             <div class="flex items-center">
-                                <input type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                <input type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }} class="h-4 w-4 text-biru-dongker-800 border-gray-300 rounded focus:ring-biru-dongker-700">
                                 <label for="is_active" class="ml-2 block text-sm text-gray-900">{{ __('Active') }}</label>
                             </div>
                         </div>
                     </div>
                     
                     <div class="mt-6">
-                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                             {{ __('Save Expense Category') }}
                         </button>
                     </div>

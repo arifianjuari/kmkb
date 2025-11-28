@@ -46,7 +46,7 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Avg. Compliance') }}</p>
                         <p class="mt-1 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($averageCompliance, 2) }}%</p>
                     </div>
-                    <div class="p-3 rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300">
+                    <div class="p-3 rounded-full bg-biru-dongker-200 text-biru-dongker-800 dark:bg-biru-dongker-900/30 dark:text-biru-dongker-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8" />
                         </svg>
@@ -70,7 +70,7 @@
         </div>
 
         <!-- Hero / CTA -->
-        <div class="mt-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white shadow">
+        <div class="mt-8 bg-gradient-to-r from-blue-500 to-biru-dongker-800 rounded-xl p-6 text-white shadow">
             <div class="flex items-start justify-between">
                 <div>
                     <h3 class="text-xl font-semibold">{{ __('Welcome to KMKB Dashboard') }}</h3>
@@ -169,7 +169,7 @@
                                         <span class="text-sm font-semibold text-gray-900 dark:text-gray-200">{{ $data->case_count }}</span>
                                     </div>
                                     <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
-                                        <div class="h-2 rounded-full bg-indigo-500" style="width: {{ ($data->case_count / $maxCases) * 100 }}%"></div>
+                                        <div class="h-2 rounded-full bg-biru-dongker-700" style="width: {{ ($data->case_count / $maxCases) * 100 }}%"></div>
                                     </div>
                                 </li>
                             @endforeach

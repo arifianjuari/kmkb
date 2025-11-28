@@ -2,7 +2,7 @@
 
 @section('content')
 <section class="mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Create Patient Case') }}</h2>
             <a href="{{ route('cases.index') }}" class="btn-secondary">
@@ -19,7 +19,7 @@
                         <div class="sm:col-span-3">
                             <label for="medical_record_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Medical Record Number') }}</label>
                             <div class="mt-1">
-                                <input type="text" id="medical_record_number" name="medical_record_number" value="{{ old('medical_record_number') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('medical_record_number') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <input type="text" id="medical_record_number" name="medical_record_number" value="{{ old('medical_record_number') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('medical_record_number') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             </div>
                             @error('medical_record_number')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -29,7 +29,7 @@
                         <div class="sm:col-span-3">
                             <label for="patient_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Patient Name') }}</label>
                             <div class="mt-1">
-                                <input type="text" id="patient_id" name="patient_id" value="{{ old('patient_id') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('patient_id') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <input type="text" id="patient_id" name="patient_id" value="{{ old('patient_id') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('patient_id') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             </div>
                             @error('patient_id')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -41,7 +41,7 @@
                         <div class="sm:col-span-3">
                             <label for="clinical_pathway_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Clinical Pathway') }}</label>
                             <div class="mt-1">
-                                <select id="clinical_pathway_id" name="clinical_pathway_id" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('clinical_pathway_id') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <select id="clinical_pathway_id" name="clinical_pathway_id" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('clinical_pathway_id') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                     <option value="">{{ __('Select Pathway') }}</option>
                                     @foreach($pathways as $pathway)
                                         <option value="{{ $pathway->id }}" {{ old('clinical_pathway_id') == $pathway->id ? 'selected' : '' }}>
@@ -58,7 +58,7 @@
                         <div class="sm:col-span-3">
                             <label for="admission_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Admission Date') }}</label>
                             <div class="mt-1">
-                                <input type="date" id="admission_date" name="admission_date" value="{{ old('admission_date') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('admission_date') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <input type="date" id="admission_date" name="admission_date" value="{{ old('admission_date') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('admission_date') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             </div>
                             @error('admission_date')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -70,7 +70,7 @@
                         <div class="sm:col-span-3">
                             <label for="discharge_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Discharge Date') }}</label>
                             <div class="mt-1">
-                                <input type="date" id="discharge_date" name="discharge_date" value="{{ old('discharge_date') }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('discharge_date') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <input type="date" id="discharge_date" name="discharge_date" value="{{ old('discharge_date') }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('discharge_date') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             </div>
                             @error('discharge_date')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -80,7 +80,7 @@
                         <div class="sm:col-span-3">
                             <label for="primary_diagnosis" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Primary Diagnosis') }}</label>
                             <div class="mt-1">
-                                <input type="text" id="primary_diagnosis" name="primary_diagnosis" value="{{ old('primary_diagnosis') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('primary_diagnosis') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <input type="text" id="primary_diagnosis" name="primary_diagnosis" value="{{ old('primary_diagnosis') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('primary_diagnosis') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             </div>
                             @error('primary_diagnosis')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -90,7 +90,7 @@
                         <div class="sm:col-span-3">
                             <label for="ina_cbg_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('INA CBG Code') }}</label>
                             <div class="mt-1 relative">
-                                <input type="text" id="ina_cbg_code" name="ina_cbg_code" value="{{ old('ina_cbg_code') }}" required autocomplete="off" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('ina_cbg_code') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <input type="text" id="ina_cbg_code" name="ina_cbg_code" value="{{ old('ina_cbg_code') }}" required autocomplete="off" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('ina_cbg_code') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 <div id="cbg-code-suggestions" class="absolute z-50 mt-1 w-full bg-white shadow-lg rounded-md overflow-hidden dark:bg-gray-700 hidden">
                                     <ul class="max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dark:bg-gray-700">
                                     </ul>
@@ -104,7 +104,7 @@
                         <div class="sm:col-span-3 sm:col-start-4">
                             <label for="additional_diagnoses" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Additional Diagnoses') }}</label>
                             <div class="mt-1">
-                                <textarea id="additional_diagnoses" name="additional_diagnoses" rows="3" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('additional_diagnoses') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('additional_diagnoses') }}</textarea>
+                                <textarea id="additional_diagnoses" name="additional_diagnoses" rows="3" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('additional_diagnoses') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('additional_diagnoses') }}</textarea>
                             </div>
                             @error('additional_diagnoses')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -116,7 +116,7 @@
                         <div class="sm:col-span-3">
                             <label for="actual_total_cost" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Actual Total Cost') }}</label>
                             <div class="mt-1">
-                                <input type="number" id="actual_total_cost" name="actual_total_cost" step="0.01" min="0" value="{{ old('actual_total_cost') }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('actual_total_cost') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <input type="number" id="actual_total_cost" name="actual_total_cost" step="0.01" min="0" value="{{ old('actual_total_cost') }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('actual_total_cost') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             </div>
                             @error('actual_total_cost')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -126,7 +126,7 @@
                         <div class="sm:col-span-3">
                             <label for="ina_cbg_tariff" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('INA CBG Tariff') }}</label>
                             <div class="mt-1">
-                                <input type="number" id="ina_cbg_tariff" name="ina_cbg_tariff" step="0.01" min="0" value="{{ old('ina_cbg_tariff') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('ina_cbg_tariff') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <input type="number" id="ina_cbg_tariff" name="ina_cbg_tariff" step="0.01" min="0" value="{{ old('ina_cbg_tariff') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('ina_cbg_tariff') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             </div>
                             @error('ina_cbg_tariff')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -137,7 +137,7 @@
                     <div class="mt-6">
                         <label for="annotation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Annotation') }}</label>
                         <div class="mt-1">
-                            <textarea id="annotation" name="annotation" rows="3" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('annotation') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Catatan atau komentar atas kasus yang dinilai') }}">{{ old('annotation') }}</textarea>
+                            <textarea id="annotation" name="annotation" rows="3" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('annotation') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Catatan atau komentar atas kasus yang dinilai') }}">{{ old('annotation') }}</textarea>
                         </div>
                         @error('annotation')
                             <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>

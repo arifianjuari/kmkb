@@ -45,9 +45,9 @@
     // Always use full rounded to ensure perfect circle
     $roundedClass = 'rounded-full';
 
-    // Background styling: prefer inline HEX color if provided; otherwise use Tailwind indigo.
+    // Background styling: prefer inline HEX color if provided; otherwise use Tailwind biru-dongker.
     $style = '';
-    $bgClass = 'bg-indigo-600';
+    $bgClass = 'bg-biru-dongker-800';
     if ($color && is_string($color)) {
         // sanitize: allow only valid hex color like #RRGGBB or #RGB
         if (preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $color)) {

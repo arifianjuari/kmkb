@@ -14,8 +14,8 @@
             <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3 flex-wrap">
                 <form action="{{ route('pathways.index') }}" method="GET" class="flex items-center gap-2 w-full sm:w-auto">
                     <label for="q" class="sr-only">{{ __('Search') }}</label>
-                    <input id="q" name="q" type="text" value="{{ $q ?? '' }}" placeholder="{{ __('Search pathways...') }}" class="w-full sm:w-80 py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-gray-200" />
-                    <button type="submit" class="inline-flex items-center px-3 py-2 rounded-md border border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input id="q" name="q" type="text" value="{{ $q ?? '' }}" placeholder="{{ __('Search pathways...') }}" class="w-full sm:w-80 py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-biru-dongker-700 focus:border-biru-dongker-700 dark:bg-gray-800 dark:text-gray-200" />
+                    <button type="submit" class="inline-flex items-center px-3 py-2 rounded-md border border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700">
                         {{ __('Search') }}
                     </button>
                     @if(!empty($q))
@@ -60,14 +60,14 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $pathway->creator->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">
-                                                <a href="{{ route('pathways.show', $pathway) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="{{ __('View') }}" aria-label="{{ __('View') }}">
+                                                <a href="{{ route('pathways.show', $pathway) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                     <!-- Eye icon -->
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                         <path d="M12 5c-5 0-9 5-9 7s4 7 9 7 9-5 9-7-4-7-9-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 .001 6.001A3 3 0 0 0 12 9Z"/>
                                                     </svg>
                                                 </a>
                                                 @if(!auth()->user()?->isObserver())
-                                                <a href="{{ route('pathways.edit', $pathway) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
+                                                <a href="{{ route('pathways.edit', $pathway) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-800 hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
                                                     <!-- Pencil icon -->
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm2.92 2.83H5v-.92l9.06-9.06.92.92L5.92 20.08ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
@@ -76,7 +76,7 @@
                                                 @endif
                                                 @auth
                                                 @if(auth()->user()?->hasRole('mutu') || auth()->user()?->hasRole('admin'))
-                                                    <a href="{{ route('pathways.builder', $pathway) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-amber-600 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500" title="{{ __('Builder') }}" aria-label="{{ __('Builder') }}">
+                                                    <a href="{{ route('pathways.builder', $pathway) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-600 hover:bg-biru-dongker-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-500" title="{{ __('Builder') }}" aria-label="{{ __('Builder') }}">
                                                         <!-- Wrench icon -->
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                             <path d="M22 19.59 19.59 22l-6.3-6.3a7.004 7.004 0 0 1-8.71-9.97L7 8l3-3L5.59 1.41A7.004 7.004 0 0 1 15.56 10.3L22 16.72v2.87Z"/>

@@ -2,74 +2,87 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Alpine.js x-cloak */
+/* Alpine.js x-cloak - Prevent FOUC (Flash of Unstyled Content) */
 [x-cloak] {
-    display: none !important;
+  display: none !important;
+}
+
+/* Sidebar optimization - Hardware acceleration for smooth transitions */
+aside[x-cloak] {
+  visibility: hidden;
+}
+
+/* Prevent layout shift on initial load */
+body:not([x-data]) .lg\:ml-64 {
+  margin-left: 16rem;
+}
+
+body:not([x-data]) .lg\:left-64 {
+  left: 16rem;
 }
 
 /* Ensure mobile overlay is hidden on desktop */
 @media (min-width: 1024px) {
-    .mobile-overlay {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-    }
+  .mobile-overlay {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
 }
 
 @layer components {
-    /* Base button */
-    .btn {
-        @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed;
-    }
+  /* Base button */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
 
-    /* Variants */
-    .btn-primary {
-        @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-400 dark:focus:ring-offset-gray-900;
-    }
+  /* Variants */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-biru-dongker-800 text-white hover:bg-biru-dongker-900 focus:ring-biru-dongker-700 dark:bg-biru-dongker-800 dark:hover:bg-biru-dongker-900 dark:focus:ring-biru-dongker-600 dark:focus:ring-offset-gray-900;
+  }
 
-    .btn-secondary {
-        @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900;
-    }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900;
+  }
 
-    .btn-danger {
-        @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-400 dark:focus:ring-offset-gray-900;
-    }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-400 dark:focus:ring-offset-gray-900;
+  }
 
-    .btn-success {
-        @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-400 dark:focus:ring-offset-gray-900;
-    }
+  .btn-success {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-400 dark:focus:ring-offset-gray-900;
+  }
 
-    .btn-warning {
-        @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-500 dark:bg-amber-500 dark:hover:bg-amber-600 dark:focus:ring-amber-400 dark:focus:ring-offset-gray-900;
-    }
+  .btn-warning {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-biru-dongker-600 text-white hover:bg-biru-dongker-700 focus:ring-biru-dongker-500 dark:bg-biru-dongker-600 dark:hover:bg-biru-dongker-700 dark:focus:ring-biru-dongker-400 dark:focus:ring-offset-gray-900;
+  }
 
-    /* Optional extras */
-    .btn-outline {
-        @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-400 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700;
-    }
-    .btn-link {
-        @apply inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700 underline-offset-4 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300;
-    }
+  /* Optional extras */
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-400 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700;
+  }
+  .btn-link {
+    @apply inline-flex items-center gap-1 text-biru-dongker-800 hover:text-biru-dongker-900 underline-offset-4 hover:underline dark:text-biru-dongker-600 dark:hover:text-biru-dongker-500;
+  }
 
-    /* 3D Transforms */
-    .perspective-1000 {
-        perspective: 1000px;
-    }
-    
-    .preserve-3d {
-        transform-style: preserve-3d;
-    }
+  /* 3D Transforms */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
 }
 
 @layer utilities {
-    /* Animation Delays */
-    .animation-delay-2000 {
-        animation-delay: 2000ms;
-    }
-    
-    .animation-delay-4000 {
-        animation-delay: 4000ms;
-    }
-}
+  /* Animation Delays */
+  .animation-delay-2000 {
+    animation-delay: 2000ms;
+  }
 
+  .animation-delay-4000 {
+    animation-delay: 4000ms;
+  }
+}

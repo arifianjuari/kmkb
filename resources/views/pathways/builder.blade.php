@@ -2,10 +2,10 @@
 
 @section('content')
 <div class="mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{{ __('Pathway Builder') }}: {{ $pathway->name }}</h2>
-            <a href="{{ route('pathways.show', $pathway) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <a href="{{ route('pathways.show', $pathway) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                 {{ __('Back to Pathway') }}
             </a>
         </div>
@@ -23,14 +23,14 @@
                             <div class="sm:col-span-2">
                                 <label for="day" class="block text-sm font-medium text-gray-700">{{ __('Day') }}</label>
                                 <div class="mt-1">
-                                    <input type="number" id="day" name="day" min="1" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="day" name="day" min="1" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 </div>
                             </div>
                             
                             <div class="sm:col-span-4">
                                 <label for="category" class="block text-sm font-medium text-gray-700">{{ __('Category') }}</label>
                                 <div class="mt-1">
-                                    <select id="category" name="category" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <select id="category" name="category" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                         <option value="">{{ __('Select Category') }}</option>
                                         <option value="Administrasi">Administrasi</option>
                                         <option value="Penilaian dan Pemantauan Medis">Penilaian dan Pemantauan Medis</option>
@@ -53,7 +53,7 @@
                             <div class="sm:col-span-5">
                                 <label for="activity" class="block text-sm font-medium text-gray-700">{{ __('Activity') }}</label>
                                 <div class="mt-1">
-                                    <input type="text" id="activity" name="activity" list="activityList" placeholder="{{ __('Type to search service code') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="text" id="activity" name="activity" list="activityList" placeholder="{{ __('Type to search service code') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                     <datalist id="activityList">
                                         @foreach($costReferences as $reference)
                                             <option value="{{ $reference->service_code }}">{{ $reference->service_description }}</option>
@@ -61,7 +61,7 @@
                                     </datalist>
                                     <input type="hidden" id="cost_reference_id" name="cost_reference_id" value="">
                                     <div id="no-match-add-ref" class="mt-2 hidden text-left">
-                                        <button type="button" id="open-add-ref" class="text-xs text-indigo-600 hover:text-indigo-800">
+                                        <button type="button" id="open-add-ref" class="text-xs text-biru-dongker-800 hover:text-biru-dongker-900">
                                             {{ __('Tidak menemukan hasil? Tambah referensi biaya baru') }}
                                         </button>
                                     </div>
@@ -71,27 +71,27 @@
                             <div class="sm:col-span-5">
                                 <label for="description" class="block text-sm font-medium text-gray-700">{{ __('Description') }}</label>
                                 <div class="mt-1">
-                                    <input type="text" id="description" name="description" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="text" id="description" name="description" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 </div>
                             </div>
 
                             <div class="sm:col-span-5">
                                 <label for="criteria" class="block text-sm font-medium text-gray-700">{{ __('Keterangan (opsional)') }}</label>
                                 <div class="mt-1">
-                                    <input type="text" id="criteria" name="criteria" placeholder="e.g., if age > 60 then ..." class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="text" id="criteria" name="criteria" placeholder="e.g., if age > 60 then ..." class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 </div>
                             </div>
                             
                             <div class="sm:col-span-3">
                                 <label for="standard_cost" class="block text-sm font-medium text-gray-700">{{ __('Standard Cost') }}</label>
                                 <div class="mt-1">
-                                    <input type="number" id="standard_cost" name="standard_cost" step="1" min="0" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="standard_cost" name="standard_cost" step="1" min="0" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 </div>
                             </div>
                             <div class="sm:col-span-2">
                                 <label for="quantity" class="block text-sm font-medium text-gray-700">{{ __('Quantity') }}</label>
                                 <div class="mt-1">
-                                    <input type="number" id="quantity" name="quantity" step="1" min="1" value="1" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="quantity" name="quantity" step="1" min="1" value="1" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 </div>
                             </div>
                             <div class="sm:col-span-2">
@@ -105,7 +105,7 @@
                         <!-- Cost Reference selection moved: handled by Activity dropdown above (which writes cost_reference_id, description, and standard_cost) -->
                         
                         <div class="mt-6">
-                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                                 {{ __('Add Step') }}
                             </button>
                         </div>
@@ -120,15 +120,15 @@
                 </div>
                 <div class="px-4 py-5 sm:p-6">
                     <div class="flex items-center gap-4">
-                        <a href="{{ route('pathways.steps.template', $pathway) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <a href="{{ route('pathways.steps.template', $pathway) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                             {{ __('Download Excel Template') }}
                         </a>
                     </div>
                     <form class="mt-4" method="POST" action="{{ route('pathways.steps.import', $pathway) }}" enctype="multipart/form-data">
                         @csrf
                         <div class="space-y-3">
-                            <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                            <button type="submit" class="w-full sm:w-auto inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                            <button type="submit" class="w-full sm:w-auto inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                                 {{ __('Upload File') }}
                             </button>
                         </div>
@@ -222,7 +222,7 @@
                                             </form>
                                         </td>
                                         <td class="px-6 py-2 whitespace-nowrap text-xs text-gray-900">
-                                            <select class="cost-reference-select py-1 px-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" data-step-id="{{ $step->id }}">
+                                            <select class="cost-reference-select py-1 px-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700" data-step-id="{{ $step->id }}">
                                                 <option value="">{{ __('None') }}</option>
                                                 @foreach($costReferences as $reference)
                                                     <option value="{{ $reference->id }}" data-cost="{{ number_format($reference->standard_cost, 0, '.', '') }}" data-code="{{ $reference->service_code }}" data-desc="{{ $reference->service_description }}" {{ $step->cost_reference_id == $reference->id ? 'selected' : '' }}>
@@ -244,7 +244,7 @@
                 <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <div class="flex justify-between items-center">
                         <h4 class="text-lg font-medium text-gray-900">{{ __('Total Pathway Cost') }}</h4>
-                        <div class="text-2xl font-bold text-indigo-600" id="total-pathway-cost">
+                        <div class="text-2xl font-bold text-biru-dongker-800" id="total-pathway-cost">
                             Rp{{ number_format($pathway->steps->sum('total_cost'), 0, ',', '.') }}
                         </div>
                     </div>
@@ -270,24 +270,24 @@
                             <div class="grid grid-cols-1 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">{{ __('Service Name') }}</label>
-                                    <input type="text" id="ref_service_code" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="text" id="ref_service_code" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">{{ __('Description') }}</label>
-                                    <input type="text" id="ref_service_description" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="text" id="ref_service_description" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">{{ __('Standard Cost') }}</label>
-                                    <input type="number" id="ref_standard_cost" step="1" min="0" value="0" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="ref_standard_cost" step="1" min="0" value="0" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 </div>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">{{ __('Unit') }}</label>
-                                        <input type="text" id="ref_unit" placeholder="{{ __('e.g. kali / tindakan') }}" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <input type="text" id="ref_unit" placeholder="{{ __('e.g. kali / tindakan') }}" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">{{ __('Source') }}</label>
-                                        <input type="text" id="ref_source" placeholder="{{ __('e.g. internal') }}" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <input type="text" id="ref_source" placeholder="{{ __('e.g. internal') }}" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                     </div>
                                 </div>
                                 <p id="add-ref-error" class="text-sm text-red-600 hidden"></p>
@@ -297,7 +297,7 @@
                 </div>
             </div>
             <div class="mt-5 sm:mt-6 sm:flex sm:flex-row-reverse">
-                <button type="button" id="save-add-ref" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">{{ __('Simpan') }}</button>
+                <button type="button" id="save-add-ref" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-biru-dongker-800 text-base font-medium text-white hover:bg-biru-dongker-900 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">{{ __('Simpan') }}</button>
                 <button type="button" id="cancel-add-ref" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">{{ __('Batal') }}</button>
             </div>
         </div>

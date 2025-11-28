@@ -2,10 +2,10 @@
 
 @section('content')
 <div class="mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{{ __('Audit Log Details') }}</h2>
-            <a href="{{ route('audit-logs.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <a href="{{ route('audit-logs.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                 {{ __('Back to List') }}
             </a>
         </div>
@@ -19,7 +19,7 @@
                                 <dt class="text-sm font-medium text-gray-500">{{ __('User') }}</dt>
                                 <dd class="mt-1 text-sm text-gray-900">
                                     @if($auditLog->user)
-                                        <a href="{{ route('users.show', $auditLog->user) }}" class="text-indigo-600 hover:text-indigo-900">{{ $auditLog->user->name }}</a>
+                                        <a href="{{ route('users.show', $auditLog->user) }}" class="text-biru-dongker-800 hover:text-biru-dongker-950">{{ $auditLog->user->name }}</a>
                                     @else
                                         <span class="text-gray-500">{{ __('System') }}</span>
                                     @endif

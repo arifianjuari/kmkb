@@ -17,7 +17,7 @@
                 <div class="mb-6">
                     <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Name') }}</label>
                     <div class="mt-1">
-                        <input type="text" id="name" name="name" value="{{ old('name') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('name') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="text" id="name" name="name" value="{{ old('name') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('name') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     </div>
                     @error('name')
                         <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -27,7 +27,7 @@
                 <div class="mb-6">
                     <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Email Address') }}</label>
                     <div class="mt-1">
-                        <input type="email" id="email" name="email" value="{{ old('email') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('email') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="email" id="email" name="email" value="{{ old('email') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('email') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     </div>
                     @error('email')
                         <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -37,7 +37,7 @@
                 <div class="mb-6">
                     <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Password') }}</label>
                     <div class="mt-1">
-                        <input type="password" id="password" name="password" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('password') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="password" id="password" name="password" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('password') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     </div>
                     @error('password')
                         <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -47,14 +47,14 @@
                 <div class="mb-6">
                     <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Confirm Password') }}</label>
                     <div class="mt-1">
-                        <input type="password" id="password_confirmation" name="password_confirmation" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="password" id="password_confirmation" name="password_confirmation" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     </div>
                 </div>
                 
                 <div class="mb-6">
                     <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Role') }}</label>
                     <div class="mt-1">
-                        <select id="role" name="role" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('role') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <select id="role" name="role" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('role') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <option value="">{{ __('Select Role') }}</option>
                             <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
                             <option value="mutu" {{ old('role') == 'mutu' ? 'selected' : '' }}>{{ __('Mutu') }}</option>
@@ -72,7 +72,7 @@
                 <div class="mb-6">
                     <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Department') }}</label>
                     <div class="mt-1">
-                        <input type="text" id="department" name="department" value="{{ old('department') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('department') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="text" id="department" name="department" value="{{ old('department') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('department') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     </div>
                     @error('department')
                         <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -83,7 +83,7 @@
                 <div class="mb-6">
                     <label for="hospital_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Hospital') }}</label>
                     <div class="mt-1">
-                        <select id="hospital_id" name="hospital_id" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <select id="hospital_id" name="hospital_id" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <option value="">{{ __('Select Hospital') }}</option>
                             @foreach(App\Models\Hospital::all() as $hospital)
                                 <option value="{{ $hospital->id }}" {{ old('hospital_id') == $hospital->id ? 'selected' : '' }}>

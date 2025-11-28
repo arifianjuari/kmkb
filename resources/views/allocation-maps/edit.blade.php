@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+<div class="max-w-7xl mx-auto">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{{ __('Edit Allocation Map') }}</h2>
             <a href="{{ route('allocation-maps.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
@@ -23,7 +23,7 @@
                         <div class="col-span-12 md:col-span-6">
                             <label for="source_cost_center_id" class="block text-sm font-medium text-gray-700">{{ __('Source Cost Center') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <select id="source_cost_center_id" name="source_cost_center_id" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <select id="source_cost_center_id" name="source_cost_center_id" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                     <option value="">{{ __('Select Source Cost Center') }}</option>
                                     @foreach($supportCostCenters as $costCenter)
                                         <option value="{{ $costCenter->id }}" {{ old('source_cost_center_id', $allocationMap->source_cost_center_id) == $costCenter->id ? 'selected' : '' }}>
@@ -41,7 +41,7 @@
                         <div class="col-span-12 md:col-span-6">
                             <label for="allocation_driver_id" class="block text-sm font-medium text-gray-700">{{ __('Allocation Driver') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <select id="allocation_driver_id" name="allocation_driver_id" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <select id="allocation_driver_id" name="allocation_driver_id" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                     <option value="">{{ __('Select Allocation Driver') }}</option>
                                     @foreach($allocationDrivers as $driver)
                                         <option value="{{ $driver->id }}" {{ old('allocation_driver_id', $allocationMap->allocation_driver_id) == $driver->id ? 'selected' : '' }}>
@@ -59,7 +59,7 @@
                         <div class="col-span-12 md:col-span-6">
                             <label for="step_sequence" class="block text-sm font-medium text-gray-700">{{ __('Step Sequence') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <input type="number" id="step_sequence" name="step_sequence" value="{{ old('step_sequence', $allocationMap->step_sequence) }}" required min="1" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <input type="number" id="step_sequence" name="step_sequence" value="{{ old('step_sequence', $allocationMap->step_sequence) }}" required min="1" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 @error('step_sequence')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -69,7 +69,7 @@
                     </div>
                     
                     <div class="mt-6">
-                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                             {{ __('Update Allocation Map') }}
                         </button>
                     </div>

@@ -29,6 +29,8 @@ class DatabaseSeeder extends Seeder
             DriverStatisticsTableSeeder::class, // Data driver per cost center
             AllocationMapsTableSeeder::class, // Mapping alokasi
             ServiceVolumesTableSeeder::class, // Volume layanan per cost reference
+            // Seeder untuk data dashboard (harus dijalankan terakhir)
+            DashboardDataSeeder::class, // Data komprehensif untuk chart dashboard
         ]);
     }
 }

@@ -3,12 +3,12 @@
 @section('title', 'Service Volume (Current) - Operasi')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 space-y-6">
+<div class="max-w-7xl mx-auto space-y-6">
     <div class="bg-white shadow rounded-lg p-6">
         <form method="GET" class="grid gap-6 md:grid-cols-4">
             <div>
                 <label for="year" class="block text-sm font-medium text-gray-700 mb-1">Tahun</label>
-                <select id="year" name="year" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <select id="year" name="year" class="w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700">
                     @foreach($availableYears as $yearOption)
                         <option value="{{ $yearOption }}" {{ (int) $year === (int) $yearOption ? 'selected' : '' }}>{{ $yearOption }}</option>
                     @endforeach
@@ -16,7 +16,7 @@
             </div>
             <div>
                 <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status Pasien</label>
-                <select id="status" name="status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <select id="status" name="status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700">
                     <option value="all" {{ $status === null ? 'selected' : '' }}>Semua Status</option>
                     <option value="Ralan" {{ $status === 'Ralan' ? 'selected' : '' }}>Rawat Jalan</option>
                     <option value="Ranap" {{ $status === 'Ranap' ? 'selected' : '' }}>Rawat Inap</option>
@@ -24,7 +24,7 @@
             </div>
             <div>
                 <label for="poli" class="block text-sm font-medium text-gray-700 mb-1">Poliklinik</label>
-                <select id="poli" name="poli" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <select id="poli" name="poli" class="w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700">
                     <option value="">Semua Poli</option>
                     @foreach($poliOptions as $option)
                         <option value="{{ $option->kd_poli }}" {{ $poli === $option->kd_poli ? 'selected' : '' }}>
@@ -35,10 +35,10 @@
             </div>
             <div>
                 <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Cari Nama Operasi</label>
-                <input type="text" id="search" name="search" value="{{ $search }}" placeholder="Nama operasi..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <input type="text" id="search" name="search" value="{{ $search }}" placeholder="Nama operasi..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700">
             </div>
             <div class="flex items-end space-x-2 md:col-span-4">
-                <button type="submit" class="inline-flex items-center justify-center w-full md:w-auto px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <button type="submit" class="inline-flex items-center justify-center w-full md:w-auto px-4 py-2 bg-biru-dongker-800 text-white rounded-md shadow hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                     Terapkan Filter
                 </button>
                 <button type="submit"

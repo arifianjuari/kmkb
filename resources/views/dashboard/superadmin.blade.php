@@ -15,7 +15,7 @@
                     <!-- Total Hospitals -->
                     <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
                         <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-4">
+                            <div class="p-3 rounded-full bg-biru-dongker-300 text-biru-dongker-800 mr-4">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4" />
                                 </svg>
@@ -77,7 +77,7 @@
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold text-gray-800">Recent Hospitals</h3>
-                        <a href="{{ route('hospitals.index') }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Manage</a>
+                        <a href="{{ route('hospitals.index') }}" class="text-biru-dongker-800 hover:text-biru-dongker-900 text-sm font-medium">Manage</a>
                     </div>
                     <div class="divide-y">
                         @forelse($recentHospitals as $hospital)
@@ -123,8 +123,8 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <a href="{{ route('hospitals.index') }}" class="flex flex-col items-center justify-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors duration-300">
-                        <div class="bg-indigo-500 p-3 rounded-full text-white mb-2">
+                    <a href="{{ route('hospitals.index') }}" class="flex flex-col items-center justify-center p-4 bg-biru-dongker-200 rounded-lg hover:bg-biru-dongker-300 transition-colors duration-300">
+                        <div class="bg-biru-dongker-700 p-3 rounded-full text-white mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>

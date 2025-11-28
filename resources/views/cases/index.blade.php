@@ -22,12 +22,12 @@
             <form method="GET" action="{{ route('cases.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                     <label for="medical_record_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('MRN') }}</label>
-                    <input type="text" id="medical_record_number" name="medical_record_number" value="{{ request('medical_record_number') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <input type="text" id="medical_record_number" name="medical_record_number" value="{{ request('medical_record_number') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 </div>
                 
                 <div>
                     <label for="pathway_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Pathway') }}</label>
-                    <select id="pathway_id" name="pathway_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <select id="pathway_id" name="pathway_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <option value="">{{ __('All Pathways') }}</option>
                         @foreach($pathways as $pathway)
                             <option value="{{ $pathway->id }}" {{ request('pathway_id') == $pathway->id ? 'selected' : '' }}>
@@ -39,12 +39,12 @@
                 
                 <div>
                     <label for="admission_date_from" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Admission Date From') }}</label>
-                    <input type="date" id="admission_date_from" name="admission_date_from" value="{{ request('admission_date_from') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <input type="date" id="admission_date_from" name="admission_date_from" value="{{ request('admission_date_from') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 </div>
                 
                 <div>
                     <label for="admission_date_to" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Admission Date To') }}</label>
-                    <input type="date" id="admission_date_to" name="admission_date_to" value="{{ request('admission_date_to') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <input type="date" id="admission_date_to" name="admission_date_to" value="{{ request('admission_date_to') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 </div>
                 
                 <div class="flex justify-end space-x-2 md:col-span-4">
@@ -108,13 +108,13 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex items-center gap-2">
-                                            <a href="{{ route('cases.show', $case) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
+                                            <a href="{{ route('cases.show', $case) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                     <path d="M12 5c-5 0-9 5-9 7s4 7 9 7 9-5 9-7-4-7-9-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 .001 6.001A3 3 0 0 0 12 9Z"/>
                                                 </svg>
                                             </a>
                                             @if(!auth()->user()?->isObserver())
-                                            <a href="{{ route('cases.edit', $case) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:text-indigo-400 dark:hover:bg-indigo-900" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
+                                            <a href="{{ route('cases.edit', $case) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-800 hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700 dark:border-gray-600 dark:text-biru-dongker-600 dark:hover:bg-biru-dongker-900" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                     <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm2.92 2.83H5v-.92l9.06-9.06.92.92L5.92 20.08ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
                                                 </svg>

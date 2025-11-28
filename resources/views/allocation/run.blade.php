@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+<div class="max-w-7xl mx-auto">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{{ __('Run Allocation') }}</h2>
             <a href="{{ route('allocation-maps.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
@@ -66,7 +66,7 @@
                             <div>
                                 <label for="year" class="block text-sm font-medium text-gray-700">{{ __('Year') }} <span class="text-red-500">*</span></label>
                                 <div class="mt-1">
-                                    <select id="year" name="year" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <select id="year" name="year" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                         @for($y = date('Y'); $y >= date('Y') - 5; $y--)
                                             <option value="{{ $y }}" {{ old('year', $year) == $y ? 'selected' : '' }}>{{ $y }}</option>
                                         @endfor
@@ -80,7 +80,7 @@
                             <div>
                                 <label for="month" class="block text-sm font-medium text-gray-700">{{ __('Month') }} <span class="text-red-500">*</span></label>
                                 <div class="mt-1">
-                                    <select id="month" name="month" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <select id="month" name="month" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                         @for($m = 1; $m <= 12; $m++)
                                             <option value="{{ $m }}" {{ old('month', $month) == $m ? 'selected' : '' }}>
                                                 {{ str_pad($m, 2, '0', STR_PAD_LEFT) }} - {{ \Carbon\Carbon::create(null, $m, 1)->locale('id')->isoFormat('MMMM') }}
@@ -95,7 +95,7 @@
                         </div>
                         
                         <div class="mt-6">
-                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                                 {{ __('Run Allocation') }}
                             </button>
                         </div>
@@ -122,7 +122,7 @@
                                     @foreach($summary['allocation_maps'] as $map)
                                         <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
                                             <div class="flex items-center space-x-2">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-biru-dongker-300 text-biru-dongker-900">
                                                     Step {{ $map['step'] }}
                                                 </span>
                                                 <span class="text-sm text-gray-700">{{ $map['source'] }}</span>
@@ -141,7 +141,7 @@
                         </div>
                     @else
                         <p class="text-sm text-gray-500">Tidak ada allocation maps yang dikonfigurasi. Silakan setup allocation maps terlebih dahulu.</p>
-                        <a href="{{ route('allocation-maps.create') }}" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                        <a href="{{ route('allocation-maps.create') }}" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                             {{ __('Create Allocation Map') }}
                         </a>
                     @endif

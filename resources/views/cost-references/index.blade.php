@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+<div class="max-w-7xl mx-auto">
+    <div>
         <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
             <div class="flex items-center gap-3 flex-shrink-0">
                 <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Cost References') }}</h2>
                 <button
                     type="button"
-                    class="flex-shrink-0 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full w-5 h-5 flex items-center justify-center hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                    class="flex-shrink-0 text-xs font-semibold text-biru-dongker-800 border border-biru-dongker-400 rounded-full w-5 h-5 flex items-center justify-center hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700 transition-colors"
                     onclick="const p = document.getElementById('cost-references-help'); if (p) { p.classList.toggle('hidden'); }"
                     aria-label="{{ __('What is Cost Reference?') }}"
                     title="{{ __('What is Cost Reference?') }}"
@@ -19,18 +19,18 @@
             <div class="flex items-center space-x-2">
                 <form method="GET" action="{{ route('cost-references.index') }}" class="flex items-center space-x-2">
                     <div class="relative">
-                        <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('Search...') }}" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('Search...') }}" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                     </div>
-                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                         {{ __('Search') }}
                     </button>
                     @if($search)
-                        <a href="{{ route('cost-references.index') }}" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <a href="{{ route('cost-references.index') }}" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                             {{ __('Clear') }}
                         </a>
                     @endif
                 </form>
-                <a href="{{ route('cost-references.template') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <a href="{{ route('cost-references.template') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                     {{ __('Download Template') }}
                 </a>
                 <button type="button" onclick="openImportModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -39,12 +39,12 @@
                 <a href="{{ route('cost-references.export') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     {{ __('Export Excel') }}
                 </a>
-                <a href="{{ route('cost-references.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <a href="{{ route('cost-references.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                     {{ __('Add New Cost Reference') }}
                 </a>
             </div>
         </div>
-        <div id="cost-references-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
+        <div id="cost-references-help" class="mb-4 hidden text-xs text-gray-700 bg-biru-dongker-200 border border-biru-dongker-300 rounded-md p-3">
             <p class="mb-2">
                 <span class="font-semibold">Cost Reference</span> adalah "buku besar" daftar layanan & item di rumah sakit yang bisa muncul di pathway, unit cost, dan tarif.
             </p>
@@ -148,7 +148,7 @@
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            <input id="select-all" type="checkbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                                            <input id="select-all" type="checkbox" class="h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Description') }}</th>
                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Standard Cost (Rp)') }}</th>
@@ -163,7 +163,7 @@
                                     @foreach($costReferences as $reference)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                                <input type="checkbox" name="ids[]" value="{{ $reference->id }}" class="row-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                                                <input type="checkbox" name="ids[]" value="{{ $reference->id }}" class="row-checkbox h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900">{{ $reference->service_description }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($reference->standard_cost, 0, ',', '.') }}</td>
@@ -173,12 +173,12 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $reference->source }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                 <div class="flex items-center gap-2">
-                                                    <a href="{{ route('cost-references.show', $reference) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="{{ __('View') }}" aria-label="{{ __('View') }}">
+                                                    <a href="{{ route('cost-references.show', $reference) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                             <path d="M12 5c-5 0-9 5-9 7s4 7 9 7 9-5 9-7-4-7-9-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 .001 6.001A3 3 0 0 0 12 9Z"/>
                                                         </svg>
                                                     </a>
-                                                    <a href="{{ route('cost-references.edit', $reference) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
+                                                    <a href="{{ route('cost-references.edit', $reference) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-800 hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm2.92 2.83H5v-.92l9.06-9.06.92.92L5.92 20.08ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
                                                         </svg>
@@ -232,7 +232,7 @@
                         {{ __('Pilih File Excel') }}
                     </label>
                     <input type="file" name="file" id="file" accept=".xlsx,.xls,.csv" required
-                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-biru-dongker-200 file:text-biru-dongker-900 hover:file:bg-biru-dongker-300">
                     <p class="mt-1 text-xs text-gray-500">
                         {{ __('Format yang didukung: .xlsx, .xls, .csv (Maks: 10MB)') }}
                     </p>
@@ -250,11 +250,11 @@
 
                 <div class="flex items-center justify-end space-x-3">
                     <button type="button" onclick="closeImportModal()" 
-                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                         {{ __('Batal') }}
                     </button>
                     <button type="submit" 
-                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                         {{ __('Import') }}
                     </button>
                 </div>

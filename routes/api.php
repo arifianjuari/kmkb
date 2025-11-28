@@ -56,6 +56,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('dashboard/summary', [App\Http\Controllers\Api\DashboardController::class, 'summary']);
     Route::get('dashboard/trends', [App\Http\Controllers\Api\DashboardController::class, 'trends']);
     
+    Route::middleware('set.hospital')->group(function () {
+        Route::get('dashboard/overview', [App\Http\Controllers\Api\DashboardController::class, 'overview']);
+        Route::get('dashboard/biaya-tarif', [App\Http\Controllers\Api\DashboardController::class, 'biayaTarif']);
+        Route::get('dashboard/pathway-mutu', [App\Http\Controllers\Api\DashboardController::class, 'pathwayMutu']);
+        Route::get('dashboard/variance-jkn', [App\Http\Controllers\Api\DashboardController::class, 'varianceJkn']);
+        Route::get('dashboard/data-proses', [App\Http\Controllers\Api\DashboardController::class, 'dataProses']);
+    });
+    
     // Unit Cost APIs
     Route::get('unit-cost', [App\Http\Controllers\Api\UnitCostController::class, 'getUnitCost']);
     Route::get('unit-cost/versions', [App\Http\Controllers\Api\UnitCostController::class, 'getVersions']);

@@ -11,11 +11,13 @@
         <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center">{{ $title ?? 'Fitur Sedang Dikembangkan' }}</h2>
         <p class="text-gray-600 mb-6 text-center">{{ $message ?? 'Fitur ini sedang dalam tahap pengembangan dan akan segera tersedia.' }}</p>
         <div class="flex justify-center">
-            <a href="{{ route('dashboard') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
+            <a href="{{ route('dashboard') }}" class="inline-flex items-center px-4 py-2 bg-biru-dongker-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-biru-dongker-900 focus:outline-none focus:border-biru-dongker-900 focus:ring ring-biru-dongker-500 disabled:opacity-25 transition ease-in-out duration-150">
                 Kembali ke Dashboard
             </a>
         </div>
     </div>
 </div>
 @endsection
+
+
 

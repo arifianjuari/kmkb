@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
                 </p>
             </div>
             <a href="{{ route('references.index') }}"
-               class="ml-4 inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+               class="ml-4 inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                 {{ __('Kembali') }}
             </a>
         </div>
@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Storage;
                 {{ ucfirst($reference->status) }}
             </span>
             @if($reference->is_pinned)
-                <span class="px-2 py-1 rounded-full bg-indigo-100 text-indigo-800">
+                <span class="px-2 py-1 rounded-full bg-biru-dongker-300 text-biru-dongker-900">
                     {{ __('Disematkan') }}
                 </span>
             @endif

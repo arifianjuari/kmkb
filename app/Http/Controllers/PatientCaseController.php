@@ -507,6 +507,54 @@ class PatientCaseController extends Controller
     }
 
     /**
+     * Show case details index - list of cases to view details
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function detailsIndex(Request $request)
+    {
+        $q = $request->get('q');
+        $pathwayId = $request->get('pathway_id');
+        
+        $query = PatientCase::where('hospital_id', hospital('id'))
+            ->with(['clinicalPathway', 'inputBy'])
+            ->latest();
+
+        if (!empty($q)) {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('medical_record_number', 'like', "%$q%")
+                    ->orWhere('patient_id', 'like', "%$q%")
+                    ->orWhere('primary_diagnosis', 'like', "%$q%");
+            });
+        }
+        
+        if ($pathwayId) {
+            $query->where('clinical_pathway_id', $pathwayId);
+        }
+
+        $cases = $query->paginate(15)->withQueryString();
+        
+        $pathways = ClinicalPathway::where('hospital_id', hospital('id'))
+            ->where('status', 'approved')
+            ->orderBy('name')
+            ->get();
+        
+        return view('cases.details-index', compact('cases', 'q', 'pathwayId', 'pathways'));
+    }
+    
+    /**
+     * Show case details page for specific case
+     *
+     * @param  \App\Models\PatientCase  $case
+     * @return \Illuminate\Http\Response
+     */
+    public function showDetails(PatientCase $case)
+    {
+        // Redirect to show page with details focus
+        return redirect()->route('cases.show', $case)->with('focus', 'details');
+    }
+    
+    /**
      * Show the form for editing the specified case detail.
      *
      * @param  \App\Models\PatientCase  $case

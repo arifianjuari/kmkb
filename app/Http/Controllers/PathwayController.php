@@ -49,6 +49,70 @@ class PathwayController extends Controller
         $pathways = $query->paginate(10)->withQueryString();
         return view('pathways.index', compact('pathways', 'q'));
     }
+    
+    /**
+     * Display pathway builder index - list of pathways to build
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function builderIndex()
+    {
+        $q = request('q');
+        $status = request('status', 'all');
+        
+        $query = ClinicalPathway::where('hospital_id', hospital('id'))
+            ->with(['creator'])
+            ->withCount('steps')
+            ->latest();
+
+        if (!empty($q)) {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('name', 'like', "%$q%")
+                    ->orWhere('diagnosis_code', 'like', "%$q%")
+                    ->orWhere('version', 'like', "%$q%");
+            });
+        }
+        
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $pathways = $query->paginate(15)->withQueryString();
+        
+        return view('pathways.builder-index', compact('pathways', 'q', 'status'));
+    }
+    
+    /**
+     * Display pathway summary index - list of pathways to view cost summary
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function summaryIndex()
+    {
+        $q = request('q');
+        $status = request('status', 'all');
+        
+        $query = ClinicalPathway::where('hospital_id', hospital('id'))
+            ->with(['creator'])
+            ->withCount('steps')
+            ->latest();
+
+        if (!empty($q)) {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('name', 'like', "%$q%")
+                    ->orWhere('diagnosis_code', 'like', "%$q%")
+                    ->orWhere('version', 'like', "%$q%");
+            });
+        }
+        
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $pathways = $query->paginate(15)->withQueryString();
+        
+        return view('pathways.summary-index', compact('pathways', 'q', 'status'));
+    }
 
     /**
      * Show the form for creating a new resource.

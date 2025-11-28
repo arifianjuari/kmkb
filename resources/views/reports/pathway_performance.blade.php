@@ -82,7 +82,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ number_format($metric->avg_length_of_stay, 1) }} {{ __('days') }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ number_format($metric->avg_steps_completed, 1) }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                                <a href="{{ route('pathways.show', $metric->pathway_id) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                <a href="{{ route('pathways.show', $metric->pathway_id) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                                                     {{ __('View Pathway') }}
                                                 </a>
                                             </td>

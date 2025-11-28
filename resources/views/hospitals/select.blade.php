@@ -14,7 +14,7 @@
             
             <div class="mb-6">
                 <label for="hospital_id" class="block text-sm font-medium text-gray-700 mb-2">Rumah Sakit</label>
-                <select name="hospital_id" id="hospital_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                <select name="hospital_id" id="hospital_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-500 focus:ring focus:ring-biru-dongker-400 focus:ring-opacity-50" required>
                     <option value="">-- Pilih Rumah Sakit --</option>
                     @foreach($hospitals as $hospital)
                         <option value="{{ $hospital->id }}">{{ $hospital->name }}</option>
@@ -26,7 +26,7 @@
             </div>
             
             <div class="flex items-center justify-end">
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <button type="submit" class="bg-biru-dongker-800 hover:bg-biru-dongker-900 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                     Pilih Rumah Sakit
                 </button>
             </div>

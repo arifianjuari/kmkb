@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+<div class="max-w-7xl mx-auto">
+    <div>
         <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
             <div class="flex items-center gap-3 flex-shrink-0">
                 <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('GL Expenses') }}</h2>
                 <button
                     type="button"
-                    class="flex-shrink-0 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full w-5 h-5 flex items-center justify-center hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                    class="flex-shrink-0 text-xs font-semibold text-biru-dongker-800 border border-biru-dongker-400 rounded-full w-5 h-5 flex items-center justify-center hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700 transition-colors"
                     onclick="const p = document.getElementById('gl-expenses-help'); if (p) { p.classList.toggle('hidden'); }"
                     aria-label="{{ __('What is GL Expense?') }}"
                     title="{{ __('What is GL Expense?') }}"
@@ -24,13 +24,13 @@
                     {{ __('Export Excel') }}
                 </a>
                 @if(!auth()->user()?->isObserver())
-                <a href="{{ route('gl-expenses.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                <a href="{{ route('gl-expenses.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                     {{ __('Add New GL Expense') }}
                 </a>
                 @endif
             </div>
         </div>
-        <div id="gl-expenses-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
+        <div id="gl-expenses-help" class="mb-4 hidden text-xs text-gray-700 bg-biru-dongker-200 border border-biru-dongker-300 rounded-md p-3">
             <p class="mb-2">
                 <span class="font-semibold">GL Expenses</span> = data biaya dari laporan keuangan RS (General Ledger).
             </p>
@@ -105,7 +105,7 @@
                 <form method="GET" action="{{ route('gl-expenses.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-5">
                     <div>
                         <label for="period_year" class="block text-sm font-medium text-gray-700">{{ __('Year') }}</label>
-                        <select id="period_year" name="period_year" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <select id="period_year" name="period_year" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                             @for($y = date('Y'); $y >= date('Y') - 5; $y--)
                                 <option value="{{ $y }}" {{ $periodYear == $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endfor
@@ -113,7 +113,7 @@
                     </div>
                     <div>
                         <label for="period_month" class="block text-sm font-medium text-gray-700">{{ __('Month') }}</label>
-                        <select id="period_month" name="period_month" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <select id="period_month" name="period_month" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                             <option value="">{{ __('All Months') }}</option>
                             @for($m = 1; $m <= 12; $m++)
                                 <option value="{{ $m }}" {{ $periodMonth == $m ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $m, 1)) }}</option>
@@ -122,7 +122,7 @@
                     </div>
                     <div>
                         <label for="cost_center_id" class="block text-sm font-medium text-gray-700">{{ __('Cost Center') }}</label>
-                        <select id="cost_center_id" name="cost_center_id" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <select id="cost_center_id" name="cost_center_id" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                             <option value="">{{ __('All Cost Centers') }}</option>
                             @foreach($costCenters as $cc)
                                 <option value="{{ $cc->id }}" {{ $costCenterId == $cc->id ? 'selected' : '' }}>{{ $cc->name }}</option>
@@ -131,7 +131,7 @@
                     </div>
                     <div>
                         <label for="expense_category_id" class="block text-sm font-medium text-gray-700">{{ __('Expense Category') }}</label>
-                        <select id="expense_category_id" name="expense_category_id" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <select id="expense_category_id" name="expense_category_id" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                             <option value="">{{ __('All Categories') }}</option>
                             @foreach($expenseCategories as $ec)
                                 <option value="{{ $ec->id }}" {{ $expenseCategoryId == $ec->id ? 'selected' : '' }}>{{ $ec->account_name }}</option>
@@ -139,7 +139,7 @@
                         </select>
                     </div>
                     <div class="flex items-end">
-                        <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                        <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                             {{ __('Filter') }}
                         </button>
                     </div>
@@ -170,13 +170,13 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($expense->amount, 0, ',', '.') }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">
-                                                <a href="{{ route('gl-expenses.show', $expense) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="{{ __('View') }}" aria-label="{{ __('View') }}">
+                                                <a href="{{ route('gl-expenses.show', $expense) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                         <path d="M12 5c-5 0-9 5-9 7s4 7 9 7 9-5 9-7-4-7-9-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 .001 6.001A3 3 0 0 0 12 9Z"/>
                                                     </svg>
                                                 </a>
                                                 @if(!auth()->user()?->isObserver())
-                                                <a href="{{ route('gl-expenses.edit', $expense) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
+                                                <a href="{{ route('gl-expenses.edit', $expense) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-800 hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm2.92 2.83H5v-.92l9.06-9.06.92.92L5.92 20.08ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
                                                     </svg>

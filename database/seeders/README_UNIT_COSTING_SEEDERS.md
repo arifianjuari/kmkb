@@ -106,23 +106,55 @@ Seeder-seeder ini dibuat untuk menghasilkan data yang diperlukan dalam proses pe
 ### 5. AllocationMapsTableSeeder
 **Tabel**: `allocation_maps`
 
-**Fungsi**: Membuat mapping alokasi dari support centers ke revenue centers menggunakan driver tertentu.
+**Fungsi**: Membuat mapping alokasi dari support centers ke revenue centers menggunakan driver tertentu. Mapping ini dirancang sesuai dengan best practice rumah sakit di Indonesia dengan urutan step-down allocation yang logis.
 
 **Data yang dibuat**:
-- Mapping alokasi dengan step sequence:
-  - Step 1: Alokasi berdasarkan Luas Lantai (MES, UMUM, LISTRIK, AC)
-  - Step 2: Alokasi berdasarkan Jumlah Karyawan (SDM, KANTIN)
-  - Step 3: Alokasi Laundry berdasarkan Volume Laundry
-  - Step 4: Alokasi Listrik berdasarkan Konsumsi Listrik
-  - Step 5: Alokasi Air berdasarkan Konsumsi Air
-  - Step 6: Alokasi lainnya (KEBERSIHAN, KEAMANAN, dll) berdasarkan Luas Lantai
+- Mapping alokasi dengan **11 step sequence** yang diurutkan berdasarkan prioritas dan ketergantungan:
+
+  **Step 1: Infrastruktur Dasar** (Luas Lantai)
+  - UMUM, MES - untuk alokasi biaya gedung, depresiasi, dan maintenance umum
+
+  **Step 2: Listrik** (Konsumsi Listrik)
+  - LISTRIK - menggunakan konsumsi aktual untuk alokasi yang lebih akurat
+
+  **Step 3: Air** (Konsumsi Air)
+  - AIR - menggunakan konsumsi aktual untuk alokasi yang lebih akurat
+
+  **Step 4: AC & Ventilasi** (Luas Lantai)
+  - AC - proporsional dengan luas ruangan
+
+  **Step 5: SDM & Kantin** (Jumlah Karyawan/FTE)
+  - SDM, KANTIN - proporsional dengan jumlah karyawan
+
+  **Step 6: Administrasi** (Jumlah Kunjungan)
+  - ADM - menggunakan jumlah kunjungan untuk mencerminkan volume transaksi aktual
+
+  **Step 7: Laundry** (Volume Laundry)
+  - LAUNDRY - menggunakan volume aktual (kg) untuk alokasi proporsional
+
+  **Step 8: Kebersihan** (Luas Lantai)
+  - KEBERSIHAN - proporsional dengan luas area yang dibersihkan
+
+  **Step 9: Keamanan** (Luas Lantai)
+  - KEAMANAN - proporsional dengan luas area yang diamankan
+
+  **Step 10: Kebun & Pertamanan** (Luas Lantai)
+  - GARDENER - proporsional dengan luas area taman
+
+  **Step 11: Support Center Lainnya** (Jumlah Karyawan/FTE)
+  - KEUANGAN, IT, LOGISTIK, GUDANG, MUTU, HUKUM, MARKETING - proporsional dengan jumlah staff
+
+**Prinsip Alokasi**:
+- Prioritas menggunakan driver yang lebih akurat (konsumsi aktual > luas lantai)
+- Urutan step mengikuti logika ketergantungan (infrastruktur → utilitas → SDM → operasional)
+- Setiap support center dialokasikan menggunakan driver yang paling relevan
 
 **Dependencies**:
 - `HospitalsTableSeeder`
 - `CostCentersTableSeeder`
 - `AllocationDriversTableSeeder`
 
-**Output**: ~13 records dengan step sequence 1-5
+**Output**: ~20+ records dengan step sequence 1-11 (mencakup semua support centers)
 
 ---
 

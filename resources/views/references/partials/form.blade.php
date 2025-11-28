@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Storage;
         <div class="mt-1">
             <input type="text" name="title" id="title"
                 value="{{ old('title', $reference->title) }}"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm"
                 required>
         </div>
         @error('title')
@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Storage;
             <label for="status" class="block text-sm font-medium text-gray-700">{{ __('Status') }}</label>
             <div class="mt-1">
                 <select id="status" name="status"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm">
                     @foreach($statusOptions as $value => $label)
                         <option value="{{ $value }}" @selected(old('status', $reference->status ?? \App\Models\Reference::STATUS_DRAFT) === $value)>
                             {{ $label }}
@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Storage;
             <div class="mt-1">
                 <input type="datetime-local" name="published_at" id="published_at"
                     value="{{ old('published_at', optional($reference->published_at)->format('Y-m-d\TH:i')) }}"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm">
             </div>
             @error('published_at')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -47,7 +47,7 @@ use Illuminate\Support\Facades\Storage;
 
         <div class="flex items-center mt-6 space-x-3">
             <input id="is_pinned" name="is_pinned" type="checkbox" value="1"
-                class="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                class="h-5 w-5 text-biru-dongker-800 border-gray-300 rounded focus:ring-biru-dongker-700"
                 @checked(old('is_pinned', $reference->is_pinned))>
             <label for="is_pinned" class="text-sm font-medium text-gray-700">
                 {{ __('Sematkan di urutan teratas') }}
@@ -73,7 +73,7 @@ use Illuminate\Support\Facades\Storage;
                 </div>
             @endif
             <input type="file" name="image" id="image" accept="image/jpeg,image/png,image/jpg"
-                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-biru-dongker-200 file:text-biru-dongker-900 hover:file:bg-biru-dongker-300">
         </div>
         <p class="mt-2 text-sm text-gray-500">
             {{ __('Format: JPEG atau PNG. Maksimal ukuran: 5MB.') }}
@@ -89,9 +89,9 @@ use Illuminate\Support\Facades\Storage;
             <div id="tags-container" class="flex flex-wrap gap-2 mb-2">
                 @if(isset($reference) && $reference->tags)
                     @foreach($reference->tags as $tag)
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 tag-item" data-tag-id="{{ $tag->id }}">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-biru-dongker-300 text-biru-dongker-900 tag-item" data-tag-id="{{ $tag->id }}">
                             {{ $tag->name }}
-                            <button type="button" class="ml-2 text-indigo-600 hover:text-indigo-800 remove-tag" aria-label="Hapus tag">
+                            <button type="button" class="ml-2 text-biru-dongker-800 hover:text-biru-dongker-900 remove-tag" aria-label="Hapus tag">
                                 ×
                             </button>
                         </span>
@@ -102,10 +102,10 @@ use Illuminate\Support\Facades\Storage;
                 <input type="text" 
                        id="tag-input" 
                        placeholder="{{ __('Ketik tag dan tekan Enter') }}"
-                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm">
                 @if(isset($tags) && $tags->count() > 0)
                     <select id="tag-select" 
-                            class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm">
                         <option value="">{{ __('Pilih tag yang sudah ada') }}</option>
                         @foreach($tags as $tag)
                             <option value="{{ $tag->name }}">{{ $tag->name }}</option>
@@ -133,7 +133,7 @@ use Illuminate\Support\Facades\Storage;
         <label for="reference-content" class="block text-sm font-medium text-gray-700">{{ __('Konten') }}</label>
         <div class="mt-1">
             <textarea id="reference-content" name="content" rows="12"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm"
                 required>{{ old('content', $reference->content) }}</textarea>
         </div>
         <p class="mt-2 text-sm text-gray-500">
@@ -170,9 +170,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Create visual tag
         const tagSpan = document.createElement('span');
-        tagSpan.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 tag-item';
+        tagSpan.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-biru-dongker-300 text-biru-dongker-900 tag-item';
         tagSpan.innerHTML = tagName + 
-            '<button type="button" class="ml-2 text-indigo-600 hover:text-indigo-800 remove-tag" aria-label="Hapus tag">×</button>';
+            '<button type="button" class="ml-2 text-biru-dongker-800 hover:text-biru-dongker-900 remove-tag" aria-label="Hapus tag">×</button>';
         
         // Add remove handler
         tagSpan.querySelector('.remove-tag').addEventListener('click', function() {

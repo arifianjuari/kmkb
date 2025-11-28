@@ -54,12 +54,17 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
 Route::get('cases/template', [PatientCaseController::class, 'downloadTemplate'])->name('cases.template');
 
 Route::middleware(['auth', 'set.hospital'])->group(function () {
-    // Patient Cases
-    Route::resource('cases', PatientCaseController::class);
+    // Patient Cases - Special routes must come BEFORE resource route
     Route::get('cases/upload', [PatientCaseController::class, 'showUploadForm'])->name('cases.upload');
     Route::post('cases/upload', [PatientCaseController::class, 'upload'])->name('cases.upload.process');
+    Route::get('cases/details', [PatientCaseController::class, 'detailsIndex'])->name('cases.details.index');
+    Route::get('cases/costing', [App\Http\Controllers\PatientCase\CaseCostingController::class, 'index'])->name('cases.costing.index');
+    Route::get('cases/variance', [App\Http\Controllers\PatientCase\CaseVarianceController::class, 'index'])->name('cases.variance.index');
     
-    // Case Details management
+    // Patient Cases Resource Route
+    Route::resource('cases', PatientCaseController::class);
+    
+    // Case Details management - Routes that require case ID (after resource)
     Route::get('cases/{case}/details/create', [PatientCaseController::class, 'createCaseDetail'])->name('cases.details.create');
     Route::post('cases/{case}/details', [PatientCaseController::class, 'storeCaseDetail'])->name('cases.details.store');
     Route::get('cases/{case}/details/{detail}/edit', [PatientCaseController::class, 'editCaseDetail'])->name('cases.details.edit');
@@ -70,14 +75,27 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     // Update case annotation
     Route::put('cases/{case}/annotation', [PatientCaseController::class, 'updateAnnotation'])->name('cases.annotation.update');
 
-    // Clinical Pathways
+    // Clinical Pathways - Special routes must come BEFORE resource route
+    Route::get('pathways/builder', [PathwayController::class, 'builderIndex'])->name('pathways.builder.index');
+    Route::get('pathways/summary', [PathwayController::class, 'summaryIndex'])->name('pathways.summary.index');
+    Route::get('pathways/approval', [App\Http\Controllers\Pathway\PathwayApprovalController::class, 'index'])->name('pathways.approval.index');
+    Route::get('pathways/templates', [App\Http\Controllers\Pathway\PathwayTemplateController::class, 'index'])->name('pathways.templates');
+    Route::get('pathways/templates/download-blank', [App\Http\Controllers\Pathway\PathwayTemplateController::class, 'downloadTemplate'])->name('pathways.templates.download-blank');
+    Route::post('pathways/templates/import', [App\Http\Controllers\Pathway\PathwayTemplateController::class, 'import'])->name('pathways.templates.import');
+    
+    // Clinical Pathways Resource Route
     Route::resource('pathways', PathwayController::class);
+    
+    // Clinical Pathways - Routes that require pathway ID (after resource)
     Route::get('pathways/{pathway}/builder', [PathwayController::class, 'builder'])->name('pathways.builder');
     Route::post('pathways/{pathway}/duplicate', [PathwayController::class, 'duplicate'])->name('pathways.duplicate');
     Route::post('pathways/{pathway}/version', [PathwayController::class, 'newVersion'])->name('pathways.version');
     Route::get('pathways/{pathway}/export-docx', [PathwayController::class, 'exportDocx'])->name('pathways.export-docx');
     Route::get('pathways/{pathway}/export-pdf', [PathwayController::class, 'exportPdf'])->name('pathways.export-pdf');
     Route::post('pathways/{pathway}/recalculate-summary', [PathwayController::class, 'recalculateSummary'])->name('pathways.recalculate-summary');
+    Route::get('pathways/{pathway}/summary', [PathwayController::class, 'summary'])->name('pathways.summary');
+    Route::get('pathways/{pathway}/approval', [App\Http\Controllers\Pathway\PathwayApprovalController::class, 'show'])->name('pathways.approval');
+    Route::get('pathways/templates/{pathway}/export', [App\Http\Controllers\Pathway\PathwayTemplateController::class, 'export'])->name('pathways.templates.export');
     
     // Pathway Steps (nested under pathways)
     Route::prefix('pathways/{pathway}')->group(function () {
@@ -299,6 +317,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         // Unit Cost Engine
         Route::prefix('unit-cost')->group(function () {
             Route::get('calculate', [App\Http\Controllers\CostingProcess\UnitCostController::class, 'calculate'])->name('costing-process.unit-cost.calculate');
+            Route::post('calculate', [App\Http\Controllers\CostingProcess\UnitCostController::class, 'runCalculation'])->name('costing-process.unit-cost.calculate.run');
             Route::get('results', [App\Http\Controllers\CostingProcess\UnitCostController::class, 'results'])->name('costing-process.unit-cost.results');
             Route::get('compare', [App\Http\Controllers\CostingProcess\UnitCostController::class, 'compare'])->name('costing-process.unit-cost.compare');
         });
@@ -313,18 +332,11 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         Route::get('comparison', [App\Http\Controllers\Tariff\TariffComparisonController::class, 'index'])->name('tariffs.comparison');
     });
 
-    // Clinical Pathways Additional Routes
-    Route::prefix('pathways')->group(function () {
-        Route::get('{pathway}/summary', [PathwayController::class, 'summary'])->name('pathways.summary');
-        Route::get('{pathway}/approval', [App\Http\Controllers\Pathway\PathwayApprovalController::class, 'show'])->name('pathways.approval');
-        Route::get('templates', [App\Http\Controllers\Pathway\PathwayTemplateController::class, 'index'])->name('pathways.templates');
-    });
 
-    // Patient Cases Additional Routes
-    Route::prefix('cases')->group(function () {
-        Route::get('{case}/costing', [App\Http\Controllers\PatientCase\CaseCostingController::class, 'show'])->name('cases.costing');
-        Route::get('{case}/variance', function ($case) { return redirect()->route('cases.show', $case); })->name('cases.variance');
-    });
+    // Patient Cases Additional Routes - Routes that require case ID (after resource)
+    Route::get('cases/{case}/details', [PatientCaseController::class, 'showDetails'])->name('cases.details');
+    Route::get('cases/{case}/costing', [App\Http\Controllers\PatientCase\CaseCostingController::class, 'show'])->name('cases.costing');
+    Route::get('cases/{case}/variance', [App\Http\Controllers\PatientCase\CaseVarianceController::class, 'show'])->name('cases.variance');
 
     // Analytics Routes
     Route::prefix('analytics')->group(function () {

@@ -17,7 +17,7 @@
                 <form action="{{ route('pathways.version', $pathway) }}" method="POST" class="flex items-center gap-2">
                     @csrf
                     <label for="bump" class="sr-only">{{ __('Version bump') }}</label>
-                    <select id="bump" name="bump" class="py-2 px-2 min-w-[140px] border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900">
+                    <select id="bump" name="bump" class="py-2 px-2 min-w-[140px] border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 bg-white text-gray-900">
                         <option value="patch">{{ __('Patch') }}</option>
                         <option value="minor">{{ __('Minor') }}</option>
                         <option value="major">{{ __('Major') }}</option>
@@ -87,11 +87,11 @@
                 <span class="text-sm text-gray-600">{{ __('Group by') }}:</span>
                 <div class="flex items-center gap-2">
                     <label class="flex items-center cursor-pointer">
-                        <input type="radio" name="groupBy" value="category" x-model="groupBy" class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                        <input type="radio" name="groupBy" value="category" x-model="groupBy" class="mr-2 text-biru-dongker-800 focus:ring-biru-dongker-700">
                         <span class="text-sm text-gray-700">{{ __('Category') }}</span>
                     </label>
                     <label class="flex items-center cursor-pointer ml-4">
-                        <input type="radio" name="groupBy" value="day" x-model="groupBy" class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                        <input type="radio" name="groupBy" value="day" x-model="groupBy" class="mr-2 text-biru-dongker-800 focus:ring-biru-dongker-700">
                         <span class="text-sm text-gray-700">{{ __('Day') }}</span>
                     </label>
                 </div>
@@ -261,7 +261,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label for="recalc_version" class="block text-sm font-medium text-gray-700 mb-2">{{ __('Unit Cost Version') }}</label>
-                                    <select id="recalc_version" name="version" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <select id="recalc_version" name="version" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                         <option value="">{{ __('Use pathway default') }}</option>
                                         @foreach($versions ?? [] as $version)
                                             <option value="{{ $version }}" {{ $pathway->unit_cost_version == $version ? 'selected' : '' }}>{{ $version }}</option>
@@ -274,12 +274,12 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Mode') }}</label>
                                     <div class="space-y-2">
                                         <label class="flex items-center">
-                                            <input type="radio" name="mode" value="simulation" checked class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                                            <input type="radio" name="mode" value="simulation" checked class="mr-2 text-biru-dongker-800 focus:ring-biru-dongker-700">
                                             <span class="text-sm text-gray-700">{{ __('Simulasi') }}</span>
                                             <span class="ml-2 text-xs text-gray-500">(Preview tanpa update data)</span>
                                         </label>
                                         <label class="flex items-center">
-                                            <input type="radio" name="mode" value="rebaseline" class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                                            <input type="radio" name="mode" value="rebaseline" class="mr-2 text-biru-dongker-800 focus:ring-biru-dongker-700">
                                             <span class="text-sm text-gray-700">{{ __('Re-baseline') }}</span>
                                             <span class="ml-2 text-xs text-gray-500">(Update semua step dengan unit cost baru)</span>
                                         </label>
@@ -288,7 +288,7 @@
                             </div>
                             
                             <div class="flex items-center gap-4">
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-biru-dongker-800 text-white text-sm font-medium rounded-md shadow hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                                     {{ __('Recalculate') }}
                                 </button>
                                 <div id="recalc-loading" class="hidden text-sm text-gray-600">

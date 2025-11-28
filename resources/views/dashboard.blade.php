@@ -1,35 +1,12 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
-
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Welcome Section -->
-            <div class="mb-6">
-                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg p-6 text-white">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h1 class="text-2xl font-bold">Welcome back, {{ Auth::user()->name }}!</h1>
-                            <p class="mt-2 opacity-90">Here's what's happening with your clinical pathways today.</p>
-                        </div>
-                        <div class="hidden md:block">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 <!-- Total Pathways -->
                 <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
                     <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-4">
+                        <div class="p-3 rounded-full bg-biru-dongker-300 text-biru-dongker-800 mr-4">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M5 7v10a2 2 0 002 2h10a2 2 0 002-2V7" />
                             </svg>
@@ -177,7 +154,7 @@
                                             <span class="text-sm font-semibold text-gray-900">{{ $data->case_count }}</span>
                                         </div>
                                         <div class="w-full bg-gray-100 rounded-full h-2">
-                                            <div class="h-2 rounded-full bg-indigo-500" style="width: {{ ($data->case_count / $maxCases) * 100 }}%"></div>
+                                            <div class="h-2 rounded-full bg-biru-dongker-700" style="width: {{ ($data->case_count / $maxCases) * 100 }}%"></div>
                                         </div>
                                     </li>
                                 @endforeach

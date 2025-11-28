@@ -25,6 +25,7 @@ class ClinicalPathway extends Model
         'status',
         'hospital_id',
         'unit_cost_version',
+        'standard_los',
     ];
 
     /**

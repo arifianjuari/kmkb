@@ -2,7 +2,7 @@
 
 @section('content')
 <section class="mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Create Clinical Pathway') }}</h2>
             <a href="{{ route('pathways.index') }}" class="btn-secondary">
@@ -18,7 +18,7 @@
                     <div class="mb-6">
                         <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Name') }}</label>
                         <div class="mt-1">
-                            <input type="text" id="name" name="name" value="{{ old('name') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('name') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <input type="text" id="name" name="name" value="{{ old('name') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('name') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         </div>
                         @error('name')
                             <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -28,7 +28,7 @@
                     <div class="mb-6">
                         <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Description') }}</label>
                         <div class="mt-1">
-                            <textarea id="description" name="description" rows="3" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('description') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('description') }}</textarea>
+                            <textarea id="description" name="description" rows="3" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('description') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('description') }}</textarea>
                         </div>
                         @error('description')
                             <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -39,7 +39,7 @@
                         <div>
                             <label for="diagnosis_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Diagnosis Code') }}</label>
                             <div class="mt-1">
-                                <input type="text" id="diagnosis_code" name="diagnosis_code" value="{{ old('diagnosis_code') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('diagnosis_code') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <input type="text" id="diagnosis_code" name="diagnosis_code" value="{{ old('diagnosis_code') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('diagnosis_code') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             </div>
                             @error('diagnosis_code')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -49,7 +49,7 @@
                         <div>
                             <label for="version" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Version') }}</label>
                             <div class="mt-1">
-                                <input type="text" id="version" name="version" value="{{ old('version') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('version') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <input type="text" id="version" name="version" value="{{ old('version') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('version') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             </div>
                             @error('version')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -61,7 +61,7 @@
                         <div>
                             <label for="effective_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Effective Date') }}</label>
                             <div class="mt-1">
-                                <input type="date" id="effective_date" name="effective_date" value="{{ old('effective_date') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('effective_date') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <input type="date" id="effective_date" name="effective_date" value="{{ old('effective_date') }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('effective_date') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             </div>
                             @error('effective_date')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -71,7 +71,7 @@
                         <div>
                             <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Status') }}</label>
                             <div class="mt-1">
-                                <select id="status" name="status" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('status') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <select id="status" name="status" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('status') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                     <option value="">{{ __('Select Status') }}</option>
                                     <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>{{ __('Draft') }}</option>
                                     <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
@@ -87,7 +87,7 @@
                     <div class="mt-6">
                         <label for="unit_cost_version" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Default Unit Cost Version') }}</label>
                         <div class="mt-1">
-                            <select id="unit_cost_version" name="unit_cost_version" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('unit_cost_version') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <select id="unit_cost_version" name="unit_cost_version" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('unit_cost_version') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 <option value="">{{ __('Pilih versi unit cost default') }}</option>
                                 @foreach($versions ?? [] as $version)
                                     <option value="{{ $version }}" {{ old('unit_cost_version') == $version ? 'selected' : '' }}>{{ $version }}</option>

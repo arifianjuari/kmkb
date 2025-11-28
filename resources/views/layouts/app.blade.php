@@ -18,14 +18,10 @@
     <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900" 
           x-data="{ 
               sidebarOpen: false, 
-              sidebarCollapsed: window.sidebarCollapsed || false
+              sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true'
           }"
-          x-init="
-              // Sync window global state with Alpine state
-              window.sidebarCollapsed = sidebarCollapsed;
-          "
           @toggle-sidebar.window="sidebarOpen = !sidebarOpen"
-          @sidebar-toggle.window="sidebarCollapsed = $event.detail.collapsed; window.sidebarCollapsed = $event.detail.collapsed">
+          @sidebar-toggle.window="sidebarCollapsed = $event.detail.collapsed">
         <div class="flex h-screen overflow-hidden">
             <!-- Sidebar -->
             <div class="hidden lg:block">
@@ -60,9 +56,9 @@
             </div>
 
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col overflow-hidden" 
-                 x-bind:class="sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'"
-                 x-bind:style="'transition: margin-left 0.3s ease-in-out;'">
+            <div class="flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out" 
+                 :class="sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'"
+                 style="will-change: margin-left;">
                 <!-- Top Navigation Bar -->
                 <header>
                     @include('layouts.navigation')
@@ -99,7 +95,7 @@
                     @endif
                     
                     <!-- Page Content -->
-                    <div class="py-6 px-4 sm:px-6 lg:px-8">
+                    <div class="py-3 px-4 sm:px-6 lg:px-8">
                         @isset($slot)
                             {{ $slot }}
                         @else

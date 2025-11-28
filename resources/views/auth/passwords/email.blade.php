@@ -33,7 +33,7 @@
                         <div class="mb-6">
                             <label for="email" class="block text-sm font-medium text-gray-700">{{ __('Email Address') }}</label>
                             <div class="mt-1">
-                                <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('email') border-red-500 @enderror">
+                                <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('email') border-red-500 @enderror">
                             </div>
                             @error('email')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -41,7 +41,7 @@
                         </div>
 
                         <div class="flex items-center justify-end">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-biru-dongker-800 text-white text-sm font-medium rounded-md shadow hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                                 {{ __('Send Password Reset Link') }}
                             </button>
                         </div>

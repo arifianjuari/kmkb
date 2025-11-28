@@ -2,10 +2,10 @@
 
 @section('content')
 <div class="mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{{ __('Upload Patient Cases') }}</h2>
-            <a href="{{ route('cases.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <a href="{{ route('cases.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                 {{ __('Back to List') }}
             </a>
         </div>
@@ -21,7 +21,7 @@
                         <div class="mb-4">
                             <label for="csv_file" class="block text-sm font-medium text-gray-700">{{ __('Excel/CSV File') }}</label>
                             <div class="mt-1">
-                                <input type="file" id="csv_file" name="csv_file" accept=".xlsx,.xls,.csv" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('csv_file') border-red-500 @enderror">
+                                <input type="file" id="csv_file" name="csv_file" accept=".xlsx,.xls,.csv" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('csv_file') border-red-500 @enderror">
                             </div>
                             @error('csv_file')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -29,7 +29,7 @@
                             <p class="mt-2 text-sm text-gray-500">{{ __('Please upload an Excel or CSV file with patient case data. The file should include headers for medical_record_number, patient_name, clinical_pathway_id, admission_date, discharge_date, primary_diagnosis, ina_cbg_code, actual_total_cost, and ina_cbg_tariff.') }}</p>
                         </div>
                         
-                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                             {{ __('Upload Cases') }}
                         </button>
                     </form>

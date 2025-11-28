@@ -2,10 +2,10 @@
 
 @section('content')
 <div class="mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{{ __('Compliance Report') }}</h2>
-            <a href="{{ route('reports.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <a href="{{ route('reports.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                 {{ __('Back to Reports') }}
             </a>
         </div>
@@ -20,21 +20,21 @@
                             <div class="sm:col-span-2">
                                 <label for="date_from" class="block text-sm font-medium text-gray-700">{{ __('Date From') }}</label>
                                 <div class="mt-1">
-                                    <input type="date" id="date_from" name="date_from" value="{{ request('date_from', now()->subMonth()->format('Y-m-d')) }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="date" id="date_from" name="date_from" value="{{ request('date_from', now()->subMonth()->format('Y-m-d')) }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 </div>
                             </div>
                             
                             <div class="sm:col-span-2">
                                 <label for="date_to" class="block text-sm font-medium text-gray-700">{{ __('Date To') }}</label>
                                 <div class="mt-1">
-                                    <input type="date" id="date_to" name="date_to" value="{{ request('date_to', now()->format('Y-m-d')) }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="date" id="date_to" name="date_to" value="{{ request('date_to', now()->format('Y-m-d')) }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                 </div>
                             </div>
                             
                             <div class="sm:col-span-1">
                                 <label for="pathway_id" class="block text-sm font-medium text-gray-700">{{ __('Pathway') }}</label>
                                 <div class="mt-1">
-                                    <select id="pathway_id" name="pathway_id" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <select id="pathway_id" name="pathway_id" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                         <option value="">{{ __('All Pathways') }}</option>
                                         @foreach($pathways as $pathway)
                                             <option value="{{ $pathway->id }}" {{ request('pathway_id') == $pathway->id ? 'selected' : '' }}>
@@ -48,7 +48,7 @@
                             <div class="sm:col-span-1">
                                 <label for="compliance_range" class="block text-sm font-medium text-gray-700">{{ __('Compliance Range') }}</label>
                                 <div class="mt-1">
-                                    <select id="compliance_range" name="compliance_range" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <select id="compliance_range" name="compliance_range" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                         <option value="">{{ __('All Ranges') }}</option>
                                         <option value="high" {{ request('compliance_range') == 'high' ? 'selected' : '' }}>{{ __('High (≥ 90%)') }}</option>
                                         <option value="medium" {{ request('compliance_range') == 'medium' ? 'selected' : '' }}>{{ __('Medium (70-89%)') }}</option>
@@ -59,10 +59,10 @@
                         </div>
                         
                         <div class="mt-6 flex justify-end space-x-3">
-                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                                 {{ __('Filter') }}
                             </button>
-                            <a href="{{ route('reports.compliance') }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <a href="{{ route('reports.compliance') }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                                 {{ __('Clear') }}
                             </a>
                         </div>
@@ -171,7 +171,7 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                                <a href="{{ route('cases.show', $case) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                <a href="{{ route('cases.show', $case) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                                                     {{ __('View Case') }}
                                                 </a>
                                             </td>

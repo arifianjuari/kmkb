@@ -71,6 +71,14 @@ class CaseDetail extends Model
     }
 
     /**
+     * Get the cost reference for the case detail.
+     */
+    public function costReference()
+    {
+        return $this->belongsTo(CostReference::class);
+    }
+
+    /**
      * Check if this case detail is a custom (non-standard) step.
      *
      * @return bool

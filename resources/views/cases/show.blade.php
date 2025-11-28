@@ -114,11 +114,11 @@
                             <span class="text-sm text-gray-600 dark:text-gray-300">{{ __('Group by') }}:</span>
                             <div class="flex items-center gap-3">
                                 <label class="flex items-center cursor-pointer">
-                                    <input type="radio" name="groupByPathway" value="category" x-model="groupBy" class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                                    <input type="radio" name="groupByPathway" value="category" x-model="groupBy" class="mr-2 text-biru-dongker-800 focus:ring-biru-dongker-700">
                                     <span class="text-sm text-gray-700 dark:text-gray-200">{{ __('Category') }}</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer">
-                                    <input type="radio" name="groupByPathway" value="day" x-model="groupBy" class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                                    <input type="radio" name="groupByPathway" value="day" x-model="groupBy" class="mr-2 text-biru-dongker-800 focus:ring-biru-dongker-700">
                                     <span class="text-sm text-gray-700 dark:text-gray-200">{{ __('Day') }}</span>
                                 </label>
                             </div>
@@ -293,7 +293,7 @@
                             id="annotation-editor" 
                             data-case-id="{{ $case->id }}"
                             contenteditable="true"
-                            class="min-h-[100px] p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 text-sm text-gray-900 dark:text-gray-300"
+                            class="min-h-[100px] p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 dark:bg-gray-700 dark:border-gray-600 text-sm text-gray-900 dark:text-gray-300"
                             style="white-space: pre-wrap; word-wrap: break-word;"
                         >{{ $case->annotation ?? '' }}</div>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('Click to edit annotation. Changes are saved automatically.') }}</p>
@@ -447,11 +447,11 @@
                             <span class="text-sm text-gray-600 dark:text-gray-300">{{ __('Group by') }}:</span>
                             <div class="flex items-center gap-3">
                                 <label class="flex items-center cursor-pointer">
-                                    <input type="radio" name="caseGroupBy" value="category" x-model="caseGroupBy" class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                                    <input type="radio" name="caseGroupBy" value="category" x-model="caseGroupBy" class="mr-2 text-biru-dongker-800 focus:ring-biru-dongker-700">
                                     <span class="text-sm text-gray-700 dark:text-gray-200">{{ __('Category') }}</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer">
-                                    <input type="radio" name="caseGroupBy" value="day" x-model="caseGroupBy" class="mr-2 text-indigo-600 focus:ring-indigo-500">
+                                    <input type="radio" name="caseGroupBy" value="day" x-model="caseGroupBy" class="mr-2 text-biru-dongker-800 focus:ring-biru-dongker-700">
                                     <span class="text-sm text-gray-700 dark:text-gray-200">{{ __('Day') }}</span>
                                 </label>
                             </div>

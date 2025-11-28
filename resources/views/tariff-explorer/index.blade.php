@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+<div class="max-w-7xl mx-auto">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{{ __('Tariff Explorer') }}</h2>
         </div>
@@ -13,12 +13,12 @@
                 <form method="GET" action="{{ route('tariff-explorer.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-5">
                     <div>
                         <label for="search" class="block text-sm font-medium text-gray-700">{{ __('Search') }}</label>
-                        <input type="text" id="search" name="search" value="{{ $search }}" placeholder="{{ __('Service code/name...') }}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <input type="text" id="search" name="search" value="{{ $search }}" placeholder="{{ __('Service code/name...') }}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                     </div>
                     
                     <div>
                         <label for="tariff_class_id" class="block text-sm font-medium text-gray-700">{{ __('Tariff Class') }}</label>
-                        <select id="tariff_class_id" name="tariff_class_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <select id="tariff_class_id" name="tariff_class_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                             <option value="">{{ __('All Classes') }}</option>
                             @foreach($tariffClasses as $tc)
                                 <option value="{{ $tc->id }}" {{ $tariffClassId == $tc->id ? 'selected' : '' }}>{{ $tc->name }}</option>
@@ -28,18 +28,18 @@
                     
                     <div>
                         <label for="effective_date" class="block text-sm font-medium text-gray-700">{{ __('Effective Date') }}</label>
-                        <input type="date" id="effective_date" name="effective_date" value="{{ $effectiveDate }}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <input type="date" id="effective_date" name="effective_date" value="{{ $effectiveDate }}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                     </div>
                     
                     <div class="flex items-end">
                         <label class="flex items-center">
-                            <input type="checkbox" name="show_expired" value="1" {{ $showExpired ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <input type="checkbox" name="show_expired" value="1" {{ $showExpired ? 'checked' : '' }} class="rounded border-gray-300 text-biru-dongker-800 focus:ring-biru-dongker-700">
                             <span class="ml-2 text-sm text-gray-700">{{ __('Show Expired') }}</span>
                         </label>
                     </div>
                     
                     <div class="flex items-end">
-                        <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                        <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                             {{ __('Search') }}
                         </button>
                     </div>
@@ -91,7 +91,7 @@
                                             {{ $tariff->sk_number }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <a href="{{ route('tariff-explorer.show', $tariff) }}" class="text-indigo-600 hover:text-indigo-900">
+                                            <a href="{{ route('tariff-explorer.show', $tariff) }}" class="text-biru-dongker-800 hover:text-biru-dongker-950">
                                                 {{ __('View Details') }}
                                             </a>
                                         </td>

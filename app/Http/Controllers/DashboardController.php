@@ -88,16 +88,7 @@ class DashboardController extends Controller
             ->groupBy('clinical_pathways.name')
             ->get();
             
-        // Use existing blade at resources/views/dashboard.blade.php
-        return view('dashboard', compact(
-            'totalPathways', 
-            'totalCases', 
-            'averageCompliance', 
-            'totalCostVariance', 
-            'recentCases', 
-            'complianceTrend', 
-            'costVarianceTrend', 
-            'casesByPathway'
-        ));
+        // Use new multi-tab dashboard view
+        return view('dashboard.kmkb');
     }
 }

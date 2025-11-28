@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 space-y-6">
+<div class="max-w-7xl mx-auto space-y-6">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
             <h1 class="text-2xl font-semibold text-gray-900">{{ __('Referensi Pengetahuan') }}</h1>
@@ -11,11 +11,11 @@
                 <div>
                     <input type="text" name="search" value="{{ $filters['search'] ?? '' }}"
                            placeholder="{{ __('Cari judul...') }}"
-                           class="w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                           class="w-48 rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm">
                 </div>
                 <div>
                     <select name="status"
-                            class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            class="rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm">
                         @foreach($statusOptions as $value => $label)
                             <option value="{{ $value }}" @selected(($filters['status'] ?? 'all') === $value)>
                                 {{ $label }}
@@ -25,7 +25,7 @@
                 </div>
                 <div>
                     <select name="tag"
-                            class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            class="rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm">
                         <option value="">{{ __('Semua Tag') }}</option>
                         @foreach($tags as $tag)
                             <option value="{{ $tag->id }}" @selected(($filters['tag'] ?? null) == $tag->id)>
@@ -35,19 +35,19 @@
                     </select>
                 </div>
                 <button type="submit"
-                        class="inline-flex items-center px-3 py-2 rounded-md border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        class="inline-flex items-center px-3 py-2 rounded-md border border-transparent text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700">
                     {{ __('Filter') }}
                 </button>
                 @if($filters['search'] || ($filters['status'] ?? 'all') !== 'all' || ($filters['tag'] ?? null))
                     <a href="{{ route('references.index') }}"
-                       class="inline-flex items-center px-3 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                       class="inline-flex items-center px-3 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700">
                         {{ __('Reset') }}
                     </a>
                 @endif
             </form>
             @can('create', App\Models\Reference::class)
                 <a href="{{ route('references.create') }}"
-                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700">
                     {{ __('Tambah Referensi') }}
                 </a>
             @endcan
@@ -77,7 +77,7 @@
                                 <div class="text-sm font-medium text-gray-900">
                                         @if($reference->is_pinned)
                                         <span class="inline-flex items-center mr-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-biru-dongker-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                             </svg>
                                         </span>
@@ -102,7 +102,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
                                     <a href="{{ route('references.show', $reference) }}"
-                                       class="inline-flex items-center p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded-md transition"
+                                       class="inline-flex items-center p-2 text-biru-dongker-800 hover:text-biru-dongker-950 hover:bg-biru-dongker-200 rounded-md transition"
                                        title="{{ __('Lihat') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

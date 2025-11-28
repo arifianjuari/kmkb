@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+<div class="max-w-7xl mx-auto">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{{ __('Tariff Simulation Preview') }}</h2>
             <div class="flex items-center space-x-2">
@@ -76,7 +76,7 @@
                                                 'jasa_sarana' => $result['jasa_sarana'],
                                                 'jasa_pelayanan' => $result['jasa_pelayanan'],
                                                 'final_tariff_price' => $result['final_tariff_price'],
-                                            ]) }}" class="text-indigo-600 hover:text-indigo-900">
+                                            ]) }}" class="text-biru-dongker-800 hover:text-biru-dongker-950">
                                                 {{ __('Create Final Tariff') }}
                                             </a>
                                         </td>

@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+<div class="max-w-7xl mx-auto">
+    <div>
         <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
             <div class="flex items-center gap-3 flex-shrink-0">
                 <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Allocation Results') }}</h2>
@@ -11,7 +11,7 @@
                 <a href="{{ route('allocation-results.export', request()->query()) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
                     {{ __('Export Excel') }}
                 </a>
-                <a href="{{ route('allocation.run.form') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                <a href="{{ route('allocation.run.form') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                     {{ __('Run Allocation') }}
                 </a>
             </div>
@@ -38,7 +38,7 @@
                 <form method="GET" action="{{ route('allocation-results.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-5">
                     <div>
                         <label for="year" class="block text-sm font-medium text-gray-700">{{ __('Year') }}</label>
-                        <select id="year" name="year" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <select id="year" name="year" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                             @for($y = date('Y'); $y >= date('Y') - 5; $y--)
                                 <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endfor
@@ -47,7 +47,7 @@
                     
                     <div>
                         <label for="month" class="block text-sm font-medium text-gray-700">{{ __('Month') }}</label>
-                        <select id="month" name="month" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <select id="month" name="month" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                             @for($m = 1; $m <= 12; $m++)
                                 <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
                                     {{ str_pad($m, 2, '0', STR_PAD_LEFT) }} - {{ \Carbon\Carbon::create(null, $m, 1)->locale('id')->isoFormat('MMMM') }}
@@ -58,7 +58,7 @@
                     
                     <div>
                         <label for="source_cost_center_id" class="block text-sm font-medium text-gray-700">{{ __('Source Cost Center') }}</label>
-                        <select id="source_cost_center_id" name="source_cost_center_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <select id="source_cost_center_id" name="source_cost_center_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                             <option value="">{{ __('All Sources') }}</option>
                             @foreach($costCenters as $cc)
                                 <option value="{{ $cc->id }}" {{ $sourceCostCenterId == $cc->id ? 'selected' : '' }}>
@@ -70,7 +70,7 @@
                     
                     <div>
                         <label for="target_cost_center_id" class="block text-sm font-medium text-gray-700">{{ __('Target Cost Center') }}</label>
-                        <select id="target_cost_center_id" name="target_cost_center_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <select id="target_cost_center_id" name="target_cost_center_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                             <option value="">{{ __('All Targets') }}</option>
                             @foreach($costCenters as $cc)
                                 <option value="{{ $cc->id }}" {{ $targetCostCenterId == $cc->id ? 'selected' : '' }}>
@@ -81,7 +81,7 @@
                     </div>
                     
                     <div class="flex items-end">
-                        <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                        <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                             {{ __('Filter') }}
                         </button>
                     </div>
@@ -127,7 +127,7 @@
                                 @foreach($allocationResults as $result)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-biru-dongker-300 text-biru-dongker-900">
                                                 {{ ucfirst(str_replace('_', ' ', $result->allocation_step)) }}
                                             </span>
                                         </td>
@@ -147,7 +147,7 @@
                                             Rp {{ number_format($result->allocated_amount, 2, ',', '.') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <a href="{{ route('allocation-results.show', $result) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="{{ __('View') }}" aria-label="{{ __('View') }}">
+                                            <a href="{{ route('allocation-results.show', $result) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                     <path d="M12 5c-5 0-9 5-9 7s4 7 9 7 9-5 9-7-4-7-9-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 .001 6.001A3 3 0 0 0 12 9Z"/>
                                                 </svg>
@@ -164,7 +164,7 @@
                     </div>
                 @else
                     <p class="text-gray-600">{{ __('No allocation results found for the selected period.') }}</p>
-                    <a href="{{ route('allocation.run.form') }}" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                    <a href="{{ route('allocation.run.form') }}" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                         {{ __('Run Allocation') }}
                     </a>
                 @endif
