@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BlocksObserver;
 use App\Models\TariffClass;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -9,6 +10,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class TariffClassController extends Controller
 {
+    use BlocksObserver;
     public function index(Request $request)
     {
         $search = $request->get('search');
@@ -34,11 +36,13 @@ class TariffClassController extends Controller
 
     public function create()
     {
+        $this->blockObserver('membuat');
         return view('tariff-classes.create');
     }
 
     public function store(Request $request)
     {
+        $this->blockObserver('membuat');
         $validated = $request->validate([
             'code' => 'required|string|max:50',
             'name' => 'required|string|max:150',
@@ -68,6 +72,7 @@ class TariffClassController extends Controller
 
     public function edit(TariffClass $tariffClass)
     {
+        $this->blockObserver('mengubah');
         if ($tariffClass->hospital_id !== hospital('id')) {
             abort(404);
         }
@@ -77,6 +82,7 @@ class TariffClassController extends Controller
 
     public function update(Request $request, TariffClass $tariffClass)
     {
+        $this->blockObserver('mengubah');
         if ($tariffClass->hospital_id !== hospital('id')) {
             abort(404);
         }
@@ -98,6 +104,7 @@ class TariffClassController extends Controller
 
     public function destroy(TariffClass $tariffClass)
     {
+        $this->blockObserver('menghapus');
         if ($tariffClass->hospital_id !== hospital('id')) {
             abort(404);
         }

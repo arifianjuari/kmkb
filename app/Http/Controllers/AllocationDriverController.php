@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BlocksObserver;
 use App\Models\AllocationDriver;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -9,6 +10,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AllocationDriverController extends Controller
 {
+    use BlocksObserver;
     public function index(Request $request)
     {
         $search = $request->get('search');
@@ -30,11 +32,13 @@ class AllocationDriverController extends Controller
 
     public function create()
     {
+        $this->blockObserver('membuat');
         return view('allocation-drivers.create');
     }
 
     public function store(Request $request)
     {
+        $this->blockObserver('membuat');
         $validated = $request->validate([
             'name' => 'required|string|max:150',
             'unit_measurement' => 'required|string|max:50',
@@ -62,6 +66,7 @@ class AllocationDriverController extends Controller
 
     public function edit(AllocationDriver $allocationDriver)
     {
+        $this->blockObserver('mengubah');
         if ($allocationDriver->hospital_id !== hospital('id')) {
             abort(404);
         }
@@ -71,6 +76,7 @@ class AllocationDriverController extends Controller
 
     public function update(Request $request, AllocationDriver $allocationDriver)
     {
+        $this->blockObserver('mengubah');
         if ($allocationDriver->hospital_id !== hospital('id')) {
             abort(404);
         }
@@ -89,6 +95,7 @@ class AllocationDriverController extends Controller
 
     public function destroy(AllocationDriver $allocationDriver)
     {
+        $this->blockObserver('menghapus');
         if ($allocationDriver->hospital_id !== hospital('id')) {
             abort(404);
         }

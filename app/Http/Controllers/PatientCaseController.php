@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BlocksObserver;
 use App\Models\PatientCase;
 use App\Models\ClinicalPathway;
 use App\Models\CaseDetail;
@@ -16,6 +17,7 @@ use Carbon\Carbon;
 
 class PatientCaseController extends Controller
 {
+    use BlocksObserver;
     protected $unitCostService;
 
     public function __construct(UnitCostService $unitCostService)
@@ -171,6 +173,7 @@ class PatientCaseController extends Controller
      */
     public function create()
     {
+        $this->blockObserver('membuat');
         try {
             $pathways = ClinicalPathway::where('hospital_id', hospital('id'))->where('status', 'active')->get();
             return view('cases.create', compact('pathways'));
@@ -187,6 +190,7 @@ class PatientCaseController extends Controller
      */
     public function createCaseDetail(PatientCase $case)
     {
+        $this->blockObserver('membuat');
         // Ensure the case belongs to the current hospital
         if ($case->hospital_id !== hospital('id')) {
             abort(404);
@@ -212,6 +216,7 @@ class PatientCaseController extends Controller
      */
     public function store(Request $request)
     {
+        $this->blockObserver('membuat');
         // Log the incoming request data for debugging
         \Illuminate\Support\Facades\Log::info('Patient case creation request data:', $request->all());
         
@@ -336,6 +341,7 @@ class PatientCaseController extends Controller
      */
     public function storeCaseDetail(Request $request, PatientCase $case)
     {
+        $this->blockObserver('membuat');
         // Ensure the case belongs to the current hospital
         if ($case->hospital_id !== hospital('id')) {
             abort(404);
@@ -509,6 +515,7 @@ class PatientCaseController extends Controller
      */
     public function editCaseDetail(PatientCase $case, CaseDetail $detail)
     {
+        $this->blockObserver('mengubah');
         // Ensure the case belongs to the current hospital
         if ($case->hospital_id !== hospital('id')) {
             abort(404);
@@ -536,6 +543,7 @@ class PatientCaseController extends Controller
      */
     public function edit(PatientCase $case)
     {
+        $this->blockObserver('mengubah');
         // Ensure the case belongs to the current hospital
         if ($case->hospital_id !== hospital('id')) {
             abort(404);
@@ -558,6 +566,7 @@ class PatientCaseController extends Controller
      */
     public function update(Request $request, PatientCase $case)
     {
+        $this->blockObserver('mengubah');
         try {
             $request->validate([
                 'medical_record_number' => 'required|string|max:50',
@@ -629,6 +638,7 @@ class PatientCaseController extends Controller
      */
     public function updateCaseDetail(Request $request, PatientCase $case, CaseDetail $detail)
     {
+        $this->blockObserver('mengubah');
         // Ensure the case belongs to the current hospital
         if ($case->hospital_id !== hospital('id')) {
             abort(404);
@@ -797,6 +807,7 @@ class PatientCaseController extends Controller
      */
     public function deleteCaseDetail(PatientCase $case, CaseDetail $detail)
     {
+        $this->blockObserver('menghapus');
         // Ensure the case belongs to the current hospital
         if ($case->hospital_id !== hospital('id')) {
             abort(404);
@@ -829,6 +840,7 @@ class PatientCaseController extends Controller
      */
     public function updateAnnotation(Request $request, PatientCase $case)
     {
+        $this->blockObserver('mengubah');
         // Ensure the case belongs to the current hospital
         if ($case->hospital_id !== hospital('id')) {
             abort(404);
@@ -873,6 +885,7 @@ class PatientCaseController extends Controller
      */
     public function destroy(PatientCase $case)
     {
+        $this->blockObserver('menghapus');
         try {
             // Ensure the case belongs to the current hospital before deleting
             if ($case->hospital_id !== hospital('id')) {

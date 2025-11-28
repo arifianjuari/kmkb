@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BlocksObserver;
 use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -9,6 +10,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ExpenseCategoryController extends Controller
 {
+    use BlocksObserver;
     public function index(Request $request)
     {
         $search = $request->get('search');
@@ -93,11 +95,13 @@ class ExpenseCategoryController extends Controller
 
     public function create()
     {
+        $this->blockObserver('membuat');
         return view('expense-categories.create');
     }
 
     public function store(Request $request)
     {
+        $this->blockObserver('membuat');
         $validated = $request->validate([
             'account_code' => 'required|string|max:50',
             'account_name' => 'required|string|max:150',
@@ -128,6 +132,7 @@ class ExpenseCategoryController extends Controller
 
     public function edit(ExpenseCategory $expenseCategory)
     {
+        $this->blockObserver('mengubah');
         if ($expenseCategory->hospital_id !== hospital('id')) {
             abort(404);
         }
@@ -137,6 +142,7 @@ class ExpenseCategoryController extends Controller
 
     public function update(Request $request, ExpenseCategory $expenseCategory)
     {
+        $this->blockObserver('mengubah');
         if ($expenseCategory->hospital_id !== hospital('id')) {
             abort(404);
         }
@@ -159,6 +165,7 @@ class ExpenseCategoryController extends Controller
 
     public function destroy(ExpenseCategory $expenseCategory)
     {
+        $this->blockObserver('menghapus');
         if ($expenseCategory->hospital_id !== hospital('id')) {
             abort(404);
         }

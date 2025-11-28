@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BlocksObserver;
 use App\Models\CostCenter;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -9,6 +10,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class CostCenterController extends Controller
 {
+    use BlocksObserver;
     /**
      * Display a listing of the resource.
      */
@@ -45,6 +47,8 @@ class CostCenterController extends Controller
      */
     public function create()
     {
+        $this->blockObserver('membuat');
+        
         $parents = CostCenter::where('hospital_id', hospital('id'))
             ->where('is_active', true)
             ->orderBy('name')
@@ -58,6 +62,7 @@ class CostCenterController extends Controller
      */
     public function store(Request $request)
     {
+        $this->blockObserver('membuat');
         $validated = $request->validate([
             'code' => 'required|string|max:50',
             'name' => 'required|string|max:150',
@@ -105,6 +110,8 @@ class CostCenterController extends Controller
      */
     public function edit(CostCenter $costCenter)
     {
+        $this->blockObserver('mengubah');
+        
         if ($costCenter->hospital_id !== hospital('id')) {
             abort(404);
         }
@@ -123,6 +130,8 @@ class CostCenterController extends Controller
      */
     public function update(Request $request, CostCenter $costCenter)
     {
+        $this->blockObserver('mengubah');
+        
         if ($costCenter->hospital_id !== hospital('id')) {
             abort(404);
         }
@@ -164,6 +173,8 @@ class CostCenterController extends Controller
      */
     public function destroy(CostCenter $costCenter)
     {
+        $this->blockObserver('menghapus');
+        
         if ($costCenter->hospital_id !== hospital('id')) {
             abort(404);
         }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BlocksObserver;
 use App\Models\ClinicalPathway;
 use App\Models\PathwayStep;
 use App\Services\UnitCostService;
@@ -16,6 +17,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class PathwayController extends Controller
 {
+    use BlocksObserver;
     protected $unitCostService;
 
     public function __construct(UnitCostService $unitCostService)
@@ -55,6 +57,7 @@ class PathwayController extends Controller
      */
     public function create()
     {
+        $this->blockObserver('membuat');
         $versions = $this->unitCostService->getAvailableVersions();
         return view('pathways.create', compact('versions'));
     }
@@ -67,6 +70,7 @@ class PathwayController extends Controller
      */
     public function store(Request $request)
     {
+        $this->blockObserver('membuat');
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
@@ -368,6 +372,7 @@ class PathwayController extends Controller
      */
     public function edit(ClinicalPathway $pathway)
     {
+        $this->blockObserver('mengubah');
         // Ensure the pathway belongs to the current hospital
         if ($pathway->hospital_id !== hospital('id')) {
             abort(404);
@@ -386,6 +391,7 @@ class PathwayController extends Controller
      */
     public function update(Request $request, ClinicalPathway $pathway)
     {
+        $this->blockObserver('mengubah');
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
@@ -409,6 +415,7 @@ class PathwayController extends Controller
      */
     public function destroy(ClinicalPathway $pathway)
     {
+        $this->blockObserver('menghapus');
         // Ensure the pathway belongs to the current hospital before deleting
         if ($pathway->hospital_id !== hospital('id')) {
             abort(404);

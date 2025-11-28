@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BlocksObserver;
 use App\Models\GlExpense;
 use App\Models\CostCenter;
 use App\Models\ExpenseCategory;
@@ -12,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class GlExpenseController extends Controller
 {
+    use BlocksObserver;
     public function index(Request $request)
     {
         $search = $request->get('search');
@@ -59,6 +61,7 @@ class GlExpenseController extends Controller
 
     public function create()
     {
+        $this->blockObserver('membuat');
         $costCenters = CostCenter::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('name')->get();
         $expenseCategories = ExpenseCategory::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('account_name')->get();
         
@@ -67,6 +70,7 @@ class GlExpenseController extends Controller
 
     public function store(Request $request)
     {
+        $this->blockObserver('membuat');
         $validated = $request->validate([
             'period_month' => 'required|integer|between:1,12',
             'period_year' => 'required|integer|min:2000|max:2100',
@@ -113,6 +117,7 @@ class GlExpenseController extends Controller
 
     public function edit(GlExpense $glExpense)
     {
+        $this->blockObserver('mengubah');
         if ($glExpense->hospital_id !== hospital('id')) {
             abort(404);
         }
@@ -125,6 +130,7 @@ class GlExpenseController extends Controller
 
     public function update(Request $request, GlExpense $glExpense)
     {
+        $this->blockObserver('mengubah');
         if ($glExpense->hospital_id !== hospital('id')) {
             abort(404);
         }
@@ -162,6 +168,7 @@ class GlExpenseController extends Controller
 
     public function destroy(GlExpense $glExpense)
     {
+        $this->blockObserver('menghapus');
         if ($glExpense->hospital_id !== hospital('id')) {
             abort(404);
         }
