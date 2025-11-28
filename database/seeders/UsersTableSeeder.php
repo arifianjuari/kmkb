@@ -51,6 +51,12 @@ class UsersTableSeeder extends Seeder
                 'role' => User::ROLE_MANAJEMEN,
                 'department' => 'Manajemen',
             ],
+            [
+                'name' => 'Observer User',
+                'email' => 'observer@example.com',
+                'role' => User::ROLE_OBSERVER,
+                'department' => 'Monitoring & Audit',
+            ],
         ];
 
         // Get the first hospital

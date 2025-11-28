@@ -222,9 +222,13 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         Route::get('/sync', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'sync'])->name('svc-current.sync');
     });
 
-    // Audit Logs (admin only)
+    // Audit Logs (admin and observer can view, admin only can delete)
+    Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+    Route::get('audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
+    
+    // Audit Logs delete/clear (admin only)
     Route::middleware('role:admin')->group(function () {
-        Route::resource('audit-logs', AuditLogController::class)->only(['index', 'show', 'destroy']);
+        Route::delete('audit-logs/{auditLog}', [AuditLogController::class, 'destroy'])->name('audit-logs.destroy');
         Route::delete('audit-logs', [AuditLogController::class, 'clear'])->name('audit-logs.clear');
         
         // Migration routes (temporary - remove after migration is complete)

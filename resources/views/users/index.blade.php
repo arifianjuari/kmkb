@@ -30,6 +30,7 @@
                         <option value="mutu" {{ request('role') == 'mutu' ? 'selected' : '' }}>{{ __('Mutu') }}</option>
                         <option value="klaim" {{ request('role') == 'klaim' ? 'selected' : '' }}>{{ __('Klaim') }}</option>
                         <option value="manajemen" {{ request('role') == 'manajemen' ? 'selected' : '' }}>{{ __('Manajemen') }}</option>
+                        <option value="observer" {{ request('role') == 'observer' ? 'selected' : '' }}>{{ __('Observer') }}</option>
                     </select>
                 </div>
                 

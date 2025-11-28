@@ -30,7 +30,22 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => Hash::make('password'), // Default password
             'remember_token' => Str::random(10),
+            'role' => User::ROLE_ADMIN, // Default role
+            'department' => $this->faker->word(),
             'hospital_id' => Hospital::factory(),
         ];
+    }
+
+    /**
+     * Indicate that the user is an observer (read-only).
+     */
+    public function observer()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => User::ROLE_OBSERVER,
+                'department' => 'Monitoring & Audit',
+            ];
+        });
     }
 }

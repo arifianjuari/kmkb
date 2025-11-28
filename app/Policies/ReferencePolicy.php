@@ -20,6 +20,11 @@ class ReferencePolicy extends BasePolicy
      */
     public function view(User $user, Reference $reference): bool
     {
+        // Observer can view all references in their hospital
+        if ($user->isObserver()) {
+            return $this->belongsToSameHospital($user, $reference);
+        }
+        
         return $user->isSuperadmin() || $this->belongsToSameHospital($user, $reference);
     }
 
@@ -28,6 +33,10 @@ class ReferencePolicy extends BasePolicy
      */
     public function create(User $user): bool
     {
+        // Observer is read-only
+        if ($user->isObserver()) {
+            return false;
+        }
         return $this->canManage($user);
     }
 
@@ -36,6 +45,10 @@ class ReferencePolicy extends BasePolicy
      */
     public function update(User $user, Reference $reference): bool
     {
+        // Observer is read-only
+        if ($user->isObserver()) {
+            return false;
+        }
         return $this->canManage($user) && $this->belongsToSameHospital($user, $reference);
     }
 
@@ -44,6 +57,10 @@ class ReferencePolicy extends BasePolicy
      */
     public function delete(User $user, Reference $reference): bool
     {
+        // Observer is read-only
+        if ($user->isObserver()) {
+            return false;
+        }
         return $this->canManage($user) && $this->belongsToSameHospital($user, $reference);
     }
 

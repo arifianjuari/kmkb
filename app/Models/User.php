@@ -52,6 +52,7 @@ class User extends Authenticatable
     const ROLE_MUTU = 'mutu';
     const ROLE_KLAIM = 'klaim';
     const ROLE_MANAJEMEN = 'manajemen';
+    const ROLE_OBSERVER = 'observer';
 
     /**
      * Check if user has a specific role
@@ -77,6 +78,16 @@ class User extends Authenticatable
     public function isSuperadmin()
     {
         return $this->role === self::ROLE_SUPERADMIN;
+    }
+
+    /**
+     * Check if user is an observer (read-only access)
+     *
+     * @return bool
+     */
+    public function isObserver()
+    {
+        return $this->role === self::ROLE_OBSERVER;
     }
 
     /**

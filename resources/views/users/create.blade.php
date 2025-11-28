@@ -60,7 +60,9 @@
                             <option value="mutu" {{ old('role') == 'mutu' ? 'selected' : '' }}>{{ __('Mutu') }}</option>
                             <option value="klaim" {{ old('role') == 'klaim' ? 'selected' : '' }}>{{ __('Klaim') }}</option>
                             <option value="manajemen" {{ old('role') == 'manajemen' ? 'selected' : '' }}>{{ __('Manajemen') }}</option>
+                            <option value="observer" {{ old('role') == 'observer' ? 'selected' : '' }}>{{ __('Observer') }} ({{ __('Read-only') }})</option>
                         </select>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Observer role has read-only access to all modules') }}</p>
                     </div>
                     @error('role')
                         <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
