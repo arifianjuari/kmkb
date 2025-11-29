@@ -58,28 +58,5 @@ class Reference extends Model
         return $this->belongsToMany(Tag::class, 'reference_tag');
     }
 
-    /**
-     * Get the route key for the model.
-     */
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
-    }
-
-    /**
-     * Retrieve the model for bound value.
-     */
-    public function resolveRouteBinding($value, $field = null)
-    {
-        $query = $this->where('slug', $value);
-        
-        // Filter by hospital_id if available (for multi-tenant)
-        $hospitalId = hospital('id');
-        if ($hospitalId) {
-            $query->where('hospital_id', $hospitalId);
-        }
-        
-        return $query->firstOrFail();
-    }
 }
 
