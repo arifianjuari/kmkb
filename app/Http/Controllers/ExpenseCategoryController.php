@@ -186,6 +186,104 @@ class ExpenseCategoryController extends Controller
             ->with('success', 'Expense category berhasil dihapus.');
     }
 
+    /**
+     * Bulk delete selected expense categories.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $this->blockObserver('menghapus');
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer',
+        ]);
+
+        $ids = $validated['ids'];
+
+        // Only delete records that belong to the current hospital
+        $expenseCategories = ExpenseCategory::where('hospital_id', hospital('id'))
+            ->whereIn('id', $ids)
+            ->get();
+
+        $deleted = 0;
+        $failedCostRefs = [];
+        $failedGlExpenses = [];
+        $failedNames = [];
+
+        foreach ($expenseCategories as $category) {
+            // Check if category is used in cost references
+            if ($category->costReferences()->count() > 0) {
+                $failedCostRefs[] = $category;
+                $failedNames[] = $category->account_name;
+                continue;
+            }
+            
+            // Check if category is used in GL expenses
+            if ($category->glExpenses()->count() > 0) {
+                $failedGlExpenses[] = $category;
+                $failedNames[] = $category->account_name;
+                continue;
+            }
+            
+            $category->delete();
+            $deleted++;
+        }
+
+        $totalFailed = count($failedCostRefs) + count($failedGlExpenses);
+        
+        // Build message
+        $messages = [];
+        
+        if ($deleted > 0) {
+            $messages[] = "{$deleted} expense categor" . ($deleted > 1 ? 'ies' : 'y') . " berhasil dihapus.";
+        }
+        
+        if ($totalFailed > 0) {
+            $failedMsg = "{$totalFailed} expense categor" . ($totalFailed > 1 ? 'ies' : 'y') . " tidak dapat dihapus";
+            
+            $reasons = [];
+            if (count($failedCostRefs) > 0) {
+                $reasons[] = count($failedCostRefs) . " kategori masih digunakan di Cost References";
+            }
+            if (count($failedGlExpenses) > 0) {
+                $reasons[] = count($failedGlExpenses) . " kategori masih digunakan di GL Expenses";
+            }
+            
+            if (count($reasons) > 0) {
+                $failedMsg .= " karena " . implode(" dan ", $reasons) . ".";
+            }
+            
+            // Show sample names (max 3 untuk tidak terlalu panjang)
+            if (count($failedNames) > 0) {
+                $sampleNames = array_slice($failedNames, 0, 3);
+                $failedMsg .= " Contoh: " . implode(", ", $sampleNames);
+                if (count($failedNames) > 3) {
+                    $failedMsg .= " dan " . (count($failedNames) - 3) . " lainnya";
+                }
+                $failedMsg .= ".";
+            }
+            
+            $messages[] = $failedMsg;
+        }
+
+        $message = implode(' ', $messages);
+
+        if ($deleted === 0 && $totalFailed > 0) {
+            return redirect()->route('expense-categories.index')
+                ->with('error', $message ?: 'Tidak ada expense category yang dapat dihapus.');
+        }
+
+        if ($deleted > 0 && $totalFailed > 0) {
+            return redirect()->route('expense-categories.index')
+                ->with('warning', $message);
+        }
+
+        return redirect()->route('expense-categories.index')
+            ->with($deleted > 0 ? 'success' : 'error', $message ?: 'Tidak ada expense category yang dipilih untuk dihapus.');
+    }
+
     public function export(Request $request)
     {
         $search = $request->get('search');

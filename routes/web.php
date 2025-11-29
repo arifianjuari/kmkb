@@ -127,6 +127,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
 
     // Expense Categories
     Route::get('expense-categories/export', [App\Http\Controllers\ExpenseCategoryController::class, 'export'])->name('expense-categories.export');
+    Route::delete('expense-categories/bulk-destroy', [App\Http\Controllers\ExpenseCategoryController::class, 'bulkDestroy'])->name('expense-categories.bulk-destroy');
     Route::resource('expense-categories', App\Http\Controllers\ExpenseCategoryController::class);
 
     // Allocation Drivers
@@ -186,16 +187,23 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::get('jkn-cbg-codes/search', [App\Http\Controllers\JknCbgCodeController::class, 'search'])->name('jkn-cbg-codes.search');
     Route::get('jkn-cbg-codes/tariff', [App\Http\Controllers\JknCbgCodeController::class, 'getTariff'])->name('jkn-cbg-codes.tariff');
 
-    // Admin-only CRUD for managing the codes
-    Route::middleware('role:admin')->group(function () {
+    // JKN CBG Codes (permission-based)
+    Route::middleware('can:view-jkn-cbg-codes')->group(function () {
         Route::resource('jkn-cbg-codes', App\Http\Controllers\JknCbgCodeController::class);
     });
 
-    // Users (admin only)
-    Route::middleware('role:admin')->group(function () {
+    // Users (permission-based)
+    Route::middleware('can:view-users')->group(function () {
         Route::resource('users', UserController::class);
         Route::get('users/{user}/change-password', [UserController::class, 'changePasswordForm'])->name('users.change-password');
         Route::post('users/{user}/change-password', [UserController::class, 'changePassword'])->name('users.change-password.update');
+    });
+
+    // Roles & Permissions Management (superadmin only)
+    Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('roles', [App\Http\Controllers\Admin\RolePermissionController::class, 'index'])->name('roles.index');
+        Route::get('roles/{role}/edit', [App\Http\Controllers\Admin\RolePermissionController::class, 'edit'])->name('roles.edit');
+        Route::put('roles/{role}', [App\Http\Controllers\Admin\RolePermissionController::class, 'update'])->name('roles.update');
     });
 
     // Reports

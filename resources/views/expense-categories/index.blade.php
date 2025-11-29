@@ -106,6 +106,21 @@
             </div>
         @endif
 
+        @if(session('warning'))
+            <div class="mb-6 rounded-md bg-yellow-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-yellow-800">{{ session('warning') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         @if(session('error'))
             <div class="mb-6 rounded-md bg-red-50 p-4">
                 <div class="flex">
@@ -177,10 +192,30 @@
                     </div>
                 </div>
                 @if($expenseCategories->count() > 0)
+                    @if(!auth()->user()?->isObserver())
+                    <form id="bulk-delete-form" action="{{ route('expense-categories.bulk-destroy') }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="text-sm text-gray-600">
+                                {{ __('Select records to delete in bulk') }}
+                            </div>
+                            <button id="bulk-delete-btn" type="submit" class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="return confirm('{{ __('Are you sure you want to delete the selected expense categories? This action cannot be undone.') }}')">
+                                {{ __('Delete Selected') }}
+                            </button>
+                        </div>
+                    @endif
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
+                                    @if(!auth()->user()?->isObserver())
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <input id="select-all" type="checkbox" class="h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
+                                    </th>
+                                    @endif
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Account Code') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Account Name') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Cost Type') }}</th>
@@ -192,6 +227,11 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($expenseCategories as $category)
                                     <tr>
+                                        @if(!auth()->user()?->isObserver())
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <input type="checkbox" name="ids[]" value="{{ $category->id }}" class="row-checkbox h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
+                                        </td>
+                                        @endif
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $category->account_code }}</td>
                                         <td class="px-6 py-4 text-sm text-gray-900">{{ $category->account_name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ucfirst(str_replace('_', ' ', $category->cost_type)) }}</td>
@@ -231,6 +271,9 @@
                             </tbody>
                         </table>
                     </div>
+                    @if(!auth()->user()?->isObserver())
+                    </form>
+                    @endif
                     
                     <div class="mt-6">
                         {{ $expenseCategories->links() }}
@@ -243,4 +286,62 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+@if(!auth()->user()?->isObserver())
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('select-all');
+        const bulkBtn = document.getElementById('bulk-delete-btn');
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        const bulkForm = document.getElementById('bulk-delete-form');
+        
+        // Update button state based on checkbox selection
+        function updateButtonState() {
+            const anyChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
+            if (bulkBtn) {
+                bulkBtn.disabled = !anyChecked;
+            }
+        }
+        
+        // Select all functionality
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                rowCheckboxes.forEach(cb => { cb.checked = selectAll.checked; });
+                updateButtonState();
+            });
+        }
+        
+        // Individual checkbox change
+        rowCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
+                if (selectAll) selectAll.checked = allChecked;
+                updateButtonState();
+            });
+        });
+        
+        // Form submission with confirmation
+        if (bulkForm) {
+            bulkForm.addEventListener('submit', function(e) {
+                const selectedCount = Array.from(rowCheckboxes).filter(cb => cb.checked).length;
+                if (selectedCount === 0) {
+                    e.preventDefault();
+                    alert('{{ __('Please select at least one item to delete.') }}');
+                    return false;
+                }
+                
+                if (!confirm('{{ __('Are you sure you want to delete the selected expense categories? This action cannot be undone.') }}')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
+        
+        // Initialize state
+        updateButtonState();
+    });
+</script>
+@endif
+@endpush
 
