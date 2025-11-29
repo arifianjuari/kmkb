@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Reference;
 use App\Models\Tag;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -112,7 +113,7 @@ class ReferenceController extends Controller
         // Handle tags
         $this->syncTags($reference, $request->input('tags', []));
 
-        return redirect()->route('references.index')
+        return redirect()->route('references.show', $reference->slug)
             ->with('success', 'Referensi berhasil dibuat.');
     }
 
@@ -126,6 +127,23 @@ class ReferenceController extends Controller
         return view('references.show', [
             'reference' => $reference->fresh(['author', 'tags']),
         ]);
+    }
+
+    /**
+     * Export the specified reference as PDF.
+     */
+    public function exportPdf(Reference $reference)
+    {
+        $reference = $reference->fresh(['author', 'tags']);
+
+        $fileName = 'reference_' . ($reference->slug ?? 'artikel') . '.pdf';
+
+        $pdf = Pdf::loadView('references.pdf', [
+            'reference' => $reference,
+        ])->setPaper('a4');
+
+        // stream() akan menampilkan PDF inline di browser.
+        return $pdf->stream($fileName);
     }
 
     /**
@@ -194,7 +212,7 @@ class ReferenceController extends Controller
         // Handle tags
         $this->syncTags($reference, $request->input('tags', []));
 
-        return redirect()->route('references.index')
+        return redirect()->route('references.show', $reference->slug)
             ->with('success', 'Referensi berhasil diperbarui.');
     }
 

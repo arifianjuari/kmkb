@@ -1,6 +1,6 @@
 <?php $__env->startSection('content'); ?>
 <div class="mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
+    <div>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900"><?php echo e(__('Pathway Builder')); ?>: <?php echo e($pathway->name); ?></h2>
             <a href="<?php echo e(route('pathways.show', $pathway)); ?>" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -76,7 +76,7 @@
                             </div>
 
                             <div class="sm:col-span-5">
-                                <label for="criteria" class="block text-sm font-medium text-gray-700"><?php echo e(__('Criteria (optional)')); ?></label>
+                                <label for="criteria" class="block text-sm font-medium text-gray-700"><?php echo e(__('Keterangan (opsional)')); ?></label>
                                 <div class="mt-1">
                                     <input type="text" id="criteria" name="criteria" placeholder="e.g., if age > 60 then ..." class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
@@ -85,7 +85,7 @@
                             <div class="sm:col-span-3">
                                 <label for="standard_cost" class="block text-sm font-medium text-gray-700"><?php echo e(__('Standard Cost')); ?></label>
                                 <div class="mt-1">
-                                    <input type="number" id="standard_cost" name="standard_cost" step="100" min="0" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="standard_cost" name="standard_cost" step="1" min="0" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                             </div>
                             <div class="sm:col-span-2">
@@ -282,7 +282,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700"><?php echo e(__('Standard Cost')); ?></label>
-                                    <input type="number" id="ref_standard_cost" step="100" min="0" value="0" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="ref_standard_cost" step="1" min="0" value="0" required class="mt-1 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
@@ -376,22 +376,108 @@
         const refUnit = document.getElementById('ref_unit');
         const refSource = document.getElementById('ref_source');
         const addRefError = document.getElementById('add-ref-error');
-        function applyActivitySelection() {
+        
+        // Unit cost version from pathway
+        const pathwayUnitCostVersion = <?php echo json_encode($pathway->unit_cost_version ?? null, 15, 512) ?>;
+        
+        // Function to fetch unit cost from API
+        async function fetchUnitCost(serviceId, version = null) {
+            if (!serviceId) return null;
+            
+            try {
+                const url = new URL('/api/unit-cost', window.location.origin);
+                url.searchParams.append('serviceId', serviceId);
+                if (version) {
+                    url.searchParams.append('version', version);
+                } else if (pathwayUnitCostVersion) {
+                    url.searchParams.append('version', pathwayUnitCostVersion);
+                }
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch unit cost');
+                }
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching unit cost:', error);
+                return null;
+            }
+        }
+        
+        // Function to show unit cost warning
+        function showUnitCostWarning(message) {
+            let warningDiv = document.getElementById('unit-cost-warning');
+            if (!warningDiv) {
+                warningDiv = document.createElement('div');
+                warningDiv.id = 'unit-cost-warning';
+                warningDiv.className = 'mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800';
+                const stdCostInput = document.getElementById('standard_cost');
+                if (stdCostInput && stdCostInput.parentElement) {
+                    stdCostInput.parentElement.appendChild(warningDiv);
+                }
+            }
+            warningDiv.textContent = message;
+            warningDiv.classList.remove('hidden');
+        }
+        
+        // Function to hide unit cost warning
+        function hideUnitCostWarning() {
+            const warningDiv = document.getElementById('unit-cost-warning');
+            if (warningDiv) {
+                warningDiv.classList.add('hidden');
+            }
+        }
+        
+        async function applyActivitySelection() {
             const code = (activityInput.value || '').trim();
             const ref = costRefMap[code];
             const stdCostInput = document.getElementById('standard_cost');
             const descInput = document.getElementById('description');
+            
             if (ref) {
                 if (hiddenCostId) hiddenCostId.value = ref.id || '';
-                if (stdCostInput) stdCostInput.value = ref.cost || '';
                 if (descInput) descInput.value = ref.desc || '';
                 if (addRefPrompt) addRefPrompt.classList.add('hidden');
+                
+                // Fetch unit cost from API
+                if (ref.id) {
+                    hideUnitCostWarning();
+                    const unitCostData = await fetchUnitCost(ref.id);
+                    
+                    if (unitCostData) {
+                        if (unitCostData.fallback_used) {
+                            // Using standard cost as fallback
+                            if (stdCostInput) stdCostInput.value = unitCostData.unit_cost || ref.cost || '';
+                            showUnitCostWarning('Belum ada unit cost resmi – menggunakan Standard Cost dari Cost References');
+                        } else {
+                            // Using unit cost
+                            if (stdCostInput) stdCostInput.value = Math.round(unitCostData.unit_cost) || ref.cost || '';
+                            hideUnitCostWarning();
+                        }
+                    } else {
+                        // Fallback to standard cost if API fails
+                        if (stdCostInput) stdCostInput.value = ref.cost || '';
+                    }
+                } else {
+                    // No cost reference ID, use standard cost
+                    if (stdCostInput) stdCostInput.value = ref.cost || '';
+                    hideUnitCostWarning();
+                }
             } else {
                 if (hiddenCostId) hiddenCostId.value = '';
                 // Only clear when the field is blank to avoid wiping custom entries while typing
                 if (code === '') {
                     if (stdCostInput) stdCostInput.value = '';
                     if (descInput) descInput.value = '';
+                    hideUnitCostWarning();
                 }
             }
             recalcCreateTotal();
@@ -525,7 +611,7 @@
                     category: row.querySelector('[data-field="category"]').textContent,
                     activity: row.querySelector('[data-field="activity"]').textContent,
                     description: row.querySelector('[data-field="description"]').textContent,
-                    criteria: row.querySelector('[data-field="criteria"]').textContent,
+                    annotation: row.querySelector('[data-field="criteria"]').textContent,
                     standard_cost: row.querySelector('[data-field="standard_cost"]').textContent.replace(/[.,\s]/g, ''),
                     quantity: row.querySelector('[data-field="quantity"]').textContent.replace(/[.,\s]/g, '')
                 };
@@ -562,24 +648,50 @@
         
         // Handle cost reference changes
         document.querySelectorAll('.cost-reference-select').forEach(select => {
-            select.addEventListener('change', function() {
+            select.addEventListener('change', async function() {
                 const stepId = this.getAttribute('data-step-id');
                 const selectedOption = this.options[this.selectedIndex];
+                const selectedValue = this.value;
                 
                 if (selectedOption && selectedOption.dataset) {
                     const costCell = document.querySelector(`tr[data-step-id="${stepId}"] [data-field="standard_cost"]`);
-                    if (selectedOption.dataset.cost && costCell) {
-                        costCell.textContent = formatInt(selectedOption.dataset.cost);
-                    }
                     const activityCell = document.querySelector(`tr[data-step-id="${stepId}"] [data-field="activity"]`);
+                    const descCell = document.querySelector(`tr[data-step-id="${stepId}"] [data-field="description"]`);
+                    const row = document.querySelector(`tr[data-step-id="${stepId}"]`);
+                    
+                    // Update activity and description from selected option
                     if (activityCell && selectedOption.dataset.code) {
                         activityCell.textContent = selectedOption.dataset.code;
                     }
-                    const descCell = document.querySelector(`tr[data-step-id="${stepId}"] [data-field="description"]`);
                     if (descCell && selectedOption.dataset.desc) {
                         descCell.textContent = selectedOption.dataset.desc;
                     }
-                    const row = document.querySelector(`tr[data-step-id="${stepId}"]`);
+                    
+                    // Fetch unit cost from API if cost reference is selected
+                    if (selectedValue && costCell) {
+                        const unitCostData = await fetchUnitCost(selectedValue);
+                        
+                        if (unitCostData) {
+                            if (unitCostData.fallback_used) {
+                                // Using standard cost as fallback
+                                costCell.textContent = formatInt(unitCostData.unit_cost || selectedOption.dataset.cost || 0);
+                                // Show warning in console or could add visual indicator
+                                console.log('Using standard cost fallback for step ' + stepId);
+                            } else {
+                                // Using unit cost
+                                costCell.textContent = formatInt(unitCostData.unit_cost || 0);
+                            }
+                        } else {
+                            // Fallback to standard cost if API fails
+                            if (selectedOption.dataset.cost) {
+                                costCell.textContent = formatInt(selectedOption.dataset.cost);
+                            }
+                        }
+                    } else if (selectedOption.dataset.cost && costCell) {
+                        // No cost reference selected, use standard cost
+                        costCell.textContent = formatInt(selectedOption.dataset.cost);
+                    }
+                    
                     if (row) recalcRowTotal(row);
                 }
             });

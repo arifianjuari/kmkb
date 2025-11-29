@@ -75,15 +75,18 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">
-                                        @if($reference->is_pinned)
+                                    @if($reference->is_pinned)
                                         <span class="inline-flex items-center mr-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-biru-dongker-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                             </svg>
                                         </span>
                                     @endif
-                                    {{ $reference->title }}
-                                    </div>
+                                    <a href="{{ route('references.show', $reference) }}" 
+                                       class="text-biru-dongker-800 hover:text-biru-dongker-950 hover:underline transition-colors">
+                                        {{ $reference->title }}
+                                    </a>
+                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-wrap gap-1">
@@ -101,6 +104,16 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ route('references.export-pdf', $reference) }}"
+                                       target="_blank"
+                                       rel="noopener"
+                                       class="inline-flex items-center p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition"
+                                       title="{{ __('PDF') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3h8l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h1.5a1.5 1.5 0 000-3H9v3zm3-3v3m0-1.5h.75A1.25 1.25 0 0014 10.25v0A1.25 1.25 0 0012.75 9H12m3 0v4h1.5" />
+                                        </svg>
+                                    </a>
                                     <a href="{{ route('references.show', $reference) }}"
                                        class="inline-flex items-center p-2 text-biru-dongker-800 hover:text-biru-dongker-950 hover:bg-biru-dongker-200 rounded-md transition"
                                        title="{{ __('Lihat') }}">

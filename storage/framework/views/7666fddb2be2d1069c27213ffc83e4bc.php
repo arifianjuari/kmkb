@@ -12,5 +12,5 @@
 } ?>
 <?php unset($__defined_vars); ?>
 
-<input <?php echo e($disabled ? 'disabled' : ''); ?> <?php echo $attributes->merge(['class' => 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm']); ?>>
+<input <?php echo e($disabled ? 'disabled' : ''); ?> <?php echo $attributes->merge(['class' => 'border-gray-300 focus:border-biru-dongker-700 focus:ring-biru-dongker-700 rounded-md shadow-sm']); ?>>
 <?php /**PATH /Users/arifianjuari/Library/CloudStorage/GoogleDrive-arifianjuari@gmail.com/My Drive/01 PAPA/05 DEVELOPMENT/kmkb/resources/views/components/text-input.blade.php ENDPATH**/ ?>

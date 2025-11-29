@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Storage;
 <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8 space-y-6">
     <!-- Header Section -->
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-3">
             <div class="flex-1 min-w-0">
                 <h1 class="text-3xl font-semibold text-gray-900">{{ $reference->title }}</h1>
                 <p class="mt-2 text-sm text-gray-500">
@@ -15,10 +15,23 @@ use Illuminate\Support\Facades\Storage;
                     · {{ optional($reference->published_at)->translatedFormat('d M Y H:i') ?? __('Belum dipublikasikan') }}
                 </p>
             </div>
-            <a href="{{ route('references.index') }}"
-               class="ml-4 inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
-                {{ __('Kembali') }}
-            </a>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <a href="{{ route('references.export-pdf', $reference) }}"
+                   target="_blank"
+                   rel="noopener"
+                   class="inline-flex items-center px-3 py-2 border border-red-300 rounded-md text-sm font-medium text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                   title="{{ __('Unduh sebagai PDF') }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3h8l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h1.5a1.5 1.5 0 000-3H9v3zm3-3v3m0-1.5h.75A1.25 1.25 0 0014 10.25v0A1.25 1.25 0 0012.75 9H12m3 0v4h1.5" />
+                    </svg>
+                    <span class="hidden sm:inline">{{ __('PDF') }}</span>
+                </a>
+                <a href="{{ route('references.index') }}"
+                   class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
+                    {{ __('Kembali') }}
+                </a>
+            </div>
         </div>
 
         <div class="mt-4 flex flex-wrap items-center gap-2 text-xs font-medium">
@@ -97,7 +110,7 @@ use Illuminate\Support\Facades\Storage;
 @push('styles')
 <style>
 .markdown-content {
-    line-height: 1.75;
+    line-height: 1.15;
     color: #374151;
 }
 

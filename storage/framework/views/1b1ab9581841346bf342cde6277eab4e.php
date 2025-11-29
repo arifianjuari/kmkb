@@ -13,18 +13,15 @@
 
         <!-- Scripts -->
         <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+        <?php echo $__env->yieldPushContent('styles'); ?>
     </head>
     <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900" 
           x-data="{ 
               sidebarOpen: false, 
-              sidebarCollapsed: window.sidebarCollapsed || false
+              sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true'
           }"
-          x-init="
-              // Sync window global state with Alpine state
-              window.sidebarCollapsed = sidebarCollapsed;
-          "
           @toggle-sidebar.window="sidebarOpen = !sidebarOpen"
-          @sidebar-toggle.window="sidebarCollapsed = $event.detail.collapsed; window.sidebarCollapsed = $event.detail.collapsed">
+          @sidebar-toggle.window="sidebarCollapsed = $event.detail.collapsed">
         <div class="flex h-screen overflow-hidden">
             <!-- Sidebar -->
             <div class="hidden lg:block">
@@ -97,16 +94,16 @@
             </div>
 
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col overflow-hidden" 
-                 x-bind:class="sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'"
-                 x-bind:style="'transition: margin-left 0.3s ease-in-out;'">
+            <div class="flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out" 
+                 :class="sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'"
+                 style="will-change: margin-left;">
                 <!-- Top Navigation Bar -->
                 <header>
                     <?php echo $__env->make('layouts.navigation', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                 </header>
 
                 <!-- Main Content -->
-                <main class="flex-1 overflow-y-auto bg-gray-50">
+                <main class="flex-1 overflow-y-auto bg-gray-50 pt-16">
                     <!-- Page Heading -->
                     <?php if(isset($header)): ?>
                         <div class="bg-white shadow dark:bg-gray-800">
@@ -137,7 +134,7 @@
                     <?php endif; ?>
                     
                     <!-- Page Content -->
-                    <div class="py-6 px-4 sm:px-6 lg:px-8">
+                    <div class="py-3 px-4 sm:px-6 lg:px-8">
                         <?php if(isset($slot)): ?>
                             <?php echo e($slot); ?>
 

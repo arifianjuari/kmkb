@@ -117,6 +117,8 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::resource('cost-references', CostReferenceController::class);
 
     // Knowledge References
+    Route::get('references/{reference}/export-pdf', [ReferenceController::class, 'exportPdf'])
+        ->name('references.export-pdf');
     Route::resource('references', ReferenceController::class);
 
     // Cost Centers

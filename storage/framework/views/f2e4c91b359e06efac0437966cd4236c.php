@@ -1,8 +1,19 @@
 <?php $__env->startSection('content'); ?>
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900"><?php echo e(__('Service Volumes')); ?></h2>
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap"><?php echo e(__('Service Volumes')); ?></h2>
+                <button
+                    type="button"
+                    class="flex-shrink-0 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-full w-5 h-5 flex items-center justify-center hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                    onclick="const p = document.getElementById('service-volumes-help'); if (p) { p.classList.toggle('hidden'); }"
+                    aria-label="<?php echo e(__('What is Service Volume?')); ?>"
+                    title="<?php echo e(__('What is Service Volume?')); ?>"
+                >
+                    i
+                </button>
+            </div>
             <div class="flex items-center space-x-2">
                 <a href="<?php echo e(route('service-volumes.import')); ?>" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
                     <?php echo e(__('Import Excel')); ?>
@@ -16,6 +27,49 @@
                     <?php echo e(__('Add New Service Volume')); ?>
 
                 </a>
+            </div>
+        </div>
+        <div id="service-volumes-help" class="mb-4 hidden text-xs text-gray-700 bg-indigo-50 border border-indigo-100 rounded-md p-3">
+            <p class="mb-2">
+                <span class="font-semibold">Service Volume</span> adalah input volume output layanan per periode.
+            </p>
+            <div class="mb-2">
+                <p class="font-semibold mb-1">Contoh:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>OK: jumlah operasi sektio sesarea, appendektomi, dll</li>
+                    <li>Lab: jumlah pemeriksaan Darah Lengkap, GDS, dsb</li>
+                    <li>RI: patient days / bed days</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <p class="font-semibold mb-1">Peran di sistem:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>Menjadi penyebut dalam perhitungan unit cost per layanan di cost center tersebut</li>
+                    <li>Data ini dipakai lagi di modul Unit Cost (versi ringkas muncul di menu Unit Cost → Service Volumes)</li>
+                </ul>
+            </div>
+            <div class="mt-3 pt-3 border-t border-indigo-200">
+                <p class="font-semibold mb-1">Merupakan data mentah operasional (source data)</p>
+                <p class="mb-2 ml-2">Ini adalah tempat menyimpan angka volume asli dari operasional RS untuk satu periode.</p>
+                <div class="mb-2">
+                    <p class="font-semibold mb-1">Ciri-cirinya:</p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li>Berperan sebagai "data sumber" dari HIS / SIMRS / rekap manual</li>
+                        <li>Isinya bisa komplet & kotor:
+                            <ul class="list-circle list-inside ml-4 space-y-0.5">
+                                <li>Semua jenis tindakan, termasuk yang nanti mungkin tidak kamu costing</li>
+                                <li>Bisa termasuk kasus yang outlier, komplikasi, paket khusus, dsb</li>
+                            </ul>
+                        </li>
+                        <li>Dipakai oleh:
+                            <ul class="list-circle list-inside ml-4 space-y-0.5">
+                                <li>Tim keuangan/akuntansi sebagai dasar rekonsiliasi dengan GL</li>
+                                <li>Modul lain yang perlu total aktivitas rumah sakit secara keseluruhan</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <p class="ml-2 italic text-gray-600">Analogi: ini seperti buku absen asli seluruh tindakan di rumah sakit per periode.</p>
             </div>
         </div>
         
