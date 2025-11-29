@@ -26,11 +26,23 @@
                     <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Role') }}</label>
                     <select id="role" name="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <option value="">{{ __('All Roles') }}</option>
-                        <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
-                        <option value="mutu" {{ request('role') == 'mutu' ? 'selected' : '' }}>{{ __('Mutu') }}</option>
-                        <option value="klaim" {{ request('role') == 'klaim' ? 'selected' : '' }}>{{ __('Klaim') }}</option>
-                        <option value="manajemen" {{ request('role') == 'manajemen' ? 'selected' : '' }}>{{ __('Manajemen') }}</option>
-                        <option value="observer" {{ request('role') == 'observer' ? 'selected' : '' }}>{{ __('Observer') }}</option>
+                        <option value="superadmin" {{ request('role') == 'superadmin' ? 'selected' : '' }}>{{ __('Superadmin') }}</option>
+                        <option value="hospital_admin" {{ request('role') == 'hospital_admin' ? 'selected' : '' }}>{{ __('Hospital Admin') }}</option>
+                        <option value="finance_costing" {{ request('role') == 'finance_costing' ? 'selected' : '' }}>{{ __('Finance Costing') }}</option>
+                        <option value="hr_payroll" {{ request('role') == 'hr_payroll' ? 'selected' : '' }}>{{ __('HR Payroll') }}</option>
+                        <option value="facility_asset" {{ request('role') == 'facility_asset' ? 'selected' : '' }}>{{ __('Facility Asset') }}</option>
+                        <option value="simrs_integration" {{ request('role') == 'simrs_integration' ? 'selected' : '' }}>{{ __('SIMRS Integration') }}</option>
+                        <option value="support_unit" {{ request('role') == 'support_unit' ? 'selected' : '' }}>{{ __('Support Unit') }}</option>
+                        <option value="clinical_unit" {{ request('role') == 'clinical_unit' ? 'selected' : '' }}>{{ __('Clinical Unit') }}</option>
+                        <option value="medrec_claims" {{ request('role') == 'medrec_claims' ? 'selected' : '' }}>{{ __('Medrec Claims') }}</option>
+                        <option value="pathway_team" {{ request('role') == 'pathway_team' ? 'selected' : '' }}>{{ __('Pathway Team') }}</option>
+                        <option value="management_auditor" {{ request('role') == 'management_auditor' ? 'selected' : '' }}>{{ __('Management Auditor') }}</option>
+                        <!-- Legacy roles -->
+                        <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>{{ __('Admin') }} (Legacy)</option>
+                        <option value="mutu" {{ request('role') == 'mutu' ? 'selected' : '' }}>{{ __('Mutu') }} (Legacy)</option>
+                        <option value="klaim" {{ request('role') == 'klaim' ? 'selected' : '' }}>{{ __('Klaim') }} (Legacy)</option>
+                        <option value="manajemen" {{ request('role') == 'manajemen' ? 'selected' : '' }}>{{ __('Manajemen') }} (Legacy)</option>
+                        <option value="observer" {{ request('role') == 'observer' ? 'selected' : '' }}>{{ __('Observer') }} (Legacy)</option>
                     </select>
                 </div>
                 
@@ -68,19 +80,29 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->name }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->email }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        @if($user->role === 'admin')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100">{{ __('Admin') }}</span>
-                                        @elseif($user->role === 'mutu')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">{{ __('Mutu') }}</span>
-                                        @elseif($user->role === 'klaim')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">{{ __('Klaim') }}</span>
-                                        @elseif($user->role === 'manajemen')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100">{{ __('Manajemen') }}</span>
-                                        @elseif($user->role === 'observer')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100">{{ __('Observer') }} ({{ __('Read-only') }})</span>
-                                        @elseif($user->role === 'superadmin')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100">{{ __('Superadmin') }}</span>
-                                        @endif
+                                        @php
+                                            $roleLabels = [
+                                                'superadmin' => ['label' => __('Superadmin'), 'class' => 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'],
+                                                'hospital_admin' => ['label' => __('Hospital Admin'), 'class' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'],
+                                                'finance_costing' => ['label' => __('Finance Costing'), 'class' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'],
+                                                'hr_payroll' => ['label' => __('HR Payroll'), 'class' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100'],
+                                                'facility_asset' => ['label' => __('Facility Asset'), 'class' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'],
+                                                'simrs_integration' => ['label' => __('SIMRS Integration'), 'class' => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-100'],
+                                                'support_unit' => ['label' => __('Support Unit'), 'class' => 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-100'],
+                                                'clinical_unit' => ['label' => __('Clinical Unit'), 'class' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'],
+                                                'medrec_claims' => ['label' => __('Medrec Claims'), 'class' => 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-100'],
+                                                'pathway_team' => ['label' => __('Pathway Team'), 'class' => 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-100'],
+                                                'management_auditor' => ['label' => __('Management Auditor'), 'class' => 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100'],
+                                                // Legacy roles
+                                                'admin' => ['label' => __('Admin'), 'class' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'],
+                                                'mutu' => ['label' => __('Mutu'), 'class' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'],
+                                                'klaim' => ['label' => __('Klaim'), 'class' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'],
+                                                'manajemen' => ['label' => __('Manajemen'), 'class' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'],
+                                                'observer' => ['label' => __('Observer') . ' (' . __('Read-only') . ')', 'class' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100'],
+                                            ];
+                                            $roleInfo = $roleLabels[$user->role] ?? ['label' => ucfirst($user->role), 'class' => 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'];
+                                        @endphp
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $roleInfo['class'] }}">{{ $roleInfo['label'] }}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->department }}</td>
                                     @if(auth()->user()->isSuperadmin())

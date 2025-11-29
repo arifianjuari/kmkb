@@ -30,10 +30,37 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => Hash::make('password'), // Default password
             'remember_token' => Str::random(10),
-            'role' => User::ROLE_ADMIN, // Default role
+            'role' => User::ROLE_HOSPITAL_ADMIN, // Default role
             'department' => $this->faker->word(),
             'hospital_id' => Hospital::factory(),
         ];
+    }
+
+    /**
+     * Indicate that the user is a superadmin.
+     */
+    public function superadmin()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => User::ROLE_SUPERADMIN,
+                'hospital_id' => null,
+                'department' => 'Global Administration',
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the user is a hospital admin.
+     */
+    public function hospitalAdmin()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => User::ROLE_HOSPITAL_ADMIN,
+                'department' => 'Administration',
+            ];
+        });
     }
 
     /**
@@ -45,6 +72,19 @@ class UserFactory extends Factory
             return [
                 'role' => User::ROLE_OBSERVER,
                 'department' => 'Monitoring & Audit',
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the user is a management auditor (read-only).
+     */
+    public function managementAuditor()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => User::ROLE_MANAGEMENT_AUDITOR,
+                'department' => 'Audit',
             ];
         });
     }

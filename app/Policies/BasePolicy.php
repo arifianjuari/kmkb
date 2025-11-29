@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\Gate;
 
 class BasePolicy
 {
@@ -28,7 +29,7 @@ class BasePolicy
 
     /**
      * Check if user can view (read-only access).
-     * Observer role has read-only access to all data in their hospital.
+     * Management auditor role has read-only access to all data in their hospital.
      *
      * @param  \App\Models\User  $user
      * @param  \Illuminate\Database\Eloquent\Model|null  $model
@@ -41,7 +42,7 @@ class BasePolicy
             return true;
         }
 
-        // Observer can view data in their hospital
+        // Management auditor (observer) can view data in their hospital
         if ($user->isObserver()) {
             if ($model === null) {
                 return true; // Can view list
@@ -49,7 +50,19 @@ class BasePolicy
             return $this->belongsToSameHospital($user, $model);
         }
 
-        // Other roles need to be checked individually
+        // Other roles need to be checked individually via permissions
         return false;
+    }
+
+    /**
+     * Check if user has a specific permission
+     *
+     * @param  \App\Models\User  $user
+     * @param  string  $permission
+     * @return bool
+     */
+    protected function hasPermission($user, $permission)
+    {
+        return Gate::forUser($user)->allows($permission);
     }
 }

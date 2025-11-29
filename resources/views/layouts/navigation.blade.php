@@ -21,12 +21,8 @@
         <!-- Right: User menu & Notifications -->
         <div class="flex items-center space-x-4">
             @auth
-                @php
-                    $isAdmin = auth()->user()->hasRole(\App\Models\User::ROLE_ADMIN);
-                @endphp
-                
-                <!-- Admin Menu (Admin only) -->
-                @if($isAdmin)
+                <!-- Admin Menu (Users & Audit Logs access) -->
+                @canany(['view-users', 'view-audit-logs'])
                     <x-dropdown align="right" width="56">
                         <x-slot name="trigger">
                             <button class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-biru-dongker-700 relative">
@@ -41,16 +37,26 @@
                             <div class="px-4 py-2 border-b border-gray-200">
                                 <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">System Administration</div>
                             </div>
+                            @can('view-users')
                             <x-dropdown-link :href="route('users.index')" class="{{ request()->routeIs('users.*') ? 'bg-gray-100' : '' }}">
                                 {{ __('Users') }}
                             </x-dropdown-link>
+                            @endcan
+                            @can('view-audit-logs')
                             <x-dropdown-link :href="route('audit-logs.index')" class="{{ request()->routeIs('audit-logs.*') ? 'bg-gray-100' : '' }}">
                                 {{ __('Audit Logs') }}
                             </x-dropdown-link>
+                            @endcan
                             <div class="border-t border-gray-200 my-1"></div>
+                            @if(auth()->user()->isSuperadmin())
+                            <x-dropdown-link :href="route('admin.roles.index')" class="{{ request()->routeIs('admin.roles.*') ? 'bg-gray-100' : '' }}">
+                                {{ __('Roles & Permissions') }}
+                            </x-dropdown-link>
+                            @else
                             <div class="px-4 py-2 text-xs text-gray-500 cursor-not-allowed">
                                 {{ __('Roles & Permissions') }}
                             </div>
+                            @endif
                             <div class="px-4 py-2 text-xs text-gray-500 cursor-not-allowed">
                                 {{ __('API Tokens') }}
                             </div>
@@ -59,7 +65,7 @@
                             </div>
                         </x-slot>
                     </x-dropdown>
-                @endif
+                @endcanany
 
                 <!-- Notifications (optional) -->
                 <button class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-biru-dongker-700 relative">

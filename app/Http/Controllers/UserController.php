@@ -64,7 +64,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:admin,mutu,klaim,manajemen,superadmin,observer',
+            'role' => 'required|in:superadmin,hospital_admin,finance_costing,hr_payroll,facility_asset,simrs_integration,support_unit,clinical_unit,medrec_claims,pathway_team,management_auditor,admin,mutu,klaim,manajemen,observer',
             'department' => 'required|string|max:255',
             'hospital_id' => 'nullable|exists:hospitals,id',
         ]);
@@ -151,7 +151,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'required|in:admin,mutu,klaim,manajemen,superadmin,observer',
+            'role' => 'required|in:superadmin,hospital_admin,finance_costing,hr_payroll,facility_asset,simrs_integration,support_unit,clinical_unit,medrec_claims,pathway_team,management_auditor,admin,mutu,klaim,manajemen,observer',
             'department' => 'required|string|max:255',
             'hospital_id' => 'nullable|exists:hospitals,id',
         ]);
@@ -210,8 +210,8 @@ class UserController extends Controller
         }
 
         // Prevent deleting the last admin in the same hospital
-        if ($user->role === User::ROLE_ADMIN) {
-            $adminCount = User::where('role', User::ROLE_ADMIN)
+        if ($user->role === User::ROLE_ADMIN || $user->role === User::ROLE_HOSPITAL_ADMIN) {
+            $adminCount = User::whereIn('role', [User::ROLE_ADMIN, User::ROLE_HOSPITAL_ADMIN])
                 ->where('hospital_id', $user->hospital_id)
                 ->count();
             if ($adminCount <= 1) {
@@ -265,6 +265,12 @@ class UserController extends Controller
     protected function ensureCanManage(User $target): void
     {
         $current = auth()->user();
+        
+        // Check permission
+        if (!$current->hasPermission('view-users')) {
+            abort(403, 'You are not authorized to view users.');
+        }
+
         if ($current->isSuperadmin()) {
             return; // Superadmin can manage all users
         }

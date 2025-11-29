@@ -1,7 +1,8 @@
 @php
+    use App\Helpers\MenuHelper;
     $user = auth()->user();
     $isSuperadmin = $user?->isSuperadmin();
-    $isAdmin = $user?->hasRole(\App\Models\User::ROLE_ADMIN);
+    $isAdmin = $user?->hasRole(\App\Models\User::ROLE_ADMIN) || $user?->hasRole(\App\Models\User::ROLE_HOSPITAL_ADMIN);
     $isObserver = $user?->isObserver();
     
     // Determine which groups should be open based on active routes
@@ -217,7 +218,7 @@
 
             @if(!$isSuperadmin)
                 <!-- Setup Group -->
-                @if($isAdmin || $user->hasRole('manajemen') || $isObserver)
+                @if(MenuHelper::canAccessMenu($user, 'setup'))
                     <div class="mb-0.5">
                         <button @click="toggleGroup('setup')" 
                                 class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -334,7 +335,7 @@
                 @endif
 
                 <!-- Data Input Group -->
-                @if($isAdmin || $user->hasRole('manajemen') || $isObserver)
+                @if(MenuHelper::canAccessMenu($user, 'data-input'))
                     <div class="mb-0.5">
                         <button @click="toggleGroup('data-input')" 
                                 class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -370,7 +371,7 @@
                 @endif
 
                 <!-- Costing Process Group -->
-                @if($isAdmin || $user->hasRole('manajemen') || $isObserver)
+                @if(MenuHelper::canAccessMenu($user, 'costing-process'))
                     <div class="mb-0.5">
                         <button @click="toggleGroup('costing-process')" 
                                 class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -466,7 +467,7 @@
                 @endif
 
                 <!-- Tariff Management Group -->
-                @if($isAdmin || $user->hasRole('manajemen') || $isObserver)
+                @if(MenuHelper::canAccessMenu($user, 'tariffs'))
                     <div class="mb-0.5">
                         <button @click="toggleGroup('tariff')" 
                                 class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -506,6 +507,7 @@
                 @endif
 
                 <!-- Clinical Pathways -->
+                @if(MenuHelper::canAccessMenu($user, 'pathways'))
                 <div class="mb-1">
                     <button @click="toggleGroup('pathways')" 
                             class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -542,8 +544,10 @@
                         </a>
                     </div>
                 </div>
+                @endif
 
                 <!-- Patient Cases -->
+                @if(MenuHelper::canAccessMenu($user, 'cases'))
                 <div class="mb-1">
                     <button @click="toggleGroup('cases')" 
                             class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -576,8 +580,10 @@
                         </a>
                     </div>
                 </div>
+                @endif
 
                 <!-- Analytics & Improvement Group -->
+                @if(MenuHelper::canAccessMenu($user, 'analytics'))
                 <div class="mb-1">
                     <button @click="toggleGroup('analytics')" 
                             class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -626,10 +632,10 @@
                         </a>
                     </div>
                 </div>
+                @endif
 
-
-                <!-- SIMRS Integration Group (Admin and Observer) -->
-                @if($isAdmin || $isObserver)
+                <!-- SIMRS Integration Group -->
+                @if(MenuHelper::canAccessMenu($user, 'simrs'))
                     <div class="mb-0.5">
                         <button @click="toggleGroup('simrs')" 
                                 class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -684,8 +690,8 @@
                     </div>
                 @endif
 
-                <!-- Service Volume (Current) Group (Admin and Observer) -->
-                @if($isAdmin || $isObserver)
+                <!-- Service Volume (Current) Group -->
+                @if(MenuHelper::canAccessMenu($user, 'service-volume-current'))
                     <div class="mb-0.5">
                         <button @click="toggleGroup('svcCurrent')"
                                 class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -737,7 +743,7 @@
                 @endif
 
                 <!-- References (Last Menu) -->
-                @can('viewAny', \App\Models\Reference::class)
+                @if(MenuHelper::canAccessMenu($user, 'references'))
                     <a href="{{ route('references.index') }}" 
                        class="flex items-center px-3 py-1.5 text-sm font-medium rounded-lg mb-0.5 transition-colors {{ request()->routeIs('references.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-700 hover:bg-gray-300 hover:text-gray-900' }}">
                         <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -745,7 +751,7 @@
                         </svg>
                         <span x-show="!collapsed" class="truncate">{{ __('Referensi') }}</span>
                     </a>
-                @endcan
+                @endif
             @else
                 <!-- Superadmin Menu -->
                 <a href="{{ route('hospitals.index') }}" 

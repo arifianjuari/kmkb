@@ -9,15 +9,13 @@
                 <a href="{{ route('users.index') }}" class="btn-secondary">
                     {{ __('Back to List') }}
                 </a>
-                @php
-                    $canManage = auth()->user()->isSuperadmin() ||
-                        (auth()->user()->hospital_id === $user->hospital_id && $user->role !== 'superadmin');
-                @endphp
-                @if($canManage)
+                @can('update-users')
+                @if(auth()->user()->isSuperadmin() || (auth()->user()->hospital_id === $user->hospital_id && $user->role !== 'superadmin'))
                     <a href="{{ route('users.edit', $user) }}" class="btn-primary">
                         {{ __('Edit') }}
                     </a>
                 @endif
+                @endcan
             </div>
         </div>
         
@@ -37,17 +35,29 @@
                         <div class="flex">
                             <div class="w-1/3 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Role') }}</div>
                             <div class="w-2/3 text-sm">
-                                @if($user->hasRole('admin'))
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100">{{ __('Admin') }}</span>
-                                @elseif($user->hasRole('mutu'))
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">{{ __('Mutu') }}</span>
-                                @elseif($user->hasRole('klaim'))
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">{{ __('Klaim') }}</span>
-                                @elseif($user->hasRole('manajemen'))
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100">{{ __('Manajemen') }}</span>
-                                @elseif($user->hasRole('observer'))
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100">{{ __('Observer') }} ({{ __('Read-only') }})</span>
-                                @endif
+                                @php
+                                    $roleLabels = [
+                                        'superadmin' => ['label' => __('Superadmin'), 'class' => 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'],
+                                        'hospital_admin' => ['label' => __('Hospital Admin'), 'class' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'],
+                                        'finance_costing' => ['label' => __('Finance Costing'), 'class' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'],
+                                        'hr_payroll' => ['label' => __('HR Payroll'), 'class' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100'],
+                                        'facility_asset' => ['label' => __('Facility Asset'), 'class' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'],
+                                        'simrs_integration' => ['label' => __('SIMRS Integration'), 'class' => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-100'],
+                                        'support_unit' => ['label' => __('Support Unit'), 'class' => 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-100'],
+                                        'clinical_unit' => ['label' => __('Clinical Unit'), 'class' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'],
+                                        'medrec_claims' => ['label' => __('Medrec Claims'), 'class' => 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-100'],
+                                        'pathway_team' => ['label' => __('Pathway Team'), 'class' => 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-100'],
+                                        'management_auditor' => ['label' => __('Management Auditor'), 'class' => 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100'],
+                                        // Legacy roles
+                                        'admin' => ['label' => __('Admin'), 'class' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'],
+                                        'mutu' => ['label' => __('Mutu'), 'class' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'],
+                                        'klaim' => ['label' => __('Klaim'), 'class' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'],
+                                        'manajemen' => ['label' => __('Manajemen'), 'class' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'],
+                                        'observer' => ['label' => __('Observer') . ' (' . __('Read-only') . ')', 'class' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100'],
+                                    ];
+                                    $roleInfo = $roleLabels[$user->role] ?? ['label' => ucfirst($user->role), 'class' => 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'];
+                                @endphp
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $roleInfo['class'] }}">{{ $roleInfo['label'] }}</span>
                             </div>
                         </div>
                     </div>

@@ -13,64 +13,91 @@ class UsersTableSeeder extends Seeder
      */
     public function run(): void
     {
+        // Default password for all users
+        $defaultPassword = Hash::make('asdfasdf');
+        
+        // Get the first hospital
+        $hospital = \App\Models\Hospital::first();
+
         // Create superadmin user (not tied to any specific hospital)
         User::updateOrCreate(
-            ['email' => 'superadmin@example.com'],
+            ['email' => 'superadmin@kmkb.online'],
             [
                 'name' => 'Super Admin',
                 'role' => User::ROLE_SUPERADMIN,
                 'department' => 'Global Administration',
                 'hospital_id' => null,
-                'password' => Hash::make('password'), // default password
+                'password' => $defaultPassword,
                 'email_verified_at' => now(),
             ]
         );
 
-        $users = [
+        // Define all roles with their details
+        $roles = [
             [
-                'name' => 'Admin',
-                'email' => 'admin@example.com',
-                'role' => User::ROLE_ADMIN,
+                'name' => 'Hospital Admin',
+                'role' => User::ROLE_HOSPITAL_ADMIN,
                 'department' => 'Administration',
             ],
             [
-                'name' => 'Mutu User',
-                'email' => 'mutu@example.com',
-                'role' => User::ROLE_MUTU,
-                'department' => 'Mutu',
+                'name' => 'Finance Costing',
+                'role' => User::ROLE_FINANCE_COSTING,
+                'department' => 'Finance',
             ],
             [
-                'name' => 'Klaim User',
-                'email' => 'klaim@example.com',
-                'role' => User::ROLE_KLAIM,
-                'department' => 'Klaim',
+                'name' => 'HR Payroll',
+                'role' => User::ROLE_HR_PAYROLL,
+                'department' => 'HR',
             ],
             [
-                'name' => 'Manajemen User',
-                'email' => 'manajemen@example.com',
-                'role' => User::ROLE_MANAJEMEN,
-                'department' => 'Manajemen',
+                'name' => 'Facility Asset',
+                'role' => User::ROLE_FACILITY_ASSET,
+                'department' => 'Facility',
             ],
             [
-                'name' => 'Observer User',
-                'email' => 'observer@example.com',
-                'role' => User::ROLE_OBSERVER,
-                'department' => 'Monitoring & Audit',
+                'name' => 'SIMRS Integration',
+                'role' => User::ROLE_SIMRS_INTEGRATION,
+                'department' => 'IT',
+            ],
+            [
+                'name' => 'Support Unit',
+                'role' => User::ROLE_SUPPORT_UNIT,
+                'department' => 'Support',
+            ],
+            [
+                'name' => 'Clinical Unit',
+                'role' => User::ROLE_CLINICAL_UNIT,
+                'department' => 'Clinical',
+            ],
+            [
+                'name' => 'Medrec Claims',
+                'role' => User::ROLE_MEDREC_CLAIMS,
+                'department' => 'Medical Records',
+            ],
+            [
+                'name' => 'Pathway Team',
+                'role' => User::ROLE_PATHWAY_TEAM,
+                'department' => 'Quality',
+            ],
+            [
+                'name' => 'Management Auditor',
+                'role' => User::ROLE_MANAGEMENT_AUDITOR,
+                'department' => 'Audit',
             ],
         ];
-
-        // Get the first hospital
-        $hospital = \App\Models\Hospital::first();
         
-        foreach ($users as $data) {
+        // Create users for all roles
+        foreach ($roles as $roleData) {
+            $email = $roleData['role'] . '@kmkb.online';
+            
             User::updateOrCreate(
-                ['email' => $data['email']],
+                ['email' => $email],
                 [
-                    'name' => $data['name'],
-                    'role' => $data['role'],
-                    'department' => $data['department'],
+                    'name' => $roleData['name'],
+                    'role' => $roleData['role'],
+                    'department' => $roleData['department'],
                     'hospital_id' => $hospital ? $hospital->id : 1,
-                    'password' => Hash::make('password'), // default password
+                    'password' => $defaultPassword,
                     'email_verified_at' => now(),
                 ]
             );

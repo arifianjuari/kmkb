@@ -40,13 +40,27 @@
                     <div class="mt-1">
                         <select id="role" name="role" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 @error('role') border-red-500 @enderror dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <option value="">{{ __('Select Role') }}</option>
-                            <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
-                            <option value="mutu" {{ old('role', $user->role) == 'mutu' ? 'selected' : '' }}>{{ __('Mutu') }}</option>
-                            <option value="klaim" {{ old('role', $user->role) == 'klaim' ? 'selected' : '' }}>{{ __('Klaim') }}</option>
-                            <option value="manajemen" {{ old('role', $user->role) == 'manajemen' ? 'selected' : '' }}>{{ __('Manajemen') }}</option>
-                            <option value="observer" {{ old('role', $user->role) == 'observer' ? 'selected' : '' }}>{{ __('Observer') }} ({{ __('Read-only') }})</option>
+                            @if(auth()->user()->isSuperadmin())
+                                <option value="superadmin" {{ old('role', $user->role) == 'superadmin' ? 'selected' : '' }}>{{ __('Superadmin') }}</option>
+                            @endif
+                            <option value="hospital_admin" {{ old('role', $user->role) == 'hospital_admin' ? 'selected' : '' }}>{{ __('Hospital Admin') }}</option>
+                            <option value="finance_costing" {{ old('role', $user->role) == 'finance_costing' ? 'selected' : '' }}>{{ __('Finance Costing') }}</option>
+                            <option value="hr_payroll" {{ old('role', $user->role) == 'hr_payroll' ? 'selected' : '' }}>{{ __('HR Payroll') }}</option>
+                            <option value="facility_asset" {{ old('role', $user->role) == 'facility_asset' ? 'selected' : '' }}>{{ __('Facility Asset') }}</option>
+                            <option value="simrs_integration" {{ old('role', $user->role) == 'simrs_integration' ? 'selected' : '' }}>{{ __('SIMRS Integration') }}</option>
+                            <option value="support_unit" {{ old('role', $user->role) == 'support_unit' ? 'selected' : '' }}>{{ __('Support Unit') }}</option>
+                            <option value="clinical_unit" {{ old('role', $user->role) == 'clinical_unit' ? 'selected' : '' }}>{{ __('Clinical Unit') }}</option>
+                            <option value="medrec_claims" {{ old('role', $user->role) == 'medrec_claims' ? 'selected' : '' }}>{{ __('Medrec Claims') }}</option>
+                            <option value="pathway_team" {{ old('role', $user->role) == 'pathway_team' ? 'selected' : '' }}>{{ __('Pathway Team') }}</option>
+                            <option value="management_auditor" {{ old('role', $user->role) == 'management_auditor' ? 'selected' : '' }}>{{ __('Management Auditor') }} ({{ __('Read-only') }})</option>
+                            <!-- Legacy roles -->
+                            <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>{{ __('Admin') }} (Legacy)</option>
+                            <option value="mutu" {{ old('role', $user->role) == 'mutu' ? 'selected' : '' }}>{{ __('Mutu') }} (Legacy)</option>
+                            <option value="klaim" {{ old('role', $user->role) == 'klaim' ? 'selected' : '' }}>{{ __('Klaim') }} (Legacy)</option>
+                            <option value="manajemen" {{ old('role', $user->role) == 'manajemen' ? 'selected' : '' }}>{{ __('Manajemen') }} (Legacy)</option>
+                            <option value="observer" {{ old('role', $user->role) == 'observer' ? 'selected' : '' }}>{{ __('Observer') }} (Legacy, Read-only)</option>
                         </select>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Observer role has read-only access to all modules') }}</p>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Management Auditor role has read-only access to all modules') }}</p>
                     </div>
                     @error('role')
                         <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Concerns;
 trait BlocksObserver
 {
     /**
-     * Block observer from write operations
+     * Block observer/management_auditor from write operations
      *
      * @param string $action
      * @return void
@@ -13,7 +13,7 @@ trait BlocksObserver
     protected function blockObserver(string $action = 'mengubah'): void
     {
         if (auth()->user()?->isObserver()) {
-            abort(403, "Observer tidak memiliki akses untuk {$action} data.");
+            abort(403, "Management Auditor tidak memiliki akses untuk {$action} data.");
         }
     }
 }

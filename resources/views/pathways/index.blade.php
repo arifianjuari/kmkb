@@ -74,23 +74,23 @@
                                                     </svg>
                                                 </a>
                                                 @endif
-                                                @auth
-                                                @if(auth()->user()?->hasRole('mutu') || auth()->user()?->hasRole('admin'))
+                                                @can('update-pathways')
                                                     <a href="{{ route('pathways.builder', $pathway) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-600 hover:bg-biru-dongker-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-500" title="{{ __('Builder') }}" aria-label="{{ __('Builder') }}">
                                                         <!-- Wrench icon -->
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                             <path d="M22 19.59 19.59 22l-6.3-6.3a7.004 7.004 0 0 1-8.71-9.97L7 8l3-3L5.59 1.41A7.004 7.004 0 0 1 15.56 10.3L22 16.72v2.87Z"/>
                                                         </svg>
                                                     </a>
+                                                @endcan
+                                                @can('export-pathways')
                                                     <a href="{{ route('pathways.export-pdf', $pathway) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500" title="{{ __('Export PDF') }}" aria-label="{{ __('Export PDF') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM8 14h1.5a1.5 1.5 0 0 0 0-3H8v3zm5-3h-1v3h1a1.5 1.5 0 0 0 0-3zm-1-6v4h4"/>
                                                             <path d="M9.5 13H9v-1h.5a.5.5 0 0 1 0 1zm4 0h-.5v-1h.5a.5.5 0 0 1 0 1z"/>
                                                         </svg>
                                                     </a>
-                                                @endif
-                                                @endauth
-                                                @if(!auth()->user()?->isObserver())
+                                                @endcan
+                                                @can('delete-pathways')
                                                 <form action="{{ route('pathways.destroy', $pathway) }}" method="POST" onsubmit="return confirm('{{ __('Are you sure you want to delete this pathway?') }}')">
                                                     @csrf
                                                     @method('DELETE')
@@ -101,7 +101,7 @@
                                                         </svg>
                                                     </button>
                                                 </form>
-                                                @endif
+                                                @endcan
                                             </div>
                                         </td>
                                     </tr>

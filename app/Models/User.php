@@ -54,6 +54,18 @@ class User extends Authenticatable
     const ROLE_MANAJEMEN = 'manajemen';
     const ROLE_OBSERVER = 'observer';
 
+    // New role constants
+    const ROLE_HOSPITAL_ADMIN = 'hospital_admin';
+    const ROLE_FINANCE_COSTING = 'finance_costing';
+    const ROLE_HR_PAYROLL = 'hr_payroll';
+    const ROLE_FACILITY_ASSET = 'facility_asset';
+    const ROLE_SIMRS_INTEGRATION = 'simrs_integration';
+    const ROLE_SUPPORT_UNIT = 'support_unit';
+    const ROLE_CLINICAL_UNIT = 'clinical_unit';
+    const ROLE_MEDREC_CLAIMS = 'medrec_claims';
+    const ROLE_PATHWAY_TEAM = 'pathway_team';
+    const ROLE_MANAGEMENT_AUDITOR = 'management_auditor';
+
     /**
      * Check if user has a specific role
      *
@@ -87,7 +99,29 @@ class User extends Authenticatable
      */
     public function isObserver()
     {
-        return $this->role === self::ROLE_OBSERVER;
+        return $this->role === self::ROLE_OBSERVER || $this->role === self::ROLE_MANAGEMENT_AUDITOR;
+    }
+
+    /**
+     * Check if user can access a menu
+     *
+     * @param string $menuKey
+     * @return bool
+     */
+    public function canAccessMenu($menuKey)
+    {
+        return \App\Helpers\MenuHelper::canAccessMenu($this, $menuKey);
+    }
+
+    /**
+     * Check if user has a specific permission
+     *
+     * @param string $permission
+     * @return bool
+     */
+    public function hasPermission($permission)
+    {
+        return \Illuminate\Support\Facades\Gate::forUser($this)->allows($permission);
     }
 
     /**
