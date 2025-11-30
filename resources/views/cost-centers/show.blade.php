@@ -27,7 +27,7 @@
                         <dd class="mt-1 text-sm text-gray-900">{{ $costCenter->code }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">{{ __('Name') }}</dt>
+                        <dt class="text-sm font-medium text-gray-500">{{ __('Division') }}</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $costCenter->name }}</dd>
                     </div>
                     @if($costCenter->building_name)

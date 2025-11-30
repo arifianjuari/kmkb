@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\BlocksObserver;
 use App\Models\CostCenter;
+use App\Models\Division;
 use App\Models\TariffClass;
+use App\Services\SimrsService;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -20,34 +22,96 @@ class CostCenterController extends Controller
         $search = $request->get('search');
         $type = $request->get('type');
         $isActive = $request->get('is_active');
+        $viewMode = $request->get('view_mode', 'tree'); // 'tree' or 'flat'
         
-        $query = CostCenter::where('hospital_id', hospital('id'));
-        
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('code', 'LIKE', "%{$search}%")
-                  ->orWhere('name', 'LIKE', "%{$search}%")
-                  ->orWhere('building_name', 'LIKE', "%{$search}%");
-            });
+        if ($viewMode === 'tree') {
+            // Get all cost centers for tree view
+            $allCostCenters = CostCenter::where('hospital_id', hospital('id'))
+                ->with(['parent', 'children', 'tariffClass'])
+                ->get();
+
+            // Apply filters if provided - include parents of matching children
+            if ($search || $type || ($isActive !== null && $isActive !== '')) {
+                $filteredIds = collect();
+                
+                // First, find all cost centers that match the filter
+                $matchingCostCenters = $allCostCenters->filter(function($costCenter) use ($search, $type, $isActive) {
+                    $matchesSearch = true;
+                    $matchesType = true;
+                    $matchesActive = true;
+                    
+                    if ($search) {
+                        $matchesSearch = stripos($costCenter->code, $search) !== false 
+                            || stripos($costCenter->name, $search) !== false
+                            || stripos($costCenter->building_name ?? '', $search) !== false;
+                    }
+                    
+                    if ($type) {
+                        $matchesType = $costCenter->type === $type;
+                    }
+                    
+                    if ($isActive !== null && $isActive !== '') {
+                        $matchesActive = $costCenter->is_active == $isActive;
+                    }
+                    
+                    return $matchesSearch && $matchesType && $matchesActive;
+                });
+                
+                // Collect IDs of matching cost centers and their parents
+                $matchingCostCenters->each(function($costCenter) use (&$filteredIds, $allCostCenters) {
+                    $filteredIds->push($costCenter->id);
+                    // Include all ancestors
+                    $current = $costCenter;
+                    while ($current->parent_id) {
+                        $filteredIds->push($current->parent_id);
+                        $current = $allCostCenters->firstWhere('id', $current->parent_id);
+                        if (!$current) break;
+                    }
+                });
+                
+                // Filter allCostCenters to include only matching cost centers and their parents
+                $allCostCenters = $allCostCenters->filter(function($costCenter) use ($filteredIds) {
+                    return $filteredIds->contains($costCenter->id);
+                });
+            }
+
+            // Get root cost centers (no parent) and sort
+            $rootCostCenters = $allCostCenters->whereNull('parent_id')->sortBy('name')->values();
+            
+            return view('cost-centers.index', compact('rootCostCenters', 'allCostCenters', 'search', 'type', 'isActive', 'viewMode'));
+        } else {
+            // Flat view with pagination
+            $query = CostCenter::where('hospital_id', hospital('id'));
+            
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('code', 'LIKE', "%{$search}%")
+                      ->orWhere('name', 'LIKE', "%{$search}%")
+                      ->orWhere('building_name', 'LIKE', "%{$search}%");
+                });
+            }
+            
+            if ($type) {
+                $query->where('type', $type);
+            }
+            
+            if ($isActive !== null && $isActive !== '') {
+                $query->where('is_active', $isActive);
+            }
+            
+            $costCenters = $query->with(['parent', 'tariffClass'])->latest()->paginate(15)->appends($request->query());
+            
+            return view('cost-centers.index', compact('costCenters', 'search', 'type', 'isActive', 'viewMode'));
         }
-        
-        if ($type) {
-            $query->where('type', $type);
-        }
-        
-        if ($isActive !== null && $isActive !== '') {
-            $query->where('is_active', $isActive);
-        }
-        
-        $costCenters = $query->with(['parent', 'tariffClass'])->latest()->paginate(15)->appends($request->query());
-        
-        return view('cost-centers.index', compact('costCenters', 'search', 'type', 'isActive'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(SimrsService $simrsService)
     {
         $this->blockObserver('membuat');
         
@@ -60,8 +124,15 @@ class CostCenterController extends Controller
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
+
+        $divisions = Division::where('hospital_id', hospital('id'))
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $candidates = $simrsService->getCostCenterCandidates();
         
-        return view('cost-centers.create', compact('parents', 'tariffClasses'));
+        return view('cost-centers.create', compact('parents', 'tariffClasses', 'candidates', 'divisions'));
     }
 
     /**
@@ -75,6 +146,7 @@ class CostCenterController extends Controller
             'name' => 'required|string|max:150',
             'building_name' => 'nullable|string|max:150',
             'floor' => 'nullable|integer|min:0|max:255',
+            'tariff_class_id' => 'nullable|exists:tariff_classes,id',
             'type' => 'required|in:support,revenue',
             'parent_id' => 'nullable|exists:cost_centers,id',
             'is_active' => 'boolean',
@@ -128,7 +200,7 @@ class CostCenterController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(CostCenter $costCenter)
+    public function edit(CostCenter $costCenter, SimrsService $simrsService)
     {
         $this->blockObserver('mengubah');
         
@@ -146,8 +218,15 @@ class CostCenterController extends Controller
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
+
+        $divisions = Division::where('hospital_id', hospital('id'))
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $candidates = $simrsService->getCostCenterCandidates();
         
-        return view('cost-centers.edit', compact('costCenter', 'parents', 'tariffClasses'));
+        return view('cost-centers.edit', compact('costCenter', 'parents', 'tariffClasses', 'divisions', 'candidates'));
     }
 
     /**

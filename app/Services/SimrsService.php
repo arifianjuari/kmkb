@@ -214,6 +214,49 @@ class SimrsService
     }
 
     /**
+     * Get candidates for cost centers (poliklinik, bangsal, departemen)
+     *
+     * @return array
+     */
+    public function getCostCenterCandidates()
+    {
+        try {
+            // Get Poliklinik (Rawat Jalan)
+            $poli = DB::connection('simrs')
+                ->table('poliklinik')
+                ->select('kd_poli as id', 'nm_poli as name', DB::raw("'Rawat Jalan' as type"))
+                ->where('status', '1')
+                ->get();
+
+            // Get Bangsal (Rawat Inap)
+            $bangsal = DB::connection('simrs')
+                ->table('bangsal')
+                ->select('kd_bangsal as id', 'nm_bangsal as name', DB::raw("'Rawat Inap' as type"))
+                ->where('status', '1')
+                ->get();
+
+            // Get Departemen
+            $departemen = DB::connection('simrs')
+                ->table('departemen')
+                ->select('dep_id as id', 'nama as name', DB::raw("'Departemen' as type"))
+                ->get();
+
+            return [
+                'poliklinik' => $poli,
+                'bangsal' => $bangsal,
+                'departemen' => $departemen,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error fetching cost center candidates from SIMRS: ' . $e->getMessage());
+            return [
+                'poliklinik' => [],
+                'bangsal' => [],
+                'departemen' => [],
+            ];
+        }
+    }
+
+    /**
      * Test connection to SIMRS database
      *
      * @return bool

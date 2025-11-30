@@ -18,7 +18,8 @@
             </div>
             <div class="flex items-center space-x-2">
                 <form method="GET" action="{{ route('cost-centers.index') }}" class="flex items-center space-x-2">
-                    <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('Search by code, name, or building name...') }}" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
+                    <input type="hidden" name="view_mode" value="{{ $viewMode ?? 'tree' }}">
+                    <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('Search by code, division, or building name...') }}" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                     <select name="type" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                         <option value="">{{ __('All Types') }}</option>
                         <option value="support" {{ $type == 'support' ? 'selected' : '' }}>{{ __('Support') }}</option>
@@ -38,6 +39,20 @@
                         </a>
                     @endif
                 </form>
+                <div class="flex items-center gap-2 border-l pl-2 ml-2">
+                    <a href="{{ route('cost-centers.index', array_merge(request()->query(), ['view_mode' => 'tree'])) }}" class="inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium {{ ($viewMode ?? 'tree') === 'tree' ? 'bg-biru-dongker-800 text-white border-biru-dongker-800' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }}">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        </svg>
+                        Tree
+                    </a>
+                    <a href="{{ route('cost-centers.index', array_merge(request()->query(), ['view_mode' => 'flat'])) }}" class="inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium {{ ($viewMode ?? 'tree') === 'flat' ? 'bg-biru-dongker-800 text-white border-biru-dongker-800' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }}">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                        </svg>
+                        Flat
+                    </a>
+                </div>
                 <a href="{{ route('cost-centers.export', request()->query()) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
                     {{ __('Export Excel') }}
                 </a>
@@ -115,77 +130,198 @@
         
         <div class="bg-white shadow overflow-hidden sm:rounded-lg">
             <div class="px-4 py-5 sm:p-6">
-                @if($costCenters->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Code') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Name') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Building Name') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Floor') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Class') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Type') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Parent') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Status') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($costCenters as $costCenter)
+                @if(isset($rootCostCenters) && ($viewMode ?? 'tree') === 'tree')
+                    {{-- Tree View --}}
+                    @if($rootCostCenters->count() > 0)
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $costCenter->code }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $costCenter->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->building_name ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->floor ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->tariffClass ? $costCenter->tariffClass->name : '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $costCenter->type == 'support' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
-                                                {{ $costCenter->type == 'support' ? __('Support') : __('Revenue') }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->parent ? $costCenter->parent->name : '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $costCenter->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                {{ $costCenter->is_active ? __('Active') : __('Inactive') }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <div class="flex items-center gap-2">
-                                                <a href="{{ route('cost-centers.show', $costCenter) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                                                        <path d="M12 5c-5 0-9 5-9 7s4 7 9 7 9-5 9-7-4-7-9-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 .001 6.001A3 3 0 0 0 12 9Z"/>
-                                                    </svg>
-                                                </a>
-                                                @if(!auth()->user()?->isObserver())
-                                                <a href="{{ route('cost-centers.edit', $costCenter) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-800 hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm2.92 2.83H5v-.92l9.06-9.06.92.92L5.92 20.08ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
-                                                    </svg>
-                                                </a>
-                                                <form action="{{ route('cost-centers.destroy', $costCenter) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('Are you sure you want to delete this cost center?') }}')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500" title="{{ __('Delete') }}" aria-label="{{ __('Delete') }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                                                            <path d="M9 3h6a1 1 0 0 1 1 1v1h4v2H4V5h4V4a1 1 0 0 1 1-1Zm-3 6h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 9Zm3 2v8h2v-8H9Zm4 0v8h2v-8h-2Z"/>
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                                @endif
-                                            </div>
-                                        </td>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Code') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Division') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Building Name') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Floor') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Class') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Type') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Status') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="mt-6">
-                        {{ $costCenters->links() }}
-                    </div>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @forelse($rootCostCenters as $costCenter)
+                                        @include('cost-centers.partials.tree-row', ['costCenter' => $costCenter, 'allCostCenters' => $allCostCenters, 'level' => 0])
+                                    @empty
+                                        <tr>
+                                            <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                                {{ __('No cost centers found.') }}
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p class="text-gray-600">{{ __('No cost centers found.') }}</p>
+                    @endif
+
+                    @push('scripts')
+                    <script>
+                        function toggleCostCenterTree(containerId, button) {
+                            // Find all rows that belong to this parent
+                            const parentRow = button.closest('tr');
+                            const parentId = parentRow.getAttribute('data-cost-center-id');
+                            
+                            // Find all child rows (rows with data-parent-id matching this cost center's id)
+                            const allRows = document.querySelectorAll('tr.cost-center-row');
+                            const childRows = Array.from(allRows).filter(row => {
+                                return row.getAttribute('data-parent-id') === parentId;
+                            });
+                            
+                            const chevronDown = button.querySelector('.chevron-down');
+                            const chevronRight = button.querySelector('.chevron-right');
+                            
+                            // Check if currently expanded (first child is visible)
+                            const isExpanded = childRows.length > 0 && !childRows[0].classList.contains('hidden');
+                            
+                            if (isExpanded) {
+                                // Collapse: hide all children and their descendants
+                                childRows.forEach(row => {
+                                    hideRowAndDescendants(row);
+                                });
+                                if (chevronDown) chevronDown.classList.add('hidden');
+                                if (chevronRight) chevronRight.classList.remove('hidden');
+                            } else {
+                                // Expand: show direct children only
+                                childRows.forEach(row => {
+                                    row.classList.remove('hidden');
+                                    // Reset chevron state for direct children (they should show as expanded)
+                                    const childButton = row.querySelector('.tree-toggle');
+                                    if (childButton) {
+                                        const childChevronDown = childButton.querySelector('.chevron-down');
+                                        const childChevronRight = childButton.querySelector('.chevron-right');
+                                        if (childChevronDown && childChevronRight) {
+                                            // Check if child has visible children
+                                            const childId = row.getAttribute('data-cost-center-id');
+                                            const grandChildren = Array.from(allRows).filter(r => {
+                                                return r.getAttribute('data-parent-id') === childId;
+                                            });
+                                            const hasVisibleGrandChildren = grandChildren.length > 0 && !grandChildren[0].classList.contains('hidden');
+                                            
+                                            if (hasVisibleGrandChildren) {
+                                                childChevronDown.classList.remove('hidden');
+                                                childChevronRight.classList.add('hidden');
+                                            } else {
+                                                childChevronDown.classList.remove('hidden');
+                                                childChevronRight.classList.add('hidden');
+                                            }
+                                        }
+                                    }
+                                });
+                                if (chevronDown) chevronDown.classList.remove('hidden');
+                                if (chevronRight) chevronRight.classList.add('hidden');
+                            }
+                        }
+                        
+                        function hideRowAndDescendants(row) {
+                            row.classList.add('hidden');
+                            const costCenterId = row.getAttribute('data-cost-center-id');
+                            const allRows = document.querySelectorAll('tr.cost-center-row');
+                            const descendants = Array.from(allRows).filter(r => {
+                                return r.getAttribute('data-parent-id') === costCenterId;
+                            });
+                            descendants.forEach(desc => hideRowAndDescendants(desc));
+                            
+                            // Update chevron state when hiding
+                            const button = row.querySelector('.tree-toggle');
+                            if (button) {
+                                const chevronDown = button.querySelector('.chevron-down');
+                                const chevronRight = button.querySelector('.chevron-right');
+                                if (chevronDown) chevronDown.classList.add('hidden');
+                                if (chevronRight) chevronRight.classList.remove('hidden');
+                            }
+                        }
+
+                        // Initialize: all children are expanded by default
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // All children are visible by default, so chevrons should show down arrow
+                            // This is already the default state from the HTML
+                        });
+                    </script>
+                    @endpush
                 @else
-                    <p class="text-gray-600">{{ __('No cost centers found.') }}</p>
+                    {{-- Flat View --}}
+                    @if(isset($costCenters) && $costCenters->count() > 0)
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Code') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Division') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Building Name') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Floor') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Class') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Type') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Parent') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Status') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach($costCenters as $costCenter)
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $costCenter->code }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-900">{{ $costCenter->name }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->building_name ?? '-' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->floor ?? '-' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->tariffClass ? $costCenter->tariffClass->name : '-' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $costCenter->type == 'support' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                                                    {{ $costCenter->type == 'support' ? __('Support') : __('Revenue') }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->parent ? $costCenter->parent->name : '-' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $costCenter->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                    {{ $costCenter->is_active ? __('Active') : __('Inactive') }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <div class="flex items-center gap-2">
+                                                    <a href="{{ route('cost-centers.show', $costCenter) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                                                            <path d="M12 5c-5 0-9 5-9 7s4 7 9 7 9-5 9-7-4-7-9-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 .001 6.001A3 3 0 0 0 12 9Z"/>
+                                                        </svg>
+                                                    </a>
+                                                    @if(!auth()->user()?->isObserver())
+                                                    <a href="{{ route('cost-centers.edit', $costCenter) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-800 hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                                                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm2.92 2.83H5v-.92l9.06-9.06.92.92L5.92 20.08ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                                                        </svg>
+                                                    </a>
+                                                    <form action="{{ route('cost-centers.destroy', $costCenter) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('Are you sure you want to delete this cost center?') }}')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500" title="{{ __('Delete') }}" aria-label="{{ __('Delete') }}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                                                                <path d="M9 3h6a1 1 0 0 1 1 1v1h4v2H4V5h4V4a1 1 0 0 1 1-1Zm-3 6h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 9Zm3 2v8h2v-8H9Zm4 0v8h2v-8h-2Z"/>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-6">
+                            {{ $costCenters->links() }}
+                        </div>
+                    @else
+                        <p class="text-gray-600">{{ __('No cost centers found.') }}</p>
+                    @endif
                 @endif
             </div>
         </div>

@@ -12,6 +12,7 @@ use App\Http\Controllers\HospitalController;
 use App\Http\Controllers\ReferenceController;
 use App\Http\Controllers\MigrateStorageController;
 use App\Http\Controllers\UploadProxyController;
+use App\Http\Controllers\DivisionController;
 use Illuminate\Support\Facades\Route;
 Route::get('/uploads/{path}', UploadProxyController::class)
     ->where('path', '.*')
@@ -115,6 +116,11 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::delete('cost-references/bulk-destroy', [CostReferenceController::class, 'bulkDestroy'])->name('cost-references.bulk-destroy');
     Route::get('cost-references/search', [CostReferenceController::class, 'search'])->name('cost-references.search');
     Route::resource('cost-references', CostReferenceController::class);
+
+    // Cost Centers
+    Route::get('cost-centers/export', [App\Http\Controllers\CostCenterController::class, 'export'])->name('cost-centers.export');
+    Route::resource('cost-centers', App\Http\Controllers\CostCenterController::class);
+    Route::resource('divisions', DivisionController::class);
 
     // Knowledge References
     Route::get('references/{reference}/export-pdf', [ReferenceController::class, 'exportPdf'])
