@@ -138,16 +138,24 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::get('tariff-classes/export', [App\Http\Controllers\TariffClassController::class, 'export'])->name('tariff-classes.export');
     Route::resource('tariff-classes', App\Http\Controllers\TariffClassController::class);
 
+    // Other Output - Location
+    Route::get('locations', [App\Http\Controllers\LocationController::class, 'index'])->name('locations.index');
+    Route::get('locations/export', [App\Http\Controllers\LocationController::class, 'export'])->name('locations.export');
+
     // GL Expenses
     Route::get('gl-expenses/import', [App\Http\Controllers\GlExpenseController::class, 'importForm'])->name('gl-expenses.import');
     Route::post('gl-expenses/import', [App\Http\Controllers\GlExpenseController::class, 'import'])->name('gl-expenses.import.process');
     Route::get('gl-expenses/export', [App\Http\Controllers\GlExpenseController::class, 'export'])->name('gl-expenses.export');
+    Route::delete('gl-expenses/bulk-delete', [App\Http\Controllers\GlExpenseController::class, 'bulkDelete'])->name('gl-expenses.bulk-delete');
     Route::resource('gl-expenses', App\Http\Controllers\GlExpenseController::class);
 
     // Driver Statistics
     Route::get('driver-statistics/import', [App\Http\Controllers\DriverStatisticController::class, 'importForm'])->name('driver-statistics.import');
     Route::post('driver-statistics/import', [App\Http\Controllers\DriverStatisticController::class, 'import'])->name('driver-statistics.import.process');
     Route::get('driver-statistics/export', [App\Http\Controllers\DriverStatisticController::class, 'export'])->name('driver-statistics.export');
+    Route::delete('driver-statistics/bulk-delete', [App\Http\Controllers\DriverStatisticController::class, 'bulkDelete'])->name('driver-statistics.bulk-delete');
+    Route::get('driver-statistics/copy-from-previous-period', [App\Http\Controllers\DriverStatisticController::class, 'copyFromPreviousPeriodForm'])->name('driver-statistics.copy-from-previous-period');
+    Route::post('driver-statistics/copy-from-previous-period', [App\Http\Controllers\DriverStatisticController::class, 'copyFromPreviousPeriod'])->name('driver-statistics.copy-from-previous-period.process');
     Route::resource('driver-statistics', App\Http\Controllers\DriverStatisticController::class);
 
     // Allocation Maps
@@ -180,6 +188,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::get('service-volumes/import', [App\Http\Controllers\ServiceVolumeController::class, 'importForm'])->name('service-volumes.import');
     Route::post('service-volumes/import', [App\Http\Controllers\ServiceVolumeController::class, 'import'])->name('service-volumes.import.process');
     Route::get('service-volumes/export', [App\Http\Controllers\ServiceVolumeController::class, 'export'])->name('service-volumes.export');
+    Route::delete('service-volumes/bulk-delete', [App\Http\Controllers\ServiceVolumeController::class, 'bulkDelete'])->name('service-volumes.bulk-delete');
     Route::resource('service-volumes', App\Http\Controllers\ServiceVolumeController::class);
 
     // JKN CBG Codes
@@ -189,7 +198,10 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
 
     // JKN CBG Codes (permission-based)
     Route::middleware('can:view-jkn-cbg-codes')->group(function () {
-        Route::resource('jkn-cbg-codes', App\Http\Controllers\JknCbgCodeController::class);
+        Route::resource('jkn-cbg-codes', App\Http\Controllers\JknCbgCodeController::class)->except(['show']);
+        Route::post('jkn-cbg-codes/import', [App\Http\Controllers\JknCbgCodeController::class, 'import'])->name('jkn-cbg-codes.import');
+        Route::get('jkn-cbg-codes/export', [App\Http\Controllers\JknCbgCodeController::class, 'export'])->name('jkn-cbg-codes.export');
+        Route::delete('jkn-cbg-codes/bulk-delete', [App\Http\Controllers\JknCbgCodeController::class, 'bulkDelete'])->name('jkn-cbg-codes.bulk-delete');
     });
 
     // Users (permission-based)
@@ -233,7 +245,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         Route::post('/sync/drugs', [App\Http\Controllers\SimrsSyncController::class, 'syncDrugs'])->name('simrs.sync.drugs');
     });
 
-    // Service Volume (Current) placeholder routes
+    // Service Volume (SIM RS) routes
     Route::prefix('service-volume-current')->group(function () {
         Route::get('/master-barang', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'masterBarang'])->name('svc-current.master-barang');
         Route::get('/tindakan-rawat-jalan', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'tindakanRawatJalan'])->name('svc-current.tindakan-rawat-jalan');
@@ -246,8 +258,6 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         Route::get('/radiologi/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportRadiologi'])->name('svc-current.radiologi.export');
         Route::get('/operasi', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'operasi'])->name('svc-current.operasi');
         Route::get('/operasi/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportOperasi'])->name('svc-current.operasi.export');
-        Route::get('/kamar', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'kamar'])->name('svc-current.kamar');
-        Route::get('/sync', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'sync'])->name('svc-current.sync');
     });
 
     // Audit Logs (admin and observer can view, admin only can delete)
@@ -370,13 +380,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         return redirect()->route("setup.costing.{$any}");
     })->where('any', '.*');
 
-    // GL & Expenses redirects
-    Route::get('gl-expenses/{any?}', function ($any = null) {
-        if ($any) {
-            return redirect()->route("gl-expenses.{$any}");
-        }
-        return redirect()->route('data-input.gl-expenses');
-    })->where('any', '.*');
+    // GL & Expenses redirects - removed to avoid conflicts with existing gl-expenses routes
 
     // Allocation redirects
     Route::get('allocation/{any?}', function ($any = null) {

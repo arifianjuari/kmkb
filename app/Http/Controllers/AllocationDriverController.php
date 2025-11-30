@@ -14,8 +14,12 @@ class AllocationDriverController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
+        $isStatic = $request->get('is_static');
         
-        $query = AllocationDriver::where('hospital_id', hospital('id'));
+        $baseQuery = AllocationDriver::where('hospital_id', hospital('id'));
+        
+        // Build query for filtering
+        $query = clone $baseQuery;
         
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -25,9 +29,29 @@ class AllocationDriverController extends Controller
             });
         }
         
+        if ($isStatic !== null && $isStatic !== '') {
+            $query->where('is_static', $isStatic);
+        }
+        
         $allocationDrivers = $query->latest()->paginate(15)->appends($request->query());
         
-        return view('allocation-drivers.index', compact('allocationDrivers', 'search'));
+        // Calculate counts for static type tabs (considering other filters but not is_static)
+        $staticCountQuery = clone $baseQuery;
+        if ($search) {
+            $staticCountQuery->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('unit_measurement', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        $staticTypeCounts = [
+            'all' => $staticCountQuery->count(),
+            'static' => (clone $staticCountQuery)->where('is_static', true)->count(),
+            'dynamic' => (clone $staticCountQuery)->where('is_static', false)->count(),
+        ];
+        
+        return view('allocation-drivers.index', compact('allocationDrivers', 'search', 'isStatic', 'staticTypeCounts'));
     }
 
     public function create()
@@ -43,6 +67,7 @@ class AllocationDriverController extends Controller
             'name' => 'required|string|max:150',
             'unit_measurement' => 'required|string|max:50',
             'description' => 'nullable|string',
+            'is_static' => 'boolean',
         ]);
 
         AllocationDriver::create(array_merge($validated, [
@@ -85,6 +110,7 @@ class AllocationDriverController extends Controller
             'name' => 'required|string|max:150',
             'unit_measurement' => 'required|string|max:50',
             'description' => 'nullable|string',
+            'is_static' => 'boolean',
         ]);
 
         $allocationDriver->update($validated);
@@ -119,6 +145,7 @@ class AllocationDriverController extends Controller
     public function export(Request $request)
     {
         $search = $request->get('search');
+        $isStatic = $request->get('is_static');
         
         $query = AllocationDriver::where('hospital_id', hospital('id'))
             ->orderBy('name');
@@ -130,12 +157,16 @@ class AllocationDriverController extends Controller
             });
         }
         
+        if ($isStatic !== null && $isStatic !== '') {
+            $query->where('is_static', $isStatic);
+        }
+        
         $data = $query->get();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $headers = ['Name', 'Unit Measurement', 'Description'];
+        $headers = ['Name', 'Unit Measurement', 'Static', 'Description'];
         $sheet->fromArray($headers, null, 'A1');
 
         if ($data->count() > 0) {
@@ -143,13 +174,14 @@ class AllocationDriverController extends Controller
                 return [
                     $item->name,
                     $item->unit_measurement,
+                    $item->is_static ? 'Yes' : 'No',
                     $item->description ?? '-',
                 ];
             })->toArray();
             $sheet->fromArray($rows, null, 'A2');
         }
 
-        foreach (range('A', 'C') as $col) {
+        foreach (range('A', 'D') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 

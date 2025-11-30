@@ -16,7 +16,7 @@
             </div>
             <div class="flex items-center space-x-2">
                 <form method="GET" action="<?php echo e(route('cost-centers.index')); ?>" class="flex items-center space-x-2">
-                    <input type="text" name="search" value="<?php echo e($search ?? ''); ?>" placeholder="<?php echo e(__('Search...')); ?>" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
+                    <input type="text" name="search" value="<?php echo e($search ?? ''); ?>" placeholder="<?php echo e(__('Search by code, name, or building name...')); ?>" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                     <select name="type" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
                         <option value=""><?php echo e(__('All Types')); ?></option>
                         <option value="support" <?php echo e($type == 'support' ? 'selected' : ''); ?>><?php echo e(__('Support')); ?></option>
@@ -124,6 +124,9 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><?php echo e(__('Code')); ?></th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><?php echo e(__('Name')); ?></th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><?php echo e(__('Building Name')); ?></th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><?php echo e(__('Floor')); ?></th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><?php echo e(__('Class')); ?></th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><?php echo e(__('Type')); ?></th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><?php echo e(__('Parent')); ?></th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><?php echo e(__('Status')); ?></th>
@@ -135,6 +138,9 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?php echo e($costCenter->code); ?></td>
                                         <td class="px-6 py-4 text-sm text-gray-900"><?php echo e($costCenter->name); ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo e($costCenter->building_name ?? '-'); ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo e($costCenter->floor ?? '-'); ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo e($costCenter->tariffClass ? $costCenter->tariffClass->name : '-'); ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo e($costCenter->type == 'support' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'); ?>">
                                                 <?php echo e($costCenter->type == 'support' ? __('Support') : __('Revenue')); ?>

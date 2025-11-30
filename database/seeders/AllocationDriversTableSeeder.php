@@ -27,6 +27,7 @@ class AllocationDriversTableSeeder extends Seeder
                 'name' => 'Luas Lantai',
                 'unit_measurement' => 'm²',
                 'description' => 'Luas lantai dalam meter persegi untuk alokasi biaya gedung, depresiasi, listrik, AC, kebersihan, keamanan, dan maintenance',
+                'is_static' => true,
             ],
             [
                 'name' => 'Konsumsi Listrik',
@@ -66,11 +67,13 @@ class AllocationDriversTableSeeder extends Seeder
                 'name' => 'Jumlah Tempat Tidur',
                 'unit_measurement' => 'TT',
                 'description' => 'Jumlah tempat tidur (bed capacity) untuk alokasi biaya perawatan, housekeeping, dan maintenance ruangan',
+                'is_static' => true,
             ],
             [
                 'name' => 'Jumlah Kamar',
                 'unit_measurement' => 'kamar',
                 'description' => 'Jumlah kamar untuk alokasi biaya housekeeping, maintenance, dan perawatan ruangan rawat inap',
+                'is_static' => true,
             ],
             [
                 'name' => 'Bed Days',
@@ -122,6 +125,7 @@ class AllocationDriversTableSeeder extends Seeder
                 'name' => 'Jumlah Unit Alat',
                 'unit_measurement' => 'unit',
                 'description' => 'Jumlah unit peralatan medis untuk alokasi biaya depresiasi dan maintenance peralatan',
+                'is_static' => true,
             ],
         ];
 
@@ -134,6 +138,7 @@ class AllocationDriversTableSeeder extends Seeder
                 [
                     'unit_measurement' => $driver['unit_measurement'],
                     'description' => $driver['description'],
+                    'is_static' => $driver['is_static'] ?? false,
                 ]
             );
         }

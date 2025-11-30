@@ -1,7 +1,8 @@
 <?php
+    use App\Helpers\MenuHelper;
     $user = auth()->user();
     $isSuperadmin = $user?->isSuperadmin();
-    $isAdmin = $user?->hasRole(\App\Models\User::ROLE_ADMIN);
+    $isAdmin = $user?->hasRole(\App\Models\User::ROLE_ADMIN) || $user?->hasRole(\App\Models\User::ROLE_HOSPITAL_ADMIN);
     $isObserver = $user?->isObserver();
     
     // Determine which groups should be open based on active routes
@@ -39,12 +40,20 @@
         $openGroups['setup-simrs'] = true;
     }
     
+    // Other Output group
+    if (request()->routeIs('locations.*') || 
+        request()->routeIs('other-output.*')) {
+        $openGroups['other-output'] = true;
+    }
+    
     // Data Input group
     if (request()->routeIs('data-input.*') || 
         request()->routeIs('gl-expenses.*') || 
         request()->routeIs('driver-statistics.*') || 
-        request()->routeIs('service-volumes.*')) {
+        request()->routeIs('service-volumes.*') ||
+        request()->routeIs('svc-current.*')) {
         $openGroups['data-input'] = true;
+        $openGroups['svc-simrs'] = true; // Auto-open Service Volume (SIM RS) submenu
     }
     
     // Costing Process group
@@ -255,7 +264,7 @@
 
             <?php if(!$isSuperadmin): ?>
                 <!-- Setup Group -->
-                <?php if($isAdmin || $user->hasRole('manajemen') || $isObserver): ?>
+                <?php if(MenuHelper::canAccessMenu($user, 'setup')): ?>
                     <div class="mb-0.5">
                         <button @click="toggleGroup('setup')" 
                                 class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -372,7 +381,7 @@
                 <?php endif; ?>
 
                 <!-- Data Input Group -->
-                <?php if($isAdmin || $user->hasRole('manajemen') || $isObserver): ?>
+                <?php if(MenuHelper::canAccessMenu($user, 'data-input')): ?>
                     <div class="mb-0.5">
                         <button @click="toggleGroup('data-input')" 
                                 class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -399,16 +408,48 @@
                                class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('service-volumes.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
                                 <span class="truncate">Service Volumes</span>
                             </a>
-                            <a href="<?php echo e(route('data-input.import-center')); ?>" 
-                               class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('data-input.import-center') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                <span class="truncate">Import Center</span>
-                            </a>
+                            <!-- Service Volume (SIM RS) Submenu -->
+                            <div class="mt-0.5" x-show="!collapsed">
+                                <button @click="toggleGroup('svc-simrs')"
+                                        class="w-full flex items-center justify-between px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                    <span class="truncate">Service Volume (SIM RS)</span>
+                                    <svg class="w-3 h-3 transition-transform" :class="isGroupOpen('svc-simrs') ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                                <div x-show="isGroupOpen('svc-simrs')" class="ml-4 mt-0.5 space-y-0.5">
+                                    <a href="<?php echo e(route('svc-current.master-barang')); ?>"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.master-barang') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Master Barang</span>
+                                    </a>
+                                    <a href="<?php echo e(route('svc-current.tindakan-rawat-jalan')); ?>"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.tindakan-rawat-jalan') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Tindakan Rawat Jalan</span>
+                                    </a>
+                                    <a href="<?php echo e(route('svc-current.tindakan-rawat-inap')); ?>"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.tindakan-rawat-inap') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Tindakan Rawat Inap</span>
+                                    </a>
+                                    <a href="<?php echo e(route('svc-current.laboratorium')); ?>"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.laboratorium') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Laboratorium</span>
+                                    </a>
+                                    <a href="<?php echo e(route('svc-current.radiologi')); ?>"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.radiologi') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Radiologi</span>
+                                    </a>
+                                    <a href="<?php echo e(route('svc-current.operasi')); ?>"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.operasi') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Operasi</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 <?php endif; ?>
 
                 <!-- Costing Process Group -->
-                <?php if($isAdmin || $user->hasRole('manajemen') || $isObserver): ?>
+                <?php if(MenuHelper::canAccessMenu($user, 'costing-process')): ?>
                     <div class="mb-0.5">
                         <button @click="toggleGroup('costing-process')" 
                                 class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -504,7 +545,7 @@
                 <?php endif; ?>
 
                 <!-- Tariff Management Group -->
-                <?php if($isAdmin || $user->hasRole('manajemen') || $isObserver): ?>
+                <?php if(MenuHelper::canAccessMenu($user, 'tariffs')): ?>
                     <div class="mb-0.5">
                         <button @click="toggleGroup('tariff')" 
                                 class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -544,6 +585,7 @@
                 <?php endif; ?>
 
                 <!-- Clinical Pathways -->
+                <?php if(MenuHelper::canAccessMenu($user, 'pathways')): ?>
                 <div class="mb-1">
                     <button @click="toggleGroup('pathways')" 
                             class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -580,8 +622,10 @@
                         </a>
                     </div>
                 </div>
+                <?php endif; ?>
 
                 <!-- Patient Cases -->
+                <?php if(MenuHelper::canAccessMenu($user, 'cases')): ?>
                 <div class="mb-1">
                     <button @click="toggleGroup('cases')" 
                             class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -614,8 +658,10 @@
                         </a>
                     </div>
                 </div>
+                <?php endif; ?>
 
                 <!-- Analytics & Improvement Group -->
+                <?php if(MenuHelper::canAccessMenu($user, 'analytics')): ?>
                 <div class="mb-1">
                     <button @click="toggleGroup('analytics')" 
                             class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -664,10 +710,32 @@
                         </a>
                     </div>
                 </div>
+                <?php endif; ?>
 
+                <!-- Other Output Group -->
+                <div class="mb-0.5">
+                    <button @click="toggleGroup('other-output')" 
+                            class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span x-show="!collapsed" class="truncate"><?php echo e(__('Other Output')); ?></span>
+                        </div>
+                        <svg x-show="!collapsed" class="w-4 h-4 transition-transform" :class="isGroupOpen('other-output') ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                    <div x-show="!collapsed && isGroupOpen('other-output')" class="ml-8 mt-0.5 space-y-0.5">
+                        <a href="<?php echo e(route('locations.index')); ?>" 
+                           class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('locations.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                            <span class="truncate"><?php echo e(__('Location')); ?></span>
+                        </a>
+                    </div>
+                </div>
 
-                <!-- SIMRS Integration Group (Admin and Observer) -->
-                <?php if($isAdmin || $isObserver): ?>
+                <!-- SIMRS Integration Group -->
+                <?php if(MenuHelper::canAccessMenu($user, 'simrs')): ?>
                     <div class="mb-0.5">
                         <button @click="toggleGroup('simrs')" 
                                 class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
@@ -722,60 +790,9 @@
                     </div>
                 <?php endif; ?>
 
-                <!-- Service Volume (Current) Group (Admin and Observer) -->
-                <?php if($isAdmin || $isObserver): ?>
-                    <div class="mb-0.5">
-                        <button @click="toggleGroup('svcCurrent')"
-                                class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v4m-4 4h8m-4-2v4m-4 4h12m-6-2v4" />
-                                </svg>
-                                <span x-show="!collapsed" class="truncate">Service Volume (Current)</span>
-                            </div>
-                            <svg x-show="!collapsed" class="w-4 h-4 transition-transform" :class="isGroupOpen('svcCurrent') ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-                        <div x-show="!collapsed && isGroupOpen('svcCurrent')" class="ml-8 mt-0.5 space-y-0.5">
-                            <a href="<?php echo e(route('svc-current.master-barang')); ?>"
-                               class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.master-barang') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                <span class="truncate">Master Barang</span>
-                            </a>
-                            <a href="<?php echo e(route('svc-current.tindakan-rawat-jalan')); ?>"
-                               class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.tindakan-rawat-jalan') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                <span class="truncate">Tindakan Rawat Jalan</span>
-                            </a>
-                            <a href="<?php echo e(route('svc-current.tindakan-rawat-inap')); ?>"
-                               class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.tindakan-rawat-inap') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                <span class="truncate">Tindakan Rawat Inap</span>
-                            </a>
-                            <a href="<?php echo e(route('svc-current.laboratorium')); ?>"
-                               class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.laboratorium') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                <span class="truncate">Laboratorium</span>
-                            </a>
-                            <a href="<?php echo e(route('svc-current.radiologi')); ?>"
-                               class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.radiologi') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                <span class="truncate">Radiologi</span>
-                            </a>
-                            <a href="<?php echo e(route('svc-current.operasi')); ?>"
-                               class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.operasi') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                <span class="truncate">Operasi</span>
-                            </a>
-                            <a href="<?php echo e(route('svc-current.kamar')); ?>"
-                               class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.kamar') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                <span class="truncate">Kamar</span>
-                            </a>
-                            <a href="<?php echo e(route('svc-current.sync')); ?>"
-                               class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.sync') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                <span class="truncate">Sync Management</span>
-                            </a>
-                        </div>
-                    </div>
-                <?php endif; ?>
 
                 <!-- References (Last Menu) -->
-                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('viewAny', \App\Models\Reference::class)): ?>
+                <?php if(MenuHelper::canAccessMenu($user, 'references')): ?>
                     <a href="<?php echo e(route('references.index')); ?>" 
                        class="flex items-center px-3 py-1.5 text-sm font-medium rounded-lg mb-0.5 transition-colors <?php echo e(request()->routeIs('references.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-700 hover:bg-gray-300 hover:text-gray-900'); ?>">
                         <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

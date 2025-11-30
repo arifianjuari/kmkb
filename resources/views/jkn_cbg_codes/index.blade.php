@@ -16,9 +16,30 @@
                     i
                 </button>
             </div>
-            <a href="{{ route('jkn-cbg-codes.create') }}" class="btn-primary">
-                {{ __('Add New CBG Code') }}
-            </a>
+            <div class="flex items-center space-x-2">
+                <form method="GET" action="{{ route('jkn-cbg-codes.index') }}" class="flex items-center space-x-2">
+                    <div class="relative">
+                        <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('Search...') }}" class="py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 text-sm">
+                    </div>
+                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
+                        {{ __('Search') }}
+                    </button>
+                    @if($search ?? '')
+                        <a href="{{ route('jkn-cbg-codes.index') }}" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
+                            {{ __('Clear') }}
+                        </a>
+                    @endif
+                </form>
+                <button type="button" onclick="document.getElementById('import-modal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    {{ __('Import Excel') }}
+                </button>
+                <a href="{{ route('jkn-cbg-codes.export', $search ? ['search' => $search] : []) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    {{ __('Export Excel') }}
+                </a>
+                <a href="{{ route('jkn-cbg-codes.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
+                    {{ __('Add New CBG Code') }}
+                </a>
+            </div>
         </div>
         <div id="jkn-cbg-codes-help" class="mb-4 hidden text-xs text-gray-700 bg-biru-dongker-200 border border-biru-dongker-300 rounded-md p-3 dark:bg-biru-dongker-900 dark:border-biru-dongker-900 dark:text-biru-dongker-300">
             <p class="mb-2">
@@ -43,20 +64,29 @@
             </div>
         </div>
 
-        @if(session('success'))
-            <div class="mb-4">
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative dark:bg-green-800 dark:text-green-100" role="alert">
-                    <span class="block sm:inline">{{ session('success') }}</span>
-                </div>
-            </div>
-        @endif
-
         <div class="bg-white shadow overflow-hidden sm:rounded-lg dark:bg-gray-800">
             <div class="px-4 py-5 sm:p-6">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                @if($cbgCodes->count() > 0)
+                    <form id="bulk-delete-form" action="{{ route('jkn-cbg-codes.bulk-delete') }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="text-sm text-gray-600">
+                                {{ __('Select records to delete in bulk') }}
+                            </div>
+                            <button id="bulk-delete-btn" type="submit" class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="return confirm('{{ __('Are you sure you want to delete the selected CBG codes? This action cannot be undone.') }}')">
+                                {{ __('Delete Selected') }}
+                            </button>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead>
                             <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                        <input id="select-all" type="checkbox" class="h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
+                                    </th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                                     {{ __('Code') }}
                                 </th>
@@ -80,6 +110,9 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse($cbgCodes as $cbgCode)
                                 <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <input type="checkbox" name="ids[]" value="{{ $cbgCode->id }}" class="row-checkbox h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                         {{ $cbgCode->code }}
                                     </td>
@@ -124,7 +157,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
+                                    <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
                                         {{ __('No CBG codes found') }}
                                     </td>
                                 </tr>
@@ -132,12 +165,89 @@
                         </tbody>
                     </table>
                 </div>
-
-                <div class="mt-4">
-                    {{ $cbgCodes->links() }}
-                </div>
+                    </form>
+                    
+                    <div class="mt-6">
+                        {{ $cbgCodes->links() }}
+                    </div>
+                @else
+                    <p class="text-gray-600">{{ __('No CBG codes found.') }}</p>
+                @endif
             </div>
         </div>
     </div>
+
+    <!-- Import Modal -->
+    <div id="import-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ __('Import Excel') }}</h3>
+                    <button onclick="document.getElementById('import-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <form action="{{ route('jkn-cbg-codes.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="mb-4">
+                        <label for="file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ __('Select Excel File') }}
+                        </label>
+                        <input type="file" name="file" id="file" accept=".xlsx,.xls,.csv" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-biru-dongker-50 file:text-biru-dongker-700 hover:file:bg-biru-dongker-100 dark:file:bg-biru-dongker-900 dark:file:text-biru-dongker-300">
+                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('Format: Code, Name, Description, Service Type, Severity Level, Grouping Version, Tariff, Is Active (Yes/No)') }}
+                        </p>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" onclick="document.getElementById('import-modal').classList.add('hidden')" class="btn-secondary">
+                            {{ __('Cancel') }}
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            {{ __('Import') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('select-all');
+        const bulkBtn = document.getElementById('bulk-delete-btn');
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        const bulkForm = document.getElementById('bulk-delete-form');
+        
+        if (!selectAll || !bulkBtn || !bulkForm) return;
+        
+        // Update button state based on checkbox selection
+        function updateButtonState() {
+            const anyChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
+            bulkBtn.disabled = !anyChecked;
+        }
+        
+        // Select all functionality
+        selectAll.addEventListener('change', function() {
+            rowCheckboxes.forEach(cb => { cb.checked = selectAll.checked; });
+            updateButtonState();
+        });
+        
+        // Individual checkbox change
+        rowCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
+                selectAll.checked = allChecked;
+                updateButtonState();
+            });
+        });
+        
+        // Initialize state
+        updateButtonState();
+    });
+</script>
+@endpush
 </section>
 @endsection

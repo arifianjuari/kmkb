@@ -279,6 +279,7 @@ class GlExpenseController extends Controller
 
     public function export(Request $request)
     {
+        $search = $request->get('search');
         $periodMonth = $request->get('period_month');
         $periodYear = $request->get('period_year', date('Y'));
         $costCenterId = $request->get('cost_center_id');
@@ -304,6 +305,16 @@ class GlExpenseController extends Controller
         
         if ($expenseCategoryId) {
             $query->where('expense_category_id', $expenseCategoryId);
+        }
+        
+        if ($search) {
+            $query->whereHas('costCenter', function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('code', 'LIKE', "%{$search}%");
+            })->orWhereHas('expenseCategory', function($q) use ($search) {
+                $q->where('account_name', 'LIKE', "%{$search}%")
+                  ->orWhere('account_code', 'LIKE', "%{$search}%");
+            });
         }
         
         $data = $query->get();
@@ -341,6 +352,30 @@ class GlExpenseController extends Controller
         }, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
+    }
+
+    /**
+     * Bulk delete GL expenses
+     */
+    public function bulkDelete(Request $request)
+    {
+        $this->blockObserver('menghapus');
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:gl_expenses,id',
+        ]);
+
+        try {
+            $deleted = GlExpense::where('hospital_id', hospital('id'))
+                ->whereIn('id', $request->ids)
+                ->delete();
+
+            return redirect()->route('gl-expenses.index')
+                ->with('success', "Berhasil menghapus {$deleted} GL expense(s).");
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus GL expenses: ' . $e->getMessage());
+        }
     }
 }
 

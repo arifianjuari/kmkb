@@ -71,6 +71,22 @@ class ServiceVolumeCurrentController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
+        // Set title
+        $sheet->setCellValue('A1', 'VOLUME TINDAKAN RAWAT JALAN');
+        $sheet->mergeCells('A1:P1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Set period info
+        $subtitle = 'Tahun: ' . $selectedYear;
+        if ($selectedPoli) {
+            $subtitle .= ' | Poli: ' . $selectedPoli;
+        }
+        $sheet->setCellValue('A2', $subtitle);
+        $sheet->mergeCells('A2:P2');
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Headers
         $header = [
             'Tindakan Rawat Jalan',
             'Harga (Rp)',
@@ -79,9 +95,20 @@ class ServiceVolumeCurrentController extends Controller
             'Total Pendapatan (Rp)',
         ];
 
-        $sheet->fromArray($header, null, 'A1');
+        $sheet->fromArray($header, null, 'A3');
 
-        $rowIndex = 2;
+        // Style headers
+        $headerRange = 'A3:P3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('E5E7EB');
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle($headerRange)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(3)->setRowHeight(22);
+
+        // Data rows
+        $rowIndex = 4;
         foreach ($tindakanData as $row) {
             $sheet->fromArray([
                 $row['nama'],
@@ -105,6 +132,7 @@ class ServiceVolumeCurrentController extends Controller
             $rowIndex++;
         }
 
+        // Grand total row
         $sheet->fromArray([
             'Grand Total',
             null,
@@ -124,12 +152,25 @@ class ServiceVolumeCurrentController extends Controller
             $grandTotals['total_pendapatan'],
         ], null, 'A' . $rowIndex);
 
+        $lastRow = $rowIndex;
+
+        // Borders for entire table (header + data + total)
+        $tableRange = 'A3:P' . $lastRow;
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Autosize columns
         foreach (range('A', 'P') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
+        // Align columns
+        $sheet->getStyle('A4:A' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('C4:O' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+
+        // Currency format for Harga dan Total Pendapatan
         foreach (['B', 'P'] as $currencyColumn) {
-            $sheet->getStyle($currencyColumn . '2:' . $currencyColumn . $rowIndex)
+            $sheet->getStyle($currencyColumn . '4:' . $currencyColumn . $lastRow)
                 ->getNumberFormat()
                 ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
         }
@@ -199,6 +240,22 @@ class ServiceVolumeCurrentController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
+        // Set title
+        $sheet->setCellValue('A1', 'VOLUME TINDAKAN RAWAT INAP');
+        $sheet->mergeCells('A1:P1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Set period info
+        $subtitle = 'Tahun: ' . $selectedYear;
+        if (!empty($selectedBangsal)) {
+            $subtitle .= ' | Bangsal: ' . implode(', ', $selectedBangsal);
+        }
+        $sheet->setCellValue('A2', $subtitle);
+        $sheet->mergeCells('A2:P2');
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Headers
         $header = [
             'Tindakan Rawat Inap',
             'Harga (Rp)',
@@ -207,9 +264,20 @@ class ServiceVolumeCurrentController extends Controller
             'Total Pendapatan (Rp)',
         ];
 
-        $sheet->fromArray($header, null, 'A1');
+        $sheet->fromArray($header, null, 'A3');
 
-        $rowIndex = 2;
+        // Style headers
+        $headerRange = 'A3:P3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('E5E7EB');
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle($headerRange)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(3)->setRowHeight(22);
+
+        // Data rows
+        $rowIndex = 4;
         foreach ($tindakanData as $row) {
             $sheet->fromArray([
                 $row['nama'],
@@ -233,6 +301,7 @@ class ServiceVolumeCurrentController extends Controller
             $rowIndex++;
         }
 
+        // Grand total row
         $sheet->fromArray([
             'Grand Total',
             null,
@@ -252,12 +321,25 @@ class ServiceVolumeCurrentController extends Controller
             $grandTotals['total_pendapatan'],
         ], null, 'A' . $rowIndex);
 
+        $lastRow = $rowIndex;
+
+        // Borders for entire table (header + data + total)
+        $tableRange = 'A3:P' . $lastRow;
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Autosize columns
         foreach (range('A', 'P') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
+        // Align columns
+        $sheet->getStyle('A4:A' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('C4:O' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+
+        // Currency format for Harga dan Total Pendapatan
         foreach (['B', 'P'] as $currencyColumn) {
-            $sheet->getStyle($currencyColumn . '2:' . $currencyColumn . $rowIndex)
+            $sheet->getStyle($currencyColumn . '4:' . $currencyColumn . $lastRow)
                 ->getNumberFormat()
                 ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
         }
@@ -338,6 +420,25 @@ class ServiceVolumeCurrentController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
+        // Set title
+        $sheet->setCellValue('A1', 'VOLUME TINDAKAN OPERASI');
+        $sheet->mergeCells('A1:P1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Set period info
+        $subtitle = 'Tahun: ' . $selectedYear;
+        if ($selectedStatus) {
+            $subtitle .= ' | Status: ' . $selectedStatus;
+        }
+        if ($selectedPoli) {
+            $subtitle .= ' | Poli: ' . $selectedPoli;
+        }
+        $sheet->setCellValue('A2', $subtitle);
+        $sheet->mergeCells('A2:P2');
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Headers
         $header = [
             'Tindakan Operasi',
             'Harga (Rp)',
@@ -346,9 +447,20 @@ class ServiceVolumeCurrentController extends Controller
             'Total Pendapatan (Rp)',
         ];
 
-        $sheet->fromArray($header, null, 'A1');
+        $sheet->fromArray($header, null, 'A3');
 
-        $rowIndex = 2;
+        // Style headers
+        $headerRange = 'A3:P3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('E5E7EB');
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle($headerRange)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(3)->setRowHeight(22);
+
+        // Data rows
+        $rowIndex = 4;
         foreach ($operasiData as $row) {
             $sheet->fromArray([
                 $row['nama'],
@@ -372,6 +484,7 @@ class ServiceVolumeCurrentController extends Controller
             $rowIndex++;
         }
 
+        // Grand total row
         $sheet->fromArray([
             'Grand Total',
             null,
@@ -391,12 +504,25 @@ class ServiceVolumeCurrentController extends Controller
             $grandTotals['total_pendapatan'],
         ], null, 'A' . $rowIndex);
 
+        $lastRow = $rowIndex;
+
+        // Borders for entire table (header + data + total)
+        $tableRange = 'A3:P' . $lastRow;
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Autosize columns
         foreach (range('A', 'P') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
+        // Align columns
+        $sheet->getStyle('A4:A' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('C4:O' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+
+        // Currency format for Harga dan Total Pendapatan
         foreach (['B', 'P'] as $currencyColumn) {
-            $sheet->getStyle($currencyColumn . '2:' . $currencyColumn . $rowIndex)
+            $sheet->getStyle($currencyColumn . '4:' . $currencyColumn . $lastRow)
                 ->getNumberFormat()
                 ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
         }
@@ -477,6 +603,25 @@ class ServiceVolumeCurrentController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
+        // Set title
+        $sheet->setCellValue('A1', 'VOLUME TINDAKAN LABORATORIUM');
+        $sheet->mergeCells('A1:P1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Set period info
+        $subtitle = 'Tahun: ' . $selectedYear;
+        if ($selectedStatus) {
+            $subtitle .= ' | Status: ' . $selectedStatus;
+        }
+        if ($selectedPoli) {
+            $subtitle .= ' | Poli: ' . $selectedPoli;
+        }
+        $sheet->setCellValue('A2', $subtitle);
+        $sheet->mergeCells('A2:P2');
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Headers
         $header = [
             'Tindakan Laboratorium',
             'Harga (Rp)',
@@ -485,9 +630,20 @@ class ServiceVolumeCurrentController extends Controller
             'Total Pendapatan (Rp)',
         ];
 
-        $sheet->fromArray($header, null, 'A1');
+        $sheet->fromArray($header, null, 'A3');
 
-        $rowIndex = 2;
+        // Style headers
+        $headerRange = 'A3:P3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('E5E7EB');
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle($headerRange)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(3)->setRowHeight(22);
+
+        // Data rows
+        $rowIndex = 4;
         foreach ($laboratoriumData as $row) {
             $sheet->fromArray([
                 $row['nama'],
@@ -511,6 +667,7 @@ class ServiceVolumeCurrentController extends Controller
             $rowIndex++;
         }
 
+        // Grand total row
         $sheet->fromArray([
             'Grand Total',
             null,
@@ -530,12 +687,25 @@ class ServiceVolumeCurrentController extends Controller
             $grandTotals['total_pendapatan'],
         ], null, 'A' . $rowIndex);
 
+        $lastRow = $rowIndex;
+
+        // Borders for entire table (header + data + total)
+        $tableRange = 'A3:P' . $lastRow;
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Autosize columns
         foreach (range('A', 'P') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
+        // Align columns
+        $sheet->getStyle('A4:A' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('C4:O' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+
+        // Currency format for Harga dan Total Pendapatan
         foreach (['B', 'P'] as $currencyColumn) {
-            $sheet->getStyle($currencyColumn . '2:' . $currencyColumn . $rowIndex)
+            $sheet->getStyle($currencyColumn . '4:' . $currencyColumn . $lastRow)
                 ->getNumberFormat()
                 ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
         }
@@ -616,6 +786,25 @@ class ServiceVolumeCurrentController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
+        // Set title
+        $sheet->setCellValue('A1', 'VOLUME TINDAKAN RADIOLOGI');
+        $sheet->mergeCells('A1:P1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Set period info
+        $subtitle = 'Tahun: ' . $selectedYear;
+        if ($selectedStatus) {
+            $subtitle .= ' | Status: ' . $selectedStatus;
+        }
+        if ($selectedPoli) {
+            $subtitle .= ' | Poli: ' . $selectedPoli;
+        }
+        $sheet->setCellValue('A2', $subtitle);
+        $sheet->mergeCells('A2:P2');
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Headers
         $header = [
             'Tindakan Radiologi',
             'Harga (Rp)',
@@ -624,9 +813,20 @@ class ServiceVolumeCurrentController extends Controller
             'Total Pendapatan (Rp)',
         ];
 
-        $sheet->fromArray($header, null, 'A1');
+        $sheet->fromArray($header, null, 'A3');
 
-        $rowIndex = 2;
+        // Style headers
+        $headerRange = 'A3:P3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('E5E7EB');
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle($headerRange)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(3)->setRowHeight(22);
+
+        // Data rows
+        $rowIndex = 4;
         foreach ($radiologiData as $row) {
             $sheet->fromArray([
                 $row['nama'],
@@ -650,6 +850,7 @@ class ServiceVolumeCurrentController extends Controller
             $rowIndex++;
         }
 
+        // Grand total row
         $sheet->fromArray([
             'Grand Total',
             null,
@@ -669,12 +870,25 @@ class ServiceVolumeCurrentController extends Controller
             $grandTotals['total_pendapatan'],
         ], null, 'A' . $rowIndex);
 
+        $lastRow = $rowIndex;
+
+        // Borders for entire table (header + data + total)
+        $tableRange = 'A3:P' . $lastRow;
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Autosize columns
         foreach (range('A', 'P') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
+        // Align columns
+        $sheet->getStyle('A4:A' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('C4:O' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+
+        // Currency format for Harga dan Total Pendapatan
         foreach (['B', 'P'] as $currencyColumn) {
-            $sheet->getStyle($currencyColumn . '2:' . $currencyColumn . $rowIndex)
+            $sheet->getStyle($currencyColumn . '4:' . $currencyColumn . $lastRow)
                 ->getNumberFormat()
                 ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
         }
@@ -687,16 +901,6 @@ class ServiceVolumeCurrentController extends Controller
         }, $fileName, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
-    }
-
-    public function kamar()
-    {
-        return view('service-volume-current.kamar');
-    }
-
-    public function sync()
-    {
-        return view('service-volume-current.sync');
     }
 
     private function getTindakanRawatInapAggregates(int $selectedYear, array $selectedBangsal, string $search): array

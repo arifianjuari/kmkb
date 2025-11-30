@@ -54,6 +54,41 @@
                             </div>
                         </div>
                         
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="building_name" class="block text-sm font-medium text-gray-700">{{ __('Building Name') }}</label>
+                            <div class="mt-1">
+                                <input type="text" id="building_name" name="building_name" value="{{ old('building_name', $costCenter->building_name) }}" placeholder="e.g. Ruang Melati" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                @error('building_name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="floor" class="block text-sm font-medium text-gray-700">{{ __('Floor') }}</label>
+                            <div class="mt-1">
+                                <input type="number" id="floor" name="floor" value="{{ old('floor', $costCenter->floor) }}" min="0" max="255" placeholder="e.g. 1" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                @error('floor')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="tariff_class_id" class="block text-sm font-medium text-gray-700">{{ __('Class') }}</label>
+                            <div class="mt-1">
+                                <select id="tariff_class_id" name="tariff_class_id" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                    <option value="">{{ __('No Class') }}</option>
+                                    @foreach($tariffClasses as $tariffClass)
+                                        <option value="{{ $tariffClass->id }}" {{ old('tariff_class_id', $costCenter->tariff_class_id) == $tariffClass->id ? 'selected' : '' }}>{{ $tariffClass->name }} ({{ $tariffClass->code }})</option>
+                                    @endforeach
+                                </select>
+                                @error('tariff_class_id')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        
                         <div class="col-span-12">
                             <label for="parent_id" class="block text-sm font-medium text-gray-700">{{ __('Parent Cost Center') }}</label>
                             <div class="mt-1">

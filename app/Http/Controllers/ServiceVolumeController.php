@@ -275,6 +275,7 @@ class ServiceVolumeController extends Controller
 
     public function export(Request $request)
     {
+        $search = $request->get('search');
         $periodMonth = $request->get('period_month');
         $periodYear = $request->get('period_year', date('Y'));
         $costReferenceId = $request->get('cost_reference_id');
@@ -300,6 +301,13 @@ class ServiceVolumeController extends Controller
         
         if ($tariffClassId) {
             $query->where('tariff_class_id', $tariffClassId);
+        }
+        
+        if ($search) {
+            $query->whereHas('costReference', function($q) use ($search) {
+                $q->where('service_code', 'LIKE', "%{$search}%")
+                  ->orWhere('service_description', 'LIKE', "%{$search}%");
+            });
         }
         
         $data = $query->get();
@@ -335,6 +343,29 @@ class ServiceVolumeController extends Controller
         }, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
+    }
+
+    /**
+     * Bulk delete service volumes
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:service_volumes,id',
+        ]);
+
+        try {
+            $deleted = ServiceVolume::where('hospital_id', hospital('id'))
+                ->whereIn('id', $request->ids)
+                ->delete();
+
+            return redirect()->route('service-volumes.index')
+                ->with('success', "Berhasil menghapus {$deleted} service volume(s).");
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus service volumes: ' . $e->getMessage());
+        }
     }
 }
 

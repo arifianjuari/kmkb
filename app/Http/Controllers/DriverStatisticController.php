@@ -6,6 +6,7 @@ use App\Models\DriverStatistic;
 use App\Models\CostCenter;
 use App\Models\AllocationDriver;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -19,9 +20,13 @@ class DriverStatisticController extends Controller
         $periodYear = $request->get('period_year', date('Y'));
         $costCenterId = $request->get('cost_center_id');
         $allocationDriverId = $request->get('allocation_driver_id');
+        $isStatic = $request->get('is_static');
         
-        $query = DriverStatistic::where('hospital_id', hospital('id'))
+        $baseQuery = DriverStatistic::where('hospital_id', hospital('id'))
             ->with(['costCenter', 'allocationDriver']);
+        
+        // Build query for filtering
+        $query = clone $baseQuery;
         
         if ($periodMonth) {
             $query->where('period_month', $periodMonth);
@@ -39,12 +44,61 @@ class DriverStatisticController extends Controller
             $query->where('allocation_driver_id', $allocationDriverId);
         }
         
+        if ($search) {
+            $query->whereHas('costCenter', function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('code', 'LIKE', "%{$search}%");
+            })->orWhereHas('allocationDriver', function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        // Filter by static/dynamic
+        if ($isStatic !== null && $isStatic !== '') {
+            $query->whereHas('allocationDriver', function($q) use ($isStatic) {
+                $q->where('is_static', $isStatic);
+            });
+        }
+        
         $driverStatistics = $query->latest()->paginate(20)->appends($request->query());
         
         $costCenters = CostCenter::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('name')->get();
         $allocationDrivers = AllocationDriver::where('hospital_id', hospital('id'))->orderBy('name')->get();
         
-        return view('driver-statistics.index', compact('driverStatistics', 'search', 'periodMonth', 'periodYear', 'costCenterId', 'allocationDriverId', 'costCenters', 'allocationDrivers'));
+        // Calculate counts for static type tabs (considering other filters but not is_static)
+        $staticCountQuery = clone $baseQuery;
+        if ($periodMonth) {
+            $staticCountQuery->where('period_month', $periodMonth);
+        }
+        if ($periodYear) {
+            $staticCountQuery->where('period_year', $periodYear);
+        }
+        if ($costCenterId) {
+            $staticCountQuery->where('cost_center_id', $costCenterId);
+        }
+        if ($allocationDriverId) {
+            $staticCountQuery->where('allocation_driver_id', $allocationDriverId);
+        }
+        if ($search) {
+            $staticCountQuery->whereHas('costCenter', function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('code', 'LIKE', "%{$search}%");
+            })->orWhereHas('allocationDriver', function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        $staticTypeCounts = [
+            'all' => $staticCountQuery->count(),
+            'static' => (clone $staticCountQuery)->whereHas('allocationDriver', function($q) {
+                $q->where('is_static', true);
+            })->count(),
+            'dynamic' => (clone $staticCountQuery)->whereHas('allocationDriver', function($q) {
+                $q->where('is_static', false);
+            })->count(),
+        ];
+        
+        return view('driver-statistics.index', compact('driverStatistics', 'search', 'periodMonth', 'periodYear', 'costCenterId', 'allocationDriverId', 'isStatic', 'costCenters', 'allocationDrivers', 'staticTypeCounts'));
     }
 
     public function create()
@@ -321,6 +375,7 @@ class DriverStatisticController extends Controller
 
     public function export(Request $request)
     {
+        $search = $request->get('search');
         $periodMonth = $request->get('period_month');
         $periodYear = $request->get('period_year', date('Y'));
         $costCenterId = $request->get('cost_center_id');
@@ -346,6 +401,15 @@ class DriverStatisticController extends Controller
         
         if ($allocationDriverId) {
             $query->where('allocation_driver_id', $allocationDriverId);
+        }
+        
+        if ($search) {
+            $query->whereHas('costCenter', function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('code', 'LIKE', "%{$search}%");
+            })->orWhereHas('allocationDriver', function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%");
+            });
         }
         
         $data = $query->get();
@@ -380,6 +444,151 @@ class DriverStatisticController extends Controller
         }, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
+    }
+
+    /**
+     * Bulk delete driver statistics
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:driver_statistics,id',
+        ]);
+
+        try {
+            $deleted = DriverStatistic::where('hospital_id', hospital('id'))
+                ->whereIn('id', $request->ids)
+                ->delete();
+
+            return redirect()->route('driver-statistics.index')
+                ->with('success', "Berhasil menghapus {$deleted} driver statistic(s).");
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus driver statistics: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show form to copy static data from previous period
+     */
+    public function copyFromPreviousPeriodForm()
+    {
+        $hospitalId = hospital('id');
+        
+        // Get available periods (ordered by most recent first)
+        $availablePeriods = DriverStatistic::where('hospital_id', $hospitalId)
+            ->select('period_year', 'period_month')
+            ->distinct()
+            ->orderBy('period_year', 'desc')
+            ->orderBy('period_month', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'year' => $item->period_year,
+                    'month' => $item->period_month,
+                    'label' => date('F Y', mktime(0, 0, 0, $item->period_month, 1, $item->period_year)),
+                ];
+            });
+
+        // Get static drivers
+        $staticDrivers = AllocationDriver::where('hospital_id', $hospitalId)
+            ->where('is_static', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('driver-statistics.copy-from-previous-period', compact('availablePeriods', 'staticDrivers'));
+    }
+
+    /**
+     * Copy static data from previous period to current period
+     */
+    public function copyFromPreviousPeriod(Request $request)
+    {
+        $validated = $request->validate([
+            'source_year' => 'required|integer|min:2000|max:2100',
+            'source_month' => 'required|integer|between:1,12',
+            'target_year' => 'required|integer|min:2000|max:2100',
+            'target_month' => 'required|integer|between:1,12',
+        ]);
+
+        $hospitalId = hospital('id');
+        $sourceYear = $validated['source_year'];
+        $sourceMonth = $validated['source_month'];
+        $targetYear = $validated['target_year'];
+        $targetMonth = $validated['target_month'];
+
+        // Check if source and target are different
+        if ($sourceYear == $targetYear && $sourceMonth == $targetMonth) {
+            return back()->withErrors(['source_month' => 'Source period dan target period tidak boleh sama.'])->withInput();
+        }
+
+        // Get static drivers
+        $staticDriverIds = AllocationDriver::where('hospital_id', $hospitalId)
+            ->where('is_static', true)
+            ->pluck('id');
+
+        if ($staticDriverIds->isEmpty()) {
+            return back()->withErrors(['source_month' => 'Tidak ada static drivers yang ditemukan.'])->withInput();
+        }
+
+        // Get source data (only static drivers)
+        $sourceData = DriverStatistic::where('hospital_id', $hospitalId)
+            ->where('period_year', $sourceYear)
+            ->where('period_month', $sourceMonth)
+            ->whereIn('allocation_driver_id', $staticDriverIds)
+            ->get();
+
+        if ($sourceData->isEmpty()) {
+            return back()->withErrors(['source_month' => 'Tidak ada data static untuk periode sumber yang dipilih.'])->withInput();
+        }
+
+        $copied = 0;
+        $updated = 0;
+        $errors = [];
+
+        DB::beginTransaction();
+        try {
+            foreach ($sourceData as $sourceStat) {
+                // Check if target already exists
+                $existing = DriverStatistic::where('hospital_id', $hospitalId)
+                    ->where('period_year', $targetYear)
+                    ->where('period_month', $targetMonth)
+                    ->where('cost_center_id', $sourceStat->cost_center_id)
+                    ->where('allocation_driver_id', $sourceStat->allocation_driver_id)
+                    ->first();
+
+                if ($existing) {
+                    // Update existing
+                    $existing->update(['value' => $sourceStat->value]);
+                    $updated++;
+                } else {
+                    // Create new
+                    DriverStatistic::create([
+                        'hospital_id' => $hospitalId,
+                        'period_year' => $targetYear,
+                        'period_month' => $targetMonth,
+                        'cost_center_id' => $sourceStat->cost_center_id,
+                        'allocation_driver_id' => $sourceStat->allocation_driver_id,
+                        'value' => $sourceStat->value,
+                    ]);
+                    $copied++;
+                }
+            }
+
+            DB::commit();
+
+            $message = "Berhasil copy {$copied} data baru dan update {$updated} data yang sudah ada dari periode " . date('F Y', mktime(0, 0, 0, $sourceMonth, 1, $sourceYear)) . " ke periode " . date('F Y', mktime(0, 0, 0, $targetMonth, 1, $targetYear)) . ".";
+
+            return redirect()->route('driver-statistics.index', [
+                'period_year' => $targetYear,
+                'period_month' => $targetMonth,
+            ])->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['source_month' => 'Error saat copy data: ' . $e->getMessage()])->withInput();
+        }
     }
 }
 

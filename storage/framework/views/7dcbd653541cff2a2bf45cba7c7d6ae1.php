@@ -21,12 +21,8 @@
         <!-- Right: User menu & Notifications -->
         <div class="flex items-center space-x-4">
             <?php if(auth()->guard()->check()): ?>
-                <?php
-                    $isAdmin = auth()->user()->hasRole(\App\Models\User::ROLE_ADMIN);
-                ?>
-                
-                <!-- Admin Menu (Admin only) -->
-                <?php if($isAdmin): ?>
+                <!-- Admin Menu (Users & Audit Logs access) -->
+                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['view-users', 'view-audit-logs'])): ?>
                     <?php if (isset($component)) { $__componentOriginaldf8083d4a852c446488d8d384bbc7cbe = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginaldf8083d4a852c446488d8d384bbc7cbe = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dropdown','data' => ['align' => 'right','width' => '56']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -50,6 +46,7 @@
                             <div class="px-4 py-2 border-b border-gray-200">
                                 <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">System Administration</div>
                             </div>
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('view-users')): ?>
                             <?php if (isset($component)) { $__componentOriginal68cb1971a2b92c9735f83359058f7108 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal68cb1971a2b92c9735f83359058f7108 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dropdown-link','data' => ['href' => route('users.index'),'class' => ''.e(request()->routeIs('users.*') ? 'bg-gray-100' : '').'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -72,6 +69,8 @@
 <?php $component = $__componentOriginal68cb1971a2b92c9735f83359058f7108; ?>
 <?php unset($__componentOriginal68cb1971a2b92c9735f83359058f7108); ?>
 <?php endif; ?>
+                            <?php endif; ?>
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('view-audit-logs')): ?>
                             <?php if (isset($component)) { $__componentOriginal68cb1971a2b92c9735f83359058f7108 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal68cb1971a2b92c9735f83359058f7108 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dropdown-link','data' => ['href' => route('audit-logs.index'),'class' => ''.e(request()->routeIs('audit-logs.*') ? 'bg-gray-100' : '').'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -94,11 +93,37 @@
 <?php $component = $__componentOriginal68cb1971a2b92c9735f83359058f7108; ?>
 <?php unset($__componentOriginal68cb1971a2b92c9735f83359058f7108); ?>
 <?php endif; ?>
+                            <?php endif; ?>
                             <div class="border-t border-gray-200 my-1"></div>
+                            <?php if(auth()->user()->isSuperadmin()): ?>
+                            <?php if (isset($component)) { $__componentOriginal68cb1971a2b92c9735f83359058f7108 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal68cb1971a2b92c9735f83359058f7108 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dropdown-link','data' => ['href' => route('admin.roles.index'),'class' => ''.e(request()->routeIs('admin.roles.*') ? 'bg-gray-100' : '').'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('dropdown-link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('admin.roles.index')),'class' => ''.e(request()->routeIs('admin.roles.*') ? 'bg-gray-100' : '').'']); ?>
+                                <?php echo e(__('Roles & Permissions')); ?>
+
+                             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal68cb1971a2b92c9735f83359058f7108)): ?>
+<?php $attributes = $__attributesOriginal68cb1971a2b92c9735f83359058f7108; ?>
+<?php unset($__attributesOriginal68cb1971a2b92c9735f83359058f7108); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal68cb1971a2b92c9735f83359058f7108)): ?>
+<?php $component = $__componentOriginal68cb1971a2b92c9735f83359058f7108; ?>
+<?php unset($__componentOriginal68cb1971a2b92c9735f83359058f7108); ?>
+<?php endif; ?>
+                            <?php else: ?>
                             <div class="px-4 py-2 text-xs text-gray-500 cursor-not-allowed">
                                 <?php echo e(__('Roles & Permissions')); ?>
 
                             </div>
+                            <?php endif; ?>
                             <div class="px-4 py-2 text-xs text-gray-500 cursor-not-allowed">
                                 <?php echo e(__('API Tokens')); ?>
 

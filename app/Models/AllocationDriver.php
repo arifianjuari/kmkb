@@ -20,6 +20,7 @@ class AllocationDriver extends Model
         'name',
         'unit_measurement',
         'description',
+        'is_static',
     ];
 
     /**
@@ -28,6 +29,7 @@ class AllocationDriver extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'is_static' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

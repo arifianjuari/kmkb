@@ -26,10 +26,24 @@ Thumbs.db
 
 # Logs
 log/*.log
+storage/logs/*.log
 
 # Temporary files
 *.tmp
 *.temp
+
+# Laravel Framework files (auto-generated)
+storage/framework/views/*
+!storage/framework/views/.gitkeep
+storage/framework/sessions/*
+!storage/framework/sessions/.gitkeep
+storage/framework/cache/*
+!storage/framework/cache/.gitkeep
+!storage/framework/cache/data
+!storage/framework/cache/data/.gitkeep
+
+# Config backup files
+config/*.backup.*
 
 # Database
 *.sqlite

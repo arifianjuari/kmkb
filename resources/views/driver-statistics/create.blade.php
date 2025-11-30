@@ -54,7 +54,13 @@
                                 <select id="cost_center_id" name="cost_center_id" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                     <option value="">{{ __('Select Cost Center') }}</option>
                                     @foreach($costCenters as $cc)
-                                        <option value="{{ $cc->id }}" {{ old('cost_center_id') == $cc->id ? 'selected' : '' }}>{{ $cc->name }} ({{ $cc->code }})</option>
+                                        <option value="{{ $cc->id }}" {{ old('cost_center_id') == $cc->id ? 'selected' : '' }}>
+                                            @if($cc->building_name)
+                                                {{ $cc->building_name }} - {{ $cc->name }}
+                                            @else
+                                                {{ $cc->name }}
+                                            @endif
+                                        </option>
                                     @endforeach
                                 </select>
                                 @error('cost_center_id')

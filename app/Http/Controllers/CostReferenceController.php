@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\CostReference;
+use App\Models\ServiceVolume;
+use App\Models\UnitCostCalculation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -256,13 +258,96 @@ class CostReferenceController extends Controller
 
         $ids = $validated['ids'];
 
-        // Only delete records that belong to the current hospital
-        $deleted = CostReference::where('hospital_id', hospital('id'))
+        // Only consider records that belong to the current hospital
+        $costReferences = CostReference::where('hospital_id', hospital('id'))
             ->whereIn('id', $ids)
-            ->delete();
+            ->get();
+
+        $deleted = 0;
+        $failedServiceVolumes = [];
+        $failedUnitCostCalculations = [];
+        $failedNames = [];
+
+        foreach ($costReferences as $reference) {
+            // Check if this cost reference is used in service volumes
+            $inUseInServiceVolumes = ServiceVolume::where('hospital_id', hospital('id'))
+                ->where('cost_reference_id', $reference->id)
+                ->exists();
+
+            if ($inUseInServiceVolumes) {
+                $failedServiceVolumes[] = $reference;
+                $failedNames[] = $reference->service_description ?: $reference->service_code;
+                continue;
+            }
+
+            // Check if this cost reference is used in unit cost calculations
+            $inUseInUnitCost = UnitCostCalculation::where('hospital_id', hospital('id'))
+                ->where('cost_reference_id', $reference->id)
+                ->exists();
+
+            if ($inUseInUnitCost) {
+                $failedUnitCostCalculations[] = $reference;
+                $failedNames[] = $reference->service_description ?: $reference->service_code;
+                continue;
+            }
+
+            // Safe to delete
+            $reference->delete();
+            $deleted++;
+        }
+
+        $totalFailed = count($failedServiceVolumes) + count($failedUnitCostCalculations);
+
+        // Build user-friendly message
+        $messages = [];
+
+        if ($deleted > 0) {
+            $messages[] = "{$deleted} cost reference" . ($deleted > 1 ? 's' : '') . " berhasil dihapus.";
+        }
+
+        if ($totalFailed > 0) {
+            $failedMsg = "{$totalFailed} cost reference" . ($totalFailed > 1 ? 's' : '') . " tidak dapat dihapus";
+
+            $reasons = [];
+            if (count($failedServiceVolumes) > 0) {
+                $reasons[] = count($failedServiceVolumes) . " digunakan di Service Volumes";
+            }
+            if (count($failedUnitCostCalculations) > 0) {
+                $reasons[] = count($failedUnitCostCalculations) . " digunakan di Unit Cost Calculations";
+            }
+
+            if (count($reasons) > 0) {
+                $failedMsg .= " karena " . implode(' dan ', $reasons) . ".";
+            } else {
+                $failedMsg .= ".";
+            }
+
+            if (count($failedNames) > 0) {
+                $sampleNames = array_slice($failedNames, 0, 3);
+                $failedMsg .= " Contoh: " . implode(', ', $sampleNames);
+                if (count($failedNames) > 3) {
+                    $failedMsg .= " dan " . (count($failedNames) - 3) . " lainnya";
+                }
+                $failedMsg .= '.';
+            }
+
+            $messages[] = $failedMsg;
+        }
+
+        $message = implode(' ', $messages);
+
+        if ($deleted === 0 && $totalFailed > 0) {
+            return redirect()->route('cost-references.index')
+                ->with('error', $message ?: 'Tidak ada cost reference yang dapat dihapus.');
+        }
+
+        if ($deleted > 0 && $totalFailed > 0) {
+            return redirect()->route('cost-references.index')
+                ->with('warning', $message);
+        }
 
         return redirect()->route('cost-references.index')
-            ->with('success', $deleted > 0 ? 'Selected cost references deleted successfully.' : 'No cost references were deleted.');
+            ->with($deleted > 0 ? 'success' : 'error', $message ?: 'Tidak ada cost reference yang dipilih untuk dihapus.');
     }
 
     /**

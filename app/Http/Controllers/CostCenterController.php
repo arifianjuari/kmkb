@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\BlocksObserver;
 use App\Models\CostCenter;
+use App\Models\TariffClass;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -25,7 +26,8 @@ class CostCenterController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('code', 'LIKE', "%{$search}%")
-                  ->orWhere('name', 'LIKE', "%{$search}%");
+                  ->orWhere('name', 'LIKE', "%{$search}%")
+                  ->orWhere('building_name', 'LIKE', "%{$search}%");
             });
         }
         
@@ -37,7 +39,7 @@ class CostCenterController extends Controller
             $query->where('is_active', $isActive);
         }
         
-        $costCenters = $query->with('parent')->latest()->paginate(15)->appends($request->query());
+        $costCenters = $query->with(['parent', 'tariffClass'])->latest()->paginate(15)->appends($request->query());
         
         return view('cost-centers.index', compact('costCenters', 'search', 'type', 'isActive'));
     }
@@ -54,7 +56,12 @@ class CostCenterController extends Controller
             ->orderBy('name')
             ->get();
         
-        return view('cost-centers.create', compact('parents'));
+        $tariffClasses = TariffClass::where('hospital_id', hospital('id'))
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+        
+        return view('cost-centers.create', compact('parents', 'tariffClasses'));
     }
 
     /**
@@ -66,6 +73,8 @@ class CostCenterController extends Controller
         $validated = $request->validate([
             'code' => 'required|string|max:50',
             'name' => 'required|string|max:150',
+            'building_name' => 'nullable|string|max:150',
+            'floor' => 'nullable|integer|min:0|max:255',
             'type' => 'required|in:support,revenue',
             'parent_id' => 'nullable|exists:cost_centers,id',
             'is_active' => 'boolean',
@@ -79,6 +88,17 @@ class CostCenterController extends Controller
             
             if (!$parent) {
                 return back()->withErrors(['parent_id' => 'Parent cost center tidak valid.'])->withInput();
+            }
+        }
+
+        // Ensure tariff class belongs to same hospital
+        if ($validated['tariff_class_id']) {
+            $tariffClass = TariffClass::where('id', $validated['tariff_class_id'])
+                ->where('hospital_id', hospital('id'))
+                ->first();
+            
+            if (!$tariffClass) {
+                return back()->withErrors(['tariff_class_id' => 'Tariff class tidak valid.'])->withInput();
             }
         }
 
@@ -100,7 +120,7 @@ class CostCenterController extends Controller
             abort(404);
         }
         
-        $costCenter->load(['parent', 'children', 'costReferences', 'glExpenses']);
+        $costCenter->load(['parent', 'children', 'costReferences', 'glExpenses', 'tariffClass']);
         
         return view('cost-centers.show', compact('costCenter'));
     }
@@ -122,7 +142,12 @@ class CostCenterController extends Controller
             ->orderBy('name')
             ->get();
         
-        return view('cost-centers.edit', compact('costCenter', 'parents'));
+        $tariffClasses = TariffClass::where('hospital_id', hospital('id'))
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+        
+        return view('cost-centers.edit', compact('costCenter', 'parents', 'tariffClasses'));
     }
 
     /**
@@ -139,6 +164,9 @@ class CostCenterController extends Controller
         $validated = $request->validate([
             'code' => 'required|string|max:50',
             'name' => 'required|string|max:150',
+            'building_name' => 'nullable|string|max:150',
+            'floor' => 'nullable|integer|min:0|max:255',
+            'tariff_class_id' => 'nullable|exists:tariff_classes,id',
             'type' => 'required|in:support,revenue',
             'parent_id' => 'nullable|exists:cost_centers,id',
             'is_active' => 'boolean',
@@ -157,6 +185,17 @@ class CostCenterController extends Controller
             
             if (!$parent) {
                 return back()->withErrors(['parent_id' => 'Parent cost center tidak valid.'])->withInput();
+            }
+        }
+
+        // Ensure tariff class belongs to same hospital
+        if ($validated['tariff_class_id']) {
+            $tariffClass = TariffClass::where('id', $validated['tariff_class_id'])
+                ->where('hospital_id', hospital('id'))
+                ->first();
+            
+            if (!$tariffClass) {
+                return back()->withErrors(['tariff_class_id' => 'Tariff class tidak valid.'])->withInput();
             }
         }
 
@@ -211,13 +250,14 @@ class CostCenterController extends Controller
         $isActive = $request->get('is_active');
         
         $query = CostCenter::where('hospital_id', hospital('id'))
-            ->with('parent')
+            ->with(['parent', 'tariffClass'])
             ->orderBy('code');
             
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('code', 'LIKE', "%{$search}%")
-                  ->orWhere('name', 'LIKE', "%{$search}%");
+                  ->orWhere('name', 'LIKE', "%{$search}%")
+                  ->orWhere('building_name', 'LIKE', "%{$search}%");
             });
         }
         
@@ -235,7 +275,7 @@ class CostCenterController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
 
         // Headers
-        $headers = ['Code', 'Name', 'Type', 'Parent', 'Is Active'];
+        $headers = ['Code', 'Name', 'Building Name', 'Floor', 'Class', 'Type', 'Parent', 'Is Active'];
         $sheet->fromArray($headers, null, 'A1');
 
         // Rows
@@ -244,6 +284,9 @@ class CostCenterController extends Controller
                 return [
                     $item->code,
                     $item->name,
+                    $item->building_name ?? '-',
+                    $item->floor ?? '-',
+                    $item->tariffClass ? $item->tariffClass->name : '-',
                     $item->type == 'support' ? 'Support' : 'Revenue',
                     $item->parent ? $item->parent->name : '-',
                     $item->is_active ? 'Yes' : 'No',
@@ -253,7 +296,7 @@ class CostCenterController extends Controller
         }
 
         // Autosize
-        foreach (range('A', 'E') as $col) {
+        foreach (range('A', 'H') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 

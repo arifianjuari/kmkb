@@ -30,6 +30,24 @@
                         <dt class="text-sm font-medium text-gray-500">{{ __('Name') }}</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $costCenter->name }}</dd>
                     </div>
+                    @if($costCenter->building_name)
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">{{ __('Building Name') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $costCenter->building_name }}</dd>
+                    </div>
+                    @endif
+                    @if($costCenter->floor !== null)
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">{{ __('Floor') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $costCenter->floor }}</dd>
+                    </div>
+                    @endif
+                    @if($costCenter->tariffClass)
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">{{ __('Class') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $costCenter->tariffClass->name }} ({{ $costCenter->tariffClass->code }})</dd>
+                    </div>
+                    @endif
                     <div>
                         <dt class="text-sm font-medium text-gray-500">{{ __('Type') }}</dt>
                         <dd class="mt-1">

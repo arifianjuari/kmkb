@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $staticTypeTabs = [
+        'all' => __('All'),
+        'static' => __('Static'),
+        'dynamic' => __('Dynamic'),
+    ];
+@endphp
 <div class="max-w-7xl mx-auto">
     <div>
         <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
@@ -76,6 +83,35 @@
         
         <div class="bg-white shadow overflow-hidden sm:rounded-lg">
             <div class="px-4 py-5 sm:p-6">
+                <div class="mb-6">
+                    {{-- Static Type Tabs --}}
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">{{ __('Data Type') }}</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            @foreach($staticTypeTabs as $key => $label)
+                                @php
+                                    $isActive = ($key === 'all' && ($isStatic === null || $isStatic === '')) || ($key === 'static' && $isStatic === '1') || ($key === 'dynamic' && $isStatic === '0');
+                                    $urlParams = request()->except('is_static', 'page');
+                                    if ($key === 'static') {
+                                        $urlParams['is_static'] = '1';
+                                    } elseif ($key === 'dynamic') {
+                                        $urlParams['is_static'] = '0';
+                                    }
+                                    $tabUrl = route('allocation-drivers.index', $urlParams);
+                                @endphp
+                                <a
+                                    href="{{ $tabUrl }}"
+                                    class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-biru-dongker-700 {{ $isActive ? 'bg-biru-dongker-800 text-white border-biru-dongker-800' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
+                                >
+                                    <span>{{ $label }}</span>
+                                    <span class="text-xs font-semibold {{ $isActive ? 'text-white/80' : 'text-gray-500' }}">
+                                        {{ $staticTypeCounts[$key] ?? 0 }}
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
                 @if($allocationDrivers->count() > 0)
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -83,6 +119,7 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Name') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Unit Measurement') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Static') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Description') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
                                 </tr>
@@ -92,6 +129,13 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $driver->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $driver->unit_measurement }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                            @if($driver->is_static)
+                                                <span class="text-green-600 font-semibold">[✓]</span>
+                                            @else
+                                                <span class="text-gray-400">-</span>
+                                            @endif
+                                        </td>
                                         <td class="px-6 py-4 text-sm text-gray-500">{{ $driver->description ?? '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">

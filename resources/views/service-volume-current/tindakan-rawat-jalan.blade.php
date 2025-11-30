@@ -112,11 +112,11 @@
                     <tfoot class="bg-gray-50">
                         <tr class="font-semibold">
                             <td class="px-4 py-3 text-gray-900">Grand Total</td>
-                            <td class="px-4 py-3"></td>
+                            <td class="px-4 py-3 text-right"></td>
                             <td class="px-3 py-3 text-center">{{ $grandTotals['jan'] }}</td>
                             <td class="px-3 py-3 text-center">{{ $grandTotals['feb'] }}</td>
                             <td class="px-3 py-3 text-center">{{ $grandTotals['mar'] }}</td>
-                            <td class="px-3 py-3 text-center>{{ $grandTotals['apr'] }}</td>
+                            <td class="px-3 py-3 text-center">{{ $grandTotals['apr'] }}</td>
                             <td class="px-3 py-3 text-center">{{ $grandTotals['may'] }}</td>
                             <td class="px-3 py-3 text-center">{{ $grandTotals['jun'] }}</td>
                             <td class="px-3 py-3 text-center">{{ $grandTotals['jul'] }}</td>

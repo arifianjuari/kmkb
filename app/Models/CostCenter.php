@@ -19,6 +19,9 @@ class CostCenter extends Model
         'hospital_id',
         'code',
         'name',
+        'building_name',
+        'floor',
+        'tariff_class_id',
         'type',
         'parent_id',
         'is_active',
@@ -97,6 +100,14 @@ class CostCenter extends Model
     public function allocationResultsAsTarget()
     {
         return $this->hasMany(AllocationResult::class, 'target_cost_center_id');
+    }
+
+    /**
+     * Get the tariff class for this cost center.
+     */
+    public function tariffClass()
+    {
+        return $this->belongsTo(TariffClass::class);
     }
 }
 

@@ -48,6 +48,16 @@
                                 @enderror
                             </div>
                         </div>
+                        
+                        <div class="col-span-12">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="is_static" name="is_static" value="1" {{ old('is_static') ? 'checked' : '' }} class="h-4 w-4 text-biru-dongker-800 border-gray-300 rounded focus:ring-biru-dongker-700">
+                                <label for="is_static" class="ml-2 block text-sm text-gray-900">{{ __('Static Data') }} <span class="text-gray-500 text-xs">(Data yang jarang berubah, seperti Luas Lantai, Jumlah TT)</span></label>
+                            </div>
+                            @error('is_static')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                     
                     <div class="mt-6">
