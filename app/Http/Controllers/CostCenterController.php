@@ -8,6 +8,7 @@ use App\Models\Division;
 use App\Models\TariffClass;
 use App\Services\SimrsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -357,26 +358,56 @@ class CostCenterController extends Controller
             abort(404);
         }
         
-        // Check if cost center is being used
-        if ($costCenter->costReferences()->count() > 0) {
-            return redirect()->route('cost-centers.index')
-                ->with('error', 'Cost center tidak dapat dihapus karena masih digunakan di Cost References.');
-        }
-        
-        if ($costCenter->glExpenses()->count() > 0) {
-            return redirect()->route('cost-centers.index')
-                ->with('error', 'Cost center tidak dapat dihapus karena masih digunakan di GL Expenses.');
-        }
-        
-        if ($costCenter->children()->count() > 0) {
-            return redirect()->route('cost-centers.index')
-                ->with('error', 'Cost center tidak dapat dihapus karena masih memiliki child cost centers.');
-        }
-        
-        $costCenter->delete();
+        try {
+            // Check if cost center is being used
+            if ($costCenter->costReferences()->count() > 0) {
+                return redirect()->route('cost-centers.index')
+                    ->with('error', 'Cost center tidak dapat dihapus karena masih digunakan di Cost References.');
+            }
+            
+            if ($costCenter->glExpenses()->count() > 0) {
+                return redirect()->route('cost-centers.index')
+                    ->with('error', 'Cost center tidak dapat dihapus karena masih digunakan di GL Expenses.');
+            }
+            
+            if ($costCenter->children()->count() > 0) {
+                return redirect()->route('cost-centers.index')
+                    ->with('error', 'Cost center tidak dapat dihapus karena masih memiliki child cost centers.');
+            }
+            
+            if ($costCenter->driverStatistics()->count() > 0) {
+                return redirect()->route('cost-centers.index')
+                    ->with('error', 'Cost center tidak dapat dihapus karena masih digunakan di Driver Statistics.');
+            }
+            
+            if ($costCenter->allocationMapsAsSource()->count() > 0) {
+                return redirect()->route('cost-centers.index')
+                    ->with('error', 'Cost center tidak dapat dihapus karena masih digunakan sebagai source di Allocation Maps.');
+            }
+            
+            if ($costCenter->allocationResultsAsSource()->count() > 0) {
+                return redirect()->route('cost-centers.index')
+                    ->with('error', 'Cost center tidak dapat dihapus karena masih digunakan sebagai source di Allocation Results.');
+            }
+            
+            if ($costCenter->allocationResultsAsTarget()->count() > 0) {
+                return redirect()->route('cost-centers.index')
+                    ->with('error', 'Cost center tidak dapat dihapus karena masih digunakan sebagai target di Allocation Results.');
+            }
+            
+            $costCenter->delete();
 
-        return redirect()->route('cost-centers.index')
-            ->with('success', 'Cost center berhasil dihapus.');
+            return redirect()->route('cost-centers.index')
+                ->with('success', 'Cost center berhasil dihapus.');
+        } catch (\Exception $e) {
+            Log::error('Error deleting cost center: ' . $e->getMessage(), [
+                'cost_center_id' => $costCenter->id,
+                'exception' => $e
+            ]);
+            
+            return redirect()->route('cost-centers.index')
+                ->with('error', 'Terjadi kesalahan saat menghapus cost center: ' . $e->getMessage());
+        }
     }
 
     /**
