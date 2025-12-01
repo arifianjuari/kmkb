@@ -33,7 +33,7 @@
                     <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                         {{ __('Filter') }}
                     </button>
-                    @if($search || $type || $isActive !== null)
+                    @if($search || $type || $division || $isActive !== null)
                         <a href="{{ route('cost-centers.index') }}" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                             {{ __('Clear') }}
                         </a>
@@ -166,6 +166,50 @@
                             @endforeach
                         </div>
                     </div>
+
+                    {{-- Division Tabs --}}
+                    @if(isset($divisions) && $divisions->count() > 0)
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">{{ __('Division') }}</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            @php
+                                $isActiveDivisionTab = !$division;
+                                $urlParams = request()->except('division', 'page');
+                                $allDivisionTabUrl = route('cost-centers.index', $urlParams);
+                            @endphp
+                            <a
+                                href="{{ $allDivisionTabUrl }}"
+                                class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-biru-dongker-700 {{ $isActiveDivisionTab ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
+                            >
+                                <span>{{ __('All Divisions') }}</span>
+                                @if(isset($divisionCounts))
+                                    <span class="text-xs font-semibold {{ $isActiveDivisionTab ? 'text-white/80' : 'text-gray-500' }}">
+                                        {{ $divisionCounts['all'] ?? 0 }}
+                                    </span>
+                                @endif
+                            </a>
+                            @foreach($divisions as $div)
+                                @php
+                                    $isActiveDivisionTab = $division === $div->name;
+                                    $urlParams = request()->except('division', 'page');
+                                    $urlParams['division'] = $div->name;
+                                    $divisionTabUrl = route('cost-centers.index', $urlParams);
+                                @endphp
+                                <a
+                                    href="{{ $divisionTabUrl }}"
+                                    class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-biru-dongker-700 {{ $isActiveDivisionTab ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
+                                >
+                                    <span>{{ $div->name }}</span>
+                                    @if(isset($divisionCounts))
+                                        <span class="text-xs font-semibold {{ $isActiveDivisionTab ? 'text-white/80' : 'text-gray-500' }}">
+                                            {{ $divisionCounts[$div->name] ?? 0 }}
+                                        </span>
+                                    @endif
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
                 </div>
 
                 @if(isset($rootCostCenters) && ($viewMode ?? 'tree') === 'tree')
@@ -175,11 +219,12 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Division') }}</th>
-                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Building Name') }}</th>
-                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Floor') }}</th>
-                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Class') }}</th>
-                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Building Name') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Floor') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Class') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Type') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Status') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -187,7 +232,7 @@
                                         @include('cost-centers.partials.tree-row', ['costCenter' => $costCenter, 'allCostCenters' => $allCostCenters, 'level' => 0])
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-center">
+                                            <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                                                 {{ __('No cost centers found.') }}
                                             </td>
                                         </tr>
@@ -290,22 +335,32 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Division') }}</th>
                                         <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Building Name') }}</th>
                                         <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Floor') }}</th>
                                         <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Class') }}</th>
+                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Type') }}</th>
                                         <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Parent') }}</th>
+                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Status') }}</th>
                                         <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($costCenters as $costCenter)
                                         <tr>
-                                            <td class="px-6 py-2 text-sm text-gray-900">{{ $costCenter->name }}</td>
                                             <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->building_name ?? '-' }}</td>
                                             <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->floor ?? '-' }}</td>
                                             <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->tariffClass ? $costCenter->tariffClass->name : '-' }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $costCenter->type == 'support' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                                                    {{ $costCenter->type == 'support' ? __('Support') : __('Revenue') }}
+                                                </span>
+                                            </td>
                                             <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->parent ? $costCenter->parent->name : '-' }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $costCenter->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                    {{ $costCenter->is_active ? __('Active') : __('Inactive') }}
+                                                </span>
+                                            </td>
                                             <td class="px-6 py-2 whitespace-nowrap text-sm">
                                                 <div class="flex items-center gap-2">
                                                     <a href="{{ route('cost-centers.show', $costCenter) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">

@@ -21,23 +21,75 @@ class CostCenterController extends Controller
     {
         $search = $request->get('search');
         $type = $request->get('type');
+        $division = $request->get('division');
         $isActive = $request->get('is_active');
         $viewMode = $request->get('view_mode', 'tree'); // 'tree' or 'flat'
+
+        $baseQuery = CostCenter::where('hospital_id', hospital('id'));
+
+        // Get all divisions for tabs
+        $divisions = Division::where('hospital_id', hospital('id'))
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        // Build query for type tab counts (menghormati filter lain, tapi tidak mengunci type)
+        $typeCountQuery = clone $baseQuery;
+        if ($search) {
+            $typeCountQuery->where(function($q) use ($search) {
+                $q->where('code', 'LIKE', "%{$search}%")
+                  ->orWhere('name', 'LIKE', "%{$search}%")
+                  ->orWhere('building_name', 'LIKE', "%{$search}%");
+            });
+        }
+        if ($division) {
+            $typeCountQuery->where('name', $division);
+        }
+        if ($isActive !== null && $isActive !== '') {
+            $typeCountQuery->where('is_active', $isActive);
+        }
+
+        $typeCounts = [
+            'all' => $typeCountQuery->count(),
+            'support' => (clone $typeCountQuery)->where('type', 'support')->count(),
+            'revenue' => (clone $typeCountQuery)->where('type', 'revenue')->count(),
+        ];
+
+        // Build division counts
+        $divisionCounts = ['all' => $typeCountQuery->count()];
+        foreach ($divisions as $div) {
+            $divisionCountQuery = clone $baseQuery;
+            if ($search) {
+                $divisionCountQuery->where(function($q) use ($search) {
+                    $q->where('code', 'LIKE', "%{$search}%")
+                      ->orWhere('name', 'LIKE', "%{$search}%")
+                      ->orWhere('building_name', 'LIKE', "%{$search}%");
+                });
+            }
+            if ($type) {
+                $divisionCountQuery->where('type', $type);
+            }
+            if ($isActive !== null && $isActive !== '') {
+                $divisionCountQuery->where('is_active', $isActive);
+            }
+            $divisionCounts[$div->name] = $divisionCountQuery->where('name', $div->name)->count();
+        }
         
         if ($viewMode === 'tree') {
             // Get all cost centers for tree view
-            $allCostCenters = CostCenter::where('hospital_id', hospital('id'))
+            $allCostCenters = $baseQuery
                 ->with(['parent', 'children', 'tariffClass'])
                 ->get();
 
             // Apply filters if provided - include parents of matching children
-            if ($search || $type || ($isActive !== null && $isActive !== '')) {
+            if ($search || $type || $division || ($isActive !== null && $isActive !== '')) {
                 $filteredIds = collect();
                 
                 // First, find all cost centers that match the filter
-                $matchingCostCenters = $allCostCenters->filter(function($costCenter) use ($search, $type, $isActive) {
+                $matchingCostCenters = $allCostCenters->filter(function($costCenter) use ($search, $type, $division, $isActive) {
                     $matchesSearch = true;
                     $matchesType = true;
+                    $matchesDivision = true;
                     $matchesActive = true;
                     
                     if ($search) {
@@ -50,11 +102,15 @@ class CostCenterController extends Controller
                         $matchesType = $costCenter->type === $type;
                     }
                     
+                    if ($division) {
+                        $matchesDivision = $costCenter->name === $division;
+                    }
+                    
                     if ($isActive !== null && $isActive !== '') {
                         $matchesActive = $costCenter->is_active == $isActive;
                     }
                     
-                    return $matchesSearch && $matchesType && $matchesActive;
+                    return $matchesSearch && $matchesType && $matchesDivision && $matchesActive;
                 });
                 
                 // Collect IDs of matching cost centers and their parents
@@ -78,10 +134,10 @@ class CostCenterController extends Controller
             // Get root cost centers (no parent) and sort
             $rootCostCenters = $allCostCenters->whereNull('parent_id')->sortBy('name')->values();
             
-            return view('cost-centers.index', compact('rootCostCenters', 'allCostCenters', 'search', 'type', 'isActive', 'viewMode'));
+            return view('cost-centers.index', compact('rootCostCenters', 'allCostCenters', 'search', 'type', 'division', 'isActive', 'viewMode', 'typeCounts', 'divisions', 'divisionCounts'));
         } else {
             // Flat view with pagination
-            $query = CostCenter::where('hospital_id', hospital('id'));
+            $query = clone $baseQuery;
             
             if ($search) {
                 $query->where(function($q) use ($search) {
@@ -95,13 +151,17 @@ class CostCenterController extends Controller
                 $query->where('type', $type);
             }
             
+            if ($division) {
+                $query->where('name', $division);
+            }
+            
             if ($isActive !== null && $isActive !== '') {
                 $query->where('is_active', $isActive);
             }
             
             $costCenters = $query->with(['parent', 'tariffClass'])->latest()->paginate(15)->appends($request->query());
             
-            return view('cost-centers.index', compact('costCenters', 'search', 'type', 'isActive', 'viewMode'));
+            return view('cost-centers.index', compact('costCenters', 'search', 'type', 'division', 'isActive', 'viewMode', 'typeCounts', 'divisions', 'divisionCounts'));
         }
     }
 
