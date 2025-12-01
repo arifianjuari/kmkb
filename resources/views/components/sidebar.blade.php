@@ -186,6 +186,13 @@
                 $normalizedPath = ltrim(Str::after($logoPath, '/storage/'), '/');
             }
         @endphp
+        <!-- Mobile close button - Only visible on mobile when sidebar is open -->
+        <button @click="$dispatch('toggle-sidebar')" 
+                class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-biru-dongker-700 flex-shrink-0 mr-2">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
         <a href="{{ route('dashboard') }}" x-show="!collapsed" class="flex items-start space-x-3 min-w-0 flex-1">
             @if($isAbsoluteUrl || ($normalizedPath && Storage::disk(uploads_disk())->exists($normalizedPath)))
                 <img src="{{ $isAbsoluteUrl ? $logoPath : storage_url($normalizedPath) }}" alt="{{ hospital('name') }}" class="h-8 w-auto flex-shrink-0 mt-0.5" />
@@ -203,7 +210,7 @@
         </a>
         <button @click="toggleCollapse()" 
                 x-show="!collapsed"
-                class="p-1.5 hover:bg-gray-300 ml-2 rounded-md transition-all duration-200 flex-shrink-0 relative z-10 flex items-center justify-center"
+                class="hidden lg:flex p-1.5 hover:bg-gray-300 ml-2 rounded-md transition-all duration-200 flex-shrink-0 relative z-10 items-center justify-center"
                 :title="'Collapse Sidebar'">
             <svg class="w-5 h-5 transition-all duration-200" 
                  fill="none" 
@@ -788,5 +795,113 @@
             @endif
         @endauth
     </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="border-t border-gray-300 bg-gray-200 p-2 mt-auto">
+        @auth
+            <!-- Admin Menu (Users & Audit Logs access) -->
+            @canany(['view-users', 'view-audit-logs'])
+                <div class="mb-2">
+                    {{-- Buka ke atas supaya tidak terpotong di bawah --}}
+                    <x-dropdown align="top" width="56">
+                        <x-slot name="trigger">
+                            <button class="w-full flex items-center justify-start px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
+                                <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span x-show="!collapsed" class="truncate">Administration</span>
+                            </button>
+                        </x-slot>
+
+                        <x-slot name="content">
+                            <div class="px-4 py-2 border-b border-gray-200">
+                                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">System Administration</div>
+                            </div>
+                            @can('view-users')
+                            <x-dropdown-link :href="route('users.index')" class="{{ request()->routeIs('users.*') ? 'bg-gray-100' : '' }}">
+                                {{ __('Users') }}
+                            </x-dropdown-link>
+                            @endcan
+                            @can('view-audit-logs')
+                            <x-dropdown-link :href="route('audit-logs.index')" class="{{ request()->routeIs('audit-logs.*') ? 'bg-gray-100' : '' }}">
+                                {{ __('Audit Logs') }}
+                            </x-dropdown-link>
+                            @endcan
+                            <div class="border-t border-gray-200 my-1"></div>
+                            @if(auth()->user()->isSuperadmin())
+                            <x-dropdown-link :href="route('admin.roles.index')" class="{{ request()->routeIs('admin.roles.*') ? 'bg-gray-100' : '' }}">
+                                {{ __('Roles & Permissions') }}
+                            </x-dropdown-link>
+                            @else
+                            <div class="px-4 py-2 text-xs text-gray-500 cursor-not-allowed">
+                                {{ __('Roles & Permissions') }}
+                            </div>
+                            @endif
+                            <div class="px-4 py-2 text-xs text-gray-500 cursor-not-allowed">
+                                {{ __('API Tokens') }}
+                            </div>
+                            <div class="px-4 py-2 text-xs text-gray-500 cursor-not-allowed">
+                                {{ __('System Settings') }}
+                            </div>
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+            @endcanany
+
+            <!-- Notifications -->
+            <div class="mb-2">
+                <button class="w-full flex items-center justify-start px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors relative">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <span x-show="!collapsed" class="truncate">Notifications</span>
+                    <!-- Badge for notifications count (optional) -->
+                    <!-- <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span> -->
+                </button>
+            </div>
+
+            <!-- User Dropdown -->
+            <div>
+                {{-- Buka dropdown user ke atas agar tidak terpotong --}}
+                <x-dropdown align="top" width="48">
+                    <x-slot name="trigger">
+                        <button class="w-full flex items-center justify-start px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
+                            <div class="h-8 w-8 rounded-full bg-biru-dongker-800 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            </div>
+                            <div x-show="!collapsed" class="ml-3 text-left min-w-0 flex-1">
+                                <div class="text-sm font-medium text-gray-900 truncate">{{ auth()->user()->name }}</div>
+                                <div class="text-xs text-gray-500 truncate">{{ auth()->user()->email }}</div>
+                            </div>
+                            <svg x-show="!collapsed" class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    </x-slot>
+
+                    <x-slot name="content">
+                        <x-dropdown-link :href="route('profile.edit')">
+                            {{ __('Profile') }}
+                        </x-dropdown-link>
+
+                        <!-- Authentication -->
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <x-dropdown-link :href="route('logout')"
+                                    onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                {{ __('Log Out') }}
+                            </x-dropdown-link>
+                        </form>
+                    </x-slot>
+                </x-dropdown>
+            </div>
+        @else
+            <a href="{{ route('login') }}" class="w-full flex items-center justify-start px-3 py-1.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-300 hover:text-gray-900 transition-colors">
+                <span x-show="!collapsed" class="truncate">Login</span>
+            </a>
+        @endauth
+    </div>
 </aside>
 
