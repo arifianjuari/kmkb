@@ -9,7 +9,7 @@
     data-cost-center-id="{{ $costCenter->id }}" 
     data-level="{{ $level }}"
     data-parent-id="{{ $costCenter->parent_id ?? '' }}">
-    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+    <td class="px-6 py-2 text-sm text-gray-900">
         <div class="flex items-center">
             @if($level > 0)
                 @for($i = 0; $i < $level; $i++)
@@ -35,36 +35,14 @@
                 @endif
             @endif
             <span class="{{ $level > 0 ? 'text-gray-700' : 'text-gray-900 font-semibold' }}">
-                {{ $costCenter->code }}
+                {{ $costCenter->name }}
             </span>
         </div>
     </td>
-    <td class="px-6 py-4 text-sm text-gray-900">
-        <span class="{{ $level > 0 ? 'text-gray-700' : 'text-gray-900 font-semibold' }}">
-            {{ $costCenter->name }}
-        </span>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->building_name ?? '-' }}</td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->floor ?? '-' }}</td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->tariffClass ? $costCenter->tariffClass->name : '-' }}</td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm">
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $costCenter->type == 'support' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
-            {{ $costCenter->type == 'support' ? __('Support') : __('Revenue') }}
-        </span>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        @if($costCenter->parent)
-            {{ $costCenter->parent->name }}
-        @else
-            <span class="text-gray-400">-</span>
-        @endif
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm">
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $costCenter->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-            {{ $costCenter->is_active ? __('Active') : __('Inactive') }}
-        </span>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm">
+    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->building_name ?? '-' }}</td>
+    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->floor ?? '-' }}</td>
+    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->tariffClass ? $costCenter->tariffClass->name : '-' }}</td>
+    <td class="px-6 py-2 whitespace-nowrap text-sm">
         <div class="flex items-center gap-2">
             <a href="{{ route('cost-centers.show', $costCenter) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
