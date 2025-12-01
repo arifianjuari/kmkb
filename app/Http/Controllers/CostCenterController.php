@@ -82,12 +82,9 @@ class CostCenterController extends Controller
                 ->with(['parent', 'children', 'tariffClass'])
                 ->get();
 
-            // Apply filters if provided - include parents of matching children
+            // Apply filters if provided
             if ($search || $type || $division || ($isActive !== null && $isActive !== '')) {
-                $filteredIds = collect();
-                
-                // First, find all cost centers that match the filter
-                $matchingCostCenters = $allCostCenters->filter(function($costCenter) use ($search, $type, $division, $isActive) {
+                $allCostCenters = $allCostCenters->filter(function($costCenter) use ($search, $type, $division, $isActive) {
                     $matchesSearch = true;
                     $matchesType = true;
                     $matchesDivision = true;
@@ -113,29 +110,12 @@ class CostCenterController extends Controller
                     
                     return $matchesSearch && $matchesType && $matchesDivision && $matchesActive;
                 });
-                
-                // Collect IDs of matching cost centers and their parents
-                $matchingCostCenters->each(function($costCenter) use (&$filteredIds, $allCostCenters) {
-                    $filteredIds->push($costCenter->id);
-                    // Include all ancestors
-                    $current = $costCenter;
-                    while ($current->parent_id) {
-                        $filteredIds->push($current->parent_id);
-                        $current = $allCostCenters->firstWhere('id', $current->parent_id);
-                        if (!$current) break;
-                    }
-                });
-                
-                // Filter allCostCenters to include only matching cost centers and their parents
-                $allCostCenters = $allCostCenters->filter(function($costCenter) use ($filteredIds) {
-                    return $filteredIds->contains($costCenter->id);
-                });
             }
 
-            // Get root cost centers (no parent) and sort
-            $rootCostCenters = $allCostCenters->whereNull('parent_id')->sortBy('name')->values();
+            // Group cost centers by division (name field)
+            $groupedByDivision = $allCostCenters->groupBy('name')->sortKeys();
             
-            return view('cost-centers.index', compact('rootCostCenters', 'allCostCenters', 'search', 'type', 'division', 'isActive', 'viewMode', 'typeCounts', 'divisions', 'divisionCounts'));
+            return view('cost-centers.index', compact('groupedByDivision', 'allCostCenters', 'search', 'type', 'division', 'isActive', 'viewMode', 'typeCounts', 'divisions', 'divisionCounts'));
         } else {
             // Flat view with pagination
             $query = clone $baseQuery;

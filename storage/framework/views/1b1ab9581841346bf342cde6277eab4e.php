@@ -97,13 +97,16 @@
             <div class="flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out" 
                  :class="sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'"
                  style="will-change: margin-left;">
-                <!-- Top Navigation Bar -->
-                <header>
-                    <?php echo $__env->make('layouts.navigation', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                </header>
-
+                <!-- Mobile menu button (floating) - Only visible on mobile when sidebar is closed -->
+                <button @click="sidebarOpen = true" 
+                        class="lg:hidden fixed top-4 left-4 z-50 p-3 rounded-md bg-white shadow-lg text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-biru-dongker-700"
+                        x-show="!sidebarOpen">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
                 <!-- Main Content -->
-                <main class="flex-1 overflow-y-auto bg-gray-50 pt-16">
+                <main class="flex-1 overflow-y-auto bg-gray-50">
                     <!-- Page Heading -->
                     <?php if(isset($header)): ?>
                         <div class="bg-white shadow dark:bg-gray-800">

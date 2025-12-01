@@ -1,42 +1,8 @@
-@php
-    // Get children from filtered allCostCenters
-    $children = $allCostCenters->where('parent_id', $costCenter->id)->sortBy('name');
-    $hasChildren = $children->count() > 0;
-    $uniqueId = 'cc-' . $costCenter->id;
-@endphp
-
-<tr class="hover:bg-gray-50 cost-center-row" 
-    data-cost-center-id="{{ $costCenter->id }}" 
-    data-level="{{ $level }}"
-    data-parent-id="{{ $costCenter->parent_id ?? '' }}">
+<tr class="hover:bg-gray-50 cost-center-row division-{{ $divisionId ?? '' }}" 
+    data-cost-center-id="{{ $costCenter->id }}">
     <td class="px-6 py-4 text-sm text-gray-500">
-        <div class="flex items-center">
-            @if($level > 0)
-                @for($i = 0; $i < $level; $i++)
-                    <span class="inline-block w-6"></span>
-                @endfor
-            @endif
-            @if($hasChildren)
-                <button type="button" 
-                        class="tree-toggle inline-flex items-center mr-2 cursor-pointer hover:bg-gray-200 rounded p-1 transition-colors" 
-                        data-target="{{ $uniqueId }}-children"
-                        onclick="toggleCostCenterTree('{{ $uniqueId }}', this)"
-                        aria-label="Toggle children">
-                    <svg class="w-4 h-4 text-gray-600 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                    <svg class="w-4 h-4 text-gray-600 chevron-icon chevron-right hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            @else
-                @if($level > 0)
-                    <span class="inline-block w-6 mr-2"></span>
-                @endif
-            @endif
-            <span class="{{ $level > 0 ? 'text-gray-700' : 'text-gray-900 font-semibold' }}">
-                {{ $costCenter->building_name ?? '-' }}
-            </span>
+        <div class="flex items-center pl-6">
+            {{ $costCenter->building_name ?? '-' }}
         </div>
     </td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->floor ?? '-' }}</td>
@@ -77,10 +43,3 @@
         </div>
     </td>
 </tr>
-
-@if($hasChildren)
-    @foreach($children as $child)
-        @include('cost-centers.partials.tree-row', ['costCenter' => $child, 'allCostCenters' => $allCostCenters, 'level' => $level + 1])
-    @endforeach
-@endif
-

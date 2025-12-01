@@ -141,8 +141,8 @@
                 <div class="mb-6 space-y-4">
                     {{-- Type Tabs (Indigo) --}}
                     <div>
-                        <p class="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">{{ __('Type') }}</p>
-                        <div class="flex flex-wrap items-center gap-2">
+                        <p class="text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">{{ __('Type') }}</p>
+                        <div class="flex flex-wrap items-center gap-1.5">
                             @foreach($typeTabs as $key => $label)
                                 @php
                                     $isActiveTab = ($key === 'all' && !$type) || ($key === $type);
@@ -154,11 +154,11 @@
                                 @endphp
                                 <a
                                     href="{{ $tabUrl }}"
-                                    class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-biru-dongker-700 {{ $isActiveTab ? 'bg-biru-dongker-800 text-white border-biru-dongker-800' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 border rounded-full text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-biru-dongker-700 {{ $isActiveTab ? 'bg-biru-dongker-800 text-white border-biru-dongker-800' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
                                 >
                                     <span>{{ $label }}</span>
                                     @if(isset($typeCounts))
-                                        <span class="text-xs font-semibold {{ $isActiveTab ? 'text-white/80' : 'text-gray-500' }}">
+                                        <span class="text-[10px] font-semibold {{ $isActiveTab ? 'text-white/80' : 'text-gray-500' }}">
                                             {{ $typeCounts[$key] ?? 0 }}
                                         </span>
                                     @endif
@@ -170,8 +170,8 @@
                     {{-- Division Tabs --}}
                     @if(isset($divisions) && $divisions->count() > 0)
                     <div>
-                        <p class="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">{{ __('Division') }}</p>
-                        <div class="flex flex-wrap items-center gap-2">
+                        <p class="text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">{{ __('Division') }}</p>
+                        <div class="flex flex-wrap items-center gap-1.5">
                             @php
                                 $isActiveDivisionTab = !$division;
                                 $urlParams = request()->except('division', 'page');
@@ -179,11 +179,11 @@
                             @endphp
                             <a
                                 href="{{ $allDivisionTabUrl }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-biru-dongker-700 {{ $isActiveDivisionTab ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 border rounded-full text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-biru-dongker-700 {{ $isActiveDivisionTab ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
                             >
                                 <span>{{ __('All Divisions') }}</span>
                                 @if(isset($divisionCounts))
-                                    <span class="text-xs font-semibold {{ $isActiveDivisionTab ? 'text-white/80' : 'text-gray-500' }}">
+                                    <span class="text-[10px] font-semibold {{ $isActiveDivisionTab ? 'text-white/80' : 'text-gray-500' }}">
                                         {{ $divisionCounts['all'] ?? 0 }}
                                     </span>
                                 @endif
@@ -197,11 +197,11 @@
                                 @endphp
                                 <a
                                     href="{{ $divisionTabUrl }}"
-                                    class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-biru-dongker-700 {{ $isActiveDivisionTab ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 border rounded-full text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-biru-dongker-700 {{ $isActiveDivisionTab ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
                                 >
                                     <span>{{ $div->name }}</span>
                                     @if(isset($divisionCounts))
-                                        <span class="text-xs font-semibold {{ $isActiveDivisionTab ? 'text-white/80' : 'text-gray-500' }}">
+                                        <span class="text-[10px] font-semibold {{ $isActiveDivisionTab ? 'text-white/80' : 'text-gray-500' }}">
                                             {{ $divisionCounts[$div->name] ?? 0 }}
                                         </span>
                                     @endif
@@ -212,9 +212,9 @@
                     @endif
                 </div>
 
-                @if(isset($rootCostCenters) && ($viewMode ?? 'tree') === 'tree')
+                @if(isset($groupedByDivision) && ($viewMode ?? 'tree') === 'tree')
                     {{-- Tree View --}}
-                    @if($rootCostCenters->count() > 0)
+                    @if($groupedByDivision->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
@@ -228,15 +228,41 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @forelse($rootCostCenters as $costCenter)
-                                        @include('cost-centers.partials.tree-row', ['costCenter' => $costCenter, 'allCostCenters' => $allCostCenters, 'level' => 0])
-                                    @empty
+                                    @foreach($groupedByDivision as $divisionName => $costCenters)
+                                        @php
+                                            $divisionId = 'division-' . md5($divisionName);
+                                            $hasItems = $costCenters->count() > 0;
+                                        @endphp
+                                        <tr class="division-header-row bg-gray-100 hover:bg-gray-200" data-division="{{ $divisionName }}" data-division-id="{{ $divisionId }}">
+                                            <td colspan="6" class="px-6 py-3">
+                                                <div class="flex items-center">
+                                                    <button type="button" 
+                                                            class="division-toggle inline-flex items-center mr-2 cursor-pointer hover:bg-gray-300 rounded p-1 transition-colors" 
+                                                            onclick="toggleDivision('{{ $divisionId }}', this)"
+                                                            aria-label="Toggle division">
+                                                        <svg class="w-4 h-4 text-gray-600 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                        </svg>
+                                                        <svg class="w-4 h-4 text-gray-600 chevron-icon chevron-right hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <span class="font-semibold text-gray-900">{{ $divisionName }}</span>
+                                                    <span class="ml-2 text-xs text-gray-500">({{ $costCenters->count() }})</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @foreach($costCenters->sortBy('building_name') as $costCenter)
+                                            @include('cost-centers.partials.tree-row', ['costCenter' => $costCenter, 'divisionId' => $divisionId])
+                                        @endforeach
+                                    @endforeach
+                                    @if($groupedByDivision->count() === 0)
                                         <tr>
                                             <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                                                 {{ __('No cost centers found.') }}
                                             </td>
                                         </tr>
-                                    @endforelse
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
@@ -246,84 +272,36 @@
 
                     @push('scripts')
                     <script>
-                        function toggleCostCenterTree(containerId, button) {
-                            // Find all rows that belong to this parent
-                            const parentRow = button.closest('tr');
-                            const parentId = parentRow.getAttribute('data-cost-center-id');
-                            
-                            // Find all child rows (rows with data-parent-id matching this cost center's id)
-                            const allRows = document.querySelectorAll('tr.cost-center-row');
-                            const childRows = Array.from(allRows).filter(row => {
-                                return row.getAttribute('data-parent-id') === parentId;
-                            });
+                        function toggleDivision(divisionId, button) {
+                            // Find all cost center rows that belong to this division
+                            const costCenterRows = document.querySelectorAll(`tr.division-${divisionId}`);
                             
                             const chevronDown = button.querySelector('.chevron-down');
                             const chevronRight = button.querySelector('.chevron-right');
                             
-                            // Check if currently expanded (first child is visible)
-                            const isExpanded = childRows.length > 0 && !childRows[0].classList.contains('hidden');
+                            // Check if currently expanded (first row is visible)
+                            const isExpanded = costCenterRows.length > 0 && !costCenterRows[0].classList.contains('hidden');
                             
                             if (isExpanded) {
-                                // Collapse: hide all children and their descendants
-                                childRows.forEach(row => {
-                                    hideRowAndDescendants(row);
+                                // Collapse: hide all cost center rows in this division
+                                costCenterRows.forEach(row => {
+                                    row.classList.add('hidden');
                                 });
                                 if (chevronDown) chevronDown.classList.add('hidden');
                                 if (chevronRight) chevronRight.classList.remove('hidden');
                             } else {
-                                // Expand: show direct children only
-                                childRows.forEach(row => {
+                                // Expand: show all cost center rows in this division
+                                costCenterRows.forEach(row => {
                                     row.classList.remove('hidden');
-                                    // Reset chevron state for direct children (they should show as expanded)
-                                    const childButton = row.querySelector('.tree-toggle');
-                                    if (childButton) {
-                                        const childChevronDown = childButton.querySelector('.chevron-down');
-                                        const childChevronRight = childButton.querySelector('.chevron-right');
-                                        if (childChevronDown && childChevronRight) {
-                                            // Check if child has visible children
-                                            const childId = row.getAttribute('data-cost-center-id');
-                                            const grandChildren = Array.from(allRows).filter(r => {
-                                                return r.getAttribute('data-parent-id') === childId;
-                                            });
-                                            const hasVisibleGrandChildren = grandChildren.length > 0 && !grandChildren[0].classList.contains('hidden');
-                                            
-                                            if (hasVisibleGrandChildren) {
-                                                childChevronDown.classList.remove('hidden');
-                                                childChevronRight.classList.add('hidden');
-                                            } else {
-                                                childChevronDown.classList.remove('hidden');
-                                                childChevronRight.classList.add('hidden');
-                                            }
-                                        }
-                                    }
                                 });
                                 if (chevronDown) chevronDown.classList.remove('hidden');
                                 if (chevronRight) chevronRight.classList.add('hidden');
                             }
                         }
-                        
-                        function hideRowAndDescendants(row) {
-                            row.classList.add('hidden');
-                            const costCenterId = row.getAttribute('data-cost-center-id');
-                            const allRows = document.querySelectorAll('tr.cost-center-row');
-                            const descendants = Array.from(allRows).filter(r => {
-                                return r.getAttribute('data-parent-id') === costCenterId;
-                            });
-                            descendants.forEach(desc => hideRowAndDescendants(desc));
-                            
-                            // Update chevron state when hiding
-                            const button = row.querySelector('.tree-toggle');
-                            if (button) {
-                                const chevronDown = button.querySelector('.chevron-down');
-                                const chevronRight = button.querySelector('.chevron-right');
-                                if (chevronDown) chevronDown.classList.add('hidden');
-                                if (chevronRight) chevronRight.classList.remove('hidden');
-                            }
-                        }
 
-                        // Initialize: all children are expanded by default
+                        // Initialize: all divisions are expanded by default
                         document.addEventListener('DOMContentLoaded', function() {
-                            // All children are visible by default, so chevrons should show down arrow
+                            // All divisions are visible by default, so chevrons should show down arrow
                             // This is already the default state from the HTML
                         });
                     </script>
