@@ -117,6 +117,10 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::get('cost-references/search', [CostReferenceController::class, 'search'])->name('cost-references.search');
     Route::resource('cost-references', CostReferenceController::class);
 
+    // RVU Values
+    Route::get('rvu-values/by-cost-reference/{costReference}', [App\Http\Controllers\RvuValueController::class, 'getByCostReference'])->name('rvu-values.by-cost-reference');
+    Route::resource('rvu-values', App\Http\Controllers\RvuValueController::class);
+
     // Cost Centers
     Route::get('cost-centers/export', [App\Http\Controllers\CostCenterController::class, 'export'])->name('cost-centers.export');
     Route::resource('cost-centers', App\Http\Controllers\CostCenterController::class);

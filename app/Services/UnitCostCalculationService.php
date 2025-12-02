@@ -8,11 +8,18 @@ use App\Models\ServiceVolume;
 use App\Models\CostReference;
 use App\Models\CostCenter;
 use App\Models\UnitCostCalculation;
+use App\Services\RvuCalculationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class UnitCostCalculationService
 {
+    protected $rvuCalculationService;
+
+    public function __construct(RvuCalculationService $rvuCalculationService)
+    {
+        $this->rvuCalculationService = $rvuCalculationService;
+    }
     /**
      * Calculate unit cost for a specific period and version
      *
@@ -114,14 +121,34 @@ class UnitCostCalculationService
             throw new \Exception("Service volume is zero or not found for {$costRef->service_code}");
         }
 
-        // 5. Calculate unit costs
+        // 5. Get RVU for this cost reference and period (if exists)
+        $rvuValue = $this->rvuCalculationService->getActiveRvuForPeriod($hospitalId, $costRef->id, $year, $month);
+        
+        // 6. Calculate unit costs (standard)
         $totalCost = $directMaterial + $directLabor + $indirectOverhead;
         $unitCostMaterial = $directMaterial / $serviceVolume;
         $unitCostLabor = $directLabor / $serviceVolume;
         $unitCostOverhead = $indirectOverhead / $serviceVolume;
         $totalUnitCost = $totalCost / $serviceVolume;
 
-        // 6. Save or update unit cost calculation
+        // 7. Calculate RVU-weighted unit cost if RVU exists
+        $rvuWeightedVolume = null;
+        $unitCostWithRvu = null;
+        $rvuValueId = null;
+        $rvuValueAmount = null;
+        
+        if ($rvuValue && $rvuValue->is_active) {
+            $rvuValueAmount = $rvuValue->rvu_value;
+            $rvuWeightedVolume = $this->rvuCalculationService->getRvuWeightedVolume($serviceVolume, $rvuValueAmount);
+            
+            if ($rvuWeightedVolume > 0) {
+                $unitCostWithRvu = $totalCost / $rvuWeightedVolume;
+            }
+            
+            $rvuValueId = $rvuValue->id;
+        }
+
+        // 8. Save or update unit cost calculation
         UnitCostCalculation::updateOrCreate(
             [
                 'hospital_id' => $hospitalId,
@@ -135,6 +162,10 @@ class UnitCostCalculationService
                 'direct_cost_labor' => round($unitCostLabor, 2),
                 'indirect_cost_overhead' => round($unitCostOverhead, 2),
                 'total_unit_cost' => round($totalUnitCost, 2),
+                'rvu_value' => $rvuValueAmount,
+                'rvu_weighted_volume' => $rvuWeightedVolume,
+                'unit_cost_with_rvu' => $unitCostWithRvu ? round($unitCostWithRvu, 2) : null,
+                'rvu_value_id' => $rvuValueId,
             ]
         );
     }

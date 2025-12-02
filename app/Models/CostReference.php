@@ -73,4 +73,51 @@ class CostReference extends Model
     {
         return $this->belongsTo(ExpenseCategory::class);
     }
+
+    /**
+     * Get the RVU values for this cost reference.
+     */
+    public function rvuValues()
+    {
+        return $this->hasMany(RvuValue::class);
+    }
+
+    /**
+     * Get active RVU for a specific period.
+     *
+     * @param int $year
+     * @param int|null $month
+     * @return RvuValue|null
+     */
+    public function getActiveRvu($year, $month = null)
+    {
+        $query = $this->rvuValues()
+            ->where('period_year', $year)
+            ->where('is_active', true);
+        
+        if ($month !== null) {
+            $query->where('period_month', $month);
+        } else {
+            $query->whereNull('period_month');
+        }
+        
+        return $query->orderBy('period_month', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->first();
+    }
+
+    /**
+     * Get the latest RVU value for this cost reference.
+     *
+     * @return RvuValue|null
+     */
+    public function getLatestRvu()
+    {
+        return $this->rvuValues()
+            ->where('is_active', true)
+            ->orderBy('period_year', 'desc')
+            ->orderBy('period_month', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->first();
+    }
 }

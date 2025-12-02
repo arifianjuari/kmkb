@@ -25,6 +25,10 @@ class UnitCostCalculation extends Model
         'indirect_cost_overhead',
         'total_unit_cost',
         'version_label',
+        'rvu_value',
+        'rvu_weighted_volume',
+        'unit_cost_with_rvu',
+        'rvu_value_id',
     ];
 
     /**
@@ -39,6 +43,9 @@ class UnitCostCalculation extends Model
         'direct_cost_labor' => 'decimal:2',
         'indirect_cost_overhead' => 'decimal:2',
         'total_unit_cost' => 'decimal:2',
+        'rvu_value' => 'decimal:4',
+        'rvu_weighted_volume' => 'decimal:4',
+        'unit_cost_with_rvu' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -49,6 +56,14 @@ class UnitCostCalculation extends Model
     public function costReference()
     {
         return $this->belongsTo(CostReference::class);
+    }
+
+    /**
+     * Get the RVU value used in this calculation.
+     */
+    public function rvuValue()
+    {
+        return $this->belongsTo(RvuValue::class, 'rvu_value_id');
     }
 
     /**

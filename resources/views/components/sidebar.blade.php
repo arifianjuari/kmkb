@@ -30,6 +30,7 @@
         $openGroups['setup-costing'] = true;
     }
     if (request()->routeIs('cost-references.*') || 
+        request()->routeIs('rvu-values.*') ||
         request()->routeIs('setup.service-catalog.*')) {
         $openGroups['setup-service-catalog'] = true;
     }
@@ -296,6 +297,10 @@
                                     <a href="{{ route('cost-references.index') }}" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('cost-references.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
                                         <span class="truncate">Service Items</span>
+                                    </a>
+                                    <a href="{{ route('rvu-values.index') }}" 
+                                       class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('rvu-values.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">RVU Management</span>
                                     </a>
                                     <a href="{{ route('setup.service-catalog.simrs-linked') }}" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('setup.service-catalog.simrs-linked') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">

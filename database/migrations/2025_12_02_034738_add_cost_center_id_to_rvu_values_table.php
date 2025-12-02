@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('rvu_values', function (Blueprint $table) {
+            $table->unsignedBigInteger('cost_center_id')->nullable()->after('cost_reference_id');
+            
+            // Foreign key
+            $table->foreign('cost_center_id')->references('id')->on('cost_centers')->onDelete('set null');
+            
+            // Index for performance
+            $table->index('cost_center_id');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('rvu_values', function (Blueprint $table) {
+            $table->dropForeign(['cost_center_id']);
+            $table->dropIndex(['cost_center_id']);
+            $table->dropColumn('cost_center_id');
+        });
+    }
+};
