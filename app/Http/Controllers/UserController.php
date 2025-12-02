@@ -235,7 +235,7 @@ class UserController extends Controller
     public function changePasswordForm(User $user)
     {
         $this->ensureCanManage($user);
-        return view('users.change_password', compact('user'));
+        return view('users.edit', compact('user'));
     }
 
     /**
@@ -249,14 +249,18 @@ class UserController extends Controller
     {
         $this->ensureCanManage($user);
         $request->validate([
-            'password' => 'required|string|min:8|confirmed',
+            'new_password' => 'required|string|min:8|confirmed',
+        ], [
+            'new_password.required' => 'Password baru wajib diisi.',
+            'new_password.min' => 'Password minimal 8 karakter.',
+            'new_password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
-        $user->password = Hash::make($request->password);
+        $user->password = Hash::make($request->new_password);
         $user->save();
 
         return redirect()->route('users.index')
-            ->with('success', 'User password updated successfully.');
+            ->with('success', 'Password pengguna berhasil diperbarui.');
     }
 
     /**

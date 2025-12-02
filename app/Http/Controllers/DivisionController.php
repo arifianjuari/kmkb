@@ -17,9 +17,53 @@ class DivisionController extends Controller
     {
         $search = $request->get('search');
         $isActive = $request->get('is_active');
-        $viewMode = $request->get('view_mode', 'tree'); // 'tree' or 'flat'
+        $viewMode = $request->get('view_mode', 'tree'); // 'tree', 'flat', or 'diagram'
 
-        if ($viewMode === 'tree') {
+        if ($viewMode === 'diagram') {
+            // Get all divisions for diagram view
+            $allDivisions = Division::where('hospital_id', hospital('id'))
+                ->with(['parent', 'children'])
+                ->get();
+
+            // Apply filters if provided
+            if ($search || ($isActive !== null && $isActive !== '')) {
+                $filteredIds = collect();
+                
+                $matchingDivisions = $allDivisions->filter(function($division) use ($search, $isActive) {
+                    $matchesSearch = true;
+                    $matchesActive = true;
+                    
+                    if ($search) {
+                        $matchesSearch = stripos($division->name, $search) !== false 
+                            || stripos($division->code ?? '', $search) !== false;
+                    }
+                    
+                    if ($isActive !== null && $isActive !== '') {
+                        $matchesActive = $division->is_active == $isActive;
+                    }
+                    
+                    return $matchesSearch && $matchesActive;
+                });
+                
+                $matchingDivisions->each(function($division) use (&$filteredIds, $allDivisions) {
+                    $filteredIds->push($division->id);
+                    $current = $division;
+                    while ($current->parent_id) {
+                        $filteredIds->push($current->parent_id);
+                        $current = $allDivisions->firstWhere('id', $current->parent_id);
+                        if (!$current) break;
+                    }
+                });
+                
+                $allDivisions = $allDivisions->filter(function($division) use ($filteredIds) {
+                    return $filteredIds->contains($division->id);
+                });
+            }
+
+            $rootDivisions = $allDivisions->whereNull('parent_id')->sortBy('name')->values();
+            
+            return view('divisions.index', compact('rootDivisions', 'allDivisions', 'search', 'isActive', 'viewMode'));
+        } elseif ($viewMode === 'tree') {
             // Get all divisions for tree view
             $allDivisions = Division::where('hospital_id', hospital('id'))
                 ->with(['parent', 'children'])

@@ -41,6 +41,12 @@
                 </form>
             </div>
             <div class="flex items-center gap-2">
+                <a href="{{ route('divisions.index', array_merge(request()->query(), ['view_mode' => 'diagram'])) }}" class="inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium {{ ($viewMode ?? 'tree') === 'diagram' ? 'bg-biru-dongker-800 text-white border-biru-dongker-800' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }}">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                    </svg>
+                    Diagram
+                </a>
                 <a href="{{ route('divisions.index', array_merge(request()->query(), ['view_mode' => 'tree'])) }}" class="inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium {{ ($viewMode ?? 'tree') === 'tree' ? 'bg-biru-dongker-800 text-white border-biru-dongker-800' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }}">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
@@ -56,7 +62,127 @@
             </div>
         </div>
         
-        @if(isset($rootDivisions) && ($viewMode ?? 'tree') === 'tree')
+        @if(isset($rootDivisions) && ($viewMode ?? 'tree') === 'diagram')
+            {{-- Diagram View --}}
+            <div class="p-6">
+                @if($rootDivisions->count() > 0)
+                    <div id="org-chart" class="org-chart-container">
+                        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+                            @foreach($rootDivisions as $rootDivision)
+                                @include('divisions.partials.diagram-node', ['division' => $rootDivision, 'allDivisions' => $allDivisions, 'level' => 0])
+                            @endforeach
+                        </div>
+                    </div>
+                @else
+                    <p class="text-gray-600 text-center py-8">{{ __('No divisions found.') }}</p>
+                @endif
+            </div>
+
+            @push('styles')
+            <style>
+                .org-chart-container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    min-height: 400px;
+                    padding: 40px 20px;
+                    overflow-x: auto;
+                    overflow-y: visible;
+                    background: #f9fafb;
+                    border-radius: 8px;
+                }
+
+                .org-node {
+                    position: relative;
+                    margin: 0 10px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding-top: 20px;
+                }
+
+                .org-node-box {
+                    padding: 14px 24px;
+                    border-radius: 6px;
+                    text-align: center;
+                    min-width: 160px;
+                    max-width: 220px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    border: 2px solid #9ca3af;
+                    background: white;
+                    color: #1f2937;
+                    font-size: 12px;
+                    font-weight: 600;
+                    word-wrap: break-word;
+                    position: relative;
+                    z-index: 2;
+                    margin-bottom: 0;
+                }
+
+                .org-node-box:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+                    border-color: #6b7280;
+                }
+
+                .org-node-box.inactive {
+                    opacity: 0.5;
+                    background: #f3f4f6;
+                    color: #9ca3af;
+                    border-color: #d1d5db;
+                }
+
+                .org-node-children {
+                    display: flex;
+                    justify-content: center;
+                    align-items: flex-start;
+                    margin-top: 20px;
+                    position: relative;
+                    padding-top: 10px;
+                }
+
+                /* Vertical connector from parent to children (above box) */
+                .org-connector-vertical {
+                    position: absolute;
+                    top: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 3px;
+                    height: 20px;
+                    background: #6b7280;
+                    z-index: 1;
+                    display: block;
+                }
+
+                /* Horizontal connector connecting siblings */
+                .org-connector-horizontal {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 3px;
+                    background: #6b7280;
+                    z-index: 1;
+                    display: block;
+                }
+
+                /* Vertical connector from horizontal line to parent (in children container) */
+                .org-connector-vertical-up {
+                    position: absolute;
+                    top: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 3px;
+                    height: 20px;
+                    background: #6b7280;
+                    z-index: 1;
+                    display: block;
+                }
+            </style>
+            @endpush
+        @elseif(isset($rootDivisions) && ($viewMode ?? 'tree') === 'tree')
             {{-- Tree View --}}
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">

@@ -113,7 +113,7 @@
             <h5 class="text-lg font-medium text-gray-900 dark:text-white">{{ __('Change Password') }}</h5>
         </div>
         <div class="p-6">
-            <form action="{{ route('users.change-password', $user) }}" method="POST">
+            <form action="{{ route('users.change-password.update', $user) }}" method="POST">
                 @csrf
                 @method('PUT')
                 

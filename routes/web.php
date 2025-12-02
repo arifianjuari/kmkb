@@ -214,7 +214,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::middleware('can:view-users')->group(function () {
         Route::resource('users', UserController::class);
         Route::get('users/{user}/change-password', [UserController::class, 'changePasswordForm'])->name('users.change-password');
-        Route::post('users/{user}/change-password', [UserController::class, 'changePassword'])->name('users.change-password.update');
+        Route::put('users/{user}/change-password', [UserController::class, 'changePassword'])->name('users.change-password.update');
     });
 
     // Roles & Permissions Management (superadmin only)
