@@ -30,7 +30,7 @@
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Cost Center</dt>
                         <dd class="mt-1 text-sm text-gray-900">
-                            {{ $rvuValue->costCenter->name ?? '-' }}
+                            {{ $rvuValue->costCenter->building_name ?? '-' }}
                         </dd>
                     </div>
                     <div>

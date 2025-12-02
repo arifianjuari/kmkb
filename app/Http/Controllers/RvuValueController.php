@@ -77,7 +77,7 @@ class RvuValueController extends Controller
         // Get cost centers for filter dropdown
         $costCenters = CostCenter::where('hospital_id', $hospitalId)
             ->where('is_active', true)
-            ->orderBy('name')
+            ->orderBy('building_name')
             ->get();
         
         // Get service volumes for current period to show "Jumlah Tindakan"
@@ -109,7 +109,7 @@ class RvuValueController extends Controller
         
         $costCenters = CostCenter::where('hospital_id', $hospitalId)
             ->where('is_active', true)
-            ->orderBy('name')
+            ->orderBy('building_name')
             ->get();
         
         // Get current year and month as default
@@ -222,7 +222,7 @@ class RvuValueController extends Controller
         
         $costCenters = CostCenter::where('hospital_id', $hospitalId)
             ->where('is_active', true)
-            ->orderBy('name')
+            ->orderBy('building_name')
             ->get();
         
         $rvuValue->load('costCenter');

@@ -76,7 +76,7 @@
                         <option value="">Semua</option>
                         @foreach($costCenters as $cc)
                             <option value="{{ $cc->id }}" {{ $costCenterId == $cc->id ? 'selected' : '' }}>
-                                {{ $cc->name }}
+                                {{ $cc->building_name ?? '-' }}
                             </option>
                         @endforeach
                     </select>
@@ -143,7 +143,7 @@
                                             {{ $rvuValues->firstItem() + $index }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
-                                            {{ $rvu->costCenter->name ?? '-' }}
+                                            {{ $rvu->costCenter->building_name ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
                                             {{ $rvu->costReference->service_description ?? '-' }}

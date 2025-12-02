@@ -69,7 +69,7 @@
                                     <option value="">Pilih Cost Center</option>
                                     @foreach($costCenters as $cc)
                                         <option value="{{ $cc->id }}" {{ old('cost_center_id', $rvuValue->cost_center_id) == $cc->id ? 'selected' : '' }}>
-                                            {{ $cc->name }}
+                                            {{ $cc->building_name ?? '-' }}
                                         </option>
                                     @endforeach
                                 </select>
