@@ -31,6 +31,13 @@ body:not([x-data]) .lg\:left-64 {
   }
 }
 
+/* Fix for sidebar collapse button - hide on mobile, show on desktop when x-show is true */
+@media (max-width: 1023px) {
+  button[title="Collapse Sidebar"] {
+    display: none !important;
+  }
+}
+
 @layer components {
   /* Base button */
   .btn {

@@ -46,6 +46,29 @@
                         </dd>
                     </div>
                     <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">{{ __('Category') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            @php
+                                $categoryLabels = [
+                                    'barang' => 'Barang/BMHP',
+                                    'tindakan_rj' => 'Tindakan Rawat Jalan',
+                                    'tindakan_ri' => 'Tindakan Rawat Inap',
+                                    'laboratorium' => 'Laboratorium',
+                                    'radiologi' => 'Radiologi',
+                                    'operasi' => 'Operasi',
+                                    'kamar' => 'Kamar',
+                                ];
+                            @endphp
+                            @if($costReference->category)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-800">
+                                    {{ $categoryLabels[$costReference->category] ?? $costReference->category }}
+                                </span>
+                            @else
+                                <span class="text-xs text-gray-400">-</span>
+                            @endif
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-1">
                         <dt class="text-sm font-medium text-gray-500">{{ __('Created At') }}</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $costReference->created_at->format('d M Y, H:i') }}</dd>
                     </div>

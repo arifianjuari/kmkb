@@ -73,6 +73,25 @@
                                 @enderror
                             </div>
                         </div>
+
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="category" class="block text-sm font-medium text-gray-700">{{ __('Category (optional)') }}</label>
+                            <div class="mt-1">
+                                <select id="category" name="category" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                    <option value="">{{ __('Select Category') }}</option>
+                                    <option value="barang" {{ old('category', $costReference->category) == 'barang' ? 'selected' : '' }}>{{ __('Barang/BMHP') }}</option>
+                                    <option value="tindakan_rj" {{ old('category', $costReference->category) == 'tindakan_rj' ? 'selected' : '' }}>{{ __('Tindakan Rawat Jalan') }}</option>
+                                    <option value="tindakan_ri" {{ old('category', $costReference->category) == 'tindakan_ri' ? 'selected' : '' }}>{{ __('Tindakan Rawat Inap') }}</option>
+                                    <option value="laboratorium" {{ old('category', $costReference->category) == 'laboratorium' ? 'selected' : '' }}>{{ __('Laboratorium') }}</option>
+                                    <option value="radiologi" {{ old('category', $costReference->category) == 'radiologi' ? 'selected' : '' }}>{{ __('Radiologi') }}</option>
+                                    <option value="operasi" {{ old('category', $costReference->category) == 'operasi' ? 'selected' : '' }}>{{ __('Operasi') }}</option>
+                                    <option value="kamar" {{ old('category', $costReference->category) == 'kamar' ? 'selected' : '' }}>{{ __('Kamar') }}</option>
+                                </select>
+                                @error('category')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mt-6">

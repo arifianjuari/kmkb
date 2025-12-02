@@ -39,6 +39,7 @@ class CostReferenceController extends Controller
                 'standard_cost' => 'required|numeric|min:0',
                 'unit' => 'required|string|max:50',
                 'source' => 'required|string|max:255',
+                'category' => 'nullable|string|in:barang,tindakan_rj,tindakan_ri,laboratorium,radiologi,operasi,kamar',
             ]);
 
             if ($validator->fails()) {
@@ -84,6 +85,7 @@ class CostReferenceController extends Controller
                 'standard_cost' => 'required|numeric|min:0',
                 'unit' => 'required|string|max:50',
                 'source' => 'required|string|max:255',
+                'category' => 'nullable|string|in:barang,tindakan_rj,tindakan_ri,laboratorium,radiologi,operasi,kamar',
             ]);
 
             if ($validator->fails()) {
@@ -112,6 +114,78 @@ class CostReferenceController extends Controller
             return response()->json(null, 204);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to delete cost reference: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get all cost references that are services (tindakan/pemeriksaan).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getServices(Request $request)
+    {
+        try {
+            $hospitalId = hospital('id');
+            $search = $request->get('search');
+            
+            $query = CostReference::where('hospital_id', $hospitalId)
+                ->where('item_type', 'service');
+            
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('service_code', 'LIKE', "%{$search}%")
+                      ->orWhere('service_description', 'LIKE', "%{$search}%");
+                });
+            }
+            
+            $services = $query->orderBy('service_description')->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $services,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to load services: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all cost references that are BMHP.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getBMHP(Request $request)
+    {
+        try {
+            $hospitalId = hospital('id');
+            $search = $request->get('search');
+            
+            $query = CostReference::where('hospital_id', $hospitalId)
+                ->where('item_type', 'bmhp');
+            
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('service_code', 'LIKE', "%{$search}%")
+                      ->orWhere('service_description', 'LIKE', "%{$search}%");
+                });
+            }
+            
+            $bmhp = $query->orderBy('service_description')->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $bmhp,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to load BMHP: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

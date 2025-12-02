@@ -23,9 +23,36 @@ class CostReferenceController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
+        $category = $request->get('category');
         
-        $query = CostReference::where('hospital_id', hospital('id'));
+        $baseQuery = CostReference::where('hospital_id', hospital('id'));
         
+        // Build query for category tab counts (menghormati filter search, tapi tidak mengunci category)
+        $categoryCountQuery = clone $baseQuery;
+        if ($search) {
+            $categoryCountQuery->where(function($q) use ($search) {
+                $q->where('service_code', 'LIKE', "%{$search}%")
+                  ->orWhere('service_description', 'LIKE', "%{$search}%")
+                  ->orWhere('unit', 'LIKE', "%{$search}%")
+                  ->orWhere('source', 'LIKE', "%{$search}%")
+                  ->orWhereRaw("CAST(standard_cost AS CHAR) LIKE ?", ["%{$search}%"]);
+            });
+        }
+
+        $categoryCounts = [
+            'all' => $categoryCountQuery->count(),
+            'barang' => (clone $categoryCountQuery)->where('category', 'barang')->count(),
+            'tindakan_rj' => (clone $categoryCountQuery)->where('category', 'tindakan_rj')->count(),
+            'tindakan_ri' => (clone $categoryCountQuery)->where('category', 'tindakan_ri')->count(),
+            'laboratorium' => (clone $categoryCountQuery)->where('category', 'laboratorium')->count(),
+            'radiologi' => (clone $categoryCountQuery)->where('category', 'radiologi')->count(),
+            'operasi' => (clone $categoryCountQuery)->where('category', 'operasi')->count(),
+            'kamar' => (clone $categoryCountQuery)->where('category', 'kamar')->count(),
+        ];
+
+        // Query utama untuk data list
+        $query = clone $baseQuery;
+
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('service_code', 'LIKE', "%{$search}%")
@@ -35,10 +62,17 @@ class CostReferenceController extends Controller
                   ->orWhereRaw("CAST(standard_cost AS CHAR) LIKE ?", ["%{$search}%"]);
             });
         }
+
+        if ($category) {
+            $query->where('category', $category);
+        }
         
-        $costReferences = $query->latest()->paginate(10)->appends(['search' => $search]);
+        $costReferences = $query->latest()->paginate(10)->appends([
+            'search' => $search,
+            'category' => $category,
+        ]);
         
-        return view('cost-references.index', compact('costReferences', 'search'));
+        return view('cost-references.index', compact('costReferences', 'search', 'category', 'categoryCounts'));
     }
 
     /**
@@ -127,6 +161,7 @@ class CostReferenceController extends Controller
             'standard_cost' => 'required|numeric|min:0',
             'unit' => 'required|string|max:20',
             'source' => 'required|string|max:20',
+            'category' => 'nullable|string|in:barang,tindakan_rj,tindakan_ri,laboratorium,radiologi,operasi,kamar',
         ]);
 
         $costReference = CostReference::create(array_merge($request->all(), ['hospital_id' => hospital('id')]));
@@ -191,6 +226,7 @@ class CostReferenceController extends Controller
             'standard_cost' => 'required|numeric|min:0',
             'unit' => 'required|string|max:20',
             'source' => 'required|string|max:20',
+            'category' => 'nullable|string|in:barang,tindakan_rj,tindakan_ri,laboratorium,radiologi,operasi,kamar',
         ]);
 
         $costReference->update($request->all());

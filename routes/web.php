@@ -258,6 +258,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     // Service Volume (SIM RS) routes
     Route::prefix('service-volume-current')->group(function () {
         Route::get('/master-barang', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'masterBarang'])->name('svc-current.master-barang');
+        Route::get('/master-barang/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportMasterBarang'])->name('svc-current.master-barang.export');
         Route::get('/tindakan-rawat-jalan', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'tindakanRawatJalan'])->name('svc-current.tindakan-rawat-jalan');
         Route::get('/tindakan-rawat-jalan/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportTindakanRawatJalan'])->name('svc-current.tindakan-rawat-jalan.export');
         Route::get('/tindakan-rawat-inap', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'tindakanRawatInap'])->name('svc-current.tindakan-rawat-inap');
@@ -301,8 +302,15 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         // Service Catalog
         Route::prefix('service-catalog')->group(function () {
             Route::get('service-items', function () { return redirect()->route('cost-references.index'); })->name('setup.service-catalog.service-items');
-            Route::get('simrs-linked', [App\Http\Controllers\Setup\ServiceCatalogController::class, 'simrsLinked'])->name('setup.service-catalog.simrs-linked');
-            Route::get('import-export', [App\Http\Controllers\Setup\ServiceCatalogController::class, 'importExport'])->name('setup.service-catalog.import-export');
+            Route::resource('standard-resource-usages', App\Http\Controllers\StandardResourceUsageController::class)->names([
+                'index' => 'standard-resource-usages.index',
+                'create' => 'standard-resource-usages.create',
+                'store' => 'standard-resource-usages.store',
+                'show' => 'standard-resource-usages.show',
+                'edit' => 'standard-resource-usages.edit',
+                'update' => 'standard-resource-usages.update',
+                'destroy' => 'standard-resource-usages.destroy',
+            ]);
         });
 
         // JKN / INA-CBG Codes

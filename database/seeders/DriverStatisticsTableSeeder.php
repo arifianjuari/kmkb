@@ -246,3 +246,4 @@ class DriverStatisticsTableSeeder extends Seeder
 
 
 
+

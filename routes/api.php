@@ -27,6 +27,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('cost-references', App\Http\Controllers\Api\CostReferenceController::class);
     
     Route::middleware(['auth:sanctum', 'set.hospital'])->group(function () {
+        // Cost References APIs for Standard Resource Usage
+        Route::get('cost-references/services', [App\Http\Controllers\Api\CostReferenceController::class, 'getServices']);
+        Route::get('cost-references/bmhp', [App\Http\Controllers\Api\CostReferenceController::class, 'getBMHP']);
+        Route::get('standard-resource-usages/by-service/{serviceId}', [App\Http\Controllers\Api\StandardResourceUsageController::class, 'getByService']);
+        Route::post('standard-resource-usages/sync-to-cost-references', [App\Http\Controllers\Api\StandardResourceUsageController::class, 'syncToCostReferences']);
+        
         // SIM RS Integration APIs
         Route::get('simrs/test-connection', [App\Http\Controllers\Api\SimrsController::class, 'testConnection']);
         Route::get('simrs/master-barang', [App\Http\Controllers\Api\SimrsController::class, 'masterBarang']);

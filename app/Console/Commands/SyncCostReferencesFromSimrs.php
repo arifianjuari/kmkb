@@ -121,6 +121,8 @@ class SyncCostReferencesFromSimrs extends Command
                     'simrs_kode_brng' => $item->kode_brng,
                     'is_synced_from_simrs' => true,
                     'last_synced_at' => now(),
+                    // Master barang from SIMRS dikategorikan sebagai barang/BMHP
+                    'category' => 'barang',
                 ];
                 
                 // Set hospital_id based on options

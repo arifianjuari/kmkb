@@ -24,7 +24,7 @@
                     <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                         {{ __('Search') }}
                     </button>
-                    @if($search)
+                    @if($search || request('category'))
                         <a href="{{ route('cost-references.index') }}" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                             {{ __('Clear') }}
                         </a>
@@ -129,6 +129,47 @@
         
         <div class="bg-white shadow overflow-hidden sm:rounded-lg">
             <div class="px-4 py-5 sm:p-6">
+                @php
+                    $categoryTabs = [
+                        'all' => __('All Categories'),
+                        'barang' => __('Barang/BMHP'),
+                        'tindakan_rj' => __('Tindakan Rawat Jalan'),
+                        'tindakan_ri' => __('Tindakan Rawat Inap'),
+                        'laboratorium' => __('Laboratorium'),
+                        'radiologi' => __('Radiologi'),
+                        'operasi' => __('Operasi'),
+                        'kamar' => __('Kamar'),
+                    ];
+                @endphp
+
+                {{-- Category Tabs (Indigo) --}}
+                <div class="mb-6">
+                    <p class="text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">{{ __('Category') }}</p>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        @foreach($categoryTabs as $key => $label)
+                            @php
+                                $isActiveTab = ($key === 'all' && !$category) || ($key === $category);
+                                $urlParams = request()->except('category', 'page');
+                                if ($key !== 'all') {
+                                    $urlParams['category'] = $key;
+                                }
+                                $tabUrl = route('cost-references.index', $urlParams);
+                            @endphp
+                            <a
+                                href="{{ $tabUrl }}"
+                                class="inline-flex items-center gap-2 px-2.5 py-1 border rounded-full text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-biru-dongker-700 {{ $isActiveTab ? 'bg-biru-dongker-800 text-white border-biru-dongker-800' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
+                            >
+                                <span>{{ $label }}</span>
+                                @if(isset($categoryCounts))
+                                    <span class="ml-1 text-[10px] font-semibold {{ $isActiveTab ? 'text-white/80' : 'text-gray-500' }}">
+                                        {{ $categoryCounts[$key] ?? 0 }}
+                                    </span>
+                                @endif
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
                 @if($costReferences->count() > 0)
                     <form id="bulk-delete-form" action="{{ route('cost-references.bulk-destroy') }}" method="POST">
                         @csrf
@@ -156,6 +197,7 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Unit') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Service Code') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Source') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Updated At') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
                                     </tr>
                                 </thead>
@@ -171,6 +213,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $reference->unit }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $reference->service_code }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $reference->source }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $reference->updated_at ? $reference->updated_at->setTimezone('Asia/Jakarta')->format('d/m/Y H:i') : '-' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                 <div class="flex items-center gap-2">
                                                     <a href="{{ route('cost-references.show', $reference) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">

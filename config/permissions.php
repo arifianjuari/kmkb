@@ -45,6 +45,10 @@ return [
                                 'route' => 'setup.service-catalog.*',
                                 'permission' => 'view-service-catalog',
                             ],
+                            'standard-resource-usages' => [
+                                'route' => 'standard-resource-usages.*',
+                                'permission' => 'view-standard-resource-usages',
+                            ],
                             'jkn-cbg-codes' => [
                                 'route' => 'jkn-cbg-codes.*',
                                 'permission' => 'view-jkn-cbg-codes',
@@ -341,6 +345,11 @@ return [
                         'delete-references',
                         // Service catalog
                         'view-service-catalog',
+                        // Standard resource usages
+                        'view-standard-resource-usages',
+                        'create-standard-resource-usages',
+                        'update-standard-resource-usages',
+                        'delete-standard-resource-usages',
                         // Service volume current
                         'view-service-volume-current',
                         'sync-service-volume-current',
@@ -452,6 +461,11 @@ return [
                         'view-references',
                         // Service catalog
                         'view-service-catalog',
+                        // Standard resource usages
+                        'view-standard-resource-usages',
+                        'create-standard-resource-usages',
+                        'update-standard-resource-usages',
+                        'delete-standard-resource-usages',
                         // Service volumes
                         'create-service-volumes',
                         'update-service-volumes',
@@ -770,6 +784,8 @@ return [
                         'view-references',
                         // Service catalog
                         'view-service-catalog',
+                        // Standard resource usages
+                        'view-standard-resource-usages',
                         // Service volume current
                         'view-service-volume-current',
                         // Service volumes

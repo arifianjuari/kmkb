@@ -5,15 +5,395 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ServiceVolumeCurrentController extends Controller
 {
-    public function masterBarang()
+    public function masterBarang(Request $request)
     {
-        return view('service-volume-current.master-barang');
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedPoli = $request->input('poli');
+        $search = trim((string) $request->input('search'));
+        $sort = $request->input('sort', 'nama_brng');
+        $direction = $request->input('direction', 'asc');
+        $perPage = (int) $request->input('per_page', 50);
+
+        // Validate sort column and direction
+        if (!in_array($sort, ['nama_brng', 'total_pendapatan'])) {
+            $sort = 'nama_brng';
+        }
+        if (!in_array($direction, ['asc', 'desc'])) {
+            $direction = 'asc';
+        }
+        if ($perPage < 10 || $perPage > 500) {
+            $perPage = 50;
+        }
+
+        [$barangData, $grandTotals, $errorMessage, $totalRecords] = $this->getMasterBarangAggregates(
+            $selectedYear,
+            $selectedPoli,
+            $search,
+            $sort,
+            $direction,
+            $perPage
+        );
+
+        // Create paginator
+        $currentPage = Paginator::resolveCurrentPage();
+        $paginatedData = new LengthAwarePaginator(
+            $barangData,
+            $totalRecords,
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+
+        $poliOptions = DB::connection('simrs')->select("
+            SELECT kd_poli, nm_poli
+            FROM poliklinik
+            ORDER BY nm_poli ASC
+        ");
+
+        return view('service-volume-current.master-barang', [
+            'year' => $selectedYear,
+            'poli' => $selectedPoli,
+            'search' => $search,
+            'sort' => $sort,
+            'direction' => $direction,
+            'perPage' => $perPage,
+            'barangData' => $paginatedData,
+            'grandTotals' => $grandTotals,
+            'poliOptions' => $poliOptions,
+            'availableYears' => $this->availableYears($currentYear),
+            'errorMessage' => $errorMessage,
+        ]);
+    }
+
+    public function exportMasterBarang(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedPoli = $request->input('poli');
+        $search = trim((string) $request->input('search'));
+        $sort = $request->input('sort', 'nama_brng');
+        $direction = $request->input('direction', 'asc');
+
+        // Validate sort column and direction
+        if (!in_array($sort, ['nama_brng', 'total_pendapatan'])) {
+            $sort = 'nama_brng';
+        }
+        if (!in_array($direction, ['asc', 'desc'])) {
+            $direction = 'asc';
+        }
+
+        // For export, get all data (use very large perPage)
+        [$barangData, $grandTotals, $errorMessage, $totalRecords] = $this->getMasterBarangAggregates(
+            $selectedYear,
+            $selectedPoli,
+            $search,
+            $sort,
+            $direction,
+            10000 // Large perPage for export
+        );
+
+        if ($errorMessage) {
+            return redirect()->back()->withInput()->with('error', $errorMessage);
+        }
+
+        if (empty($barangData)) {
+            return redirect()->back()->withInput()->with('error', 'Tidak ada data untuk filter tersebut.');
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set title
+        $sheet->setCellValue('A1', 'VOLUME PENGGUNAAN OBAT/BHP');
+        $sheet->mergeCells('A1:P1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Set period info
+        $subtitle = 'Tahun: ' . $selectedYear;
+        if ($selectedPoli) {
+            $subtitle .= ' | Poli: ' . $selectedPoli;
+        }
+        $sheet->setCellValue('A2', $subtitle);
+        $sheet->mergeCells('A2:P2');
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Headers
+        $header = [
+            'Nama Barang',
+            'Harga (Rp)',
+            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
+            'Total Jumlah',
+            'Total Pendapatan (Rp)',
+        ];
+
+        $sheet->fromArray($header, null, 'A3');
+
+        // Style headers
+        $headerRange = 'A3:P3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('E5E7EB');
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle($headerRange)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(3)->setRowHeight(22);
+
+        // Data rows
+        $rowIndex = 4;
+        foreach ($barangData as $row) {
+            $sheet->fromArray([
+                $row['nama'],
+                $row['harga'],
+                $row['jan'],
+                $row['feb'],
+                $row['mar'],
+                $row['apr'],
+                $row['may'],
+                $row['jun'],
+                $row['jul'],
+                $row['aug'],
+                $row['sep'],
+                $row['oct'],
+                $row['nov'],
+                $row['dec'],
+                $row['total_jumlah'],
+                $row['total_pendapatan'],
+            ], null, 'A' . $rowIndex);
+
+            $rowIndex++;
+        }
+
+        // Grand total row
+        $sheet->fromArray([
+            'Grand Total',
+            null,
+            $grandTotals['jan'],
+            $grandTotals['feb'],
+            $grandTotals['mar'],
+            $grandTotals['apr'],
+            $grandTotals['may'],
+            $grandTotals['jun'],
+            $grandTotals['jul'],
+            $grandTotals['aug'],
+            $grandTotals['sep'],
+            $grandTotals['oct'],
+            $grandTotals['nov'],
+            $grandTotals['dec'],
+            $grandTotals['total_jumlah'],
+            $grandTotals['total_pendapatan'],
+        ], null, 'A' . $rowIndex);
+
+        $lastRow = $rowIndex;
+
+        // Borders for entire table (header + data + total)
+        $tableRange = 'A3:P' . $lastRow;
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Autosize columns
+        foreach (range('A', 'P') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Align columns
+        $sheet->getStyle('A4:A' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('C4:O' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+
+        // Currency format for Harga dan Total Pendapatan
+        foreach (['B', 'P'] as $currencyColumn) {
+            $sheet->getStyle($currencyColumn . '4:' . $currencyColumn . $lastRow)
+                ->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        }
+
+        $fileName = 'service-volume-master-barang-' . $selectedYear . '-' . now()->format('Ymd_His') . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    private function getMasterBarangAggregates(int $selectedYear, ?string $selectedPoli, string $search, string $sort = 'nama_brng', string $direction = 'asc', int $perPage = 50): array
+    {
+        $barangData = [];
+        $errorMessage = null;
+        $grandTotals = [
+            'jan' => 0,
+            'feb' => 0,
+            'mar' => 0,
+            'apr' => 0,
+            'may' => 0,
+            'jun' => 0,
+            'jul' => 0,
+            'aug' => 0,
+            'sep' => 0,
+            'oct' => 0,
+            'nov' => 0,
+            'dec' => 0,
+            'total_jumlah' => 0,
+            'total_pendapatan' => 0,
+        ];
+        $totalRecords = 0;
+
+        try {
+            $bindings = [$selectedYear];
+
+            // Base SQL for building queries
+            $baseWhere = "WHERE YEAR(dpo.tgl_perawatan) = ?";
+            if ($selectedPoli) {
+                $baseWhere .= " AND reg.kd_poli = ? ";
+                $bindings[] = $selectedPoli;
+            }
+            if ($search !== '') {
+                $baseWhere .= " AND db.nama_brng LIKE ? ";
+                $bindings[] = '%' . $search . '%';
+            }
+
+            // First, get grand totals from ALL data (not paginated)
+            $grandTotalsSql = "
+                SELECT
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 1 THEN dpo.jml ELSE 0 END) AS jan,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 2 THEN dpo.jml ELSE 0 END) AS feb,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 3 THEN dpo.jml ELSE 0 END) AS mar,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 4 THEN dpo.jml ELSE 0 END) AS apr,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 5 THEN dpo.jml ELSE 0 END) AS may,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 6 THEN dpo.jml ELSE 0 END) AS jun,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 7 THEN dpo.jml ELSE 0 END) AS jul,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 8 THEN dpo.jml ELSE 0 END) AS aug,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 9 THEN dpo.jml ELSE 0 END) AS sep,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 10 THEN dpo.jml ELSE 0 END) AS oct,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 11 THEN dpo.jml ELSE 0 END) AS nov,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 12 THEN dpo.jml ELSE 0 END) AS `dec`,
+                    SUM(dpo.jml) AS total_jumlah,
+                    SUM(dpo.total) AS total_pendapatan
+                FROM detail_pemberian_obat dpo
+                INNER JOIN databarang db ON db.kode_brng = dpo.kode_brng
+                INNER JOIN reg_periksa reg ON reg.no_rawat = dpo.no_rawat
+                {$baseWhere}
+            ";
+
+            $grandTotalsResult = DB::connection('simrs')->select($grandTotalsSql, $bindings);
+            if (!empty($grandTotalsResult)) {
+                $gt = $grandTotalsResult[0];
+                $grandTotals['jan'] = (float) ($gt->jan ?? 0);
+                $grandTotals['feb'] = (float) ($gt->feb ?? 0);
+                $grandTotals['mar'] = (float) ($gt->mar ?? 0);
+                $grandTotals['apr'] = (float) ($gt->apr ?? 0);
+                $grandTotals['may'] = (float) ($gt->may ?? 0);
+                $grandTotals['jun'] = (float) ($gt->jun ?? 0);
+                $grandTotals['jul'] = (float) ($gt->jul ?? 0);
+                $grandTotals['aug'] = (float) ($gt->aug ?? 0);
+                $grandTotals['sep'] = (float) ($gt->sep ?? 0);
+                $grandTotals['oct'] = (float) ($gt->oct ?? 0);
+                $grandTotals['nov'] = (float) ($gt->nov ?? 0);
+                $grandTotals['dec'] = (float) ($gt->dec ?? 0);
+                $grandTotals['total_jumlah'] = (float) ($gt->total_jumlah ?? 0);
+                $grandTotals['total_pendapatan'] = (float) ($gt->total_pendapatan ?? 0);
+            }
+
+            // Get total count for pagination
+            $countSql = "
+                SELECT COUNT(DISTINCT dpo.kode_brng) as total
+                FROM detail_pemberian_obat dpo
+                INNER JOIN databarang db ON db.kode_brng = dpo.kode_brng
+                INNER JOIN reg_periksa reg ON reg.no_rawat = dpo.no_rawat
+                {$baseWhere}
+            ";
+            $countResult = DB::connection('simrs')->select($countSql, $bindings);
+            $totalRecords = (int) ($countResult[0]->total ?? 0);
+
+            // Get paginated data
+            $currentPage = Paginator::resolveCurrentPage();
+            $offset = ($currentPage - 1) * $perPage;
+
+            $sql = "
+                SELECT
+                    dpo.kode_brng,
+                    db.nama_brng,
+                    dpo.biaya_obat AS harga,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 1 THEN dpo.jml ELSE 0 END) AS jan,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 2 THEN dpo.jml ELSE 0 END) AS feb,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 3 THEN dpo.jml ELSE 0 END) AS mar,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 4 THEN dpo.jml ELSE 0 END) AS apr,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 5 THEN dpo.jml ELSE 0 END) AS may,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 6 THEN dpo.jml ELSE 0 END) AS jun,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 7 THEN dpo.jml ELSE 0 END) AS jul,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 8 THEN dpo.jml ELSE 0 END) AS aug,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 9 THEN dpo.jml ELSE 0 END) AS sep,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 10 THEN dpo.jml ELSE 0 END) AS oct,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 11 THEN dpo.jml ELSE 0 END) AS nov,
+                    SUM(CASE WHEN MONTH(dpo.tgl_perawatan) = 12 THEN dpo.jml ELSE 0 END) AS `dec`,
+                    SUM(dpo.jml) AS total_jumlah,
+                    SUM(dpo.total) AS total_pendapatan
+                FROM detail_pemberian_obat dpo
+                INNER JOIN databarang db ON db.kode_brng = dpo.kode_brng
+                INNER JOIN reg_periksa reg ON reg.no_rawat = dpo.no_rawat
+                {$baseWhere}
+                GROUP BY dpo.kode_brng, db.nama_brng, dpo.biaya_obat
+            ";
+
+            // Apply sorting
+            if ($sort === 'total_pendapatan') {
+                $sql .= " ORDER BY total_pendapatan " . strtoupper($direction);
+            } else {
+                $sql .= " ORDER BY db.nama_brng " . strtoupper($direction);
+            }
+
+            // Apply pagination
+            $sql .= " LIMIT ? OFFSET ? ";
+            $bindings[] = $perPage;
+            $bindings[] = $offset;
+
+            $rows = DB::connection('simrs')->select($sql, $bindings);
+
+            foreach ($rows as $row) {
+                $barangData[] = [
+                    'kode' => $row->kode_brng,
+                    'nama' => $row->nama_brng,
+                    'harga' => (float) $row->harga,
+                    'jan' => (float) $row->jan,
+                    'feb' => (float) $row->feb,
+                    'mar' => (float) $row->mar,
+                    'apr' => (float) $row->apr,
+                    'may' => (float) $row->may,
+                    'jun' => (float) $row->jun,
+                    'jul' => (float) $row->jul,
+                    'aug' => (float) $row->aug,
+                    'sep' => (float) $row->sep,
+                    'oct' => (float) $row->oct,
+                    'nov' => (float) $row->nov,
+                    'dec' => (float) $row->dec,
+                    'total_jumlah' => (float) $row->total_jumlah,
+                    'total_pendapatan' => (float) $row->total_pendapatan,
+                ];
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Failed to load master barang volume', [
+                'year' => $selectedYear,
+                'poli' => $selectedPoli,
+                'search' => $search,
+                'message' => $exception->getMessage(),
+            ]);
+            $errorMessage = 'Gagal memuat data master barang dari SIMRS. Silakan coba lagi atau hubungi administrator.';
+        }
+
+        return [$barangData, $grandTotals, $errorMessage, $totalRecords];
     }
 
     public function tindakanRawatJalan(Request $request)

@@ -380,7 +380,9 @@ class SimrsController extends Controller
                         'purchase_price' => $item['harga_beli_dasar'],
                         'standard_cost' => isset($item['kelas3']) ? $item['kelas3'] : $item['harga_beli_dasar'],
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        // Master barang SIMRS → kategori barang
+                        'category' => 'barang',
                     ]);
                 } else {
                     // Create new item
@@ -394,7 +396,8 @@ class SimrsController extends Controller
                         'hospital_id' => $hospitalId,
                         'simrs_kode_brng' => $item['kode_brng'],
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        'category' => 'barang',
                     ]);
                 }
                 
@@ -473,7 +476,9 @@ class SimrsController extends Controller
                         'purchase_price' => $item['harga'],
                         'standard_cost' => $item['harga'],
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        // Tindakan rawat jalan → kategori tindakan_rj
+                        'category' => 'tindakan_rj',
                     ]);
                 } else {
                     // Create new item
@@ -486,7 +491,8 @@ class SimrsController extends Controller
                         'source' => 'SIMRS - Tindakan Rawat Jalan',
                         'hospital_id' => $hospitalId,
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        'category' => 'tindakan_rj',
                     ]);
                 }
                 
@@ -565,7 +571,9 @@ class SimrsController extends Controller
                         'purchase_price' => $item['harga'],
                         'standard_cost' => $item['harga'],
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        // Tindakan rawat inap → kategori tindakan_ri
+                        'category' => 'tindakan_ri',
                     ]);
                 } else {
                     // Create new item
@@ -578,7 +586,8 @@ class SimrsController extends Controller
                         'source' => 'SIMRS - Tindakan Rawat Inap',
                         'hospital_id' => $hospitalId,
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        'category' => 'tindakan_ri',
                     ]);
                 }
                 
@@ -657,7 +666,9 @@ class SimrsController extends Controller
                         'purchase_price' => $item['harga'],
                         'standard_cost' => $item['harga'],
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        // Laboratorium → kategori laboratorium
+                        'category' => 'laboratorium',
                     ]);
                 } else {
                     // Create new item
@@ -670,7 +681,8 @@ class SimrsController extends Controller
                         'source' => 'SIMRS - Laboratorium',
                         'hospital_id' => $hospitalId,
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        'category' => 'laboratorium',
                     ]);
                 }
                 
@@ -749,7 +761,9 @@ class SimrsController extends Controller
                         'purchase_price' => $item['harga'],
                         'standard_cost' => $item['harga'],
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        // Radiologi → kategori radiologi
+                        'category' => 'radiologi',
                     ]);
                 } else {
                     // Create new item
@@ -762,7 +776,8 @@ class SimrsController extends Controller
                         'source' => 'SIMRS - Radiologi',
                         'hospital_id' => $hospitalId,
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        'category' => 'radiologi',
                     ]);
                 }
                 
@@ -838,7 +853,9 @@ class SimrsController extends Controller
                         'purchase_price' => $item['harga'],
                         'standard_cost' => $item['harga'],
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        // Operasi → kategori operasi
+                        'category' => 'operasi',
                     ]);
                 } else {
                     // Create new item
@@ -851,7 +868,8 @@ class SimrsController extends Controller
                         'source' => 'SIMRS - Operasi',
                         'hospital_id' => $hospitalId,
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        'category' => 'operasi',
                     ]);
                 }
 
@@ -927,7 +945,9 @@ class SimrsController extends Controller
                         'purchase_price' => $item['harga'],
                         'standard_cost' => $item['harga'],
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        // Kamar → kategori kamar
+                        'category' => 'kamar',
                     ]);
                 } else {
                     // Create new item
@@ -940,7 +960,8 @@ class SimrsController extends Controller
                         'source' => 'SIMRS - Kamar',
                         'hospital_id' => $hospitalId,
                         'is_synced_from_simrs' => true,
-                        'last_synced_at' => now()
+                        'last_synced_at' => now(),
+                        'category' => 'kamar',
                     ]);
                 }
 

@@ -32,6 +32,8 @@ class CostReference extends Model
         'is_bundle',
         'active_from',
         'active_to',
+        'item_type',
+        'category',
     ];
 
     /**
@@ -119,5 +121,75 @@ class CostReference extends Model
             ->orderBy('period_month', 'desc')
             ->orderBy('created_at', 'desc')
             ->first();
+    }
+
+    /**
+     * Get the standard resource usages for this service.
+     */
+    public function standardResourceUsages()
+    {
+        return $this->hasMany(StandardResourceUsage::class, 'service_id');
+    }
+
+    /**
+     * Get the standard resource usages where this is used as BMHP.
+     */
+    public function usedAsBmhp()
+    {
+        return $this->hasMany(StandardResourceUsage::class, 'bmhp_id');
+    }
+
+    /**
+     * Check if this cost reference is a service (tindakan/pemeriksaan).
+     *
+     * @return bool
+     */
+    public function isService()
+    {
+        return $this->item_type === 'service';
+    }
+
+    /**
+     * Check if this cost reference is a BMHP.
+     *
+     * @return bool
+     */
+    public function isBMHP()
+    {
+        return $this->item_type === 'bmhp';
+    }
+
+    /**
+     * Get all cost references that are services.
+     *
+     * @param int|null $hospitalId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function getServices($hospitalId = null)
+    {
+        $query = static::where('item_type', 'service');
+        
+        if ($hospitalId) {
+            $query->where('hospital_id', $hospitalId);
+        }
+        
+        return $query->get();
+    }
+
+    /**
+     * Get all cost references that are BMHP.
+     *
+     * @param int|null $hospitalId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function getBMHP($hospitalId = null)
+    {
+        $query = static::where('item_type', 'bmhp');
+        
+        if ($hospitalId) {
+            $query->where('hospital_id', $hospitalId);
+        }
+        
+        return $query->get();
     }
 }

@@ -11,13 +11,14 @@
     // Setup group
     if (request()->routeIs('setup.*') || 
         request()->routeIs('cost-references.*') || 
+        request()->routeIs('rvu-values.*') ||
+        request()->routeIs('standard-resource-usages.*') ||
         request()->routeIs('jkn-cbg-codes.*') || 
         request()->routeIs('cost-centers.*') || 
         request()->routeIs('divisions.*') || 
         request()->routeIs('expense-categories.*') || 
         request()->routeIs('allocation-drivers.*') || 
-        request()->routeIs('tariff-classes.*') ||
-        request()->routeIs('simrs.*')) {
+        request()->routeIs('tariff-classes.*')) {
         $openGroups['setup'] = true;
     }
     
@@ -31,15 +32,15 @@
     }
     if (request()->routeIs('cost-references.*') || 
         request()->routeIs('rvu-values.*') ||
-        request()->routeIs('setup.service-catalog.*')) {
+        request()->routeIs('setup.service-catalog.*') ||
+        request()->routeIs('standard-resource-usages.*')) {
         $openGroups['setup-service-catalog'] = true;
     }
     if (request()->routeIs('jkn-cbg-codes.*') || 
         request()->routeIs('setup.jkn-cbg-codes.*')) {
         $openGroups['setup-jkn'] = true;
     }
-    if (request()->routeIs('simrs.*') || 
-        request()->routeIs('setup.simrs-integration.*')) {
+    if (request()->routeIs('setup.simrs-integration.*')) {
         $openGroups['setup-simrs'] = true;
     }
     
@@ -125,6 +126,11 @@
         $openGroups['cases'] = true;
     }
     
+    // SIMRS group (separate from Setup)
+    if (request()->routeIs('simrs.*')) {
+        $openGroups['simrs'] = true;
+    }
+    
     // Admin routes are now in navbar dropdown, not in sidebar
     // Removed admin group logic
 @endphp
@@ -200,7 +206,7 @@
             @else
                 <x-hospital-avatar name="{{ hospital('name') }}" color="{{ hospital('theme_color') }}" size="8" class="block flex-shrink-0 mt-0.5" />
             @endif
-            <span class="text-lg font-semibold break-words min-w-0 leading-tight">{{ hospital('name') ?? config('app.name', 'Laravel') }}</span>
+            <span class="hidden lg:block text-lg font-semibold break-words min-w-0 leading-tight">{{ hospital('name') ?? config('app.name', 'Laravel') }}</span>
         </a>
         <a href="{{ route('dashboard') }}" x-show="collapsed" class="flex items-center justify-center w-full h-full min-w-0">
             @if($isAbsoluteUrl || ($normalizedPath && Storage::disk(uploads_disk())->exists($normalizedPath)))
@@ -211,8 +217,8 @@
         </a>
         <button @click="toggleCollapse()" 
                 x-show="!collapsed"
-                class="hidden lg:flex p-1.5 hover:bg-gray-300 ml-2 rounded-md transition-all duration-200 flex-shrink-0 relative z-10 items-center justify-center"
-                :title="'Collapse Sidebar'">
+                class="lg:flex p-1.5 hover:bg-gray-300 ml-2 rounded-md transition-all duration-200 flex-shrink-0 relative z-10 items-center justify-center"
+                title="Collapse Sidebar">
             <svg class="w-5 h-5 transition-all duration-200" 
                  fill="none" 
                  stroke="currentColor" 
@@ -302,13 +308,9 @@
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('rvu-values.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
                                         <span class="truncate">RVU Management</span>
                                     </a>
-                                    <a href="{{ route('setup.service-catalog.simrs-linked') }}" 
-                                       class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('setup.service-catalog.simrs-linked') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
-                                        <span class="truncate">SIMRS-linked Items</span>
-                                    </a>
-                                    <a href="{{ route('setup.service-catalog.import-export') }}" 
-                                       class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('setup.service-catalog.import-export') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
-                                        <span class="truncate">Import/Export</span>
+                                    <a href="{{ route('standard-resource-usages.index') }}" 
+                                       class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('standard-resource-usages.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Standard Resource Usage</span>
                                     </a>
                                 </div>
                             </div>
@@ -400,7 +402,7 @@
                                 <div x-show="isGroupOpen('svc-simrs')" class="ml-4 mt-0.5 space-y-0.5">
                                     <a href="{{ route('svc-current.master-barang') }}"
                                        class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('svc-current.master-barang') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
-                                        <span class="truncate">Master Barang</span>
+                                        <span class="truncate">Obat & BHP</span>
                                     </a>
                                     <a href="{{ route('svc-current.tindakan-rawat-jalan') }}"
                                        class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('svc-current.tindakan-rawat-jalan') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
