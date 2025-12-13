@@ -19,54 +19,68 @@
                     @csrf
                     
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-12">
+                        {{-- Cost Center Name (dropdown with SIMRS candidates) --}}
                         <div class="col-span-12 md:col-span-6">
-                            <label for="building_name" class="block text-sm font-medium text-gray-700">{{ __('Building Name') }}</label>
+                            <label for="name" class="block text-sm font-medium text-gray-700">{{ __('Cost Center Name') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <select id="building_name" name="building_name" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700" onchange="updateCode(this)">
-                                    <option value="">{{ __('Select Building / Unit') }}</option>
+                                <select id="name" name="name" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700" onchange="updateCode(this)">
+                                    <option value="">{{ __('Select Cost Center') }}</option>
                                     @if(isset($candidates))
                                         <optgroup label="Poliklinik (Rawat Jalan)">
                                             @foreach($candidates['poliklinik'] as $poli)
-                                                <option value="{{ $poli->name }}" data-code="{{ $poli->id }}" {{ old('building_name') == $poli->name ? 'selected' : '' }}>{{ $poli->name }}</option>
+                                                <option value="{{ $poli->name }}" data-code="{{ $poli->id }}" {{ old('name') == $poli->name ? 'selected' : '' }}>{{ $poli->name }}</option>
                                             @endforeach
                                         </optgroup>
                                         <optgroup label="Bangsal (Rawat Inap)">
                                             @foreach($candidates['bangsal'] as $bangsal)
-                                                <option value="{{ $bangsal->name }}" data-code="{{ $bangsal->id }}" {{ old('building_name') == $bangsal->name ? 'selected' : '' }}>{{ $bangsal->name }}</option>
+                                                <option value="{{ $bangsal->name }}" data-code="{{ $bangsal->id }}" {{ old('name') == $bangsal->name ? 'selected' : '' }}>{{ $bangsal->name }}</option>
                                             @endforeach
                                         </optgroup>
                                         <optgroup label="Departemen">
                                             @foreach($candidates['departemen'] as $dep)
-                                                <option value="{{ $dep->name }}" data-code="{{ $dep->id }}" {{ old('building_name') == $dep->name ? 'selected' : '' }}>{{ $dep->name }}</option>
+                                                <option value="{{ $dep->name }}" data-code="{{ $dep->id }}" {{ old('name') == $dep->name ? 'selected' : '' }}>{{ $dep->name }}</option>
                                             @endforeach
                                         </optgroup>
                                     @endif
-                                    <option value="custom" class="font-bold text-blue-600">-- Custom Building --</option>
+                                    <option value="custom" class="font-bold text-blue-600">-- Custom Name --</option>
                                 </select>
-                                <input type="text" id="custom_building_name" name="custom_building_name" value="{{ old('custom_building_name') }}" class="mt-2 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 hidden" placeholder="Enter custom building name">
-                                @error('building_name')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-span-12 md:col-span-6">
-                            <label for="name" class="block text-sm font-medium text-gray-700">{{ __('Division') }} <span class="text-red-500">*</span></label>
-                            <div class="mt-1">
-                                <select id="name" name="name" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
-                                    <option value="">{{ __('Select Division') }}</option>
-                                    @if(isset($divisions))
-                                        @foreach($divisions as $division)
-                                            <option value="{{ $division->name }}" {{ old('name') == $division->name ? 'selected' : '' }}>{{ $division->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
+                                <input type="text" id="custom_name" name="custom_name" value="{{ old('custom_name') }}" class="mt-2 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 hidden" placeholder="Enter custom cost center name">
                                 @error('name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
 
+                        {{-- Division (dropdown from divisions table) --}}
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="division" class="block text-sm font-medium text-gray-700">{{ __('Division') }}</label>
+                            <div class="mt-1">
+                                <select id="division" name="division" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                    <option value="">{{ __('Select Division') }}</option>
+                                    @if(isset($divisions))
+                                        @foreach($divisions as $div)
+                                            <option value="{{ $div->name }}" {{ old('division') == $div->name ? 'selected' : '' }}>{{ $div->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                @error('division')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Building Name (free text) --}}
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="building_name" class="block text-sm font-medium text-gray-700">{{ __('Building Name') }}</label>
+                            <div class="mt-1">
+                                <input type="text" id="building_name" name="building_name" value="{{ old('building_name') }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700" placeholder="e.g. Gedung A">
+                                @error('building_name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Code --}}
                         <div class="col-span-12 md:col-span-6">
                             <label for="code" class="block text-sm font-medium text-gray-700">{{ __('Code') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
@@ -77,6 +91,7 @@
                             </div>
                         </div>
                         
+                        {{-- Type --}}
                         <div class="col-span-12 md:col-span-6">
                             <label for="type" class="block text-sm font-medium text-gray-700">{{ __('Type') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
@@ -91,6 +106,7 @@
                             </div>
                         </div>
                         
+                        {{-- Floor --}}
                         <div class="col-span-12 md:col-span-6">
                             <label for="floor" class="block text-sm font-medium text-gray-700">{{ __('Floor') }}</label>
                             <div class="mt-1">
@@ -101,6 +117,7 @@
                             </div>
                         </div>
                         
+                        {{-- Class --}}
                         <div class="col-span-12 md:col-span-6">
                             <label for="tariff_class_id" class="block text-sm font-medium text-gray-700">{{ __('Class') }}</label>
                             <div class="mt-1">
@@ -116,6 +133,7 @@
                             </div>
                         </div>
                         
+                        {{-- Parent Cost Center --}}
                         <div class="col-span-12">
                             <label for="parent_id" class="block text-sm font-medium text-gray-700">{{ __('Parent Cost Center') }}</label>
                             <div class="mt-1">
@@ -131,6 +149,7 @@
                             </div>
                         </div>
                         
+                        {{-- Active --}}
                         <div class="col-span-12">
                             <div class="flex items-center">
                                 <input type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }} class="h-4 w-4 text-biru-dongker-800 border-gray-300 rounded focus:ring-biru-dongker-700">
@@ -156,39 +175,26 @@
     function updateCode(selectElement) {
         const selectedOption = selectElement.options[selectElement.selectedIndex];
         const codeInput = document.getElementById('code');
-        const nameInput = document.getElementById('name');
-        const customBuildingInput = document.getElementById('custom_building_name');
+        const customNameInput = document.getElementById('custom_name');
         
         if (selectElement.value === 'custom') {
-            customBuildingInput.classList.remove('hidden');
-            // customBuildingInput.required = true; // Optional depending on validation
+            customNameInput.classList.remove('hidden');
             selectElement.name = ''; 
-            customBuildingInput.name = 'building_name';
+            customNameInput.name = 'name';
             
-            // Clear code but don't clear name as user might have typed something
             codeInput.value = '';
             codeInput.readOnly = false;
         } else {
-            customBuildingInput.classList.add('hidden');
-            // customBuildingInput.required = false;
-            selectElement.name = 'building_name';
-            customBuildingInput.name = 'custom_building_name'; // Reset
+            customNameInput.classList.add('hidden');
+            selectElement.name = 'name';
+            customNameInput.name = 'custom_name';
             
             const code = selectedOption.getAttribute('data-code');
-            const name = selectedOption.value;
             
             if (code) {
                 codeInput.value = code;
             }
-            
-            // Auto-fill name logic removed as per request
         }
     }
 </script>
 @endpush
-
-
-
-
-
-

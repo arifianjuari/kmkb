@@ -20,68 +20,82 @@
                     @method('PUT')
                     
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-12">
+                        {{-- Cost Center Name (dropdown with SIMRS candidates) --}}
                         <div class="col-span-12 md:col-span-6">
-                            <label for="building_name" class="block text-sm font-medium text-gray-700">{{ __('Building Name') }}</label>
+                            <label for="name" class="block text-sm font-medium text-gray-700">{{ __('Cost Center Name') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
                                 @php
-                                    $currentBuilding = old('building_name', $costCenter->building_name);
-                                    $isCustom = !empty($currentBuilding);
+                                    $currentName = old('name', $costCenter->name);
+                                    $isCustomName = !empty($currentName);
                                     if (isset($candidates)) {
                                         foreach ($candidates as $group) {
                                             foreach ($group as $item) {
-                                                if ($currentBuilding == $item->name) {
-                                                    $isCustom = false;
+                                                if ($currentName == $item->name) {
+                                                    $isCustomName = false;
                                                     break 2;
                                                 }
                                             }
                                         }
                                     }
                                 @endphp
-                                <select id="building_name" name="{{ $isCustom ? '' : 'building_name' }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700" onchange="updateCode(this)">
-                                    <option value="">{{ __('Select Building / Unit') }}</option>
+                                <select id="name" name="{{ $isCustomName ? '' : 'name' }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700" onchange="updateCode(this)">
+                                    <option value="">{{ __('Select Cost Center') }}</option>
                                     @if(isset($candidates))
                                         <optgroup label="Poliklinik (Rawat Jalan)">
                                             @foreach($candidates['poliklinik'] as $poli)
-                                                <option value="{{ $poli->name }}" data-code="{{ $poli->id }}" {{ $currentBuilding == $poli->name ? 'selected' : '' }}>{{ $poli->name }}</option>
+                                                <option value="{{ $poli->name }}" data-code="{{ $poli->id }}" {{ $currentName == $poli->name ? 'selected' : '' }}>{{ $poli->name }}</option>
                                             @endforeach
                                         </optgroup>
                                         <optgroup label="Bangsal (Rawat Inap)">
                                             @foreach($candidates['bangsal'] as $bangsal)
-                                                <option value="{{ $bangsal->name }}" data-code="{{ $bangsal->id }}" {{ $currentBuilding == $bangsal->name ? 'selected' : '' }}>{{ $bangsal->name }}</option>
+                                                <option value="{{ $bangsal->name }}" data-code="{{ $bangsal->id }}" {{ $currentName == $bangsal->name ? 'selected' : '' }}>{{ $bangsal->name }}</option>
                                             @endforeach
                                         </optgroup>
                                         <optgroup label="Departemen">
                                             @foreach($candidates['departemen'] as $dep)
-                                                <option value="{{ $dep->name }}" data-code="{{ $dep->id }}" {{ $currentBuilding == $dep->name ? 'selected' : '' }}>{{ $dep->name }}</option>
+                                                <option value="{{ $dep->name }}" data-code="{{ $dep->id }}" {{ $currentName == $dep->name ? 'selected' : '' }}>{{ $dep->name }}</option>
                                             @endforeach
                                         </optgroup>
                                     @endif
-                                    <option value="custom" class="font-bold text-blue-600" {{ $isCustom ? 'selected' : '' }}>-- Custom Building --</option>
+                                    <option value="custom" class="font-bold text-blue-600" {{ $isCustomName ? 'selected' : '' }}>-- Custom Name --</option>
                                 </select>
-                                <input type="text" id="custom_building_name" name="{{ $isCustom ? 'building_name' : 'custom_building_name' }}" value="{{ $isCustom ? $currentBuilding : '' }}" class="mt-2 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 {{ $isCustom ? '' : 'hidden' }}" placeholder="Enter custom building name">
-                                @error('building_name')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-span-12 md:col-span-6">
-                            <label for="name" class="block text-sm font-medium text-gray-700">{{ __('Division') }} <span class="text-red-500">*</span></label>
-                            <div class="mt-1">
-                                <select id="name" name="name" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
-                                    <option value="">{{ __('Select Division') }}</option>
-                                    @if(isset($divisions))
-                                        @foreach($divisions as $division)
-                                            <option value="{{ $division->name }}" {{ old('name', $costCenter->name) == $division->name ? 'selected' : '' }}>{{ $division->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
+                                <input type="text" id="custom_name" name="{{ $isCustomName ? 'name' : 'custom_name' }}" value="{{ $isCustomName ? $currentName : '' }}" class="mt-2 py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700 {{ $isCustomName ? '' : 'hidden' }}" placeholder="Enter custom cost center name">
                                 @error('name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
 
+                        {{-- Division (dropdown from divisions table) --}}
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="division" class="block text-sm font-medium text-gray-700">{{ __('Division') }}</label>
+                            <div class="mt-1">
+                                <select id="division" name="division" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                    <option value="">{{ __('Select Division') }}</option>
+                                    @if(isset($divisions))
+                                        @foreach($divisions as $div)
+                                            <option value="{{ $div->name }}" {{ old('division', $costCenter->division) == $div->name ? 'selected' : '' }}>{{ $div->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                @error('division')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Building Name (free text) --}}
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="building_name" class="block text-sm font-medium text-gray-700">{{ __('Building Name') }}</label>
+                            <div class="mt-1">
+                                <input type="text" id="building_name" name="building_name" value="{{ old('building_name', $costCenter->building_name) }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700" placeholder="e.g. Gedung A">
+                                @error('building_name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Code --}}
                         <div class="col-span-12 md:col-span-6">
                             <label for="code" class="block text-sm font-medium text-gray-700">{{ __('Code') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
@@ -92,6 +106,7 @@
                             </div>
                         </div>
                         
+                        {{-- Type --}}
                         <div class="col-span-12 md:col-span-6">
                             <label for="type" class="block text-sm font-medium text-gray-700">{{ __('Type') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
@@ -105,22 +120,19 @@
                                 @enderror
                             </div>
                         </div>
-                        
-                        <div class="col-span-12">
-                            <label for="parent_id" class="block text-sm font-medium text-gray-700">{{ __('Parent Cost Center') }}</label>
+
+                        {{-- Floor --}}
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="floor" class="block text-sm font-medium text-gray-700">{{ __('Floor') }}</label>
                             <div class="mt-1">
-                                <select id="parent_id" name="parent_id" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
-                                    <option value="">{{ __('No Parent') }}</option>
-                                    @foreach($parents as $parent)
-                                        <option value="{{ $parent->id }}" {{ old('parent_id', $costCenter->parent_id) == $parent->id ? 'selected' : '' }}>{{ $parent->name }} ({{ $parent->code }})</option>
-                                    @endforeach
-                                </select>
-                                @error('parent_id')
+                                <input type="number" id="floor" name="floor" value="{{ old('floor', $costCenter->floor) }}" min="0" max="255" placeholder="e.g. 1" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                @error('floor')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
 
+                        {{-- Class --}}
                         <div class="col-span-12 md:col-span-6">
                             <label for="tariff_class_id" class="block text-sm font-medium text-gray-700">{{ __('Class') }}</label>
                             <div class="mt-1">
@@ -135,17 +147,24 @@
                                 @enderror
                             </div>
                         </div>
-
-                        <div class="col-span-12 md:col-span-6">
-                            <label for="floor" class="block text-sm font-medium text-gray-700">{{ __('Floor') }}</label>
+                        
+                        {{-- Parent Cost Center --}}
+                        <div class="col-span-12">
+                            <label for="parent_id" class="block text-sm font-medium text-gray-700">{{ __('Parent Cost Center') }}</label>
                             <div class="mt-1">
-                                <input type="number" id="floor" name="floor" value="{{ old('floor', $costCenter->floor) }}" min="0" max="255" placeholder="e.g. 1" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
-                                @error('floor')
+                                <select id="parent_id" name="parent_id" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                    <option value="">{{ __('No Parent') }}</option>
+                                    @foreach($parents as $parent)
+                                        <option value="{{ $parent->id }}" {{ old('parent_id', $costCenter->parent_id) == $parent->id ? 'selected' : '' }}>{{ $parent->name }} ({{ $parent->code }})</option>
+                                    @endforeach
+                                </select>
+                                @error('parent_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
                         
+                        {{-- Active --}}
                         <div class="col-span-12">
                             <div class="flex items-center">
                                 <input type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', $costCenter->is_active) ? 'checked' : '' }} class="h-4 w-4 text-biru-dongker-800 border-gray-300 rounded focus:ring-biru-dongker-700">
@@ -171,22 +190,19 @@
     function updateCode(selectElement) {
         const selectedOption = selectElement.options[selectElement.selectedIndex];
         const codeInput = document.getElementById('code');
-        const customBuildingInput = document.getElementById('custom_building_name');
+        const customNameInput = document.getElementById('custom_name');
         
         if (selectElement.value === 'custom') {
-            customBuildingInput.classList.remove('hidden');
+            customNameInput.classList.remove('hidden');
             selectElement.name = ''; 
-            customBuildingInput.name = 'building_name';
+            customNameInput.name = 'name';
             
-            // Don't clear code in edit mode unless user explicitly clears it, 
-            // or maybe we should leave it as is. 
-            // For now, let's NOT clear the code automatically in edit mode to prevent data loss.
-            // codeInput.value = ''; 
+            // Don't clear code in edit mode to prevent data loss
             codeInput.readOnly = false;
         } else {
-            customBuildingInput.classList.add('hidden');
-            selectElement.name = 'building_name';
-            customBuildingInput.name = 'custom_building_name';
+            customNameInput.classList.add('hidden');
+            selectElement.name = 'name';
+            customNameInput.name = 'custom_name';
             
             const code = selectedOption.getAttribute('data-code');
             
@@ -197,9 +213,3 @@
     }
 </script>
 @endpush
-
-
-
-
-
-

@@ -185,6 +185,7 @@ class CostCenterController extends Controller
         $validated = $request->validate([
             'code' => 'required|string|max:50',
             'name' => 'required|string|max:150',
+            'division' => 'nullable|string|max:150',
             'building_name' => 'nullable|string|max:150',
             'floor' => 'nullable|integer|min:0|max:255',
             'tariff_class_id' => 'nullable|exists:tariff_classes,id',
@@ -284,6 +285,7 @@ class CostCenterController extends Controller
         $validated = $request->validate([
             'code' => 'required|string|max:50',
             'name' => 'required|string|max:150',
+            'division' => 'nullable|string|max:150',
             'building_name' => 'nullable|string|max:150',
             'floor' => 'nullable|integer|min:0|max:255',
             'tariff_class_id' => 'nullable|exists:tariff_classes,id',

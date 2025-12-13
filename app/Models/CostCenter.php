@@ -19,6 +19,7 @@ class CostCenter extends Model
         'hospital_id',
         'code',
         'name',
+        'division',
         'building_name',
         'floor',
         'tariff_class_id',
