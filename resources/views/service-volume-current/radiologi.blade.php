@@ -76,7 +76,15 @@
                         @endif
                     </p>
                 </div>
-                <p class="text-sm text-gray-500">Sumber data: SIMRS</p>
+                <div class="flex items-center space-x-2">
+                    <button id="sync-selected" class="hidden inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Sync Selected ke Cost References
+                    </button>
+                    <p class="text-sm text-gray-500">Sumber data: SIMRS</p>
+                </div>
             </div>
         </div>
 
@@ -84,6 +92,9 @@
             <table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th scope="col" class="w-10 px-3 py-3 text-left">
+                            <input type="checkbox" id="select-all" class="rounded border-gray-300 text-biru-dongker-800 shadow-sm focus:border-biru-dongker-500 focus:ring focus:ring-biru-dongker-400 focus:ring-opacity-50">
+                        </th>
                         <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-700">Nama Pemeriksaan</th>
                         <th scope="col" class="px-4 py-3 text-right font-semibold text-gray-700">Harga (Rp)</th>
                         @foreach(['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'] as $bulan)
@@ -96,6 +107,12 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($radiologiData as $row)
                         <tr class="hover:bg-gray-50">
+                            <td class="w-10 px-3 py-3">
+                                <input type="checkbox" class="row-checkbox rounded border-gray-300 text-biru-dongker-800 shadow-sm focus:border-biru-dongker-500 focus:ring focus:ring-biru-dongker-400 focus:ring-opacity-50"
+                                       data-kode="{{ $row['kode'] }}"
+                                       data-nama="{{ $row['nama'] }}"
+                                       data-harga="{{ $row['harga'] }}">
+                            </td>
                             <td class="px-4 py-3">
                                 <div class="font-medium text-gray-900">{{ $row['nama'] }}</div>
                                 <div class="text-xs text-gray-500">Kode: {{ $row['kode'] }}</div>
@@ -118,13 +135,14 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="16" class="px-4 py-6 text-center text-gray-500">Belum ada data radiologi untuk filter yang dipilih.</td>
+                            <td colspan="17" class="px-4 py-6 text-center text-gray-500">Belum ada data radiologi untuk filter yang dipilih.</td>
                         </tr>
                     @endforelse
                 </tbody>
                 @if(count($radiologiData) > 0)
                     <tfoot class="bg-gray-50">
                         <tr class="font-semibold">
+                            <td class="px-3 py-3"></td>
                             <td class="px-4 py-3 text-gray-900">Grand Total</td>
                             <td class="px-4 py-3"></td>
                             <td class="px-3 py-3 text-center">{{ $grandTotals['jan'] }}</td>
@@ -148,4 +166,63 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const syncButton = document.getElementById('sync-selected');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+
+    function toggleSyncButton() {
+        const anyChecked = document.querySelector('.row-checkbox:checked');
+        syncButton.classList.toggle('hidden', !anyChecked);
+    }
+
+    selectAllCheckbox.addEventListener('change', function() {
+        rowCheckboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+        toggleSyncButton();
+    });
+
+    rowCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            selectAllCheckbox.checked = document.querySelectorAll('.row-checkbox:checked').length === rowCheckboxes.length;
+            toggleSyncButton();
+        });
+    });
+
+    syncButton.addEventListener('click', function() {
+        const selected = document.querySelectorAll('.row-checkbox:checked');
+        if (selected.length === 0) { alert('Silakan pilih item yang ingin disinkronkan.'); return; }
+
+        const items = [];
+        selected.forEach(cb => items.push({ kode: cb.dataset.kode, nama: cb.dataset.nama, harga: cb.dataset.harga }));
+
+        syncButton.disabled = true;
+        syncButton.innerHTML = '<svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Syncing...';
+
+        fetch('{{ route("svc-current.radiologi.sync") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+            body: JSON.stringify({ items: items }),
+            credentials: 'same-origin'
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert(`${data.synced_count} item berhasil disinkronkan ke Cost References.`);
+                selectAllCheckbox.checked = false;
+                selected.forEach(cb => cb.checked = false);
+                toggleSyncButton();
+            } else {
+                alert('Gagal menyinkronkan data: ' + data.message);
+            }
+        })
+        .catch(e => { console.error('Error:', e); alert('Terjadi kesalahan saat menyinkronkan data.'); })
+        .finally(() => {
+            syncButton.disabled = false;
+            syncButton.innerHTML = '<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Sync Selected ke Cost References';
+        });
+    });
+});
+</script>
 @endsection

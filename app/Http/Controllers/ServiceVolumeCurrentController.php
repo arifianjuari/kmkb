@@ -2000,6 +2000,495 @@ class ServiceVolumeCurrentController extends Controller
         return [$tindakanData, $grandTotals, $errorMessage];
     }
 
+    /**
+     * Sync selected tindakan rawat jalan from service volume current to cost references
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncTindakanRawatJalanToCostReferences(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            
+            if (empty($items)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No items provided for sync'
+                ], 400);
+            }
+            
+            // Check if user is authenticated
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ], 401);
+            }
+            
+            $user = auth()->user();
+            
+            // Check if user has hospital_id or a selected hospital context
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            if (!$hospitalId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User has no associated hospital'
+                ], 400);
+            }
+            
+            $syncedCount = 0;
+            
+            foreach ($items as $item) {
+                // Validate required fields
+                if (!isset($item['kode']) || !isset($item['nama']) || !isset($item['harga'])) {
+                    Log::warning('Invalid item data for sync', ['item' => $item]);
+                    continue;
+                }
+                
+                // Check if item already exists in cost references
+                $existing = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)
+                    ->first();
+                
+                if ($existing) {
+                    // Update existing item
+                    $existing->update([
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'tindakan_rj',
+                    ]);
+                } else {
+                    // Create new item
+                    \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'unit' => 'Tindakan',
+                        'source' => 'Service Volume Current - Tindakan Rawat Jalan',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'tindakan_rj',
+                    ]);
+                }
+                
+                $syncedCount++;
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount items successfully synced to cost references"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing tindakan rawat jalan from service volume: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error syncing data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Sync selected tindakan rawat inap from service volume current to cost references
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncTindakanRawatInapToCostReferences(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            
+            if (empty($items)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No items provided for sync'
+                ], 400);
+            }
+            
+            // Check if user is authenticated
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ], 401);
+            }
+            
+            $user = auth()->user();
+            
+            // Check if user has hospital_id or a selected hospital context
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            if (!$hospitalId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User has no associated hospital'
+                ], 400);
+            }
+            
+            $syncedCount = 0;
+            
+            foreach ($items as $item) {
+                // Validate required fields
+                if (!isset($item['kode']) || !isset($item['nama']) || !isset($item['harga'])) {
+                    Log::warning('Invalid item data for sync', ['item' => $item]);
+                    continue;
+                }
+                
+                // Check if item already exists in cost references
+                $existing = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)
+                    ->first();
+                
+                if ($existing) {
+                    // Update existing item
+                    $existing->update([
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'tindakan_ri',
+                    ]);
+                } else {
+                    // Create new item
+                    \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'unit' => 'Tindakan',
+                        'source' => 'Service Volume Current - Tindakan Rawat Inap',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'tindakan_ri',
+                    ]);
+                }
+                
+                $syncedCount++;
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount items successfully synced to cost references"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing tindakan rawat inap from service volume: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error syncing data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Sync selected laboratorium from service volume current to cost references
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncLaboratoriumToCostReferences(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            
+            if (empty($items)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No items provided for sync'
+                ], 400);
+            }
+            
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ], 401);
+            }
+            
+            $user = auth()->user();
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            
+            if (!$hospitalId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User has no associated hospital'
+                ], 400);
+            }
+            
+            $syncedCount = 0;
+            
+            foreach ($items as $item) {
+                if (!isset($item['kode']) || !isset($item['nama']) || !isset($item['harga'])) {
+                    Log::warning('Invalid item data for sync', ['item' => $item]);
+                    continue;
+                }
+                
+                $existing = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)
+                    ->first();
+                
+                if ($existing) {
+                    $existing->update([
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'laboratorium',
+                    ]);
+                } else {
+                    \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'unit' => 'Pemeriksaan',
+                        'source' => 'Service Volume Current - Laboratorium',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'laboratorium',
+                    ]);
+                }
+                
+                $syncedCount++;
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount items successfully synced to cost references"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing laboratorium from service volume: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error syncing data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Sync selected radiologi from service volume current to cost references
+     */
+    public function syncRadiologiToCostReferences(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            
+            if (empty($items)) {
+                return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
+            }
+            
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+            }
+            
+            $user = auth()->user();
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            
+            if (!$hospitalId) {
+                return response()->json(['success' => false, 'message' => 'User has no associated hospital'], 400);
+            }
+            
+            $syncedCount = 0;
+            
+            foreach ($items as $item) {
+                if (!isset($item['kode']) || !isset($item['nama']) || !isset($item['harga'])) {
+                    Log::warning('Invalid item data for sync', ['item' => $item]);
+                    continue;
+                }
+                
+                $existing = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)->first();
+                
+                if ($existing) {
+                    $existing->update([
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'radiologi',
+                    ]);
+                } else {
+                    \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'unit' => 'Pemeriksaan',
+                        'source' => 'Service Volume Current - Radiologi',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'radiologi',
+                    ]);
+                }
+                $syncedCount++;
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount items successfully synced to cost references"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing radiologi from service volume: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error syncing data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Sync selected operasi from service volume current to cost references
+     */
+    public function syncOperasiToCostReferences(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            
+            if (empty($items)) {
+                return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
+            }
+            
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+            }
+            
+            $user = auth()->user();
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            
+            if (!$hospitalId) {
+                return response()->json(['success' => false, 'message' => 'User has no associated hospital'], 400);
+            }
+            
+            $syncedCount = 0;
+            
+            foreach ($items as $item) {
+                if (!isset($item['kode']) || !isset($item['nama']) || !isset($item['harga'])) {
+                    Log::warning('Invalid item data for sync', ['item' => $item]);
+                    continue;
+                }
+                
+                $existing = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)->first();
+                
+                if ($existing) {
+                    $existing->update([
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'operasi',
+                    ]);
+                } else {
+                    \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'unit' => 'Tindakan',
+                        'source' => 'Service Volume Current - Operasi',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'operasi',
+                    ]);
+                }
+                $syncedCount++;
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount items successfully synced to cost references"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing operasi from service volume: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error syncing data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Sync selected master barang from service volume current to cost references
+     */
+    public function syncMasterBarangToCostReferences(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            
+            if (empty($items)) {
+                return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
+            }
+            
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+            }
+            
+            $user = auth()->user();
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            
+            if (!$hospitalId) {
+                return response()->json(['success' => false, 'message' => 'User has no associated hospital'], 400);
+            }
+            
+            $syncedCount = 0;
+            
+            foreach ($items as $item) {
+                if (!isset($item['kode']) || !isset($item['nama']) || !isset($item['harga'])) {
+                    Log::warning('Invalid item data for sync', ['item' => $item]);
+                    continue;
+                }
+                
+                $existing = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)->first();
+                
+                if ($existing) {
+                    $existing->update([
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'obat_bhp',
+                    ]);
+                } else {
+                    \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'unit' => 'Barang',
+                        'source' => 'Service Volume Current - Master Barang',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'obat_bhp',
+                    ]);
+                }
+                $syncedCount++;
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount items successfully synced to cost references"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing master barang from service volume: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error syncing data: ' . $e->getMessage()], 500);
+        }
+    }
+
     private function availableYears(int $currentYear, int $range = 5): array
     {
         $years = [];

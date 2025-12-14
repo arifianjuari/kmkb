@@ -261,16 +261,22 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::prefix('service-volume-current')->group(function () {
         Route::get('/master-barang', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'masterBarang'])->name('svc-current.master-barang');
         Route::get('/master-barang/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportMasterBarang'])->name('svc-current.master-barang.export');
+        Route::post('/master-barang/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncMasterBarangToCostReferences'])->name('svc-current.master-barang.sync');
         Route::get('/tindakan-rawat-jalan', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'tindakanRawatJalan'])->name('svc-current.tindakan-rawat-jalan');
         Route::get('/tindakan-rawat-jalan/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportTindakanRawatJalan'])->name('svc-current.tindakan-rawat-jalan.export');
+        Route::post('/tindakan-rawat-jalan/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncTindakanRawatJalanToCostReferences'])->name('svc-current.tindakan-rawat-jalan.sync');
         Route::get('/tindakan-rawat-inap', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'tindakanRawatInap'])->name('svc-current.tindakan-rawat-inap');
         Route::get('/tindakan-rawat-inap/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportTindakanRawatInap'])->name('svc-current.tindakan-rawat-inap.export');
+        Route::post('/tindakan-rawat-inap/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncTindakanRawatInapToCostReferences'])->name('svc-current.tindakan-rawat-inap.sync');
         Route::get('/laboratorium', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'laboratorium'])->name('svc-current.laboratorium');
         Route::get('/laboratorium/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportLaboratorium'])->name('svc-current.laboratorium.export');
+        Route::post('/laboratorium/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncLaboratoriumToCostReferences'])->name('svc-current.laboratorium.sync');
         Route::get('/radiologi', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'radiologi'])->name('svc-current.radiologi');
         Route::get('/radiologi/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportRadiologi'])->name('svc-current.radiologi.export');
+        Route::post('/radiologi/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncRadiologiToCostReferences'])->name('svc-current.radiologi.sync');
         Route::get('/operasi', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'operasi'])->name('svc-current.operasi');
         Route::get('/operasi/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportOperasi'])->name('svc-current.operasi.export');
+        Route::post('/operasi/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncOperasiToCostReferences'])->name('svc-current.operasi.sync');
     });
 
     // Audit Logs (admin and observer can view, admin only can delete)
