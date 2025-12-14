@@ -353,8 +353,12 @@ class CostCenterController extends Controller
             }
             
             if ($costCenter->children()->count() > 0) {
+                $count = $costCenter->children()->count();
+                $samples = $costCenter->children()->limit(3)->pluck('name')->implode(', ');
+                $suffix = $count > 3 ? " dan " . ($count - 3) . " lainnya" : "";
+                
                 return redirect()->route('cost-centers.index')
-                    ->with('error', 'Cost center tidak dapat dihapus karena masih memiliki child cost centers.');
+                    ->with('error', "Cost center tidak dapat dihapus karena masih memiliki {$count} child cost centers: {$samples}{$suffix}.");
             }
             
             if ($costCenter->driverStatistics()->count() > 0) {
