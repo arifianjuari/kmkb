@@ -68,6 +68,13 @@
                     {{ __('Export Excel') }}
                 </a>
                 @if(!auth()->user()?->isObserver())
+                <button
+                    x-data=""
+                    x-on:click.prevent="$dispatch('open-modal', 'import-expense-category-modal')"
+                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                >
+                    {{ __('Import Excel') }}
+                </button>
                 <a href="{{ route('expense-categories.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                     {{ __('Add New Cost Element') }}
                 </a>
@@ -284,6 +291,45 @@
             </div>
         </div>
     </div>
+
+    {{-- Import Modal --}}
+    <x-modal name="import-expense-category-modal" :show="false" focusable>
+        <div class="p-6">
+            <h2 class="text-lg font-medium text-gray-900">
+                {{ __('Import Expense Categories') }}
+            </h2>
+
+            <p class="mt-1 text-sm text-gray-600">
+                {{ __('Upload an Excel file to import expense categories. Existing records with the same Account Code will be updated.') }}
+            </p>
+
+            <div class="mt-4">
+                <a href="{{ route('expense-categories.template') }}" class="text-sm text-blue-600 hover:text-blue-900 underline">
+                    {{ __('Download Template') }}
+                </a>
+            </div>
+
+            <form method="POST" action="{{ route('expense-categories.import') }}" enctype="multipart/form-data" class="mt-6">
+                @csrf
+                
+                <div>
+                    <x-input-label for="file" :value="__('Excel File')" />
+                    <input id="file" class="block mt-1 w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" type="file" name="file" accept=".xlsx, .xls" required>
+                    <x-input-error :messages="$errors->get('file')" class="mt-2" />
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <x-secondary-button x-on:click="$dispatch('close')">
+                        {{ __('Cancel') }}
+                    </x-secondary-button>
+
+                    <x-primary-button class="ml-3">
+                        {{ __('Import') }}
+                    </x-primary-button>
+                </div>
+            </form>
+        </div>
+    </x-modal>
 </div>
 @endsection
 

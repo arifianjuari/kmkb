@@ -139,6 +139,8 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::get('expense-categories/export', [App\Http\Controllers\ExpenseCategoryController::class, 'export'])->name('expense-categories.export');
     Route::delete('expense-categories/bulk-destroy', [App\Http\Controllers\ExpenseCategoryController::class, 'bulkDestroy'])->name('expense-categories.bulk-destroy');
     Route::resource('expense-categories', App\Http\Controllers\ExpenseCategoryController::class);
+    Route::get('expense-categories/template', [App\Http\Controllers\ExpenseCategoryController::class, 'downloadTemplate'])->name('expense-categories.template');
+    Route::post('expense-categories/import', [App\Http\Controllers\ExpenseCategoryController::class, 'import'])->name('expense-categories.import');
 
     // Allocation Drivers
     Route::get('allocation-drivers/export', [App\Http\Controllers\AllocationDriverController::class, 'export'])->name('allocation-drivers.export');

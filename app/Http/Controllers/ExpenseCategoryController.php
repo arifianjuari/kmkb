@@ -347,6 +347,160 @@ class ExpenseCategoryController extends Controller
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
+    /**
+     * Download template for importing expense categories.
+     */
+    public function downloadTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $headers = ['Account Code', 'Account Name', 'Cost Type', 'Allocation Category', 'Is Active'];
+        $sheet->fromArray($headers, null, 'A1');
+
+        // Add sample data
+        $sheet->setCellValue('A2', 'SAMPLE-001');
+        $sheet->setCellValue('B2', 'Gaji Pokok Perawat');
+        $sheet->setCellValue('C2', 'Fixed');
+        $sheet->setCellValue('D2', 'Gaji');
+        $sheet->setCellValue('E2', 'Yes');
+
+        // Add validations/comments
+        $sheet->getColumnDimension('A')->setAutoSize(true);
+        $sheet->getColumnDimension('B')->setAutoSize(true);
+        $sheet->getColumnDimension('C')->setAutoSize(true);
+        $sheet->getColumnDimension('D')->setAutoSize(true);
+        $sheet->getColumnDimension('E')->setAutoSize(true);
+
+        $filename = 'expense_category_template.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    /**
+     * Import expense categories from Excel.
+     */
+    public function import(Request $request)
+    {
+        $this->blockObserver('membuat');
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getPathname());
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+
+            // Remove header
+            array_shift($rows);
+
+            $successCount = 0;
+            $updatedCount = 0;
+            $errors = [];
+
+            foreach ($rows as $index => $row) {
+                if (empty($row[0]) || empty($row[1])) {
+                    continue; // Skip empty rows
+                }
+
+                $rowNumber = $index + 2; // +2 because header is 1 and index starts at 0
+
+                try {
+                    $accountCode = trim($row[0]);
+                    $accountName = trim($row[1]);
+                    $costType = $this->normalizeCostType($row[2] ?? '');
+                    $allocationCategory = $this->normalizeAllocationCategory($row[3] ?? '');
+                    $isActive = strtolower(trim($row[4] ?? 'yes')) === 'yes';
+
+                    if (!$costType) {
+                        throw new \Exception("Invalid Cost Type: {$row[2]}");
+                    }
+
+                    if (!$allocationCategory) {
+                        throw new \Exception("Invalid Allocation Category: {$row[3]}");
+                    }
+
+                    $expenseCategory = ExpenseCategory::where('hospital_id', hospital('id'))
+                        ->where('account_code', $accountCode)
+                        ->first();
+
+                    if ($expenseCategory) {
+                        $expenseCategory->update([
+                            'account_name' => $accountName,
+                            'cost_type' => $costType,
+                            'allocation_category' => $allocationCategory,
+                            'is_active' => $isActive,
+                        ]);
+                        $updatedCount++;
+                    } else {
+                        ExpenseCategory::create([
+                            'hospital_id' => hospital('id'),
+                            'account_code' => $accountCode,
+                            'account_name' => $accountName,
+                            'cost_type' => $costType,
+                            'allocation_category' => $allocationCategory,
+                            'is_active' => $isActive,
+                        ]);
+                        $successCount++;
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "Row {$rowNumber}: " . $e->getMessage();
+                }
+            }
+
+            if (count($errors) > 0) {
+                return redirect()->route('expense-categories.index')
+                    ->with('warning', "Import selesai dengan catatan. {$successCount} data baru, {$updatedCount} data diupdate. " . count($errors) . " baris gagal: " . implode(', ', array_slice($errors, 0, 3)) . (count($errors) > 3 ? '...' : ''));
+            }
+
+            return redirect()->route('expense-categories.index')
+                ->with('success', "Import berhasil! {$successCount} data baru, {$updatedCount} data diupdate.");
+
+        } catch (\Exception $e) {
+            return redirect()->route('expense-categories.index')
+                ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
+        }
+    }
+
+    private function normalizeCostType($value)
+    {
+        $value = strtolower(trim($value));
+        $value = str_replace(' ', '_', $value);
+        
+        $validTypes = ['fixed', 'variable', 'semi_variable'];
+        return in_array($value, $validTypes) ? $value : null;
+    }
+
+    private function normalizeAllocationCategory($value)
+    {
+        $value = strtolower(trim($value));
+        $value = str_replace([' ', '-'], '_', $value);
+
+        $validCategories = ['gaji', 'bhp_medis', 'bhp_non_medis', 'depresiasi', 'lain_lain'];
+        
+        // Try exact match first
+        if (in_array($value, $validCategories)) {
+            return $value;
+        }
+        
+        // Map common variations
+        $map = [
+            'bhp' => 'bhp_medis', // Default to medis if ambiguous
+            'non_medis' => 'bhp_non_medis',
+            'medis' => 'bhp_medis',
+            'lain' => 'lain_lain',
+            'lainlain' => 'lain_lain',
+        ];
+
+        return $map[$value] ?? null;
+    }
 }
 
 
