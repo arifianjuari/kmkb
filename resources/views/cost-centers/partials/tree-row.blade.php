@@ -1,9 +1,12 @@
 <tr class="hover:bg-gray-50 cost-center-row division-{{ $divisionId ?? '' }}" 
     data-cost-center-id="{{ $costCenter->id }}">
-    <td class="px-6 py-4 text-sm text-gray-500">
+    <td class="px-6 py-4 text-sm text-gray-900 font-medium">
         <div class="flex items-center pl-6">
-            {{ $costCenter->building_name ?? '-' }}
+            {{ $costCenter->name }}
         </div>
+    </td>
+    <td class="px-6 py-4 text-sm text-gray-500">
+        {{ $costCenter->building_name ?? '-' }}
     </td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->floor ?? '-' }}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->tariffClass ? $costCenter->tariffClass->name : '-' }}</td>

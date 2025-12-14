@@ -219,6 +219,7 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Cost Center') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Building Name') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Floor') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Class') }}</th>
@@ -234,7 +235,7 @@
                                             $hasItems = $costCenters->count() > 0;
                                         @endphp
                                         <tr class="division-header-row bg-gray-100 hover:bg-gray-200" data-division="{{ $divisionName }}" data-division-id="{{ $divisionId }}">
-                                            <td colspan="6" class="px-6 py-3">
+                                            <td colspan="7" class="px-6 py-3">
                                                 <div class="flex items-center">
                                                     <button type="button" 
                                                             class="division-toggle inline-flex items-center mr-2 cursor-pointer hover:bg-gray-300 rounded p-1 transition-colors" 
@@ -247,7 +248,7 @@
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                                         </svg>
                                                     </button>
-                                                    <span class="font-semibold text-gray-900">{{ $divisionName }}</span>
+                                                    <span class="font-semibold text-gray-900">{{ $divisionName ?: __('No Division') }}</span>
                                                     <span class="ml-2 text-xs text-gray-500">({{ $costCenters->count() }})</span>
                                                 </div>
                                             </td>
@@ -258,7 +259,7 @@
                                     @endforeach
                                     @if($groupedByDivision->count() === 0)
                                         <tr>
-                                            <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                            <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                                                 {{ __('No cost centers found.') }}
                                             </td>
                                         </tr>
@@ -313,6 +314,7 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
+                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Cost Center') }}</th>
                                         <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Building Name') }}</th>
                                         <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Floor') }}</th>
                                         <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Class') }}</th>
@@ -325,6 +327,7 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($costCenters as $costCenter)
                                         <tr>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">{{ $costCenter->name }}</td>
                                             <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->building_name ?? '-' }}</td>
                                             <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->floor ?? '-' }}</td>
                                             <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $costCenter->tariffClass ? $costCenter->tariffClass->name : '-' }}</td>

@@ -112,8 +112,10 @@ class CostCenterController extends Controller
                 });
             }
 
-            // Group cost centers by division (name field)
-            $groupedByDivision = $allCostCenters->groupBy('name')->sortKeys();
+            // Group cost centers by division
+            $groupedByDivision = $allCostCenters->groupBy(function($item) {
+                return $item->division ?: 'No Division';
+            })->sortKeys();
             
             return view('cost-centers.index', compact('groupedByDivision', 'allCostCenters', 'search', 'type', 'division', 'isActive', 'viewMode', 'typeCounts', 'divisions', 'divisionCounts'));
         } else {
