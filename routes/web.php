@@ -302,6 +302,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         // Service Catalog
         Route::prefix('service-catalog')->group(function () {
             Route::get('service-items', function () { return redirect()->route('cost-references.index'); })->name('setup.service-catalog.service-items');
+            Route::get('standard-resource-usages/export', [App\Http\Controllers\StandardResourceUsageController::class, 'export'])->name('standard-resource-usages.export');
             Route::resource('standard-resource-usages', App\Http\Controllers\StandardResourceUsageController::class)->names([
                 'index' => 'standard-resource-usages.index',
                 'create' => 'standard-resource-usages.create',

@@ -7,6 +7,9 @@ use App\Models\CostReference;
 use App\Http\Requests\StoreStandardResourceUsageRequest;
 use App\Http\Requests\UpdateStandardResourceUsageRequest;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class StandardResourceUsageController extends Controller
 {
@@ -436,5 +439,158 @@ class StandardResourceUsageController extends Controller
 
         return redirect()->route('standard-resource-usages.index')
             ->with('success', "Standard Resource Usage berhasil dihapus ({$count} BMHP untuk service tersebut).");
+    }
+
+    /**
+     * Export standard resource usages to Excel for the current hospital.
+     *
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public function export(Request $request)
+    {
+        $hospitalId = hospital('id');
+        $search = $request->get('search');
+        $serviceId = $request->get('service_id');
+        $bmhpId = $request->get('bmhp_id');
+        $isActive = $request->get('is_active');
+        $category = $request->get('category');
+
+        $query = StandardResourceUsage::with(['service', 'bmhp'])
+            ->where('hospital_id', $hospitalId);
+
+        // Filter by service
+        if ($serviceId) {
+            $query->where('service_id', $serviceId);
+        }
+
+        // Filter by BMHP
+        if ($bmhpId) {
+            $query->where('bmhp_id', $bmhpId);
+        }
+
+        // Filter by active status
+        if ($isActive !== null && $isActive !== '') {
+            $query->where('is_active', $isActive);
+        }
+
+        // Filter by category
+        if ($category) {
+            $query->where(function($q) use ($category) {
+                $q->where('category', $category)
+                  ->orWhereHas('service', function($sq) use ($category) {
+                      $sq->where('category', $category);
+                  });
+            });
+        }
+
+        // Search
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->whereHas('service', function($sq) use ($search) {
+                    $sq->where('service_code', 'LIKE', "%{$search}%")
+                      ->orWhere('service_description', 'LIKE', "%{$search}%");
+                })
+                ->orWhere('service_name', 'LIKE', "%{$search}%")
+                ->orWhere('service_code', 'LIKE', "%{$search}%")
+                ->orWhereHas('bmhp', function($bq) use ($search) {
+                    $bq->where('service_code', 'LIKE', "%{$search}%")
+                      ->orWhere('service_description', 'LIKE', "%{$search}%");
+                });
+            });
+        }
+
+        $data = $query->orderBy('service_name')
+            ->orderBy('service_code')
+            ->get();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Headers
+        $headers = [
+            'Service Code',
+            'Service Name',
+            'Category',
+            'BMHP Code',
+            'BMHP Name',
+            'Quantity',
+            'Unit',
+            'BMHP Price',
+            'Total Cost',
+            'Status'
+        ];
+        $sheet->fromArray($headers, null, 'A1');
+
+        // Category labels
+        $categoryLabels = [
+            'barang' => 'Barang/BMHP',
+            'tindakan_rj' => 'Tindakan Rawat Jalan',
+            'tindakan_ri' => 'Tindakan Rawat Inap',
+            'laboratorium' => 'Laboratorium',
+            'radiologi' => 'Radiologi',
+            'operasi' => 'Operasi',
+            'kamar' => 'Kamar',
+        ];
+
+        // Rows
+        if ($data->count() > 0) {
+            $rows = [];
+            foreach ($data as $item) {
+                $serviceCode = $item->service->service_code ?? $item->service_code ?? '-';
+                $serviceName = $item->service->service_description ?? $item->service_name ?? '-';
+                $category = $item->category ?? ($item->service->category ?? null);
+                $categoryLabel = $category ? ($categoryLabels[$category] ?? $category) : '-';
+                $bmhpCode = $item->bmhp->service_code ?? '-';
+                $bmhpName = $item->bmhp->service_description ?? '-';
+                $bmhpPrice = $item->bmhp->purchase_price ?? $item->bmhp->standard_cost ?? 0;
+                $totalCost = $item->getTotalCost();
+                $status = $item->is_active ? 'Aktif' : 'Tidak Aktif';
+
+                $rows[] = [
+                    $serviceCode,
+                    $serviceName,
+                    $categoryLabel,
+                    $bmhpCode,
+                    $bmhpName,
+                    (float) $item->quantity,
+                    $item->unit,
+                    (float) $bmhpPrice,
+                    (float) $totalCost,
+                    $status,
+                ];
+            }
+            $sheet->fromArray($rows, null, 'A2');
+        }
+
+        // Format number columns
+        $sheet->getStyle('F2:F' . max(2, $data->count() + 1))
+            ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+        $sheet->getStyle('H2:I' . max(2, $data->count() + 1))
+            ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+
+        // Auto size columns
+        foreach (range('A', 'J') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Style header row
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E3F2FD']
+            ]
+        ];
+        $sheet->getStyle('A1:J1')->applyFromArray($headerStyle);
+
+        $filename = 'standard_resource_usages_' . hospital('id') . '_' . now()->format('Ymd_His') . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 }

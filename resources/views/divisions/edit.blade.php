@@ -4,7 +4,7 @@
 <div class="max-w-7xl mx-auto">
     <div class="md:flex md:items-center md:justify-between mb-6">
         <div class="flex-1 min-w-0">
-            <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">{{ __('Edit Division') }}</h2>
+            <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">{{ __('Edit Organization Unit') }}</h2>
         </div>
         <div class="mt-4 flex md:mt-0 md:ml-4">
             <a href="{{ route('divisions.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
@@ -40,7 +40,7 @@
                 </div>
 
                 <div class="col-span-2 md:col-span-1">
-                    <label for="parent_id" class="block text-sm font-medium text-gray-700">{{ __('Parent Division') }}</label>
+                    <label for="parent_id" class="block text-sm font-medium text-gray-700">{{ __('Parent Organization Unit') }}</label>
                     <div class="mt-1">
                         <select id="parent_id" name="parent_id" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                             <option value="">-- Tidak Ada Parent --</option>
@@ -73,7 +73,7 @@
                         </div>
                         <div class="ml-3 text-sm">
                             <label for="is_active" class="font-medium text-gray-700">{{ __('Active') }}</label>
-                            <p class="text-gray-500">{{ __('Inactive divisions will not be available for selection.') }}</p>
+                            <p class="text-gray-500">{{ __('Inactive organization units will not be available for selection.') }}</p>
                         </div>
                     </div>
                 </div>

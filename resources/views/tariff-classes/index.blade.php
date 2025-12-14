@@ -5,13 +5,13 @@
     <div>
         <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
             <div class="flex items-center gap-3 flex-shrink-0">
-                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Tariff Classes') }}</h2>
+                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Charge Classes') }}</h2>
                 <button
                     type="button"
                     class="flex-shrink-0 text-xs font-semibold text-biru-dongker-800 border border-biru-dongker-400 rounded-full w-5 h-5 flex items-center justify-center hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700 transition-colors"
                     onclick="const p = document.getElementById('tariff-classes-help'); if (p) { p.classList.toggle('hidden'); }"
                     aria-label="{{ __('What is Tariff Class?') }}"
-                    title="{{ __('What is Tariff Class?') }}"
+                    title="{{ __('What is Charge Class?') }}"
                 >
                     i
                 </button>
@@ -38,14 +38,14 @@
                 </a>
                 @if(!auth()->user()?->isObserver())
                 <a href="{{ route('tariff-classes.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
-                    {{ __('Add New Tariff Class') }}
+                    {{ __('Add New Charge Class') }}
                 </a>
                 @endif
             </div>
         </div>
         <div id="tariff-classes-help" class="mb-4 hidden text-xs text-gray-700 bg-biru-dongker-200 border border-biru-dongker-300 rounded-md p-3">
             <p class="mb-2">
-                <span class="font-semibold">Tariff Class</span> adalah pengelompokan kelas tarif yang akan dipakai saat pricing.
+                <span class="font-semibold">Charge Class</span> adalah pengelompokan kelas tarif yang akan dipakai saat pricing.
             </p>
             <div class="mb-2">
                 <p class="font-semibold mb-1">Isi utama:</p>
@@ -129,7 +129,7 @@
                                                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm2.92 2.83H5v-.92l9.06-9.06.92.92L5.92 20.08ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
                                                     </svg>
                                                 </a>
-                                                <form action="{{ route('tariff-classes.destroy', $tariffClass) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('Are you sure you want to delete this tariff class?') }}')">
+                                                <form action="{{ route('tariff-classes.destroy', $tariffClass) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('Are you sure you want to delete this charge class?') }}')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500" title="{{ __('Delete') }}" aria-label="{{ __('Delete') }}">
@@ -151,7 +151,7 @@
                         {{ $tariffClasses->links() }}
                     </div>
                 @else
-                    <p class="text-gray-600">{{ __('No tariff classes found.') }}</p>
+                    <p class="text-gray-600">{{ __('No charge classes found.') }}</p>
                 @endif
             </div>
         </div>

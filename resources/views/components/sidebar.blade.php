@@ -270,7 +270,7 @@
                                 <div x-show="isGroupOpen('setup-costing')" class="ml-4 mt-0.5 space-y-0.5">
                                     <a href="{{ route('divisions.index') }}" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('divisions.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
-                                        <span class="truncate">Divisions</span>
+                                        <span class="truncate">Organization Units</span>
                                     </a>
                                     <a href="{{ route('cost-centers.index') }}" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('cost-centers.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
@@ -278,7 +278,7 @@
                                     </a>
                                     <a href="{{ route('expense-categories.index') }}" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('expense-categories.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
-                                        <span class="truncate">Expense Categories</span>
+                                        <span class="truncate">Cost Elements (COA Mapping)</span>
                                     </a>
                                     <a href="{{ route('allocation-drivers.index') }}" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('allocation-drivers.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
@@ -286,7 +286,7 @@
                                     </a>
                                     <a href="{{ route('tariff-classes.index') }}" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('tariff-classes.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
-                                        <span class="truncate">Tariff Classes</span>
+                                        <span class="truncate">Charge Classes</span>
                                     </a>
                                 </div>
                             </div>
@@ -302,7 +302,7 @@
                                 <div x-show="isGroupOpen('setup-service-catalog')" class="ml-4 mt-0.5 space-y-0.5">
                                     <a href="{{ route('cost-references.index') }}" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('cost-references.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
-                                        <span class="truncate">Service Items</span>
+                                        <span class="truncate">Cost Catalogue</span>
                                     </a>
                                     <a href="{{ route('rvu-values.index') }}" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('rvu-values.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">

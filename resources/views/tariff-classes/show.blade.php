@@ -4,7 +4,7 @@
 <div class="max-w-7xl mx-auto">
     <div>
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">{{ __('Tariff Class Details') }}</h2>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('Charge Class Details') }}</h2>
             <div class="flex items-center space-x-2">
                 <a href="{{ route('tariff-classes.edit', $tariffClass) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                     {{ __('Edit') }}
@@ -18,7 +18,7 @@
         <div class="bg-white shadow overflow-hidden sm:rounded-lg">
             <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
                 <h3 class="text-lg leading-6 font-medium text-gray-900">{{ $tariffClass->name }}</h3>
-                <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ __('Tariff Class Information') }}</p>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ __('Charge Class Information') }}</p>
             </div>
             <div class="px-4 py-5 sm:p-6">
                 <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
@@ -52,6 +52,8 @@
     </div>
 </div>
 @endsection
+
+
 
 
 

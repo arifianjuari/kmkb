@@ -5,13 +5,13 @@
     <div>
         <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
             <div class="flex items-center gap-3 flex-shrink-0">
-                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Cost References') }}</h2>
+                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Cost Catalogue') }}</h2>
                 <button
                     type="button"
                     class="flex-shrink-0 text-xs font-semibold text-biru-dongker-800 border border-biru-dongker-400 rounded-full w-5 h-5 flex items-center justify-center hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700 transition-colors"
                     onclick="const p = document.getElementById('cost-references-help'); if (p) { p.classList.toggle('hidden'); }"
                     aria-label="{{ __('What is Cost Reference?') }}"
-                    title="{{ __('What is Cost Reference?') }}"
+                    title="{{ __('What is Cost Catalogue?') }}"
                 >
                     i
                 </button>
@@ -40,13 +40,13 @@
                     {{ __('Export Excel') }}
                 </a>
                 <a href="{{ route('cost-references.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
-                    {{ __('Add New Cost Reference') }}
+                    {{ __('Add New Cost Catalogue Item') }}
                 </a>
             </div>
         </div>
         <div id="cost-references-help" class="mb-4 hidden text-xs text-gray-700 bg-biru-dongker-200 border border-biru-dongker-300 rounded-md p-3">
             <p class="mb-2">
-                <span class="font-semibold">Cost Reference</span> adalah "buku besar" daftar layanan & item di rumah sakit yang bisa muncul di pathway, unit cost, dan tarif.
+                <span class="font-semibold">Cost Catalogue</span> adalah "buku besar" daftar layanan & item di rumah sakit yang bisa muncul di pathway, unit cost, dan tarif.
             </p>
             <div class="mb-2">
                 <p class="font-semibold mb-1">Isi utama:</p>
@@ -179,7 +179,7 @@
                             <div class="text-sm text-gray-600">
                                 {{ __('Select records to delete in bulk') }}
                             </div>
-                            <button id="bulk-delete-btn" type="submit" class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="return confirm('{{ __('Are you sure you want to delete the selected cost references? This action cannot be undone.') }}')">
+                            <button id="bulk-delete-btn" type="submit" class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="return confirm('{{ __('Are you sure you want to delete the selected cost catalogue items? This action cannot be undone.') }}')">
                                 {{ __('Delete Selected') }}
                             </button>
                         </div>
@@ -226,7 +226,7 @@
                                                             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm2.92 2.83H5v-.92l9.06-9.06.92.92L5.92 20.08ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
                                                         </svg>
                                                     </a>
-                                                    <form action="{{ route('cost-references.destroy', $reference) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('Are you sure you want to delete this cost reference?') }}')">
+                                                    <form action="{{ route('cost-references.destroy', $reference) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('Are you sure you want to delete this cost catalogue item?') }}')">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500" title="{{ __('Delete') }}" aria-label="{{ __('Delete') }}">
@@ -248,7 +248,7 @@
                         {{ $costReferences->links() }}
                     </div>
                 @else
-                    <p class="text-gray-600">{{ __('No cost references found.') }}</p>
+                    <p class="text-gray-600">{{ __('No cost catalogue items found.') }}</p>
                 @endif
             </div>
         </div>
@@ -260,7 +260,7 @@
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900">{{ __('Import Cost References') }}</h3>
+                <h3 class="text-lg font-medium text-gray-900">{{ __('Import Cost Catalogue') }}</h3>
                 <button onclick="closeImportModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -348,7 +348,7 @@
                     return false;
                 }
                 
-                if (!confirm('Are you sure you want to delete the selected cost references? This action cannot be undone.')) {
+                if (!confirm('Are you sure you want to delete the selected cost catalogue items? This action cannot be undone.')) {
                     e.preventDefault();
                     return false;
                 }

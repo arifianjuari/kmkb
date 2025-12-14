@@ -4,7 +4,7 @@
 <div class="max-w-7xl mx-auto">
     <div>
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">{{ __('Cost Reference Details') }}</h2>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('Cost Catalogue Item Details') }}</h2>
             <div>
                 <a href="{{ route('cost-references.edit', $costReference) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                     {{ __('Edit') }}
@@ -84,8 +84,8 @@
             <form action="{{ route('cost-references.destroy', $costReference) }}" method="POST">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" onclick="return confirm('{{ __('Are you sure you want to delete this cost reference?') }}')">
-                    {{ __('Delete Cost Reference') }}
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" onclick="return confirm('{{ __('Are you sure you want to delete this cost catalogue item?') }}')">
+                    {{ __('Delete Cost Catalogue Item') }}
                 </button>
             </form>
         </div>

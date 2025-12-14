@@ -3,12 +3,12 @@
 @section('content')
 <div class="max-w-7xl mx-auto">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-900">{{ __('Divisions') }}</h2>
+        <h2 class="text-2xl font-bold text-gray-900">{{ __('Organization Units') }}</h2>
         <a href="{{ route('divisions.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
             <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
             </svg>
-            {{ __('Add New Division') }}
+            {{ __('Add New Organization Unit') }}
         </a>
     </div>
 
@@ -74,7 +74,7 @@
                         </div>
                     </div>
                 @else
-                    <p class="text-gray-600 text-center py-8">{{ __('No divisions found.') }}</p>
+                    <p class="text-gray-600 text-center py-8">{{ __('No organization units found.') }}</p>
                 @endif
             </div>
 
@@ -203,7 +203,7 @@
                         @empty
                             <tr>
                                 <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                    No divisions found.
+                                    No organization units found.
                                 </td>
                             </tr>
                         @endforelse
@@ -337,7 +337,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{{ route('divisions.edit', $division) }}" class="text-biru-dongker-800 hover:text-biru-dongker-900 mr-3">Edit</a>
-                                    <form action="{{ route('divisions.destroy', $division) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this division?');">
+                                    <form action="{{ route('divisions.destroy', $division) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this organization unit?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
@@ -347,7 +347,7 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                    No divisions found.
+                                    No organization units found.
                                 </td>
                             </tr>
                         @endforelse

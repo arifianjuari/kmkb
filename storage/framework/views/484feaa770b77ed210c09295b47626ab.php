@@ -11,13 +11,14 @@
     // Setup group
     if (request()->routeIs('setup.*') || 
         request()->routeIs('cost-references.*') || 
+        request()->routeIs('rvu-values.*') ||
+        request()->routeIs('standard-resource-usages.*') ||
         request()->routeIs('jkn-cbg-codes.*') || 
         request()->routeIs('cost-centers.*') || 
         request()->routeIs('divisions.*') || 
         request()->routeIs('expense-categories.*') || 
         request()->routeIs('allocation-drivers.*') || 
-        request()->routeIs('tariff-classes.*') ||
-        request()->routeIs('simrs.*')) {
+        request()->routeIs('tariff-classes.*')) {
         $openGroups['setup'] = true;
     }
     
@@ -30,15 +31,16 @@
         $openGroups['setup-costing'] = true;
     }
     if (request()->routeIs('cost-references.*') || 
-        request()->routeIs('setup.service-catalog.*')) {
+        request()->routeIs('rvu-values.*') ||
+        request()->routeIs('setup.service-catalog.*') ||
+        request()->routeIs('standard-resource-usages.*')) {
         $openGroups['setup-service-catalog'] = true;
     }
     if (request()->routeIs('jkn-cbg-codes.*') || 
         request()->routeIs('setup.jkn-cbg-codes.*')) {
         $openGroups['setup-jkn'] = true;
     }
-    if (request()->routeIs('simrs.*') || 
-        request()->routeIs('setup.simrs-integration.*')) {
+    if (request()->routeIs('setup.simrs-integration.*')) {
         $openGroups['setup-simrs'] = true;
     }
     
@@ -122,6 +124,11 @@
     }
     if (request()->routeIs('cases.variance*')) {
         $openGroups['cases'] = true;
+    }
+    
+    // SIMRS group (separate from Setup)
+    if (request()->routeIs('simrs.*')) {
+        $openGroups['simrs'] = true;
     }
     
     // Admin routes are now in navbar dropdown, not in sidebar
@@ -218,7 +225,7 @@
 <?php unset($__componentOriginal9abb5b9f9947fec1aec288b20ca02d30); ?>
 <?php endif; ?>
             <?php endif; ?>
-            <span class="text-lg font-semibold break-words min-w-0 leading-tight"><?php echo e(hospital('name') ?? config('app.name', 'Laravel')); ?></span>
+            <span class="hidden lg:block text-lg font-semibold break-words min-w-0 leading-tight"><?php echo e(hospital('name') ?? config('app.name', 'Laravel')); ?></span>
         </a>
         <a href="<?php echo e(route('dashboard')); ?>" x-show="collapsed" class="flex items-center justify-center w-full h-full min-w-0">
             <?php if($isAbsoluteUrl || ($normalizedPath && Storage::disk(uploads_disk())->exists($normalizedPath))): ?>
@@ -248,8 +255,8 @@
         </a>
         <button @click="toggleCollapse()" 
                 x-show="!collapsed"
-                class="hidden lg:flex p-1.5 hover:bg-gray-300 ml-2 rounded-md transition-all duration-200 flex-shrink-0 relative z-10 items-center justify-center"
-                :title="'Collapse Sidebar'">
+                class="lg:flex p-1.5 hover:bg-gray-300 ml-2 rounded-md transition-all duration-200 flex-shrink-0 relative z-10 items-center justify-center"
+                title="Collapse Sidebar">
             <svg class="w-5 h-5 transition-all duration-200" 
                  fill="none" 
                  stroke="currentColor" 
@@ -301,7 +308,7 @@
                                 <div x-show="isGroupOpen('setup-costing')" class="ml-4 mt-0.5 space-y-0.5">
                                     <a href="<?php echo e(route('divisions.index')); ?>" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('divisions.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                        <span class="truncate">Divisions</span>
+                                        <span class="truncate">Organization Units</span>
                                     </a>
                                     <a href="<?php echo e(route('cost-centers.index')); ?>" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('cost-centers.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
@@ -309,7 +316,7 @@
                                     </a>
                                     <a href="<?php echo e(route('expense-categories.index')); ?>" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('expense-categories.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                        <span class="truncate">Expense Categories</span>
+                                        <span class="truncate">Cost Elements (COA Mapping)</span>
                                     </a>
                                     <a href="<?php echo e(route('allocation-drivers.index')); ?>" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('allocation-drivers.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
@@ -317,7 +324,7 @@
                                     </a>
                                     <a href="<?php echo e(route('tariff-classes.index')); ?>" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('tariff-classes.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                        <span class="truncate">Tariff Classes</span>
+                                        <span class="truncate">Charge Classes</span>
                                     </a>
                                 </div>
                             </div>
@@ -333,15 +340,15 @@
                                 <div x-show="isGroupOpen('setup-service-catalog')" class="ml-4 mt-0.5 space-y-0.5">
                                     <a href="<?php echo e(route('cost-references.index')); ?>" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('cost-references.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                        <span class="truncate">Service Items</span>
+                                        <span class="truncate">Cost Catalogue</span>
                                     </a>
-                                    <a href="<?php echo e(route('setup.service-catalog.simrs-linked')); ?>" 
-                                       class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('setup.service-catalog.simrs-linked') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                        <span class="truncate">SIMRS-linked Items</span>
+                                    <a href="<?php echo e(route('rvu-values.index')); ?>" 
+                                       class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('rvu-values.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">RVU Management</span>
                                     </a>
-                                    <a href="<?php echo e(route('setup.service-catalog.import-export')); ?>" 
-                                       class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('setup.service-catalog.import-export') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                        <span class="truncate">Import/Export</span>
+                                    <a href="<?php echo e(route('standard-resource-usages.index')); ?>" 
+                                       class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('standard-resource-usages.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Standard Resource Usage</span>
                                     </a>
                                 </div>
                             </div>
@@ -433,7 +440,7 @@
                                 <div x-show="isGroupOpen('svc-simrs')" class="ml-4 mt-0.5 space-y-0.5">
                                     <a href="<?php echo e(route('svc-current.master-barang')); ?>"
                                        class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.master-barang') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                        <span class="truncate">Master Barang</span>
+                                        <span class="truncate">Obat & BHP</span>
                                     </a>
                                     <a href="<?php echo e(route('svc-current.tindakan-rawat-jalan')); ?>"
                                        class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.tindakan-rawat-jalan') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
