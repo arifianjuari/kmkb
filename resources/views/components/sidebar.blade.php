@@ -424,6 +424,14 @@
                                        class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('svc-current.operasi') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
                                         <span class="truncate">Operasi</span>
                                     </a>
+                                    <a href="{{ route('svc-current.kamar') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('svc-current.kamar') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Kamar</span>
+                                    </a>
+                                    <a href="{{ route('svc-current.hari-rawat') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('svc-current.hari-rawat') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Hari Rawat</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>

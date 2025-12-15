@@ -277,6 +277,11 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         Route::get('/operasi', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'operasi'])->name('svc-current.operasi');
         Route::get('/operasi/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportOperasi'])->name('svc-current.operasi.export');
         Route::post('/operasi/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncOperasiToCostReferences'])->name('svc-current.operasi.sync');
+        Route::get('/kamar', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'kamar'])->name('svc-current.kamar');
+        Route::get('/kamar/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportKamar'])->name('svc-current.kamar.export');
+        Route::post('/kamar/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncKamarToCostReferences'])->name('svc-current.kamar.sync');
+        Route::get('/hari-rawat', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'hariRawat'])->name('svc-current.hari-rawat');
+        Route::get('/hari-rawat/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportHariRawat'])->name('svc-current.hari-rawat.export');
     });
 
     // Audit Logs (admin and observer can view, admin only can delete)

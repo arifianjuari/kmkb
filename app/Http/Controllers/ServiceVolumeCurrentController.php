@@ -2489,6 +2489,636 @@ class ServiceVolumeCurrentController extends Controller
         }
     }
 
+    public function kamar(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedBangsal = array_filter((array) $request->input('bangsal', []));
+        $search = trim((string) $request->input('search'));
+
+        [$kamarData, $grandTotals, $errorMessage] = $this->getKamarAggregates(
+            $selectedYear,
+            $selectedBangsal,
+            $search
+        );
+
+        $bangsalOptions = DB::connection('simrs')->select("
+            SELECT kd_bangsal, nm_bangsal
+            FROM bangsal
+            ORDER BY nm_bangsal ASC
+        ");
+
+        return view('service-volume-current.kamar', [
+            'year' => $selectedYear,
+            'bangsal' => $selectedBangsal,
+            'search' => $search,
+            'kamarData' => $kamarData,
+            'grandTotals' => $grandTotals,
+            'bangsalOptions' => $bangsalOptions,
+            'availableYears' => $this->availableYears($currentYear),
+            'errorMessage' => $errorMessage,
+        ]);
+    }
+
+    public function exportKamar(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedBangsal = array_filter((array) $request->input('bangsal', []));
+        $search = trim((string) $request->input('search'));
+
+        [$kamarData, $grandTotals, $errorMessage] = $this->getKamarAggregates(
+            $selectedYear,
+            $selectedBangsal,
+            $search
+        );
+
+        if ($errorMessage) {
+            return redirect()->back()->withInput()->with('error', $errorMessage);
+        }
+
+        if (empty($kamarData)) {
+            return redirect()->back()->withInput()->with('error', 'Tidak ada data untuk filter tersebut.');
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set title
+        $sheet->setCellValue('A1', 'VOLUME PEMAKAIAN KAMAR');
+        $sheet->mergeCells('A1:Q1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Set period info
+        $subtitle = 'Tahun: ' . $selectedYear;
+        if (!empty($selectedBangsal)) {
+            $subtitle .= ' | Bangsal: ' . implode(', ', $selectedBangsal);
+        }
+        $sheet->setCellValue('A2', $subtitle);
+        $sheet->mergeCells('A2:Q2');
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Headers
+        $header = [
+            'Kode Kamar',
+            'Bangsal',
+            'Kelas',
+            'Tarif (Rp)',
+            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
+            'Total Hari',
+            'Total Pendapatan (Rp)',
+        ];
+
+        $sheet->fromArray($header, null, 'A3');
+
+        // Style headers
+        $headerRange = 'A3:R3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('E5E7EB');
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle($headerRange)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(3)->setRowHeight(22);
+
+        // Data rows
+        $rowIndex = 4;
+        foreach ($kamarData as $row) {
+            $sheet->fromArray([
+                $row['kode'],
+                $row['bangsal'],
+                $row['kelas'],
+                $row['tarif'],
+                $row['jan'],
+                $row['feb'],
+                $row['mar'],
+                $row['apr'],
+                $row['may'],
+                $row['jun'],
+                $row['jul'],
+                $row['aug'],
+                $row['sep'],
+                $row['oct'],
+                $row['nov'],
+                $row['dec'],
+                $row['total_hari'],
+                $row['total_pendapatan'],
+            ], null, 'A' . $rowIndex);
+
+            $rowIndex++;
+        }
+
+        // Grand total row
+        $sheet->fromArray([
+            'Grand Total',
+            null,
+            null,
+            null,
+            $grandTotals['jan'],
+            $grandTotals['feb'],
+            $grandTotals['mar'],
+            $grandTotals['apr'],
+            $grandTotals['may'],
+            $grandTotals['jun'],
+            $grandTotals['jul'],
+            $grandTotals['aug'],
+            $grandTotals['sep'],
+            $grandTotals['oct'],
+            $grandTotals['nov'],
+            $grandTotals['dec'],
+            $grandTotals['total_hari'],
+            $grandTotals['total_pendapatan'],
+        ], null, 'A' . $rowIndex);
+
+        $lastRow = $rowIndex;
+
+        // Borders for entire table (header + data + total)
+        $tableRange = 'A3:R' . $lastRow;
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Autosize columns
+        foreach (range('A', 'R') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Align columns
+        $sheet->getStyle('A4:C' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('E4:Q' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+
+        // Currency format for Tarif dan Total Pendapatan
+        foreach (['D', 'R'] as $currencyColumn) {
+            $sheet->getStyle($currencyColumn . '4:' . $currencyColumn . $lastRow)
+                ->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        }
+
+        $fileName = 'service-volume-kamar-' . $selectedYear . '-' . now()->format('Ymd_His') . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    private function getKamarAggregates(int $selectedYear, array $selectedBangsal, string $search): array
+    {
+        $kamarData = [];
+        $errorMessage = null;
+        $grandTotals = [
+            'jan' => 0,
+            'feb' => 0,
+            'mar' => 0,
+            'apr' => 0,
+            'may' => 0,
+            'jun' => 0,
+            'jul' => 0,
+            'aug' => 0,
+            'sep' => 0,
+            'oct' => 0,
+            'nov' => 0,
+            'dec' => 0,
+            'total_hari' => 0,
+            'total_pendapatan' => 0,
+        ];
+
+        try {
+            $bindings = [$selectedYear];
+
+            $baseWhere = "WHERE YEAR(ki.tgl_masuk) = ?";
+            if (!empty($selectedBangsal)) {
+                $placeholders = implode(',', array_fill(0, count($selectedBangsal), '?'));
+                $baseWhere .= " AND k.kd_bangsal IN ({$placeholders})";
+                $bindings = array_merge($bindings, $selectedBangsal);
+            }
+            if ($search !== '') {
+                $baseWhere .= " AND (k.kd_kamar LIKE ? OR b.nm_bangsal LIKE ? OR k.kelas LIKE ?)";
+                $bindings[] = '%' . $search . '%';
+                $bindings[] = '%' . $search . '%';
+                $bindings[] = '%' . $search . '%';
+            }
+
+            $sql = "
+                SELECT
+                    k.kd_kamar,
+                    k.kd_bangsal,
+                    COALESCE(b.nm_bangsal, k.kd_bangsal) AS nm_bangsal,
+                    k.kelas,
+                    k.trf_kamar,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 1 THEN ki.lama ELSE 0 END) AS jan,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 2 THEN ki.lama ELSE 0 END) AS feb,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 3 THEN ki.lama ELSE 0 END) AS mar,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 4 THEN ki.lama ELSE 0 END) AS apr,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 5 THEN ki.lama ELSE 0 END) AS may,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 6 THEN ki.lama ELSE 0 END) AS jun,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 7 THEN ki.lama ELSE 0 END) AS jul,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 8 THEN ki.lama ELSE 0 END) AS aug,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 9 THEN ki.lama ELSE 0 END) AS sep,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 10 THEN ki.lama ELSE 0 END) AS oct,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 11 THEN ki.lama ELSE 0 END) AS nov,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 12 THEN ki.lama ELSE 0 END) AS `dec`,
+                    SUM(ki.lama) AS total_hari,
+                    SUM(ki.lama * k.trf_kamar) AS total_pendapatan
+                FROM kamar_inap ki
+                INNER JOIN kamar k ON k.kd_kamar = ki.kd_kamar
+                LEFT JOIN bangsal b ON b.kd_bangsal = k.kd_bangsal
+                {$baseWhere}
+                GROUP BY k.kd_kamar, k.kd_bangsal, b.nm_bangsal, k.kelas, k.trf_kamar
+                ORDER BY k.kelas ASC, k.kd_kamar ASC
+            ";
+
+            $rows = DB::connection('simrs')->select($sql, $bindings);
+
+            foreach ($rows as $row) {
+                $kamarData[] = [
+                    'kode' => $row->kd_kamar,
+                    'bangsal' => $row->nm_bangsal,
+                    'kelas' => $row->kelas,
+                    'tarif' => (float) $row->trf_kamar,
+                    'jan' => (int) $row->jan,
+                    'feb' => (int) $row->feb,
+                    'mar' => (int) $row->mar,
+                    'apr' => (int) $row->apr,
+                    'may' => (int) $row->may,
+                    'jun' => (int) $row->jun,
+                    'jul' => (int) $row->jul,
+                    'aug' => (int) $row->aug,
+                    'sep' => (int) $row->sep,
+                    'oct' => (int) $row->oct,
+                    'nov' => (int) $row->nov,
+                    'dec' => (int) $row->dec,
+                    'total_hari' => (int) $row->total_hari,
+                    'total_pendapatan' => (float) $row->total_pendapatan,
+                ];
+
+                $grandTotals['jan'] += (int) $row->jan;
+                $grandTotals['feb'] += (int) $row->feb;
+                $grandTotals['mar'] += (int) $row->mar;
+                $grandTotals['apr'] += (int) $row->apr;
+                $grandTotals['may'] += (int) $row->may;
+                $grandTotals['jun'] += (int) $row->jun;
+                $grandTotals['jul'] += (int) $row->jul;
+                $grandTotals['aug'] += (int) $row->aug;
+                $grandTotals['sep'] += (int) $row->sep;
+                $grandTotals['oct'] += (int) $row->oct;
+                $grandTotals['nov'] += (int) $row->nov;
+                $grandTotals['dec'] += (int) $row->dec;
+                $grandTotals['total_hari'] += (int) $row->total_hari;
+                $grandTotals['total_pendapatan'] += (float) $row->total_pendapatan;
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Failed to load kamar volume', [
+                'year' => $selectedYear,
+                'bangsal' => $selectedBangsal,
+                'search' => $search,
+                'message' => $exception->getMessage(),
+            ]);
+            $errorMessage = 'Gagal memuat data kamar dari SIMRS. Silakan coba lagi atau hubungi administrator.';
+        }
+
+        return [$kamarData, $grandTotals, $errorMessage];
+    }
+
+    /**
+     * Sync selected kamar from service volume current to cost references
+     */
+    public function syncKamarToCostReferences(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            
+            if (empty($items)) {
+                return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
+            }
+            
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+            }
+            
+            $user = auth()->user();
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            
+            if (!$hospitalId) {
+                return response()->json(['success' => false, 'message' => 'User has no associated hospital'], 400);
+            }
+            
+            $syncedCount = 0;
+            
+            foreach ($items as $item) {
+                if (!isset($item['kode']) || !isset($item['nama']) || !isset($item['harga'])) {
+                    Log::warning('Invalid item data for sync (kamar)', ['item' => $item]);
+                    continue;
+                }
+                
+                $existing = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)->first();
+                
+                if ($existing) {
+                    $existing->update([
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'kamar',
+                    ]);
+                } else {
+                    \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'],
+                        'standard_cost' => $item['harga'],
+                        'unit' => 'Hari',
+                        'source' => 'Service Volume Current - Kamar',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'kamar',
+                    ]);
+                }
+                $syncedCount++;
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount items successfully synced to cost references"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing kamar from service volume: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error syncing data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function hariRawat(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedBangsal = array_filter((array) $request->input('bangsal', []));
+
+        [$hariRawatData, $grandTotals, $errorMessage] = $this->getHariRawatAggregates(
+            $selectedYear,
+            $selectedBangsal
+        );
+
+        $bangsalOptions = DB::connection('simrs')->select("
+            SELECT kd_bangsal, nm_bangsal
+            FROM bangsal
+            ORDER BY nm_bangsal ASC
+        ");
+
+        return view('service-volume-current.hari-rawat', [
+            'year' => $selectedYear,
+            'bangsal' => $selectedBangsal,
+            'hariRawatData' => $hariRawatData,
+            'grandTotals' => $grandTotals,
+            'bangsalOptions' => $bangsalOptions,
+            'availableYears' => $this->availableYears($currentYear),
+            'errorMessage' => $errorMessage,
+        ]);
+    }
+
+    public function exportHariRawat(Request $request)
+    {
+        $currentYear = now()->year;
+        $selectedYear = (int) $request->input('year', $currentYear);
+        $selectedBangsal = array_filter((array) $request->input('bangsal', []));
+
+        [$hariRawatData, $grandTotals, $errorMessage] = $this->getHariRawatAggregates(
+            $selectedYear,
+            $selectedBangsal
+        );
+
+        if ($errorMessage) {
+            return redirect()->back()->withInput()->with('error', $errorMessage);
+        }
+
+        if (empty($hariRawatData)) {
+            return redirect()->back()->withInput()->with('error', 'Tidak ada data untuk filter tersebut.');
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set title
+        $sheet->setCellValue('A1', 'REKAP HARI RAWAT');
+        $sheet->mergeCells('A1:Q1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Set period info
+        $subtitle = 'Tahun: ' . $selectedYear;
+        if (!empty($selectedBangsal)) {
+            $subtitle .= ' | Bangsal: ' . implode(', ', $selectedBangsal);
+        }
+        $sheet->setCellValue('A2', $subtitle);
+        $sheet->mergeCells('A2:Q2');
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Headers
+        $header = [
+            'Bangsal',
+            'Kelas',
+            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
+            'Total Hari',
+            'Jumlah Pasien',
+            'Rata-rata LOS',
+        ];
+
+        $sheet->fromArray($header, null, 'A3');
+
+        // Style headers
+        $headerRange = 'A3:Q3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('E5E7EB');
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle($headerRange)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(3)->setRowHeight(22);
+
+        // Data rows
+        $rowIndex = 4;
+        foreach ($hariRawatData as $row) {
+            $sheet->fromArray([
+                $row['bangsal'],
+                $row['kelas'],
+                $row['jan'],
+                $row['feb'],
+                $row['mar'],
+                $row['apr'],
+                $row['may'],
+                $row['jun'],
+                $row['jul'],
+                $row['aug'],
+                $row['sep'],
+                $row['oct'],
+                $row['nov'],
+                $row['dec'],
+                $row['total_hari'],
+                $row['jumlah_pasien'],
+                $row['avg_los'],
+            ], null, 'A' . $rowIndex);
+
+            $rowIndex++;
+        }
+
+        // Grand total row
+        $sheet->fromArray([
+            'Grand Total',
+            null,
+            $grandTotals['jan'],
+            $grandTotals['feb'],
+            $grandTotals['mar'],
+            $grandTotals['apr'],
+            $grandTotals['may'],
+            $grandTotals['jun'],
+            $grandTotals['jul'],
+            $grandTotals['aug'],
+            $grandTotals['sep'],
+            $grandTotals['oct'],
+            $grandTotals['nov'],
+            $grandTotals['dec'],
+            $grandTotals['total_hari'],
+            $grandTotals['jumlah_pasien'],
+            $grandTotals['avg_los'],
+        ], null, 'A' . $rowIndex);
+
+        $lastRow = $rowIndex;
+
+        // Borders for entire table
+        $tableRange = 'A3:Q' . $lastRow;
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Autosize columns
+        foreach (range('A', 'Q') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $fileName = 'rekap-hari-rawat-' . $selectedYear . '-' . now()->format('Ymd_His') . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    private function getHariRawatAggregates(int $selectedYear, array $selectedBangsal): array
+    {
+        $hariRawatData = [];
+        $errorMessage = null;
+        $grandTotals = [
+            'jan' => 0, 'feb' => 0, 'mar' => 0, 'apr' => 0, 'may' => 0, 'jun' => 0,
+            'jul' => 0, 'aug' => 0, 'sep' => 0, 'oct' => 0, 'nov' => 0, 'dec' => 0,
+            'total_hari' => 0,
+            'jumlah_pasien' => 0,
+            'avg_los' => 0,
+        ];
+
+        try {
+            $bindings = [$selectedYear];
+
+            $baseWhere = "WHERE YEAR(ki.tgl_masuk) = ?";
+            if (!empty($selectedBangsal)) {
+                $placeholders = implode(',', array_fill(0, count($selectedBangsal), '?'));
+                $baseWhere .= " AND k.kd_bangsal IN ({$placeholders})";
+                $bindings = array_merge($bindings, $selectedBangsal);
+            }
+
+            $sql = "
+                SELECT
+                    k.kd_bangsal,
+                    COALESCE(b.nm_bangsal, k.kd_bangsal) AS nm_bangsal,
+                    k.kelas,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 1 THEN ki.lama ELSE 0 END) AS jan,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 2 THEN ki.lama ELSE 0 END) AS feb,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 3 THEN ki.lama ELSE 0 END) AS mar,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 4 THEN ki.lama ELSE 0 END) AS apr,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 5 THEN ki.lama ELSE 0 END) AS may,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 6 THEN ki.lama ELSE 0 END) AS jun,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 7 THEN ki.lama ELSE 0 END) AS jul,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 8 THEN ki.lama ELSE 0 END) AS aug,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 9 THEN ki.lama ELSE 0 END) AS sep,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 10 THEN ki.lama ELSE 0 END) AS oct,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 11 THEN ki.lama ELSE 0 END) AS nov,
+                    SUM(CASE WHEN MONTH(ki.tgl_masuk) = 12 THEN ki.lama ELSE 0 END) AS `dec`,
+                    SUM(ki.lama) AS total_hari,
+                    COUNT(ki.no_rawat) AS jumlah_pasien,
+                    ROUND(AVG(ki.lama), 2) AS avg_los
+                FROM kamar_inap ki
+                INNER JOIN kamar k ON k.kd_kamar = ki.kd_kamar
+                LEFT JOIN bangsal b ON b.kd_bangsal = k.kd_bangsal
+                {$baseWhere}
+                GROUP BY k.kd_bangsal, b.nm_bangsal, k.kelas
+                ORDER BY k.kelas ASC, b.nm_bangsal ASC
+            ";
+
+            $rows = DB::connection('simrs')->select($sql, $bindings);
+
+            $totalHariAll = 0;
+            $totalPasienAll = 0;
+
+            foreach ($rows as $row) {
+                $hariRawatData[] = [
+                    'bangsal' => $row->nm_bangsal,
+                    'kelas' => $row->kelas,
+                    'jan' => (int) $row->jan,
+                    'feb' => (int) $row->feb,
+                    'mar' => (int) $row->mar,
+                    'apr' => (int) $row->apr,
+                    'may' => (int) $row->may,
+                    'jun' => (int) $row->jun,
+                    'jul' => (int) $row->jul,
+                    'aug' => (int) $row->aug,
+                    'sep' => (int) $row->sep,
+                    'oct' => (int) $row->oct,
+                    'nov' => (int) $row->nov,
+                    'dec' => (int) $row->dec,
+                    'total_hari' => (int) $row->total_hari,
+                    'jumlah_pasien' => (int) $row->jumlah_pasien,
+                    'avg_los' => (float) $row->avg_los,
+                ];
+
+                $grandTotals['jan'] += (int) $row->jan;
+                $grandTotals['feb'] += (int) $row->feb;
+                $grandTotals['mar'] += (int) $row->mar;
+                $grandTotals['apr'] += (int) $row->apr;
+                $grandTotals['may'] += (int) $row->may;
+                $grandTotals['jun'] += (int) $row->jun;
+                $grandTotals['jul'] += (int) $row->jul;
+                $grandTotals['aug'] += (int) $row->aug;
+                $grandTotals['sep'] += (int) $row->sep;
+                $grandTotals['oct'] += (int) $row->oct;
+                $grandTotals['nov'] += (int) $row->nov;
+                $grandTotals['dec'] += (int) $row->dec;
+                $grandTotals['total_hari'] += (int) $row->total_hari;
+                $grandTotals['jumlah_pasien'] += (int) $row->jumlah_pasien;
+
+                $totalHariAll += (int) $row->total_hari;
+                $totalPasienAll += (int) $row->jumlah_pasien;
+            }
+
+            // Calculate overall average LOS
+            $grandTotals['avg_los'] = $totalPasienAll > 0 ? round($totalHariAll / $totalPasienAll, 2) : 0;
+
+        } catch (\Throwable $exception) {
+            Log::error('Failed to load hari rawat data', [
+                'year' => $selectedYear,
+                'bangsal' => $selectedBangsal,
+                'message' => $exception->getMessage(),
+            ]);
+            $errorMessage = 'Gagal memuat data hari rawat dari SIMRS. Silakan coba lagi atau hubungi administrator.';
+        }
+
+        return [$hariRawatData, $grandTotals, $errorMessage];
+    }
+
     private function availableYears(int $currentYear, int $range = 5): array
     {
         $years = [];
