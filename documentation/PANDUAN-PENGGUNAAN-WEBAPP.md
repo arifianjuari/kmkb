@@ -1,348 +1,893 @@
-# Panduan Penggunaan WebApp Costing, Tariff, dan Clinical Pathway Management System
+# Panduan Penggunaan WebApp KMKB
+## Kurikulum Belajar & Petunjuk Teknis Terintegrasi
+
+> **Versi:** Desember 2025  
+> **Platform:** WebApp Costing, Tariff, dan Clinical Pathway Management System
+
+---
 
 ## Daftar Isi
-1. [Pendahuluan](#pendahuluan)
-2. [Ikhtisar Peran & Menu](#ikhtisar-peran--menu)
-3. [Workflow Cepat End-to-End](#workflow-cepat-end-to-end)
-4. [Persiapan Awal & Navigasi](#persiapan-awal--navigasi)
-5. [Setup Master Data](#setup-master-data)
-6. [Input Data Operasional](#input-data-operasional)
-7. [Cost Allocation](#cost-allocation)
-8. [Unit Costing](#unit-costing)
-9. [Tariff Management](#tariff-management)
-10. [Clinical Pathway Management](#clinical-pathway-management)
-11. [Patient Case Management](#patient-case-management)
-12. [Analytics & Reporting](#analytics--reporting)
-13. [SIMRS Integration & Service Volume Current](#simrs-integration--service-volume-current)
-14. [System Administration & Utilities](#system-administration--utilities)
-15. [Tips & Best Practices](#tips--best-practices)
-16. [Troubleshooting](#troubleshooting)
-17. [Lampiran & Template](#lampiran--template)
+
+### Bagian A: Landasan Teori & Prinsip
+1. [Prinsip Dasar Analisis Biaya (Defining the Final Product)](#bagian-a-prinsip-dasar-analisis-biaya)
+2. [Defining Cost Centres (Mendefinisikan Pusat Biaya)](#defining-cost-centres-mendefinisikan-pusat-biaya)
+
+### Bagian B: Modul Pembelajaran & Petunjuk Teknis
+- [Modul 1-5: Dasar-Dasar Costing Rumah Sakit](#modul-1-5-dasar-dasar-costing-rumah-sakit)
+- [Modul 6-8: Cost Allocation](#modul-6-8-cost-allocation)
+- [Modul 9-10: Unit Costing](#modul-9-10-unit-costing)
+- [Modul 11-13: Clinical Pathway](#modul-11-13-clinical-pathway)
+- [Modul 14-21: Tariff Management](#modul-14-21-tariff-management)
+
+### Bagian C: Referensi Operasional
+- [Ikhtisar Peran & Menu](#ikhtisar-peran--menu)
+- [Workflow Cepat End-to-End](#workflow-cepat-end-to-end)
+- [Troubleshooting](#troubleshooting)
+- [Lampiran & Template](#lampiran--template)
 
 ---
 
-## Pendahuluan
-WebApp Costing, Tariff, dan Clinical Pathway Management System adalah platform Laravel + Tailwind berbasis multi-tenant yang menyatukan modul costing, penetapan tariff, clinical pathway, dan monitoring kasus pasien. Dokumen ini menjadi rujukan operasional bagi seluruh peran (superadmin sampai auditor) untuk menjalankan proses mutu-biaya secara konsisten.
+# BAGIAN A: PRINSIP DASAR ANALISIS BIAYA
 
-### Tujuan Sistem
-- Standarisasi pengelolaan cost center, expense category, driver, dan tariff class.
-- Otomatisasi perhitungan allocation → unit cost → simulasi tariff → final tariff.
-- Digitalisasi clinical pathway lengkap dengan builder, versi, approval, dan estimasi biaya.
-- Monitoring kasus aktual terhadap pathway, termasuk compliance dan cost variance.
-- Integrasi data SIMRS serta penyediaan laporan KPI siap ekspor.
+## Defining the Final Product of Cost Analysis
+
+Sebelum memulai proses costing, penting memahami prinsip-prinsip dasar dalam mendefinisikan "produk akhir" dari analisis biaya.
+
+### A.1. Menentukan Layanan/Unit untuk Unit Cost
+
+**Prinsip:** Tentukan apakah unit cost dihitung secara agregat (seluruh RS), per departemen, atau per bangsal.
+
+**Faktor penentu:**
+- **Tujuan analisis**: Perbandingan antar departemen → per departemen. Perbandingan antar RS → agregat.
+- **Ketersediaan data**: Granular membutuhkan data detail di level tersebut.
+
+**Implementasi di Webapp:**
+
+| Fitur | Menu | Keterangan |
+|-------|------|------------|
+| Cost Centers hierarkis | Master Data → Cost Centers | Mendukung struktur parent-child |
+| Tipe Cost Center | Master Data → Cost Centers | Pembedaan `revenue` vs `support` |
+| Lokasi fisik | Master Data → Cost Centers | Field building, floor, division |
+| Cost References | Master Data → Cost References | Layanan terhubung ke cost center |
+
+**Rekomendasi:**
+```
+Perbandingan antar-RS       → 1 Cost Center agregat per jenis layanan
+Perbandingan antar-bangsal  → Cost Center terpisah per bangsal (VIP, Kelas 1, ICU, dsb)
+Analisis detail layanan     → Cost References yang terhubung ke Cost Center
+```
 
 ---
+
+### A.2. Final Product vs Intermediate Output
+
+**Prinsip:** Lab dan Radiologi bisa sebagai:
+- **Final product**: unit cost tersendiri
+- **Intermediate**: dialokasikan ke rawat inap/jalan
+
+**Status di Webapp:**
+
+| Cost Center | Tipe | Perlakuan |
+|-------------|------|-----------|
+| IGD, Rawat Inap, Rawat Jalan | Revenue | Final product |
+| Laboratorium, Radiologi, OK | Revenue | Final product (default) |
+| Administrasi, Laundry, Kebersihan | Support | Intermediate → dialokasikan |
+
+> **[!IMPORTANT]**
+> Tetap konsisten dalam pemilihan final/intermediate sepanjang periode analisis. Dokumentasikan di Knowledge References.
+
+> **[!NOTE] Catatan Pengembangan**
+> Toggle otomatis final/intermediate belum tersedia. Perlu penyesuaian manual di Allocation Maps.
+
+---
+
+### A.3. Satuan Output untuk Final Cost Centre
+
+| Jenis Layanan | Satuan Output |
+|---------------|---------------|
+| Rawat Inap | Inpatient-days atau Admissions |
+| Rawat Jalan | Visits (kunjungan) |
+| Laboratorium | Jumlah tes |
+| Radiologi | Jumlah pemeriksaan |
+| Kamar Operasi | Jumlah operasi |
+| Farmasi | Jumlah resep/item |
+
+**Formula:**
+```
+Unit Cost = (Direct Cost + Indirect Cost) / Service Volume
+```
+
+**Menu:** `GL & Expenses → Service Volumes`
+
+> **[!TIP]**
+> Sepakati di awal: rawat inap menggunakan `patient-days` atau `admissions`. Dokumentasikan pilihan di Knowledge References.
+
+---
+
+### A.4. Periode Data
+
+| Tujuan | Periode |
+|--------|---------|
+| Monitoring internal cepat | Bulanan/Triwulan |
+| Perbandingan antar RS | Tahunan (menghilangkan variasi musiman) |
+
+**Default webapp:** Bulanan (`period_year`, `period_month`)
+
+> **[!NOTE] Catatan Pengembangan**
+> Agregasi triwulan/tahunan otomatis belum tersedia. Lakukan agregasi manual via Excel atau gunakan Reports → Unit Cost Summary untuk multi-periode.
+
+---
+
+## Defining Cost Centres (Mendefinisikan Pusat Biaya)
+
+Langkah penting dalam menghitung unit cost adalah menentukan **cost centres** di rumah sakit, yaitu unit kegiatan tempat biaya langsung dan tidak langsung akan dibebankan.
+
+### A.5. Apa itu Cost Centre?
+
+**Cost Centre** adalah pusat aktivitas/unit kerja di mana biaya dialokasikan dan diukur.
+
+**Jenis biaya yang dibebankan:**
+
+| Kategori | Contoh | Keterangan |
+|----------|--------|------------|
+| **Biaya Langsung (Direct Costs)** | Gaji, bahan habis pakai, jasa, perjalanan, sewa | Dapat ditelusuri langsung ke cost centre |
+| **Biaya Tidak Langsung (Indirect Costs)** | Depresiasi, alokasi dari departemen lain | Dialokasikan melalui cost allocation |
+
+**Implementasi di Webapp:**
+- Menu: `Master Data → Cost Centers`
+- Setiap cost center memiliki: kode, nama, tipe, building, floor, division
+
+---
+
+### A.6. Mengapa Cost Centre Harus Selaras dengan Struktur Organisasi?
+
+**Alasan manajerial:**
+1. Rumah sakit **diorganisasi dalam departemen/unit kerja**
+2. Cost centre yang selaras memberikan **"peta rute"** untuk menyalurkan biaya melalui proses cost-finding
+3. Membantu manajer melihat **penggunaan sumber daya vs anggaran** dan layanan yang dihasilkan
+4. Menjadi kerangka untuk menghitung biaya fungsi yang berbeda pada setiap unit
+
+**Implementasi di Webapp:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  STRUKTUR ORGANISASI RS    →    STRUKTUR COST CENTER        │
+├─────────────────────────────────────────────────────────────┤
+│  Direktorat Pelayanan      →    Revenue Centers             │
+│  ├── IGD                   →    ├── IGD                     │
+│  ├── Rawat Jalan           →    ├── Rawat Jalan             │
+│  └── Rawat Inap            →    └── Rawat Inap per Bangsal  │
+│                                                              │
+│  Direktorat Penunjang      →    Intermediate Centers        │
+│  ├── Laboratorium          →    ├── Lab Klinik              │
+│  ├── Radiologi             →    ├── Radiologi               │
+│  └── Farmasi               →    └── Farmasi                 │
+│                                                              │
+│  Direktorat Umum           →    Overhead/Support Centers    │
+│  ├── Keuangan              →    ├── Keuangan                │
+│  ├── SDM                   →    ├── SDM                     │
+│  └── Umum                  →    └── Housekeeping, Laundry   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+> **[!TIP]**
+> Gunakan field `division` di Cost Center untuk mengelompokkan sesuai struktur organisasi RS Anda.
+
+---
+
+### A.7. Klasifikasi Cost Centre
+
+Secara administratif, cost centre dibedakan menurut **sifat pekerjaan**:
+
+| Klasifikasi | Deskripsi | Contoh | Di Webapp |
+|-------------|-----------|--------|-----------|
+| **Patient Care** | Unit yang memberi layanan pasien secara langsung | Bangsal/rawat inap, Unit rawat jalan, IGD, OK | Tipe: `revenue` |
+| **Intermediate** | Layanan penunjang klinis untuk patient care, berdiri sebagai departemen terpisah | Laboratorium, Farmasi, Radiologi | Tipe: `revenue` (default) |
+| **Overhead** | Layanan dukungan umum untuk patient care dan intermediate | Keuangan, Gizi, Keamanan, Housekeeping, Laundry, Maintenance | Tipe: `support` |
+
+**Alur biaya mengikuti step-down:**
+```
+Overhead → Intermediate → Patient Care
+   └────────────────────────┘
+```
+
+**Implementasi di Webapp:**
+- Patient Care & Intermediate: set tipe `revenue` di Master Data → Cost Centers
+- Overhead: set tipe `support` di Master Data → Cost Centers
+- Alokasi diatur di: `Allocation → Allocation Maps`
+
+---
+
+### A.8. Berapa Banyak Cost Centre yang Perlu Dibuat?
+
+**Prinsip:** Tingkat rincian cost centre ditentukan oleh **kebutuhan analisis**.
+
+| Kebutuhan Analisis | Tingkat Rincian | Contoh |
+|--------------------|-----------------|--------|
+| Unit cost per bangsal | Setiap bangsal = 1 cost centre | VIP, Kelas 1, Kelas 2, Kelas 3, ICU, NICU |
+| Unit cost per jenis penunjang | Setiap jenis = 1 cost centre | Lab Klinik, Lab PA, X-Ray, CT Scan, MRI |
+| Analisis agregat | Gabungan = 1 cost centre | Rawat Inap (semua kelas), Penunjang Medis |
+
+**Rekomendasi granularitas:**
+
+| Tingkat | Kelebihan | Kekurangan |
+|---------|-----------|------------|
+| **Detail** | Analisis mendalam, benchmarking per unit | Butuh data lebih banyak, kompleks |
+| **Agregat** | Lebih mudah, cukup untuk perbandingan antar RS | Kurang detail, tidak bisa lihat per unit |
+
+> **[!IMPORTANT]**
+> Keputusan granularitas harus diambil **di awal** dan tetap konsisten sepanjang periode analisis.
+
+**Implementasi di Webapp:**
+- Buat cost center sesuai tingkat rincian yang diperlukan
+- Gunakan parent-child hierarchy jika perlu struktur bertingkat
+- Dokumentasikan keputusan di Knowledge References
+
+---
+
+### A.9. Untuk Cost Centre Mana Unit Cost Dihitung?
+
+**Tujuan utama:** Mengalokasikan semua biaya RS ke pusat-pusat yang akan diukur unit cost-nya.
+
+| Target Utama | Contoh | Satuan Output |
+|--------------|--------|---------------|
+| **Patient Care Centres** | Bangsal maternitas, klinik rawat jalan, unit anak | Per admission, per patient-day, per visit |
+| **Intermediate Departments** (jika perlu) | Laboratorium, Radiologi, Farmasi | Per tes, per pemeriksaan, per resep |
+| **Overhead tertentu** (kasus khusus) | Gizi, Laundry | Per porsi, per kg linen |
+
+**Kapan menghitung unit cost untuk overhead?**
+- Untuk menilai opsi **outsourcing** (misal: kontrak catering vs gizi internal)
+- Untuk **benchmarking** kinerja unit overhead antar RS
+- Untuk **cost recovery analysis** layanan internal
+
+**Implementasi di Webapp:**
+- Unit cost dihitung untuk Cost References yang terhubung ke revenue cost center
+- Menu: `Unit Costing → Calculate Unit Cost`
+
+---
+
+### A.10. Memisahkan Cost Centre Penghasil Pendapatan vs Non-Pendapatan
+
+Untuk analisis **cost recovery** (sejauh mana tarif menutup biaya), perlu membedakan:
+
+| Kategori | Deskripsi | Contoh | Perlakuan |
+|----------|-----------|--------|-----------|
+| **Revenue-Producing** | Menghasilkan pendapatan dari pasien | Patient care, Intermediate | Final cost centre (unit cost dihitung) |
+| **Non-Revenue** | Tidak menghasilkan pendapatan langsung | Security, Housekeeping, Payroll | Biaya dialokasikan ke revenue-producing |
+
+**Contoh tarif yang dapat dianalisis cost recovery-nya:**
+- Biaya kamar, makan, keperawatan (tarif harian)
+- Obat dan balutan
+- X-ray, lab, fisioterapi
+
+**Implementasi di Webapp:**
+- Revenue-producing: Tipe `revenue` di Cost Centers
+- Non-revenue: Tipe `support` di Cost Centers
+- Semua biaya support dialokasikan ke revenue melalui step-down allocation
+
+---
+
+### A.11. Dua Versi Unit Cost: Dengan atau Tanpa Biaya Penunjang
+
+Dalam analisis, Anda mungkin perlu menghitung **dua jenis unit cost**:
+
+| Versi | Deskripsi | Kegunaan |
+|-------|-----------|----------|
+| **Termasuk biaya penunjang** | Unit cost mencakup alokasi biaya lab, radiologi, farmasi | Total cost per admission, cost recovery analysis |
+| **Tidak termasuk biaya penunjang** | Unit cost hanya biaya langsung + overhead non-klinis | Analisis efisiensi unit, benchmarking per layanan |
+
+**Contoh praktis:**
+
+```
+Biaya per admission rawat inap:
+├── Versi 1 (dengan penunjang):  Rp 5.000.000
+│   ├── Biaya langsung rawat inap:  Rp 2.500.000
+│   ├── Overhead dialokasikan:      Rp 1.000.000
+│   └── Penunjang (lab, rad):       Rp 1.500.000
+│
+└── Versi 2 (tanpa penunjang):   Rp 3.500.000
+    ├── Biaya langsung rawat inap:  Rp 2.500.000
+    └── Overhead dialokasikan:      Rp 1.000.000
+```
+
+> **[!NOTE] Catatan Pengembangan**
+> Webapp saat ini menghitung unit cost dengan metode standar (termasuk alokasi overhead). Fitur dual-view reporting (dengan/tanpa biaya penunjang dialokasikan) direncanakan untuk pengembangan mendatang:
+> - [ ] Toggle include/exclude intermediate allocation
+> - [ ] Laporan perbandingan dua versi
+> - [ ] Dashboard dual-view
+
+**Workaround saat ini:**
+1. Jalankan dua skenario Allocation Maps:
+   - Skenario A: Lab/Radiologi sebagai final product (tidak dialokasikan)
+   - Skenario B: Lab/Radiologi dialokasikan ke patient care
+2. Hitung unit cost untuk masing-masing skenario
+3. Dokumentasikan kedua hasil di Knowledge References
+
+---
+
+### Ringkasan Kesesuaian Webapp dengan Literatur
+
+| Prinsip | Status | Catatan |
+|---------|--------|---------|
+| Cost center fleksibel | ✅ Tersedia | Hierarki, tipe, lokasi |
+| Revenue vs Support | ✅ Tersedia | Step-down allocation |
+| Klasifikasi 3-tier (Patient/Intermediate/Overhead) | ✅ Tersedia | Tipe revenue & support |
+| Selaras struktur organisasi | ✅ Tersedia | Field division, building |
+| Multiple output measures | ✅ Tersedia | Service Volumes per layanan |
+| Periode bulanan | ✅ Tersedia | Default per bulan |
+| Agregasi triwulan/tahunan | ⚠️ Manual | Perlu pengembangan |
+| Dual reporting (dengan/tanpa penunjang) | ⚠️ Manual | Workaround via Allocation Maps |
+| Toggle final/intermediate | ⚠️ Manual | Via Allocation Maps |
+
+---
+
+# BAGIAN B: MODUL PEMBELAJARAN & PETUNJUK TEKNIS
+
+---
+
+## MODUL 1-5: DASAR-DASAR COSTING RUMAH SAKIT
+
+### Modul 1: Dasar-Dasar Biaya Rumah Sakit
+
+**🎯 Tujuan Pembelajaran:**
+Memahami konsep dasar akuntansi biaya rumah sakit.
+
+**📘 Materi:**
+- Apa itu biaya, cost object, cost pool
+- Jenis biaya: Fixed, Variable, Semi-fixed
+- Direct vs Indirect cost
+- Overhead & cost center
+- Mengapa unit cost penting
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Master Data → Expense Categories` | Lihat struktur kategori biaya |
+| 2 | `Master Data → Cost Centers` | Pahami struktur unit biaya RS |
+
+**📤 Output:**
+Pemahaman fundamental untuk proses costing.
+
+---
+
+### Modul 2: Cost Center Rumah Sakit
+
+**🎯 Tujuan:**
+Mampu mengidentifikasi unit layanan sebagai cost center.
+
+**📘 Materi:**
+- **Support/Overhead**: Administrasi, Keuangan, SDM, Laundry, CSSD, IPSRS, IT, Gizi
+- **Intermediate/Penunjang**: Lab, Radiologi, Farmasi, Kamar Bedah
+- **Revenue Center**: IGD, Poliklinik, Rawat Inap, OK
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Master Data → Cost Centers` | Klik **Add New** |
+| 2 | Form | Isi kode, nama, tipe (`support`/`revenue`) |
+| 3 | Form | Isi building, floor, division jika perlu |
+| 4 | Form | Pilih parent (untuk hierarki) |
+| 5 | - | Simpan |
+
+**📤 Output:**
+Struktur cost center siap dipakai untuk alokasi.
+
+**Sumber Data:** Struktur organisasi, bagan unit kerja  
+**Pemilik Data:** Direksi / Keuangan / SDM
+
+---
+
+### Modul 3: Konsep Alokasi Biaya (Step-Down)
+
+**🎯 Tujuan:**
+Memahami teori dasar sebelum menggunakan engine alokasi.
+
+**📘 Materi:**
+- Alokasi overhead
+- Allocation driver (dasar pembagi)
+- Step-down vs reciprocal method
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Master Data → Allocation Drivers` | Buat driver (Luas Lantai, FTE, Kg Laundry, dll) |
+| 2 | `Allocation → Allocation Maps` | Preview flow alokasi |
+
+**📤 Output:**
+Dasar teori step-down allocation.
+
+---
+
+### Modul 4: Master Data Costing
+
+**🎯 Tujuan:**
+Menyiapkan semua data referensi untuk costing.
+
+**📘 Materi:**
+- Cost Center
+- Expense Category / COA
+- Allocation Driver
+- Service Catalog (Cost References)
+- Tariff Class
+
+**🛠 Aktivitas di Webapp (Urutan Setup):**
+
+| No | Menu | Tindakan | Sumber Data |
+|----|------|----------|-------------|
+| 1 | `Master Data → Cost Centers` | Buat semua unit RS | Struktur organisasi |
+| 2 | `Master Data → Expense Categories` | Import/input COA | Buku COA, trial balance |
+| 3 | `Master Data → Allocation Drivers` | Definisikan driver | Kebijakan costing RS |
+| 4 | `Master Data → Tariff Classes` | Buat kelas tarif | SK Tarif internal |
+| 5 | `Master Data → Cost References` | Import layanan | Master SIMRS |
+
+**Checklist Master Data:**
+- [ ] Cost Centers selesai (semua unit)
+- [ ] Expense Categories selesai (COA lengkap)
+- [ ] Allocation Drivers selesai
+- [ ] Tariff Classes selesai
+- [ ] Cost References selesai (sync SIMRS jika ada)
+
+**📤 Output:**
+Master data siap untuk perhitungan biaya.
+
+---
+
+### Modul 5: Pengumpulan Data Operasional
+
+**🎯 Tujuan:**
+Mengisi semua data bulanan costing.
+
+**📘 Materi:**
+- GL Expenses (biaya per cost center)
+- Driver Statistics (nilai driver)
+- Service Volumes (volume layanan)
+
+**🛠 Aktivitas di Webapp:**
+
+#### 5.1. Input GL Expenses
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `GL & Expenses → GL Expenses` | Pilih periode |
+| 2 | - | Import Excel atau input manual |
+| 3 | - | Isi: cost center, expense category, amount |
+| 4 | - | Validasi dengan trial balance |
+
+**Sumber:** Buku besar, trial balance  
+**Pemilik:** Bagian Keuangan
+
+#### 5.2. Input Driver Statistics
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `GL & Expenses → Driver Statistics` | Pilih periode |
+| 2 | - | Isi nilai driver per cost center |
+
+**Contoh nilai driver:**
+
+| Driver | Unit | Contoh Sumber |
+|--------|------|---------------|
+| Luas Lantai | m² | Sarpras |
+| FTE Pegawai | orang | HRD |
+| Kg Laundry | kg | Instalasi Laundry |
+| Jam Layanan | jam | SIMRS |
+
+#### 5.3. Input Service Volumes
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `GL & Expenses → Service Volumes` | Pilih periode |
+| 2 | - | Import/isi volume per cost reference |
+| 3 | - | Opsional: breakdown per tariff class |
+
+**📤 Output:**
+Dataset bulanan siap masuk proses costing.
+
+---
+
+## MODUL 6-8: COST ALLOCATION
+
+### Modul 6: Pre-Allocation Check
+
+**🎯 Tujuan:**
+Validasi kualitas data sebelum menjalankan alokasi.
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Costing Process → Pre-Allocation Check` | Jalankan semua pengecekan |
+| 2 | GL Completeness | Cek kelengkapan GL per cost center |
+| 3 | Driver Completeness | Cek nilai driver > 0 |
+| 4 | Service Volume Completeness | Cek volume layanan |
+| 5 | - | Perbaiki jika ada warning/error |
+
+**Checklist Pre-Allocation:**
+- [ ] Semua cost center memiliki GL
+- [ ] Semua driver yang dipakai memiliki nilai > 0
+- [ ] Layanan yang dihitung unit cost memiliki volume
+
+**📤 Output:**
+Data konsisten dan aman untuk dialokasikan.
+
+---
+
+### Modul 7: Allocation Engine (Step-Down)
+
+**🎯 Tujuan:**
+Menjalankan perhitungan alokasi biaya overhead.
+
+**📘 Materi:**
+- Step sequence (urutan alokasi)
+- Source cost center (support) → Target (revenue)
+- Perhitungan overhead transfer
+
+**🛠 Aktivitas di Webapp:**
+
+#### 7.1. Setup Allocation Maps (Sekali, Review Berkala)
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Allocation → Allocation Maps` | Klik Add New |
+| 2 | - | Pilih source cost center (support) |
+| 3 | - | Pilih allocation driver |
+| 4 | - | Atur step sequence |
+
+**Contoh Allocation Maps:**
+
+| Step | Source | Driver | Alokasi ke |
+|------|--------|--------|------------|
+| 1 | Housekeeping | Luas Lantai | Semua unit |
+| 2 | Administrasi | FTE | Semua unit |
+| 3 | Laundry | Kg Laundry | Rawat Inap, OK |
+| 4 | Gizi | Jumlah Porsi | Rawat Inap |
+
+#### 7.2. Run Allocation
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Allocation → Run Allocation` | Pilih periode |
+| 2 | - | Review konfigurasi |
+| 3 | - | Klik **Run** |
+| 4 | - | Tunggu proses selesai |
+
+**📤 Output:**
+Total cost per cost center (post allocation).
+
+---
+
+### Modul 8: Analisis Hasil Alokasi
+
+**🎯 Tujuan:**
+Mengevaluasi apakah alokasi sudah benar.
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Allocation → Allocation Results` | Filter periode & versi |
+| 2 | - | Lihat source → target flow |
+| 3 | - | Bandingkan pre vs post allocation |
+| 4 | - | Export untuk review |
+
+**Hal yang dicek:**
+- Total biaya sebelum = sesudah alokasi
+- Tidak ada outlier ekstrem
+- Flow alokasi sesuai kebijakan
+
+**📤 Output:**
+Hasil alokasi yang akurat untuk unit cost.
+
+---
+
+## MODUL 9-10: UNIT COSTING
+
+### Modul 9: Perhitungan Unit Cost
+
+**🎯 Tujuan:**
+Menghasilkan biaya satuan per layanan.
+
+**📘 Formula:**
+```
+Unit Cost = (Direct Cost + Allocated Overhead) / Service Volume
+```
+
+**Komponen biaya:**
+- **Direct Material**: BHP Medis + Non Medis
+- **Direct Labor**: Gaji langsung
+- **Indirect Overhead**: Hasil alokasi
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Unit Costing → Calculate Unit Cost` | Pilih periode |
+| 2 | - | Beri label versi (misal `UC_2025_JAN`) |
+| 3 | - | Klik **Calculate** |
+| 4 | - | Tunggu proses selesai |
+
+**📤 Output:**
+Unit Cost Version tersimpan.
+
+---
+
+### Modul 10: Analisis Unit Cost
+
+**🎯 Tujuan:**
+Menginterpretasikan hasil unit cost.
+
+**📘 Materi:**
+- Layanan mahal (high cost)
+- Layanan merugi (under-reimbursed)
+- Volume effect
+- Overhead-heavy services
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Unit Costing → Unit Cost Results` | Filter versi/periode |
+| 2 | - | Klik detail untuk breakdown |
+| 3 | - | Bandingkan antar versi |
+| 4 | - | Export ke Excel/PDF |
+
+**📤 Output:**
+Unit cost siap dipakai untuk penetapan tarif.
+
+---
+
+## MODUL 11-13: CLINICAL PATHWAY
+
+### Modul 11: Penyusunan Clinical Pathway
+
+**🎯 Tujuan:**
+Membuat pathway berbasis evidence & biaya.
+
+**📘 Materi:**
+- Struktur pathway per hari/fase
+- Step medis: lab, imaging, farmasi, tindakan
+- Mandatory vs optional steps
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Clinical Pathways → Add New` | Isi nama, diagnosis, INA-CBG |
+| 2 | - | Set expected LOS |
+| 3 | - | Simpan sebagai Draft |
+
+---
+
+### Modul 12: Pathway Builder & Cost Summary
+
+**🎯 Tujuan:**
+Menghubungkan pathway dengan unit cost.
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Clinical Pathways → Pathway Builder` | Pilih pathway |
+| 2 | - | Tambah steps per hari/fase |
+| 3 | - | Link ke Cost Reference |
+| 4 | - | Set quantity & mandatory/optional |
+| 5 | Tab Summary | Klik **Recalculate** |
+| 6 | - | Bandingkan dengan INA-CBG |
+
+**📤 Output:**
+Pathway terstruktur dengan estimasi biaya.
+
+---
+
+### Modul 13: Pathway Approval & Governance
+
+**🎯 Tujuan:**
+Kontrol mutu klinis & biaya.
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi | Peran |
+|---------|------|------|-------|
+| 1 | Detail Pathway | Review isi & biaya | Komite Medis |
+| 2 | - | Beri komentar | Komite Medis |
+| 3 | - | Set status: Approved | Komite Medis |
+
+**Status Flow:** Draft → Review → Approved → Archived
+
+**📤 Output:**
+Pathway final siap digunakan pada pasien.
+
+---
+
+## MODUL 14-21: TARIFF MANAGEMENT
+
+### Modul 14: Prinsip Tarif RS
+
+**📘 Materi:**
+- Tarif ≠ Unit cost
+- Cross-subsidy antar kelas
+- Jasa sarana vs jasa pelayanan
+- Price positioning
+
+**🛠 Aktivitas:** `Tariffs → Tariff Explorer` - review existing tariff
+
+---
+
+### Modul 15: Penentuan Margin Tarif
+
+**📘 Materi:**
+- Margin global (5–20%)
+- Margin per layanan
+- Margin berdasarkan risiko
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Tariffs → Tariff Simulation` | Pilih unit cost version |
+| 2 | - | Set margin (global/per layanan) |
+| 3 | - | Buat beberapa skenario |
+| 4 | - | Preview & bandingkan |
+
+---
+
+### Modul 16: Tarif per Kelas (Differentiated Pricing)
+
+**📘 Materi:**
+- Hoteling cost
+- Fasilitas & akomodasi
+- Jasa sarana kelas
+
+**🛠 Aktivitas:** `Tariff Simulation → Per-class Margin`
+
+---
+
+### Modul 17-18: Bundling & Perbandingan INA-CBG
+
+**Modul 17 - Paket Layanan:**
+- Bundling vs unbundling
+- Komponen paket
+- Menu: `Cost References → Create Bundle`
+
+**Modul 18 - Perbandingan INA-CBG:**
+- Gap analysis
+- Strategic efficiency
+- Menu: `Reports → Tariff vs INA-CBG`
+
+---
+
+### Modul 19: Final Tariffs
+
+**🎯 Tujuan:**
+Menghasilkan tarif resmi RS.
+
+**🛠 Aktivitas di Webapp:**
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Tariffs → Final Tariffs` | Klik Add New |
+| 2 | - | Pilih layanan + tariff class |
+| 3 | - | Set margin, jasa sarana/pelayanan |
+| 4 | - | Isi metadata: SK, tanggal berlaku |
+| 5 | - | Set status: Draft → Review → Approved |
+
+**📤 Output:**
+Tariff List final versi SK.
+
+---
+
+### Modul 20-21: Governance & Finalisasi SK
+
+**Modul 20 - Audit Governance:**
+- Audit trail: `System → Audit Logs`
+- Konsistensi unit cost & periode
+- Template tarif
+
+**Modul 21 - Finalisasi SK:**
+- Export: `Final Tariffs → Export Excel/PDF`
+- Lampiran SK
+- Matrix perubahan tarif
+
+**📤 Output:**
+SK Tarif RS siap ditandatangani.
+
+---
+
+# BAGIAN C: REFERENSI OPERASIONAL
 
 ## Ikhtisar Peran & Menu
-| Peran | Modul Utama | Catatan |
-| --- | --- | --- |
-| Superadmin | Hospitals, Dashboard Superadmin, Audit Logs | Memilih hospital aktif & troubleshooting lintas tenant. |
-| Admin RS / Administrator IT | Master Data, Users, SIMRS, Settings | Setup awal, kelola user, koneksi SIMRS, storage. |
-| Financial Manager | GL & Expenses, Allocation, Unit Cost, Final Tariffs, Reports | Menyetujui data costing & hasil tariff. |
-| Costing Analyst | Master Data Costing, GL Intake, Allocation Engine, Unit Cost, Tariff Simulation | Menjalankan proses costing harian/bulanan. |
-| Pathway Designer / Tim Mutu | Clinical Pathways, Cost References, Reports | Menyusun pathway, versi, dan dokumentasi. |
-| Medical Committee | Pathway Approval, Reports | Memberi catatan dan keputusan pathway. |
-| Case Manager / Unit Klaim | Patient Cases, Tariff Explorer, Reports | Menginput kasus dan analisis variance. |
-| Auditor & Manajemen | Dashboard, Analytics, Audit Logs | Membaca KPI dan jejak audit read-only. |
 
-Ikon menu utama berada di sidebar kiri. Gunakan tombol `Ctrl/Cmd + K` untuk membuka Command Palette dan melompat ke halaman tertentu.
+| Peran | Modul Utama | Catatan |
+|-------|-------------|---------|
+| **Superadmin** | Hospitals, Dashboard Superadmin, Audit Logs | Memilih hospital aktif |
+| **Admin RS** | Master Data, Users, SIMRS, Settings | Setup awal |
+| **Financial Manager** | GL, Allocation, Unit Cost, Final Tariffs | Menyetujui data costing |
+| **Costing Analyst** | Master Data, GL, Allocation, Unit Cost, Simulation | Proses costing harian |
+| **Pathway Designer** | Clinical Pathways, Cost References | Menyusun pathway |
+| **Medical Committee** | Pathway Approval | Keputusan klinis |
+| **Case Manager** | Patient Cases, Tariff Explorer | Input kasus |
+| **Auditor** | Dashboard, Analytics, Audit Logs | Read-only |
 
 ---
 
 ## Workflow Cepat End-to-End
-1. **Setup awal (sekali)**: master data + allocation map + referensi knowledge.
-2. **Input bulanan**: GL Expenses → Driver Statistics → Service Volumes.
-3. **Processing**: Run allocation → Hitung unit cost → Simulasi & tetapkan final tariff.
-4. **Clinical**: Bangun pathway, salin biaya estimasi, jalankan approval.
-5. **Operational**: Catat patient case, copy langkah pathway, lengkapi actual services.
-6. **Analisis**: Gunakan laporan compliance, variance, pathway performance, dan dashboards.
-7. **Integrasi & utilitas**: Sinkronisasi SIMRS, kelola user/role, pantau audit logs.
 
-Gunakan tabel Workflow Lengkap di [Lampiran](#lampiran--template) untuk checklist harian/bulanan.
+### Workflow Bulanan:
 
----
+```mermaid
+graph LR
+    A[1. Input GL] --> B[2. Input Driver]
+    B --> C[3. Input Volume]
+    C --> D[4. Pre-Check]
+    D --> E[5. Run Allocation]
+    E --> F[6. Calculate Unit Cost]
+    F --> G[7. Simulate/Finalize Tariff]
+    G --> H[8. Generate Reports]
+```
 
-## Persiapan Awal & Navigasi
-1. **Login** menggunakan kredensial masing-masing peran.
-2. **Superadmin** memilih hospital melalui halaman `Hospitals → Select` sebelum mengakses modul lain.
-3. **Dashboard** menampilkan tile KPI (cost trend, tariff margin, pathway compliance, cost variance, aktivitas terbaru). Klik tile untuk shortcut.
-4. Gunakan **Profile menu** kanan atas untuk ganti password, ubah bahasa tampilan, atau logout.
-
----
-
-## Setup Master Data
-Master data wajib disiapkan sebelum menjalankan proses costing. Lakukan dalam urutan berikut:
-
-### 1. Cost Centers
-- Menu: `Master Data → Cost Centers`.
-- Input kode, nama, tipe (`support` atau `revenue`), hierarki parent, serta status aktif.
-- Gunakan tombol **Export** untuk backup atau audit.
-
-### 2. Expense Categories
-- Menu: `Master Data → Expense Categories`.
-- Wajib mengisi account code, nama, cost type (fixed/variable/semi), allocation category (Gaji, BHP, Depresiasi, Lain).
-- Pastikan mapping COA ke kategori alokasi telah disepakati tim akuntansi.
-
-### 3. Allocation Drivers
-- Menu: `Master Data → Allocation Drivers`.
-- Definisikan nama driver, satuan, dan deskripsi.
-- Contoh: `Luas Lantai (m2)`, `Jumlah Karyawan (orang)`, `Jam Layanan (jam)`.
-
-### 4. Tariff Classes
-- Menu: `Master Data → Tariff Classes`.
-- Digunakan oleh unit cost dan modul tariff; isi kode, nama, deskripsi, dan status aktif.
-
-### 5. Cost References (Chargemaster)
-- Menu: `Master Data → Cost References`.
-- Input service code, deskripsi, unit, sumber, serta link ke cost center dan expense category.
-- Fitur penting: template import, bulk delete, pencarian cepat, dan SIMRS sync.
-
-### 6. Knowledge References
-- Menu: `Referensi`.
-- Simpan SOP, guideline, dan pengumuman penting (markdown). Gunakan pin untuk menampilkan catatan prioritas.
-
-### 7. JKN CBG Codes (Opsional tetapi disarankan)
-- Menu: `Master Data → JKN CBG Codes`.
-- Admin membuat kode INA-CBG lengkap dengan base tariff; semua role dapat mencari melalui endpoint publik.
-
-**Checklist Master Data** tersedia di lampiran untuk memastikan setiap hospital siap menjalankan proses costing.
-
----
-
-## Input Data Operasional
-Dilakukan setiap periode (bulanan atau sesuai kebutuhan laporan).
-
-### 1. GL Expenses
-- Menu: `GL & Expenses → GL Expenses`.
-- Input manual atau impor Excel (cost center code, expense category code, amount).
-- Validasi kesesuaian dengan laporan keuangan sebelum melanjutkan.
-
-### 2. Driver Statistics
-- Menu: `GL & Expenses → Driver Statistics`.
-- Masukkan nilai driver per cost center dan periode. Gunakan import untuk bulk update.
-
-### 3. Service Volumes
-- Menu: `GL & Expenses → Service Volumes` atau `Unit Costing → Service Volumes`.
-- Catat volume layanan per cost reference dan (opsional) tariff class. Dapat diimpor massal.
-
-### 4. Data Quality Checklist
-- Semua cost center dan expense category memiliki GL.
-- Semua driver yang dipakai allocation memiliki nilai > 0.
-- Layanan yang akan dihitung unit cost-nya memiliki volume.
-- Catat hasil pengecekan dalam Knowledge References agar dapat diaudit.
-
----
-
-## Cost Allocation
-### 1. Setup Allocation Maps
-- Menu: `Allocation → Allocation Maps`.
-- Tentukan source cost center (support), allocation driver, dan urutan step.
-- Step sequence menentukan prioritas step-down; cost center yang sudah dialokasikan tidak lagi menerima alokasi berikutnya.
-
-### 2. Run Allocation
-- Menu: `Allocation → Run Allocation`.
-- Pilih periode, review konfigurasi prereq (GL & driver). Klik **Run** untuk mengeksekusi `AllocationService`.
-- Sistem menjalankan dalam transaksi; jika ada error, seluruh proses dibatalkan.
-
-### 3. Review Allocation Results
-- Menu: `Allocation → Allocation Results`.
-- Filter berdasarkan periode dan versi, lihat source-target, step, dan nilai alokasi.
-- Gunakan tombol export untuk Excel/PDF.
-
-### 4. Tips
-- Arsipkan snapshot hasil alokasi ke Knowledge References untuk audit.
-- Gunakan catatan warning yang ditampilkan modul (misal selisih total biaya) sebagai indikator data belum lengkap.
-
----
-
-## Unit Costing
-### 1. Validasi Service Volume
-- Pastikan data volume lengkap sebelum menjalankan perhitungan.
-
-### 2. Calculate Unit Cost
-- Menu: `Unit Costing → Calculate Unit Cost`.
-- Pilih periode, beri label versi (misal `UC_2025_JAN`).
-- Sistem menggabungkan GL (direct) + allocation result (overhead) + volume → direct material, direct labor, indirect overhead.
-
-### 3. Review Unit Cost Results
-- Menu: `Unit Costing → Unit Cost Results`.
-- Filter berdasarkan versi, periode, layanan. Klik detail untuk breakdown cost center.
-- Fitur compare version membantu analisis trend.
-
-### 4. Export & Audit
-- Export ke Excel/PDF, catat asumsi di Knowledge References.
-- Unit cost version menjadi dasar modul tariff dan clinical pathway estimasi biaya.
-
----
-
-## Tariff Management
-### 1. Tariff Simulation
-- Menu: `Tariff → Tariff Simulation`.
-- Pilih unit cost version, atur margin global atau per layanan, preview hasil, bandingkan skenario, lalu export.
-
-### 2. Final Tariffs
-- Menu: `Tariff → Final Tariffs`.
-- Isi service, tariff class, unit cost version, margin, komponen jasa sarana/pelayanan, SK number, effective date, dan status.
-- Workflow: Draft → Review → Approved. Hanya status approved yang muncul di Tariff Explorer.
-
-### 3. Tariff Explorer
-- Menu: `Tariff → Tariff Explorer`.
-- Semua role dapat mencari tarif berdasarkan kode, kelas, atau tanggal efektif. Tersedia histori perubahan dan komparasi INA-CBG.
-
-### 4. Export & Distribusi
-- Gunakan export PDF/Excel untuk publikasi internal. Cantumkan SK di Knowledge References agar mudah ditemukan.
-
----
-
-## Clinical Pathway Management
-### 1. Create Pathway
-- Menu: `Clinical Pathways → Pathway List → Add New`.
-- Isi nama, deskripsi, diagnosis/INA-CBG code, expected LOS, versi, status.
-
-### 2. Pathway Builder
-- Builder mendukung drag-and-drop, impor template Excel, dan pengaturan mandatory/optional.
-- Setiap langkah dapat dikaitkan dengan cost reference sehingga estimasi biaya otomatis terisi.
-
-### 3. Recalculate Summary & Export
-- Klik **Recalculate Summary** untuk memperbarui estimasi total biaya/tariff.
-- Ekspor ke PDF atau DOCX untuk presentasi atau kebutuhan akreditasi.
-
-### 4. Approval Workflow
-- Medical Committee melakukan review di halaman pathway. Gunakan komentar untuk catatan klinis.
-- Status berubah dari Draft → Review → Approved → Archived.
-
----
-
-## Patient Case Management
-### 1. Register Case
-- Menu: `Patient Cases → Case List → Add New`.
-- Isi MRN, pathway terkait, tanggal masuk, diagnosis, INA-CBG, skema pembayaran, unit cost version.
-- Fitur upload Excel tersedia untuk bulk input.
-
-### 2. Case Details
-- Gunakan tombol **Copy Steps from Pathway** untuk membuat planned steps otomatis.
-- Tambahkan layanan tambahan jika ada varian. Sistem menampilkan unit cost dan tarif yang berlaku.
-
-### 3. Recalculate & Analysis
-- Klik **Recalculate** untuk menghitung actual total cost, tariff, compliance %, dan cost variance.
-- Tab Analysis menampilkan planned vs actual, skipped, additional steps, serta komparasi INA-CBG.
-
-### 4. Export & Catatan
-- Export analysis (PDF/Excel) untuk rapat mutu. Gunakan kolom anotasi untuk dokumentasi variansi klinis.
-
----
-
-## Analytics & Reporting
-Menu: `Reports`.
-
-| Laporan | Fungsi | Highlight |
-| --- | --- | --- |
-| Dashboard Report | Ringkasan KPI tambahan | Widget interaktif + filter periode. |
-| Pathway Compliance | Monitoring kepatuhan per pathway/departemen | Top non-compliant steps. |
-| Cost Variance Analysis | Selisih actual vs estimasi vs INA-CBG | Ranking kasus variance tertinggi. |
-| Pathway Performance | LOS, cost efficiency, compliance vs cost | Cocok untuk rapat mutu. |
-| Cost Center Performance | Pre/post allocation, expense breakdown | Digunakan FM/Admin. |
-| Allocation Results Summary | Resume step-down per periode | Flow diagram + compare versi. |
-| Unit Cost Summary | Trend unit cost & breakdown | Dapat diekspor per departemen. |
-| Tariff Comparison | Internal vs INA-CBG | Margin analysis per kelas. |
-
-**Export Jobs**: halaman `Reports → Export` memungkinkan generate PDF/Excel secara asynchronous dan menyimpan arsip download.
-
----
-
-## SIMRS Integration & Service Volume Current
-### 1. Konfigurasi SIMRS
-- Admin mengatur koneksi di `.env` / panel konfigurasi sesuai panduan `SIMRS_DATABASE_SETUP.md`.
-
-### 2. Viewer Data SIMRS
-- Menu: `SIMRS → (Master Barang / Tindakan Rawat Jalan / Rawat Inap / Laboratorium / Radiologi / Operasi / Kamar)`.
-- Setiap halaman memiliki filter, status last sync, dan tombol export.
-
-### 3. Sync Management
-- Menu: `SIMRS → Sync`.
-- Tersedia tombol manual (misal `Sync Drugs`) dengan log status sukses/gagal. Catat error di Knowledge References bila perlu tindakan lanjutan.
-
-### 4. Service Volume Current
-- Menu: `Service Volume Current → (kategori)`.
-- Monitoring volume aktual per layanan (misal kamar, operasi). Dilengkapi tombol export dan placeholder integrasi realtime.
-
----
-
-## System Administration & Utilities
-| Modul | Deskripsi |
-| --- | --- |
-| Hospitals | Superadmin menambah/mengedit rumah sakit dan memilih hospital aktif. |
-| Users | Admin mengelola akun, role, reset password, dan status aktif. |
-| Roles & Permissions | Pengaturan role berbasis Spatie Permission (opsional di UI). |
-| Audit Logs | Menyimpan semua aktivitas penting; dapat difilter dan diekspor. |
-| Migrate Storage | Wizard untuk memindahkan file evidence/pathway ke storage baru atau S3. |
-| API Tokens (Roadmap Tahap 4) | Persiapan integrasi pihak ketiga dengan scope terbatas. |
-| Diagnostics Scripts | Lihat Folder `documentation/*` (misal `TROUBLESHOOTING_ERROR_500.md`). |
-
-Gunakan menu **Profile → Switch Hospital** (bagi superadmin) untuk berganti tenant tanpa logout.
-
----
-
-## Tips & Best Practices
-1. **Master Data**: jaga konsistensi kode; gunakan export sebagai backup rutin.
-2. **Data Operasional**: tetapkan SLA input (misal setiap tanggal 5 bulan berikutnya selesai).
-3. **Allocation & Unit Cost**: document-kan asumsi dan hasil verifikasi di Knowledge References.
-4. **Tariff**: simpan SK resmi sebagai lampiran di pathway atau knowledge base.
-5. **Clinical Pathway**: gunakan import template saat membuat pathway baru dari versi naratif.
-6. **Patient Case**: disiplinkan pencatatan alasan varian agar mudah saat audit.
-7. **Reporting**: jadwalkan export bulanan dan arsipkan di folder aman.
-8. **Security**: rotasi password admin, review audit log minimal mingguan.
-9. **Integrasi SIMRS**: lakukan sync di jam tidak sibuk; gunakan log untuk memverifikasi perubahan.
-10. **Kolaborasi**: manfaatkan Knowledge References sebagai "living document" lintas tim.
+| Langkah | Menu | Frekuensi |
+|---------|------|-----------|
+| 1. Input GL Expenses | GL & Expenses → GL Expenses | Bulanan |
+| 2. Input Driver Statistics | GL & Expenses → Driver Statistics | Bulanan |
+| 3. Input Service Volumes | GL & Expenses → Service Volumes | Bulanan |
+| 4. Pre-Allocation Check | Costing Process → Pre-Allocation Check | Bulanan |
+| 5. Run Allocation | Allocation → Run Allocation | Bulanan |
+| 6. Calculate Unit Cost | Unit Costing → Calculate | Bulanan |
+| 7. Tariff (jika perlu) | Tariffs → Simulation/Final | Berkala |
+| 8. Reports | Reports → Export | Bulanan |
 
 ---
 
 ## Troubleshooting
+
 | Masalah | Kemungkinan Penyebab | Solusi |
-| --- | --- | --- |
-| Data import gagal | Format tidak sesuai template, kode belum terdaftar | Unduh ulang template, pastikan kode tersedia di master data, cek log error. |
-| Allocation menghasilkan selisih | Driver kosong, GL belum lengkap | Review driver statistics & GL, perbaiki data lalu jalankan ulang. |
-| Unit cost ekstrem | Volume nol, mapping cost reference salah | Validasi service volumes, cek mapping cost center di cost reference. |
-| Pathway compliance rendah | Langkah tidak realistis atau data kasus belum lengkap | Tinjau pathway, komunikasikan ke tim lapangan, update pathway bila perlu. |
-| Variance kasus tinggi | Layanan tambahan tidak tercatat, tarif INA-CBG berbeda | Lengkapi case detail, ulangi recalculation, dokumentasikan justifikasi. |
-| Sync SIMRS gagal | Koneksi DB, kredensial salah | Test koneksi via `test_simrs_connection.php`, update konfigurasi, ulangi sync. |
-| Export job macet | Worker belum dijalankan | Jalankan queue worker atau gunakan opsi download manual. |
-| File evidence hilang | Storage belum dimigrasi | Buka `System Admin → Migrate Storage`, ikuti langkah pada `MIGRATE_TO_OBJECT_STORAGE.md`. |
+|---------|---------------------|--------|
+| Import gagal | Format tidak sesuai template | Unduh ulang template, cek kode master |
+| Allocation selisih | Driver kosong, GL belum lengkap | Review driver & GL, jalankan ulang |
+| Unit cost ekstrem | Volume nol, mapping salah | Validasi service volumes & cost reference |
+| Pathway compliance rendah | Langkah tidak realistis | Tinjau pathway, update bila perlu |
+| Variance tinggi | Layanan tambahan tidak tercatat | Lengkapi case detail |
+| SIMRS sync gagal | Koneksi/kredensial | Test koneksi, update konfigurasi |
 
 ---
 
 ## Lampiran & Template
-1. **Checklist Setup Hospital Baru**
-   - [ ] Cost Centers selesai
-   - [ ] Expense Categories selesai
-   - [ ] Allocation Drivers selesai
-   - [ ] Tariff Classes selesai
-   - [ ] Cost References impor
-   - [ ] Knowledge References minimal 1 SOP
-   - [ ] JKN CBG (opsional) siap
-   - [ ] Allocation Maps dibuat
 
-2. **Workflow Bulanan (Ringkas)**
-   1. Input GL → Driver → Volume
-   2. Jalankan Allocation → Review hasil
-   3. Hitung Unit Cost → Ekspor
-   4. Simulasikan Tariff → Finalisasi jika diperlukan
-   5. Update Pathway/Case bila ada perubahan klinis
-   6. Generate Laporan (Compliance, Variance, Tariff)
+### Checklist Setup Hospital Baru
+- [ ] Cost Centers selesai
+- [ ] Expense Categories selesai
+- [ ] Allocation Drivers selesai
+- [ ] Tariff Classes selesai
+- [ ] Cost References selesai
+- [ ] Knowledge References minimal 1 SOP
+- [ ] JKN CBG Codes (opsional)
+- [ ] Allocation Maps dibuat
 
-3. **Template Excel**
-   - Dapat diunduh langsung dari masing-masing halaman import (GL, Driver, Service Volume, Pathway Steps, Cases).
-   - Simpan versi template di knowledge base untuk referensi offline.
+### Workflow Bulanan (Ringkas)
+1. Input GL → Driver → Volume
+2. Jalankan Allocation → Review hasil
+3. Hitung Unit Cost → Ekspor
+4. Simulasikan Tariff → Finalisasi jika diperlukan
+5. Update Pathway/Case bila ada perubahan klinis
+6. Generate Laporan (Compliance, Variance, Tariff)
 
-4. **Glosarium**
-   - **Unit Cost Version**: Snapshot hasil kalkulasi per periode.
-   - **Allocation Driver**: Basis pembagi biaya step-down.
-   - **Compliance %**: Persentase langkah pathway yang terlaksana sesuai rencana.
-   - **Variance**: Selisih biaya aktual vs estimasi vs INA-CBG.
+### Template Excel
+Dapat diunduh dari masing-masing halaman import:
+- GL Expenses
+- Driver Statistics
+- Service Volumes
+- Pathway Steps
+- Patient Cases
 
-5. **Dokumen Pendukung**
-   - Lihat folder `documentation/` (BRD, PRD, checklist deployment, panduan SIMRS, dsb) untuk detail teknis tambahan.
+### Glosarium
+
+| Istilah | Definisi |
+|---------|----------|
+| **Unit Cost Version** | Snapshot hasil kalkulasi per periode |
+| **Allocation Driver** | Basis pembagi biaya step-down |
+| **Compliance %** | Persentase langkah pathway yang terlaksana |
+| **Variance** | Selisih biaya aktual vs estimasi vs INA-CBG |
+| **Final Product** | Output akhir dengan unit cost tersendiri |
+| **Intermediate Output** | Biaya dialokasikan ke layanan lain |
 
 ---
 
-_Dokumen ini diperbarui selaras dengan fitur per November 2025. Gunakan tombol "Feedback" di aplikasi atau tambah entri baru di Knowledge References jika menemukan gap panduan._
+_Dokumen ini diperbarui Desember 2025. Menggabungkan kurikulum pembelajaran dan petunjuk teknis penggunaan webapp KMKB. Berdasarkan literatur "Defining the Final Product of Cost Analysis" untuk hospital cost management._

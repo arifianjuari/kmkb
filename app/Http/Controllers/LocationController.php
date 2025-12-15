@@ -31,7 +31,7 @@ class LocationController extends Controller
             ->first();
         
         $jumlahKamarDriver = AllocationDriver::where('hospital_id', $hospitalId)
-            ->where('name', 'Jumlah Kamar')
+            ->where('name', 'Jumlah Ruangan')
             ->first();
         
         // Get cost centers with their driver statistics
@@ -111,7 +111,7 @@ class LocationController extends Controller
             ->first();
         
         $jumlahKamarDriver = AllocationDriver::where('hospital_id', $hospitalId)
-            ->where('name', 'Jumlah Kamar')
+            ->where('name', 'Jumlah Ruangan')
             ->first();
         
         // Get cost centers with their driver statistics
