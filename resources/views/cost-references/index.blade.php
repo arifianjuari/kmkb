@@ -36,7 +36,7 @@
                 <button type="button" onclick="openImportModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     {{ __('Import Excel') }}
                 </button>
-                <a href="{{ route('cost-references.export') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                <a href="{{ route('cost-references.export', ['search' => $search ?? '', 'category' => $category ?? '']) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     {{ __('Export Excel') }}
                 </a>
                 <a href="{{ route('cost-references.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
@@ -284,7 +284,10 @@
                 <div class="mb-4 p-3 bg-blue-50 rounded-md">
                     <p class="text-sm text-blue-800">
                         <strong>{{ __('Format File:') }}</strong><br>
-                        {{ __('Kolom: Service Code, Service Description, Standard Cost, Unit, Source') }}
+                        {{ __('Kolom: Service Code, Service Description, Standard Cost, Unit, Source, Category (opsional)') }}
+                    </p>
+                    <p class="text-xs text-blue-600 mt-1">
+                        {{ __('Category valid: barang, tindakan_rj, tindakan_ri, laboratorium, radiologi, operasi, kamar') }}
                     </p>
                     <a href="{{ route('cost-references.template') }}" class="text-sm text-blue-600 hover:text-blue-800 underline mt-2 inline-block">
                         {{ __('Download Template Excel') }}

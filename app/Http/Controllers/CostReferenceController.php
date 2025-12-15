@@ -83,6 +83,7 @@ class CostReferenceController extends Controller
     public function export(Request $request)
     {
         $search = $request->get('search');
+        $category = $request->get('category');
         
         $query = CostReference::where('hospital_id', hospital('id'))
             ->orderBy('service_code');
@@ -97,13 +98,17 @@ class CostReferenceController extends Controller
             });
         }
         
-        $data = $query->get(['service_code', 'service_description', 'standard_cost', 'unit', 'source']);
+        if ($category) {
+            $query->where('category', $category);
+        }
+        
+        $data = $query->get(['service_code', 'service_description', 'standard_cost', 'unit', 'source', 'category']);
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         // Headers
-        $headers = ['Service Code', 'Description', 'Standard Cost', 'Unit', 'Source'];
+        $headers = ['Service Code', 'Description', 'Standard Cost', 'Unit', 'Source', 'Category'];
         $sheet->fromArray($headers, null, 'A1');
 
         // Rows
@@ -115,6 +120,7 @@ class CostReferenceController extends Controller
                     (float) $item->standard_cost,
                     $item->unit,
                     $item->source,
+                    $item->category ?? '',
                 ];
             })->toArray();
             $sheet->fromArray($rows, null, 'A2');
@@ -123,7 +129,7 @@ class CostReferenceController extends Controller
         // Formats and autosize
         $sheet->getStyle('C2:C' . max(2, $data->count() + 1))
             ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-        foreach (range('A', 'E') as $col) {
+        foreach (range('A', 'F') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -397,7 +403,7 @@ class CostReferenceController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
 
         // Headers
-        $headers = ['Service Code', 'Service Description', 'Standard Cost', 'Unit', 'Source'];
+        $headers = ['Service Code', 'Service Description', 'Standard Cost', 'Unit', 'Source', 'Category'];
         $sheet->fromArray($headers, null, 'A1');
 
         // Example row
@@ -406,7 +412,8 @@ class CostReferenceController extends Controller
             'Contoh Layanan',
             '100000',
             'Kali',
-            'Manual'
+            'Manual',
+            'tindakan_rj'
         ];
         $sheet->fromArray([$exampleRow], null, 'A2');
 
@@ -415,7 +422,7 @@ class CostReferenceController extends Controller
             ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
 
         // Auto size columns
-        foreach (range('A', 'E') as $col) {
+        foreach (range('A', 'F') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -427,7 +434,7 @@ class CostReferenceController extends Controller
                 'startColor' => ['rgb' => 'E3F2FD']
             ]
         ];
-        $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
+        $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
 
         $filename = 'cost_references_template.xlsx';
         $headers = [
@@ -476,12 +483,13 @@ class CostReferenceController extends Controller
                 }
 
                 try {
-                    // Expected format: Service Code, Service Description, Standard Cost, Unit, Source
+                    // Expected format: Service Code, Service Description, Standard Cost, Unit, Source, Category (optional)
                     $serviceCode = trim($row[0] ?? '');
                     $serviceDescription = trim($row[1] ?? '');
                     $standardCost = isset($row[2]) ? (float) str_replace([','], [''], (string) $row[2]) : 0;
                     $unit = trim($row[3] ?? '');
                     $source = trim($row[4] ?? 'Manual');
+                    $category = isset($row[5]) ? trim($row[5]) : null;
 
                     // Validation
                     if (empty($serviceCode) || empty($serviceDescription)) {
@@ -499,6 +507,13 @@ class CostReferenceController extends Controller
                         continue;
                     }
 
+                    // Validate category if provided
+                    $validCategories = ['barang', 'tindakan_rj', 'tindakan_ri', 'laboratorium', 'radiologi', 'operasi', 'kamar'];
+                    if ($category && !in_array($category, $validCategories)) {
+                        $errors[] = "Baris " . ($index + 2) . ": Category tidak valid. Nilai yang diperbolehkan: " . implode(', ', $validCategories);
+                        continue;
+                    }
+
                     // Check if cost reference exists (by service_code and hospital_id)
                     $existing = CostReference::where('hospital_id', hospital('id'))
                         ->where('service_code', $serviceCode)
@@ -512,6 +527,14 @@ class CostReferenceController extends Controller
                         'source' => $source,
                         'hospital_id' => hospital('id'),
                     ];
+
+                    // Only set category if provided (preserve existing if not in import file)
+                    if ($category) {
+                        $data['category'] = $category;
+                    } elseif (!$existing) {
+                        // For new records, set category to null if not provided
+                        $data['category'] = null;
+                    }
 
                     if ($existing) {
                         // Update existing
