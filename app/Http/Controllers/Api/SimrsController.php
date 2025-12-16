@@ -391,7 +391,7 @@ class SimrsController extends Controller
                         'service_description' => $item['nama_brng'],
                         'purchase_price' => $item['harga_beli_dasar'],
                         'standard_cost' => isset($item['kelas3']) ? $item['kelas3'] : $item['harga_beli_dasar'],
-                        'unit' => 'Unit',
+                        'unit' => 'Barang',
                         'source' => 'SIMRS',
                         'hospital_id' => $hospitalId,
                         'simrs_kode_brng' => $item['kode_brng'],

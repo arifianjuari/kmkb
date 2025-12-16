@@ -78,7 +78,7 @@
                             <div class="mt-1">
                                 <select id="category" name="category" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
                                     <option value="">{{ __('Select Category') }}</option>
-                                    <option value="barang" {{ old('category') == 'barang' ? 'selected' : '' }}>{{ __('Barang/BMHP') }}</option>
+                                    <option value="barang" {{ old('category') == 'barang' ? 'selected' : '' }}>{{ __('Obat/BHP') }}</option>
                                     <option value="tindakan_rj" {{ old('category') == 'tindakan_rj' ? 'selected' : '' }}>{{ __('Tindakan Rawat Jalan') }}</option>
                                     <option value="tindakan_ri" {{ old('category') == 'tindakan_ri' ? 'selected' : '' }}>{{ __('Tindakan Rawat Inap') }}</option>
                                     <option value="laboratorium" {{ old('category') == 'laboratorium' ? 'selected' : '' }}>{{ __('Laboratorium') }}</option>

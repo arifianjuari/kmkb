@@ -524,7 +524,7 @@ class StandardResourceUsageController extends Controller
 
         // Category labels
         $categoryLabels = [
-            'barang' => 'Barang/BMHP',
+            'barang' => 'Obat/BHP',
             'tindakan_rj' => 'Tindakan Rawat Jalan',
             'tindakan_ri' => 'Tindakan Rawat Inap',
             'laboratorium' => 'Laboratorium',

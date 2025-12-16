@@ -2459,7 +2459,7 @@ class ServiceVolumeCurrentController extends Controller
                         'standard_cost' => $item['harga'],
                         'is_synced_from_simrs' => true,
                         'last_synced_at' => now(),
-                        'category' => 'obat_bhp',
+                        'category' => 'barang',
                     ]);
                 } else {
                     \App\Models\CostReference::create([
@@ -2472,7 +2472,7 @@ class ServiceVolumeCurrentController extends Controller
                         'hospital_id' => $hospitalId,
                         'is_synced_from_simrs' => true,
                         'last_synced_at' => now(),
-                        'category' => 'obat_bhp',
+                        'category' => 'barang',
                     ]);
                 }
                 $syncedCount++;

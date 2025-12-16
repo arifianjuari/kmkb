@@ -50,7 +50,7 @@
                         <dd class="mt-1 text-sm text-gray-900">
                             @php
                                 $categoryLabels = [
-                                    'barang' => 'Barang/BMHP',
+                                    'barang' => 'Obat/BHP',
                                     'tindakan_rj' => 'Tindakan Rawat Jalan',
                                     'tindakan_ri' => 'Tindakan Rawat Inap',
                                     'laboratorium' => 'Laboratorium',

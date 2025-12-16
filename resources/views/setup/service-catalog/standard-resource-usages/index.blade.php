@@ -115,7 +115,7 @@
                 @php
                     $categoryTabs = [
                         'all' => 'Semua Kategori',
-                        'barang' => 'Barang/BMHP',
+                        'barang' => 'Obat/BHP',
                         'tindakan_rj' => 'Tindakan RJ',
                         'tindakan_ri' => 'Tindakan RI',
                         'laboratorium' => 'Laboratorium',

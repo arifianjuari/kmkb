@@ -132,7 +132,7 @@
                 @php
                     $categoryTabs = [
                         'all' => __('All Categories'),
-                        'barang' => __('Barang/BMHP'),
+                        'barang' => __('Obat/BHP'),
                         'tindakan_rj' => __('Tindakan Rawat Jalan'),
                         'tindakan_ri' => __('Tindakan Rawat Inap'),
                         'laboratorium' => __('Laboratorium'),
