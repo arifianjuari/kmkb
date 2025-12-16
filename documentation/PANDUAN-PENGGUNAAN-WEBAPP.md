@@ -842,8 +842,8 @@ Dalam praktik, cost center dapat disusun secara **hierarkis** (parent-child) unt
 **Contoh Hierarki:**
 
 ```
-Rumah Sakit XYZ (Root)
-├── Direktorat Pelayanan Medis
+Rumah Sakit XYZ
+├── Bidang Pelayanan Medis
 │   ├── Instalasi Rawat Jalan
 │   │   ├── Poliklinik Umum
 │   │   ├── Poliklinik Penyakit Dalam
@@ -857,7 +857,7 @@ Rumah Sakit XYZ (Root)
 │   │   └── ICU
 │   └── Instalasi Gawat Darurat
 │       └── IGD
-├── Direktorat Penunjang Medis
+├── Bidang Penunjang Medis
 │   ├── Instalasi Laboratorium
 │   │   ├── Lab Klinik
 │   │   └── Lab Patologi Anatomi
@@ -866,7 +866,7 @@ Rumah Sakit XYZ (Root)
 │   │   ├── CT-Scan
 │   │   └── MRI
 │   └── Instalasi Farmasi
-└── Direktorat Umum & Keuangan
+└── Bagian Umum & Keuangan
     ├── Bagian Keuangan
     ├── Bagian SDM
     ├── Bagian Umum
