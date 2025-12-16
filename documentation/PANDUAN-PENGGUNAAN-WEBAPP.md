@@ -1021,23 +1021,358 @@ Setelah menyelesaikan modul ini, Anda akan memiliki:
 
 ### Modul 3: Konsep Alokasi Biaya (Step-Down)
 
-**🎯 Tujuan:**
-Memahami teori dasar sebelum menggunakan engine alokasi.
+**🎯 Tujuan Pembelajaran:**
+Memahami teori dasar cost allocation, jenis-jenis metode alokasi, dan konsep allocation driver sebagai fondasi sebelum menggunakan engine alokasi di webapp.
 
-**📘 Materi:**
-- Alokasi overhead
-- Allocation driver (dasar pembagi)
-- Step-down vs reciprocal method
+---
 
-**🛠 Aktivitas di Webapp:**
+#### 3.1. Mengapa Perlu Alokasi Biaya?
+
+**Permasalahan:**
+> Cost center pendukung (support) seperti Administrasi, Laundry, Gizi tidak menghasilkan pendapatan langsung, tetapi biayanya **harus diperhitungkan** dalam unit cost layanan yang dijual ke pasien.
+
+**Solusi:**
+> **Cost Allocation** adalah proses **mendistribusikan biaya** dari cost center pendukung (support/overhead) ke cost center penghasil pendapatan (revenue) menggunakan dasar pembagi yang logis.
+
+**Ilustrasi Kebutuhan Alokasi:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    MENGAPA ALOKASI DIPERLUKAN?                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  SEBELUM ALOKASI:                                                       │
+│  ┌────────────────┐      ┌────────────────┐      ┌────────────────┐     │
+│  │   Laundry      │      │   Rawat Inap   │      │   Poliklinik   │     │
+│  │   Rp 50 juta   │      │   Rp 200 juta  │      │   Rp 100 juta  │     │
+│  │   (Support)    │      │   (Revenue)    │      │   (Revenue)    │     │
+│  └────────────────┘      └────────────────┘      └────────────────┘     │
+│         ↓                                                               │
+│  Biaya Laundry tidak termasuk dalam unit cost layanan                   │
+│  → Unit cost TERLALU RENDAH → Tarif tidak menutup biaya sebenarnya      │
+│                                                                         │
+│  ═══════════════════════════════════════════════════════════════════    │
+│                                                                         │
+│  SETELAH ALOKASI:                                                       │
+│  ┌────────────────┐      ┌────────────────┐      ┌────────────────┐     │
+│  │   Laundry      │──┬──▶│   Rawat Inap   │      │   Poliklinik   │     │
+│  │   Rp 50 juta   │  │   │ Rp 200 + 40jt  │      │ Rp 100 + 10jt  │     │
+│  │   (Rp 0)       │  └──▶│ = Rp 240 juta  │      │ = Rp 110 juta  │     │
+│  └────────────────┘      └────────────────┘      └────────────────┘     │
+│                                                                         │
+│  → Biaya Laundry sudah masuk ke unit cost layanan                       │
+│  → Unit cost AKURAT → Tarif mencerminkan biaya sebenarnya               │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 3.2. Metode Alokasi Biaya
+
+Ada tiga metode utama dalam alokasi biaya overhead:
+
+##### a) Direct Allocation Method (Metode Langsung)
+
+**Konsep:**
+> Biaya support center dialokasikan **langsung ke revenue center** tanpa memperhitungkan layanan antar support center.
+
+**Karakteristik:**
+- ✅ Sederhana, mudah dipahami
+- ❌ Mengabaikan layanan antar support (misal: SDM melayani Laundry)
+- ❌ Kurang akurat
+
+**Diagram:**
+```
+Support Centers          Revenue Centers
+┌──────────┐            ┌──────────┐
+│ Laundry  │───────────▶│Rawat Inap│
+└──────────┘            └──────────┘
+┌──────────┐            ┌──────────┐
+│   SDM    │───────────▶│Poliklinik│
+└──────────┘            └──────────┘
+      ✗ Tidak ada alokasi antar support
+```
+
+##### b) Step-Down Allocation Method (Metode Bertahap) ⭐
+
+**Konsep:**
+> Biaya dialokasikan secara **bertahap/berurutan** dari support center yang paling banyak melayani unit lain, kemudian dilanjutkan ke support center berikutnya, hingga akhirnya semua biaya sampai ke revenue center.
+
+**Karakteristik:**
+- ✅ Memperhitungkan layanan antar support (satu arah)
+- ✅ Lebih akurat dari direct method
+- ✅ Praktis untuk implementasi
+- ⚠️ Urutan (sequence) alokasi mempengaruhi hasil
+
+**Diagram:**
+```
+Step 1: Administrasi dialokasikan ke semua unit (termasuk support lain)
+Step 2: SDM dialokasikan ke unit yang tersisa
+Step 3: Laundry dialokasikan ke revenue centers
+
+┌─────────────┐
+│Administrasi │══╦═══════════════════════════════════════════╗
+└─────────────┘  ║ Step 1                                    ║
+                 ▼                                           ▼
+          ┌──────────┐                                ┌──────────┐
+          │   SDM    │══════════════════════════╦════▶│Rawat Inap│
+          └──────────┘  Step 2                  ║     └──────────┘
+                 ▼                              ▼
+          ┌──────────┐                   ┌──────────┐
+          │ Laundry  │═══════════════════▶│Poliklinik│
+          └──────────┘  Step 3           └──────────┘
+```
+
+> [!IMPORTANT]
+> **Webapp KMKB menggunakan Step-Down Method** karena keseimbangan antara akurasi dan kepraktisan implementasi.
+
+##### c) Reciprocal Allocation Method (Metode Timbal Balik)
+
+**Konsep:**
+> Memperhitungkan layanan **timbal balik antar support center** menggunakan persamaan simultan atau iterasi.
+
+**Karakteristik:**
+- ✅ Paling akurat secara teoritis
+- ❌ Kompleks, membutuhkan perhitungan matriks
+- ❌ Sulit dijelaskan ke manajemen
+
+**Contoh Layanan Timbal Balik:**
+- SDM mengelola pegawai Laundry
+- Laundry mencuci seragam pegawai SDM
+
+> [!NOTE]
+> **Catatan Pengembangan:** Reciprocal method belum tersedia di webapp. Untuk kasus dengan layanan timbal balik signifikan, pertimbangkan estimasi proporsi dan masukkan dalam step-down sequence.
+
+---
+
+#### 3.3. Allocation Driver (Dasar Alokasi)
+
+**Definisi:**
+> **Allocation Driver** (atau **Cost Driver**) adalah dasar/basis yang digunakan untuk **mendistribusikan biaya** dari source cost center ke target cost center secara proporsional.
+
+**Kriteria Driver yang Baik:**
+
+| Kriteria | Penjelasan | Contoh Baik | Contoh Buruk |
+|----------|------------|-------------|--------------|
+| **Kausalitas** | Ada hubungan sebab-akibat dengan biaya | Kg linen untuk Laundry | Jumlah pasien untuk Laundry |
+| **Measurable** | Dapat diukur secara objektif | m² luas lantai | "Tingkat kompleksitas" |
+| **Tersedia** | Data tersedia dengan biaya wajar | Jumlah pegawai dari HRD | Survey waktu tiap aktivitas |
+| **Proporsional** | Mencerminkan penggunaan sumber daya | kWh listrik | Flat rate sama rata |
+
+**Contoh Allocation Driver per Support Center:**
+
+| Support Center | Driver yang Direkomendasikan | Alternatif | Satuan |
+|----------------|------------------------------|------------|--------|
+| **Administrasi Umum** | FTE Pegawai | Proporsi anggaran | orang |
+| **Keuangan** | Jumlah transaksi | FTE | transaksi |
+| **SDM** | FTE Pegawai | Jumlah formasi | orang |
+| **IT** | Jumlah PC/workstation | FTE | unit |
+| **Housekeeping** | Luas lantai | Jumlah tempat tidur | m² |
+| **Laundry** | Berat linen | Jumlah tempat tidur × LOS | kg |
+| **Gizi** | Jumlah porsi makanan | Hari rawat | porsi |
+| **IPSRS** | Nilai aset | Luas lantai | rupiah |
+| **Keamanan** | Luas lantai total | Jumlah pintu akses | m² |
+| **CSSD** | Jumlah set steril | Jumlah tindakan | set |
+
+---
+
+#### 3.4. Formula Alokasi Step-Down
+
+**Formula Dasar:**
+
+```
+Alokasi ke Target = Biaya Source × (Driver Target / Total Driver)
+```
+
+**Contoh Perhitungan:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  CONTOH ALOKASI LAUNDRY                                                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  Biaya Laundry Total: Rp 60.000.000                                     │
+│  Driver: Kg Linen                                                       │
+│                                                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │  Target Cost Center    │  Kg Linen  │  Proporsi  │  Alokasi     │    │
+│  ├────────────────────────┼────────────┼────────────┼──────────────│    │
+│  │  Rawat Inap VIP        │    500 kg  │    25%     │  Rp 15 juta  │    │
+│  │  Rawat Inap Kelas 1    │    400 kg  │    20%     │  Rp 12 juta  │    │
+│  │  Rawat Inap Kelas 2    │    600 kg  │    30%     │  Rp 18 juta  │    │
+│  │  Rawat Inap Kelas 3    │    300 kg  │    15%     │  Rp  9 juta  │    │
+│  │  Kamar Operasi         │    200 kg  │    10%     │  Rp  6 juta  │    │
+│  ├────────────────────────┼────────────┼────────────┼──────────────│    │
+│  │  TOTAL                 │  2.000 kg  │   100%     │  Rp 60 juta  │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+│                                                                         │
+│  Contoh Perhitungan Rawat Inap VIP:                                     │
+│  Alokasi = Rp 60.000.000 × (500 / 2.000) = Rp 15.000.000               │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 3.5. Step Sequence (Urutan Alokasi)
+
+**Prinsip Penentuan Urutan:**
+> Support center yang **paling banyak melayani** unit lain (termasuk support lain) dialokasikan **lebih dulu**.
+
+**Kriteria Penentuan Urutan:**
+
+| Prioritas | Kriteria | Contoh |
+|-----------|----------|--------|
+| 1 | Melayani semua unit (termasuk support) | Administrasi, SDM |
+| 2 | Melayani banyak unit tapi tidak semua | IT, Keuangan |
+| 3 | Melayani unit tertentu saja | Laundry (rawat inap), Gizi |
+| 4 | Melayani sedikit unit spesifik | CSSD (OK, rawat inap) |
+
+**Contoh Step Sequence:**
+
+```
+┌───────────────────────────────────────────────────────────────────────┐
+│  CONTOH URUTAN STEP-DOWN ALLOCATION                                   │
+├───────────────────────────────────────────────────────────────────────┤
+│                                                                       │
+│  Step │ Source Center    │ Driver        │ Target                    │
+│  ─────┼──────────────────┼───────────────┼─────────────────────────  │
+│   1   │ Administrasi     │ FTE Pegawai   │ Semua unit                │
+│   2   │ SDM              │ FTE Pegawai   │ Semua unit (kecuali Adm)  │
+│   3   │ Keuangan         │ Transaksi     │ Revenue + remaining supp  │
+│   4   │ IT               │ Workstation   │ Revenue + remaining supp  │
+│   5   │ Housekeeping     │ Luas Lantai   │ Revenue centers           │
+│   6   │ IPSRS            │ Nilai Aset    │ Revenue centers           │
+│   7   │ Laundry          │ Kg Linen      │ Rawat Inap, OK            │
+│   8   │ Gizi             │ Porsi Makan   │ Rawat Inap                │
+│   9   │ CSSD             │ Set Steril    │ OK, Rawat Inap            │
+│                                                                       │
+└───────────────────────────────────────────────────────────────────────┘
+```
+
+> [!TIP]
+> **Best Practice:** Dokumentasikan alasan pemilihan urutan di Knowledge References agar dapat dijelaskan ke auditor atau manajemen.
+
+---
+
+#### 3.6. Implementasi di Webapp KMKB
+
+##### a) Master Data → Allocation Drivers
+
+Sebelum membuat allocation map, definisikan driver yang akan digunakan:
+
+| Field | Deskripsi | Contoh |
+|-------|-----------|--------|
+| **Kode** | Identifikasi unik | `DRV-LUAS`, `DRV-FTE` |
+| **Nama** | Nama deskriptif | `Luas Lantai`, `FTE Pegawai` |
+| **Satuan** | Unit of Measurement | `m²`, `orang`, `kg` |
+| **Deskripsi** | Penjelasan penggunaan | "Untuk alokasi biaya fasilitas" |
+
+##### b) GL & Expenses → Driver Statistics
+
+Input nilai driver per cost center per periode:
+
+| Cost Center | Driver | Nilai | Periode |
+|-------------|--------|-------|---------|
+| Rawat Inap VIP | Luas Lantai | 500 m² | Jan 2025 |
+| Rawat Inap VIP | Kg Linen | 500 kg | Jan 2025 |
+| Rawat Inap Kelas 1 | Luas Lantai | 400 m² | Jan 2025 |
+| ... | ... | ... | ... |
+
+##### c) Allocation → Allocation Maps
+
+Setup aturan alokasi:
+
+| Field | Deskripsi |
+|-------|-----------|
+| **Source Cost Center** | Support center yang biayanya akan dialokasikan |
+| **Driver** | Dasar pembagi yang digunakan |
+| **Step Sequence** | Urutan eksekusi (angka kecil = duluan) |
+| **Target Cost Centers** | Otomatis ke semua revenue (atau pilih manual) |
+
+**Contoh Setup di Webapp:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ALLOCATION MAP - Laundry                                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Source:    CC-SUP-LDR (Instalasi Laundry)                              │
+│  Driver:    DRV-LINEN (Kg Linen)                                        │
+│  Sequence:  7                                                           │
+│  Targets:   CC-REV-RI-VIP, CC-REV-RI-K1, CC-REV-RI-K2,                  │
+│             CC-REV-RI-K3, CC-REV-OK                                     │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 🛠 Aktivitas Praktik di Webapp
+
+**Tujuan:** Memahami dan menyiapkan konfigurasi alokasi biaya.
+
+##### Langkah 1: Identifikasi Driver yang Dibutuhkan
+
+| Support Center | Driver Dipilih | Alasan | Sumber Data |
+|----------------|----------------|--------|-------------|
+| Administrasi | FTE Pegawai | Proporsional dengan beban manajemen | HRD |
+| Housekeeping | Luas Lantai | Biaya cleaning proporsional luas | Sarpras |
+| Laundry | Kg Linen | Direct causality | Log Laundry |
+| Gizi | Porsi Makan | Direct causality | Log Gizi |
+| ... | ... | ... | ... |
+
+##### Langkah 2: Setup Allocation Drivers
 
 | Langkah | Menu | Aksi |
 |---------|------|------|
-| 1 | `Master Data → Allocation Drivers` | Buat driver (Luas Lantai, FTE, Kg Laundry, dll) |
-| 2 | `Allocation → Allocation Maps` | Preview flow alokasi |
+| 1 | `Master Data → Allocation Drivers` | Klik **Add New** |
+| 2 | Form | Isi kode (mis: `DRV-LUAS`) |
+| 3 | Form | Isi nama (mis: `Luas Lantai`) |
+| 4 | Form | Pilih satuan dari UoM (mis: `m²`) |
+| 5 | - | Simpan, ulangi untuk driver lainnya |
 
-**📤 Output:**
-Dasar teori step-down allocation.
+##### Langkah 3: Tentukan Step Sequence
+
+| No | Support Center | Step | Driver | Alasan Urutan |
+|----|----------------|------|--------|---------------|
+| 1 | Administrasi | 1 | FTE | Melayani semua |
+| 2 | SDM | 2 | FTE | Melayani semua |
+| 3 | Keuangan | 3 | Transaksi | Melayani banyak |
+| ... | ... | ... | ... | ... |
+
+##### Langkah 4: Preview di Allocation Maps
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Allocation → Allocation Maps` | Lihat existing maps |
+| 2 | - | Klik **Add New** jika perlu |
+| 3 | Form | Pilih source, driver, sequence |
+| 4 | - | Preview targets yang akan menerima alokasi |
+| 5 | - | Validasi logika alokasi |
+
+---
+
+#### 📤 Output Modul
+
+Setelah menyelesaikan modul ini, Anda akan memiliki:
+
+1. **Pemahaman teoritis** tentang metode alokasi (direct, step-down, reciprocal)
+2. **Daftar allocation drivers** yang diperlukan untuk RS Anda
+3. **Step sequence** yang terdokumentasi dengan alasan
+4. **Konfigurasi Allocation Maps** siap di webapp
+5. **Fondasi** untuk menjalankan proses alokasi di Modul 6-8
+
+**Checklist Pemahaman:**
+- [ ] Saya memahami mengapa alokasi biaya diperlukan
+- [ ] Saya dapat membedakan metode direct, step-down, dan reciprocal
+- [ ] Saya mengerti kriteria pemilihan allocation driver yang baik
+- [ ] Saya memahami prinsip penentuan step sequence
+- [ ] Saya dapat melakukan setup Allocation Drivers dan Maps di webapp
+
+---
+
+**Referensi Teori:**
+- Cost Accounting: A Managerial Emphasis (Horngren, Datar, Rajan)
+- Costing of Health Services for Provider Payment (WHO)
+- Hospital Cost Accounting (Steven A. Finkler)
 
 ---
 
