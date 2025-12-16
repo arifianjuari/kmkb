@@ -83,24 +83,28 @@ Analisis detail layanan     → Cost References yang terhubung ke Cost Center
 
 ### A.3. Satuan Output untuk Final Cost Centre
 
-| Jenis Layanan | Satuan Output |
-|---------------|---------------|
-| Rawat Inap | Inpatient-days atau Admissions |
-| Rawat Jalan | Visits (kunjungan) |
-| Laboratorium | Jumlah tes |
-| Radiologi | Jumlah pemeriksaan |
-| Kamar Operasi | Jumlah operasi |
-| Farmasi | Jumlah resep/item |
+| Jenis Layanan | Satuan Output | Fitur Sync di Webapp |
+|---------------|---------------|----------------------|
+| Rawat Inap | Inpatient-days atau Admissions | ✅ Via `Service Volume Current → Rawat Inap` |
+| Rawat Jalan | Visits (kunjungan) | ✅ Via `Service Volume Current` |
+| Laboratorium | Jumlah tes | ✅ Via `Service Volume Current → Laboratorium` |
+| Radiologi | Jumlah pemeriksaan | ✅ Via `Service Volume Current → Radiologi` |
+| Kamar Operasi | Jumlah operasi | ✅ Via `Service Volume Current → Bedah Sentral` |
+| Farmasi | Jumlah resep/item | Manual / Import Excel |
 
 **Formula:**
 ```
 Unit Cost = (Direct Cost + Indirect Cost) / Service Volume
 ```
 
-**Menu:** `GL & Expenses → Service Volumes`
+**Menu:**
+1. **Input Data:** `GL & Expenses → Service Volumes` (Bisa import Excel atau Sync)
+2. **Master Satuan:** `Master Data → Units of Measurement` (Gunakan satuan standar)
 
 > **[!TIP]**
-> Sepakati di awal: rawat inap menggunakan `patient-days` atau `admissions`. Dokumentasikan pilihan di Knowledge References.
+> - Sepakati di awal: rawat inap menggunakan `patient-days` atau `admissions`.
+> - Gunakan fitur **Sync** di menu `Service Volume Current` untuk menarik data volume otomatis dari modul operasional tanpa input manual.
+> - Pastikan satuan (Unit) yang digunakan di Cost References konsisten dengan Master UoM.
 
 ---
 
@@ -177,18 +181,21 @@ Langkah penting dalam menghitung unit cost adalah menentukan **cost centres** di
 
 ### A.7. Klasifikasi Cost Centre
 
-Secara administratif, cost centre dibedakan menurut **sifat pekerjaan**:
+Secara administratif, cost centre dibedakan menurut **sifat pekerjaan** (Concept), namun di Webapp disederhanakan menjadi **Tipe** (System):
 
-| Klasifikasi | Deskripsi | Contoh | Di Webapp |
-|-------------|-----------|--------|-----------|
-| **Patient Care** | Unit yang memberi layanan pasien secara langsung | Bangsal/rawat inap, Unit rawat jalan, IGD, OK | Tipe: `revenue` |
-| **Intermediate** | Layanan penunjang klinis untuk patient care, berdiri sebagai departemen terpisah | Laboratorium, Farmasi, Radiologi | Tipe: `revenue` (default) |
-| **Overhead** | Layanan dukungan umum untuk patient care dan intermediate | Keuangan, Gizi, Keamanan, Housekeeping, Laundry, Maintenance | Tipe: `support` |
+| Klasifikasi (Konsep) | Deskripsi | Contoh | Tipe di Webapp |
+|----------------------|-----------|--------|----------------|
+| **Patient Care** | Unit yang memberi layanan pasien secara langsung | Bangsal/rawat inap, Unit rawat jalan, IGD, OK | `revenue` |
+| **Intermediate** | Layanan penunjang klinis, bisa menjadi *final product* atau dialokasikan lagi | Laboratorium, Farmasi, Radiologi | `revenue` |
+| **Overhead** | Layanan dukungan umum (Non-Revenue) | Keuangan, Gizi, Keamanan, Housekeeping | `support` |
+
+> **[!NOTE]**
+> Di Webapp, **Intermediate** dan **Patient Care** sama-sama bertipe `revenue` karena keduanya memiliki **Cost References** (layanan yang bisa dihitung unit cost-nya dan dijual). Bedanya hanya pada alur pelayanan klinisnya.
 
 **Alur biaya mengikuti step-down:**
 ```
-Overhead → Intermediate → Patient Care
-   └────────────────────────┘
+Overhead (Support) → Intermediate (Revenue) → Patient Care (Revenue)
+       └───────────────────────────────────────────┘
 ```
 
 **Implementasi di Webapp:**

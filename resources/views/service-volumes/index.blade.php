@@ -87,7 +87,7 @@
         
         <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
             <div class="px-4 py-5 sm:p-6">
-                <form method="GET" action="{{ route('service-volumes.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-5">
+                <form method="GET" action="{{ route('service-volumes.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-4">
                     @if($search ?? '')
                         <input type="hidden" name="search" value="{{ $search }}">
                     @endif
@@ -99,34 +99,8 @@
                             @endfor
                         </select>
                     </div>
-                    <div>
-                        <label for="period_month" class="block text-sm font-medium text-gray-700">{{ __('Month') }}</label>
-                        <select id="period_month" name="period_month" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
-                            <option value="">{{ __('All Months') }}</option>
-                            @for($m = 1; $m <= 12; $m++)
-                                <option value="{{ $m }}" {{ $periodMonth == $m ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $m, 1)) }}</option>
-                            @endfor
-                        </select>
-                    </div>
-                    <div>
-                        <label for="cost_reference_id" class="block text-sm font-medium text-gray-700">{{ __('Service') }}</label>
-                        <select id="cost_reference_id" name="cost_reference_id" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
-                            <option value="">{{ __('All Services') }}</option>
-                            @foreach($costReferences as $cr)
-                                <option value="{{ $cr->id }}" {{ $costReferenceId == $cr->id ? 'selected' : '' }}>{{ $cr->service_code }}</option>
-                            @endforeach
-                        </select>
-                    </div>
 
-                    <div>
-                        <label for="category" class="block text-sm font-medium text-gray-700">{{ __('Category') }}</label>
-                        <select id="category" name="category" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
-                            <option value="">{{ __('All Categories') }}</option>
-                            @foreach($categoryOptions as $value => $label)
-                                <option value="{{ $value }}" {{ ($category ?? '') == $value ? 'selected' : '' }}>{{ __($label) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+
 
                     <div class="flex items-end">
                         <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
@@ -137,89 +111,107 @@
             </div>
         </div>
         
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div class="px-4 py-5 sm:p-6">
-                @if($serviceVolumes->count() > 0)
-                    <!-- Hidden form for individual delete - placed outside to avoid nested forms -->
-                    <form id="single-delete-form" method="POST" class="hidden">
-                        @csrf
-                        @method('DELETE')
-                    </form>
+        {{-- Category Tabs --}}
+        <div class="mb-4">
+            <div class="flex flex-wrap items-center gap-2.5">
+                @php
+                    $tabs = array_merge(['all' => 'All Categories'], $categoryOptions);
+                @endphp
+                
+                @foreach($tabs as $key => $label)
+                    @php
+                        $tabKey = $key === 'all' ? null : $key;
+                        $isActiveTab = $category == $tabKey;
+                        $urlParams = request()->except('category', 'page');
+                        if ($tabKey) {
+                            $urlParams['category'] = $tabKey;
+                        }
+                        $tabUrl = route('service-volumes.index', $urlParams);
+                        $countKey = $key; // Matches keys in $categoryCounts
+                    @endphp
+                    <a
+                        href="{{ $tabUrl }}"
+                        class="inline-flex items-center gap-2 px-2.5 py-1 border rounded-full text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-biru-dongker-700 {{ $isActiveTab ? 'bg-biru-dongker-800 text-white border-biru-dongker-800' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}"
+                    >
+                        <span>{{ __($label) }}</span>
+                        @if(isset($categoryCounts))
+                            <span class="ml-1 text-[10px] font-semibold {{ $isActiveTab ? 'text-white/80' : 'text-gray-500' }}">
+                                {{ $categoryCounts[$countKey] ?? 0 }}
+                            </span>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
+        </div>
 
-                    <form id="bulk-delete-form" action="{{ route('service-volumes.bulk-delete') }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="text-sm text-gray-600">
-                                {{ __('Select records to delete in bulk') }}
-                            </div>
-                            <button id="bulk-delete-btn" type="submit" class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="return confirm('{{ __('Are you sure you want to delete the selected service volumes? This action cannot be undone.') }}')">
-                                {{ __('Delete Selected') }}
-                            </button>
-                        </div>
-                        
-                        <div class="overflow-x-auto">
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="flex flex-col">
+                <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                        <div class="shadow border-b border-gray-200 sm:rounded-lg overflow-hidden">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            <input id="select-all" type="checkbox" class="h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10 bg-gray-50 shadow-sm min-w-[200px]">
+                                            {{ __('Service / Category') }}
                                         </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Period') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Service Code') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Service Description') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Category') }}</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Total Quantity') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($serviceVolumes as $volume)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <input type="checkbox" name="ids[]" value="{{ $volume->id }}" class="row-checkbox h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $volume->period_month }}/{{ $volume->period_year }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $volume->costReference ? $volume->costReference->service_code : '-' }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $volume->costReference ? $volume->costReference->service_description : '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ isset($categoryOptions[$volume->category]) ? $categoryOptions[$volume->category] : '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($volume->total_quantity, 2, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <div class="flex items-center gap-2">
-                                                <a href="{{ route('service-volumes.show', $volume) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                                                        <path d="M12 5c-5 0-9 5-9 7s4 7 9 7 9-5 9-7-4-7-9-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 .001 6.001A3 3 0 0 0 12 9Z"/>
-                                                    </svg>
-                                                </a>
-                                                <a href="{{ route('service-volumes.edit', $volume) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-800 hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm2.92 2.83H5v-.92l9.06-9.06.92.92L5.92 20.08ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
-                                                    </svg>
-                                                </a>
-                                                <button type="button" 
-                                                    onclick="deleteSingleRecord('{{ route('service-volumes.destroy', $volume) }}')"
-                                                    class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500" 
-                                                    title="{{ __('Delete') }}" 
-                                                    aria-label="{{ __('Delete') }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                                                        <path d="M9 3h6a1 1 0 0 1 1 1v1h4v2H4V5h4V4a1 1 0 0 1 1-1Zm-3 6h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 9Zm3 2v8h2v-8H9Zm4 0v8h2v-8h-2Z"/>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </td>
+                                        @foreach(range(1, 12) as $m)
+                                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[60px]">
+                                                {{ date('M', mktime(0, 0, 0, $m, 1)) }}
+                                            </th>
+                                        @endforeach
+                                        <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px] font-bold bg-gray-100">
+                                            {{ __('Total') }}
+                                        </th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach($services as $service)
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 z-10 bg-white shadow-sm border-r group-hover:bg-gray-50">
+                                                <div class="flex flex-col">
+                                                    <span class="truncate" title="{{ $service->service_description }}">{{ $service->service_description }}</span>
+                                                    <span class="text-xs text-gray-500">{{ $service->service_code }} • {{ $categoryOptions[$service->category] ?? '-' }}</span>
+                                                </div>
+                                            </td>
+                                            
+                                            @php
+                                                $rowTotal = 0;
+                                            @endphp
+
+                                            @foreach(range(1, 12) as $m)
+                                                @php
+                                                    $val = $volumeMap[$service->id][$m] ?? 0;
+                                                    $rowTotal += $val;
+                                                @endphp
+                                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500 text-center border-r border-gray-100">
+                                                    {{ $val > 0 ? number_format($val, 0, ',', '.') : '-' }}
+                                                </td>
+                                            @endforeach
+                                            
+                                            <td class="px-3 py-3 whitespace-nowrap text-sm font-bold text-gray-900 text-right bg-gray-50">
+                                                {{ $rowTotal > 0 ? number_format($rowTotal, 0, ',', '.') : '-' }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                    
+                                    @if($services->count() === 0)
+                                        <tr>
+                                            <td colspan="14" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                                {{ __('No services found matching your criteria.') }}
+                                            </td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    </form>
-                    
-                    <div class="mt-6">
-                        {{ $serviceVolumes->links() }}
+                </div>
+                
+                @if($services->hasPages())
+                    <div class="px-4 py-3 border-t border-gray-200 sm:px-6">
+                        {{ $services->links() }}
                     </div>
-                @else
-                    <p class="text-gray-600">{{ __('No service volumes found.') }}</p>
                 @endif
             </div>
         </div>

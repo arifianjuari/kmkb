@@ -26,49 +26,70 @@ class ServiceVolumeController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $periodMonth = $request->get('period_month');
         $periodYear = $request->get('period_year', date('Y'));
-        $costReferenceId = $request->get('cost_reference_id');
-        $tariffClassId = $request->get('tariff_class_id');
         $category = $request->get('category');
         
-        $query = ServiceVolume::where('hospital_id', hospital('id'))
-            ->with(['costReference', 'tariffClass']);
-        
-        if ($periodMonth) {
-            $query->where('period_month', $periodMonth);
-        }
-        
-        if ($periodYear) {
-            $query->where('period_year', $periodYear);
-        }
-        
-        if ($costReferenceId) {
-            $query->where('cost_reference_id', $costReferenceId);
-        }
-        
-        if ($tariffClassId) {
-            $query->where('tariff_class_id', $tariffClassId);
-        }
+        // Base query for counts (Search only, NO Category filter yet)
+        $baseQuery = CostReference::where('hospital_id', hospital('id'))
+            ->when($search, function($q) use ($search) {
+                return $q->where(function($sub) use ($search) {
+                    $sub->where('service_code', 'LIKE', "%{$search}%")
+                        ->orWhere('service_description', 'LIKE', "%{$search}%");
+                });
+            });
+
+        // Calculate counts for tabs
+        $categoryCounts = [
+            'all' => $baseQuery->count(),
+            'barang' => (clone $baseQuery)->where('category', 'barang')->count(),
+            'tindakan_rj' => (clone $baseQuery)->where('category', 'tindakan_rj')->count(),
+            'tindakan_ri' => (clone $baseQuery)->where('category', 'tindakan_ri')->count(),
+            'laboratorium' => (clone $baseQuery)->where('category', 'laboratorium')->count(),
+            'radiologi' => (clone $baseQuery)->where('category', 'radiologi')->count(),
+            'operasi' => (clone $baseQuery)->where('category', 'operasi')->count(),
+            'kamar' => (clone $baseQuery)->where('category', 'kamar')->count(),
+        ];
+
+        // Clone base query for the main list and apply category filter
+        $query = clone $baseQuery;
         
         if ($category) {
             $query->where('category', $category);
         }
-        
-        if ($search) {
-            $query->whereHas('costReference', function($q) use ($search) {
-                $q->where('service_code', 'LIKE', "%{$search}%")
-                  ->orWhere('service_description', 'LIKE', "%{$search}%");
-            });
+
+        // 1. Get paginated services
+        $services = $query->orderBy('category')
+            ->orderBy('service_description')
+            ->paginate(50) // Higher pagination for matrix view
+            ->appends($request->query());
+
+        // 2. Fetch volumes for these services for the selected year
+        $serviceIds = $services->pluck('id');
+        $volumes = ServiceVolume::where('hospital_id', hospital('id'))
+            ->whereIn('cost_reference_id', $serviceIds)
+            ->where('period_year', $periodYear)
+            ->selectRaw('cost_reference_id, period_month, SUM(total_quantity) as total_quantity')
+            ->groupBy('cost_reference_id', 'period_month')
+            ->get();
+
+        // 3. Map volumes to structure: [cost_reference_id][month] = quantity
+        $volumeMap = [];
+        foreach ($volumes as $vol) {
+            $volumeMap[$vol->cost_reference_id][$vol->period_month] = $vol->total_quantity;
         }
         
-        $serviceVolumes = $query->latest()->paginate(20)->appends($request->query());
-        
-        $costReferences = CostReference::where('hospital_id', hospital('id'))->orderBy('service_code')->get();
-        $tariffClasses = TariffClass::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('name')->get();
+        $costReferences = CostReference::where('hospital_id', hospital('id'))->orderBy('service_code')->get(); // kept for filters/modals if needed
         $categoryOptions = self::CATEGORY_OPTIONS;
         
-        return view('service-volumes.index', compact('serviceVolumes', 'search', 'periodMonth', 'periodYear', 'costReferenceId', 'tariffClassId', 'costReferences', 'tariffClasses', 'category', 'categoryOptions'));
+        return view('service-volumes.index', compact(
+            'services', 
+            'volumeMap', 
+            'search', 
+            'periodYear', 
+            'category', 
+            'categoryOptions',
+            'categoryCounts'
+        ));
     }
 
     public function create()
