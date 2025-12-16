@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CostReference;
 use App\Models\ServiceVolume;
 use App\Models\UnitCostCalculation;
+use App\Models\UnitOfMeasurement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -150,7 +151,12 @@ class CostReferenceController extends Controller
      */
     public function create()
     {
-        return view('cost-references.create');
+        $uoms = UnitOfMeasurement::where('hospital_id', hospital('id'))
+            ->forService()
+            ->active()
+            ->orderBy('name')
+            ->get();
+        return view('cost-references.create', compact('uoms'));
     }
 
     /**
@@ -161,16 +167,36 @@ class CostReferenceController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        // Check if using new UoM system or legacy
+        $hasUoms = UnitOfMeasurement::where('hospital_id', hospital('id'))->exists();
+        
+        $rules = [
             'service_code' => 'required|string|max:50',
             'service_description' => 'required|string',
             'standard_cost' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:20',
             'source' => 'required|string|max:20',
             'category' => 'nullable|string|in:barang,tindakan_rj,tindakan_ri,laboratorium,radiologi,operasi,kamar',
-        ]);
+        ];
 
-        $costReference = CostReference::create(array_merge($request->all(), ['hospital_id' => hospital('id')]));
+        if ($hasUoms && $request->has('unit_of_measurement_id')) {
+            $rules['unit_of_measurement_id'] = 'required|exists:units_of_measurement,id';
+        } else {
+            $rules['unit'] = 'required|string|max:20';
+        }
+
+        $validated = $request->validate($rules);
+
+        // If using UoM, also set the legacy field for backward compatibility
+        if (isset($validated['unit_of_measurement_id'])) {
+            $uom = UnitOfMeasurement::find($validated['unit_of_measurement_id']);
+            if ($uom) {
+                // If the legacy 'unit' field is required by database but not in form because of new UI
+                // we must provide it.
+                $validated['unit'] = $uom->symbol ?? $uom->code;
+            }
+        }
+
+        $costReference = CostReference::create(array_merge($validated, ['hospital_id' => hospital('id')]));
 
         // If the request expects JSON (AJAX), return the created model instead of redirect
         if ($request->wantsJson() || $request->expectsJson() || $request->ajax()) {
@@ -214,7 +240,13 @@ class CostReferenceController extends Controller
             abort(404);
         }
         
-        return view('cost-references.edit', compact('costReference'));
+        $uoms = UnitOfMeasurement::where('hospital_id', hospital('id'))
+            ->forService()
+            ->active()
+            ->orderBy('name')
+            ->get();
+        
+        return view('cost-references.edit', compact('costReference', 'uoms'));
     }
 
     /**
@@ -226,16 +258,34 @@ class CostReferenceController extends Controller
      */
     public function update(Request $request, CostReference $costReference)
     {
-        $request->validate([
+        // Check if using new UoM system or legacy
+        $hasUoms = UnitOfMeasurement::where('hospital_id', hospital('id'))->exists();
+        
+        $rules = [
             'service_code' => 'required|string|max:50',
             'service_description' => 'required|string',
             'standard_cost' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:20',
             'source' => 'required|string|max:20',
             'category' => 'nullable|string|in:barang,tindakan_rj,tindakan_ri,laboratorium,radiologi,operasi,kamar',
-        ]);
+        ];
 
-        $costReference->update($request->all());
+        if ($hasUoms && $request->has('unit_of_measurement_id')) {
+            $rules['unit_of_measurement_id'] = 'required|exists:units_of_measurement,id';
+        } else {
+            $rules['unit'] = 'required|string|max:20';
+        }
+
+        $validated = $request->validate($rules);
+
+        // If using UoM, also set the legacy field for backward compatibility
+        if (isset($validated['unit_of_measurement_id'])) {
+            $uom = UnitOfMeasurement::find($validated['unit_of_measurement_id']);
+            if ($uom) {
+                $validated['unit'] = $uom->symbol ?? $uom->code;
+            }
+        }
+
+        $costReference->update($validated);
 
         return redirect()->route('cost-references.index')
             ->with('success', 'Cost reference updated successfully.');
@@ -519,11 +569,31 @@ class CostReferenceController extends Controller
                         ->where('service_code', $serviceCode)
                         ->first();
 
+
+                    // Try to map unit text to ID
+                    $unitId = null;
+                    if (!empty($unit)) {
+                        $normalizedUnit = strtolower(trim($unit));
+                        // Find by symbol or name or code
+                        $uom = UnitOfMeasurement::where('hospital_id', hospital('id'))
+                            ->where(function($q) use ($normalizedUnit) {
+                                $q->where('symbol', $unit)
+                                  ->orWhereRaw('LOWER(name) = ?', [$normalizedUnit])
+                                  ->orWhereRaw('LOWER(code) = ?', [$normalizedUnit]);
+                            })
+                            ->first();
+                            
+                        if ($uom) {
+                            $unitId = $uom->id;
+                        }
+                    }
+
                     $data = [
                         'service_code' => $serviceCode,
                         'service_description' => $serviceDescription,
                         'standard_cost' => $standardCost,
                         'unit' => $unit,
+                        'unit_of_measurement_id' => $unitId,
                         'source' => $source,
                         'hospital_id' => hospital('id'),
                     ];

@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             HospitalsTableSeeder::class,
+            UnitOfMeasurementSeeder::class, // UoM master table (referenced by many)
             CostCentersTableSeeder::class, // Harus sebelum CostReferencesTableSeeder karena ada FK
             ExpenseCategoriesTableSeeder::class, // Untuk GL Expenses
             AllocationDriversTableSeeder::class, // Untuk Driver Statistics dan Allocation Maps

@@ -117,15 +117,17 @@
                             @endforeach
                         </select>
                     </div>
+
                     <div>
-                        <label for="tariff_class_id" class="block text-sm font-medium text-gray-700">{{ __('Tariff Class') }}</label>
-                        <select id="tariff_class_id" name="tariff_class_id" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
-                            <option value="">{{ __('All Classes') }}</option>
-                            @foreach($tariffClasses as $tc)
-                                <option value="{{ $tc->id }}" {{ $tariffClassId == $tc->id ? 'selected' : '' }}>{{ $tc->name }}</option>
+                        <label for="category" class="block text-sm font-medium text-gray-700">{{ __('Category') }}</label>
+                        <select id="category" name="category" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                            <option value="">{{ __('All Categories') }}</option>
+                            @foreach($categoryOptions as $value => $label)
+                                <option value="{{ $value }}" {{ ($category ?? '') == $value ? 'selected' : '' }}>{{ __($label) }}</option>
                             @endforeach
                         </select>
                     </div>
+
                     <div class="flex items-end">
                         <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                             {{ __('Filter') }}
@@ -167,7 +169,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Period') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Service Code') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Service Description') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Tariff Class') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Category') }}</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Total Quantity') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
                                 </tr>
@@ -181,7 +183,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $volume->period_month }}/{{ $volume->period_year }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $volume->costReference ? $volume->costReference->service_code : '-' }}</td>
                                         <td class="px-6 py-4 text-sm text-gray-900">{{ $volume->costReference ? $volume->costReference->service_description : '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $volume->tariffClass ? $volume->tariffClass->name : '-' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ isset($categoryOptions[$volume->category]) ? $categoryOptions[$volume->category] : '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($volume->total_quantity, 2, ',', '.') }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">

@@ -467,7 +467,196 @@ class CostCenterController extends Controller
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
+
+    /**
+     * Download template for importing cost centers.
+     */
+    public function downloadTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $headers = ['Code', 'Name', 'Division', 'Building Name', 'Floor', 'Class Code', 'Type', 'Parent Code', 'Is Active'];
+        $sheet->fromArray($headers, null, 'A1');
+
+        // Style header row
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+
+        // Add sample data
+        $sheet->setCellValue('A2', 'CC-001');
+        $sheet->setCellValue('B2', 'Instalasi Rawat Jalan');
+        $sheet->setCellValue('C2', 'Direktorat Medis');
+        $sheet->setCellValue('D2', 'Gedung A');
+        $sheet->setCellValue('E2', '1');
+        $sheet->setCellValue('F2', 'KELAS-1');
+        $sheet->setCellValue('G2', 'Revenue');
+        $sheet->setCellValue('H2', '');
+        $sheet->setCellValue('I2', 'Yes');
+
+        $sheet->setCellValue('A3', 'CC-002');
+        $sheet->setCellValue('B3', 'Poli Umum');
+        $sheet->setCellValue('C3', 'Direktorat Medis');
+        $sheet->setCellValue('D3', 'Gedung A');
+        $sheet->setCellValue('E3', '1');
+        $sheet->setCellValue('F3', 'KELAS-1');
+        $sheet->setCellValue('G3', 'Revenue');
+        $sheet->setCellValue('H3', 'CC-001');
+        $sheet->setCellValue('I3', 'Yes');
+
+        // Add notes
+        $sheet->setCellValue('K1', 'PETUNJUK:');
+        $sheet->setCellValue('K2', '- Code: Kode cost center (wajib, unik)');
+        $sheet->setCellValue('K3', '- Name: Nama cost center (wajib)');
+        $sheet->setCellValue('K4', '- Division: Nama division (opsional)');
+        $sheet->setCellValue('K5', '- Building Name: Nama gedung (opsional)');
+        $sheet->setCellValue('K6', '- Floor: Lantai (opsional, angka)');
+        $sheet->setCellValue('K7', '- Class Code: Kode tariff class (opsional)');
+        $sheet->setCellValue('K8', '- Type: Support atau Revenue (wajib)');
+        $sheet->setCellValue('K9', '- Parent Code: Kode parent cost center (opsional)');
+        $sheet->setCellValue('K10', '- Is Active: Yes/No (default: Yes)');
+
+        foreach (range('A', 'K') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'cost_center_template.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    /**
+     * Import cost centers from Excel.
+     */
+    public function import(Request $request)
+    {
+        $this->blockObserver('membuat');
+
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getPathname());
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+
+            // Remove header
+            array_shift($rows);
+
+            $successCount = 0;
+            $updatedCount = 0;
+            $errors = [];
+
+            // Get tariff classes for lookup
+            $tariffClasses = TariffClass::where('hospital_id', hospital('id'))->get()->keyBy('code');
+
+            // First pass: create/update cost centers
+            $costCentersByCode = [];
+            
+            foreach ($rows as $index => $row) {
+                if (empty($row[0]) || empty($row[1])) {
+                    continue; // Skip empty rows
+                }
+
+                $rowNumber = $index + 2;
+
+                try {
+                    $code = trim($row[0]);
+                    $name = trim($row[1]);
+                    $division = !empty($row[2]) ? trim($row[2]) : null;
+                    $buildingName = !empty($row[3]) ? trim($row[3]) : null;
+                    $floor = !empty($row[4]) ? (int)$row[4] : null;
+                    $classCode = !empty($row[5]) ? trim($row[5]) : null;
+                    $type = !empty($row[6]) ? strtolower(trim($row[6])) : 'revenue';
+                    $parentCode = !empty($row[7]) ? trim($row[7]) : null;
+                    $isActive = empty($row[8]) || strtolower(trim($row[8])) === 'yes';
+
+                    // Validate type
+                    if (!in_array($type, ['support', 'revenue'])) {
+                        throw new \Exception("Type harus 'Support' atau 'Revenue'");
+                    }
+
+                    // Find tariff class
+                    $tariffClassId = null;
+                    if ($classCode && isset($tariffClasses[$classCode])) {
+                        $tariffClassId = $tariffClasses[$classCode]->id;
+                    }
+
+                    // Check if cost center already exists by code
+                    $costCenter = CostCenter::where('hospital_id', hospital('id'))
+                        ->where('code', $code)
+                        ->first();
+
+                    if ($costCenter) {
+                        $costCenter->update([
+                            'name' => $name,
+                            'division' => $division,
+                            'building_name' => $buildingName,
+                            'floor' => $floor,
+                            'tariff_class_id' => $tariffClassId,
+                            'type' => $type,
+                            'is_active' => $isActive,
+                        ]);
+                        $costCentersByCode[$code] = $costCenter;
+                        $updatedCount++;
+                    } else {
+                        $newCostCenter = CostCenter::create([
+                            'hospital_id' => hospital('id'),
+                            'code' => $code,
+                            'name' => $name,
+                            'division' => $division,
+                            'building_name' => $buildingName,
+                            'floor' => $floor,
+                            'tariff_class_id' => $tariffClassId,
+                            'type' => $type,
+                            'is_active' => $isActive,
+                        ]);
+                        $costCentersByCode[$code] = $newCostCenter;
+                        $successCount++;
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "Baris {$rowNumber}: " . $e->getMessage();
+                }
+            }
+
+            // Second pass: update parent_id
+            foreach ($rows as $index => $row) {
+                if (empty($row[0]) || empty($row[7])) {
+                    continue;
+                }
+
+                $code = trim($row[0]);
+                $parentCode = trim($row[7]);
+
+                if (isset($costCentersByCode[$code])) {
+                    // Find parent
+                    $parent = CostCenter::where('hospital_id', hospital('id'))
+                        ->where('code', $parentCode)
+                        ->first();
+                    
+                    if ($parent) {
+                        $costCentersByCode[$code]->update(['parent_id' => $parent->id]);
+                    }
+                }
+            }
+
+            if (count($errors) > 0) {
+                return redirect()->route('cost-centers.index')
+                    ->with('warning', "Import selesai dengan catatan. {$successCount} data baru, {$updatedCount} data diupdate. " . count($errors) . " baris gagal: " . implode(', ', array_slice($errors, 0, 3)) . (count($errors) > 3 ? '...' : ''));
+            }
+
+            return redirect()->route('cost-centers.index')
+                ->with('success', "Import berhasil! {$successCount} data baru, {$updatedCount} data diupdate.");
+
+        } catch (\Exception $e) {
+            return redirect()->route('cost-centers.index')
+                ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
+        }
+    }
 }
-
-
-

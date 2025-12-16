@@ -81,7 +81,13 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
-                        Sync Selected ke Cost References
+                        Sync ke Cost References
+                    </button>
+                    <button id="sync-to-volumes" class="hidden inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Sync ke Service Volumes
                     </button>
                     <p class="text-sm text-gray-500">Sumber data: SIMRS</p>
                 </div>
@@ -111,7 +117,19 @@
                                 <input type="checkbox" class="row-checkbox rounded border-gray-300 text-biru-dongker-800 shadow-sm focus:border-biru-dongker-500 focus:ring focus:ring-biru-dongker-400 focus:ring-opacity-50"
                                        data-kode="{{ $row['kode'] }}"
                                        data-nama="{{ $row['nama'] }}"
-                                       data-harga="{{ $row['harga'] }}">
+                                       data-harga="{{ $row['harga'] }}"
+                                       data-jan="{{ $row['jan'] }}"
+                                       data-feb="{{ $row['feb'] }}"
+                                       data-mar="{{ $row['mar'] }}"
+                                       data-apr="{{ $row['apr'] }}"
+                                       data-may="{{ $row['may'] }}"
+                                       data-jun="{{ $row['jun'] }}"
+                                       data-jul="{{ $row['jul'] }}"
+                                       data-aug="{{ $row['aug'] }}"
+                                       data-sep="{{ $row['sep'] }}"
+                                       data-oct="{{ $row['oct'] }}"
+                                       data-nov="{{ $row['nov'] }}"
+                                       data-dec="{{ $row['dec'] }}">
                             </td>
                             <td class="px-4 py-3">
                                 <div class="font-medium text-gray-900">{{ $row['nama'] }}</div>
@@ -171,25 +189,28 @@
 document.addEventListener('DOMContentLoaded', function() {
     const selectAllCheckbox = document.getElementById('select-all');
     const syncButton = document.getElementById('sync-selected');
+    const syncVolumesButton = document.getElementById('sync-to-volumes');
     const rowCheckboxes = document.querySelectorAll('.row-checkbox');
 
-    function toggleSyncButton() {
+    function toggleSyncButtons() {
         const anyChecked = document.querySelector('.row-checkbox:checked');
         syncButton.classList.toggle('hidden', !anyChecked);
+        syncVolumesButton.classList.toggle('hidden', !anyChecked);
     }
 
     selectAllCheckbox.addEventListener('change', function() {
         rowCheckboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
-        toggleSyncButton();
+        toggleSyncButtons();
     });
 
     rowCheckboxes.forEach(cb => {
         cb.addEventListener('change', function() {
             selectAllCheckbox.checked = document.querySelectorAll('.row-checkbox:checked').length === rowCheckboxes.length;
-            toggleSyncButton();
+            toggleSyncButtons();
         });
     });
 
+    // Sync to Cost References
     syncButton.addEventListener('click', function() {
         const selected = document.querySelectorAll('.row-checkbox:checked');
         if (selected.length === 0) { alert('Silakan pilih item yang ingin disinkronkan.'); return; }
@@ -212,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(`${data.synced_count} item berhasil disinkronkan ke Cost References.`);
                 selectAllCheckbox.checked = false;
                 selected.forEach(cb => cb.checked = false);
-                toggleSyncButton();
+                toggleSyncButtons();
             } else {
                 alert('Gagal menyinkronkan data: ' + data.message);
             }
@@ -220,7 +241,58 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(e => { console.error('Error:', e); alert('Terjadi kesalahan saat menyinkronkan data.'); })
         .finally(() => {
             syncButton.disabled = false;
-            syncButton.innerHTML = '<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Sync Selected ke Cost References';
+            syncButton.innerHTML = '<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Sync ke Cost References';
+        });
+    });
+
+    // Sync to Service Volumes
+    syncVolumesButton.addEventListener('click', function() {
+        const selected = document.querySelectorAll('.row-checkbox:checked');
+        if (selected.length === 0) { alert('Silakan pilih item yang ingin disinkronkan.'); return; }
+
+        const items = [];
+        selected.forEach(cb => items.push({
+            kode: cb.dataset.kode,
+            nama: cb.dataset.nama,
+            harga: cb.dataset.harga,
+            jan: cb.dataset.jan,
+            feb: cb.dataset.feb,
+            mar: cb.dataset.mar,
+            apr: cb.dataset.apr,
+            may: cb.dataset.may,
+            jun: cb.dataset.jun,
+            jul: cb.dataset.jul,
+            aug: cb.dataset.aug,
+            sep: cb.dataset.sep,
+            oct: cb.dataset.oct,
+            nov: cb.dataset.nov,
+            dec: cb.dataset.dec
+        }));
+
+        syncVolumesButton.disabled = true;
+        syncVolumesButton.innerHTML = '<svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Syncing...';
+
+        fetch('{{ route("svc-current.operasi.sync-volumes") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+            body: JSON.stringify({ items: items, year: {{ $year }} }),
+            credentials: 'same-origin'
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert(`${data.synced_count} volume record berhasil disinkronkan ke Service Volumes.`);
+                selectAllCheckbox.checked = false;
+                selected.forEach(cb => cb.checked = false);
+                toggleSyncButtons();
+            } else {
+                alert('Gagal menyinkronkan data: ' + data.message);
+            }
+        })
+        .catch(e => { console.error('Error:', e); alert('Terjadi kesalahan saat menyinkronkan data.'); })
+        .finally(() => {
+            syncVolumesButton.disabled = false;
+            syncVolumesButton.innerHTML = '<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Sync ke Service Volumes';
         });
     });
 });

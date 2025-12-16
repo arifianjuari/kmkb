@@ -123,7 +123,13 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
 
     // Cost Centers
     Route::get('cost-centers/export', [App\Http\Controllers\CostCenterController::class, 'export'])->name('cost-centers.export');
+    Route::get('cost-centers/template', [App\Http\Controllers\CostCenterController::class, 'downloadTemplate'])->name('cost-centers.template');
+    Route::post('cost-centers/import', [App\Http\Controllers\CostCenterController::class, 'import'])->name('cost-centers.import');
     Route::resource('cost-centers', App\Http\Controllers\CostCenterController::class);
+    // Divisions - Excel features
+    Route::get('divisions/export', [DivisionController::class, 'export'])->name('divisions.export');
+    Route::get('divisions/template', [DivisionController::class, 'downloadTemplate'])->name('divisions.template');
+    Route::post('divisions/import', [DivisionController::class, 'import'])->name('divisions.import');
     Route::resource('divisions', DivisionController::class);
 
     // Knowledge References
@@ -144,10 +150,21 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
 
     // Allocation Drivers
     Route::get('allocation-drivers/export', [App\Http\Controllers\AllocationDriverController::class, 'export'])->name('allocation-drivers.export');
+    Route::get('allocation-drivers/template', [App\Http\Controllers\AllocationDriverController::class, 'downloadTemplate'])->name('allocation-drivers.template');
+    Route::post('allocation-drivers/import', [App\Http\Controllers\AllocationDriverController::class, 'import'])->name('allocation-drivers.import');
     Route::resource('allocation-drivers', App\Http\Controllers\AllocationDriverController::class);
+
+    // Units of Measurement
+    Route::get('units-of-measurement/export', [App\Http\Controllers\UnitOfMeasurementController::class, 'export'])->name('units-of-measurement.export');
+    Route::get('units-of-measurement/template', [App\Http\Controllers\UnitOfMeasurementController::class, 'downloadTemplate'])->name('units-of-measurement.template');
+    Route::post('units-of-measurement/import', [App\Http\Controllers\UnitOfMeasurementController::class, 'import'])->name('units-of-measurement.import');
+    Route::resource('units-of-measurement', App\Http\Controllers\UnitOfMeasurementController::class);
+
 
     // Tariff Classes
     Route::get('tariff-classes/export', [App\Http\Controllers\TariffClassController::class, 'export'])->name('tariff-classes.export');
+    Route::get('tariff-classes/template', [App\Http\Controllers\TariffClassController::class, 'downloadTemplate'])->name('tariff-classes.template');
+    Route::post('tariff-classes/import', [App\Http\Controllers\TariffClassController::class, 'import'])->name('tariff-classes.import');
     Route::resource('tariff-classes', App\Http\Controllers\TariffClassController::class);
 
     // Other Output - Location
@@ -265,21 +282,27 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         Route::get('/tindakan-rawat-jalan', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'tindakanRawatJalan'])->name('svc-current.tindakan-rawat-jalan');
         Route::get('/tindakan-rawat-jalan/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportTindakanRawatJalan'])->name('svc-current.tindakan-rawat-jalan.export');
         Route::post('/tindakan-rawat-jalan/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncTindakanRawatJalanToCostReferences'])->name('svc-current.tindakan-rawat-jalan.sync');
+        Route::post('/tindakan-rawat-jalan/sync-to-service-volumes', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncTindakanRawatJalanToServiceVolumes'])->name('svc-current.tindakan-rawat-jalan.sync-volumes');
         Route::get('/tindakan-rawat-inap', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'tindakanRawatInap'])->name('svc-current.tindakan-rawat-inap');
         Route::get('/tindakan-rawat-inap/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportTindakanRawatInap'])->name('svc-current.tindakan-rawat-inap.export');
         Route::post('/tindakan-rawat-inap/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncTindakanRawatInapToCostReferences'])->name('svc-current.tindakan-rawat-inap.sync');
+        Route::post('/tindakan-rawat-inap/sync-to-service-volumes', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncTindakanRawatInapToServiceVolumes'])->name('svc-current.tindakan-rawat-inap.sync-volumes');
         Route::get('/laboratorium', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'laboratorium'])->name('svc-current.laboratorium');
         Route::get('/laboratorium/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportLaboratorium'])->name('svc-current.laboratorium.export');
         Route::post('/laboratorium/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncLaboratoriumToCostReferences'])->name('svc-current.laboratorium.sync');
+        Route::post('/laboratorium/sync-to-service-volumes', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncLaboratoriumToServiceVolumes'])->name('svc-current.laboratorium.sync-volumes');
         Route::get('/radiologi', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'radiologi'])->name('svc-current.radiologi');
         Route::get('/radiologi/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportRadiologi'])->name('svc-current.radiologi.export');
         Route::post('/radiologi/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncRadiologiToCostReferences'])->name('svc-current.radiologi.sync');
+        Route::post('/radiologi/sync-to-service-volumes', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncRadiologiToServiceVolumes'])->name('svc-current.radiologi.sync-volumes');
         Route::get('/operasi', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'operasi'])->name('svc-current.operasi');
         Route::get('/operasi/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportOperasi'])->name('svc-current.operasi.export');
         Route::post('/operasi/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncOperasiToCostReferences'])->name('svc-current.operasi.sync');
+        Route::post('/operasi/sync-to-service-volumes', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncOperasiToServiceVolumes'])->name('svc-current.operasi.sync-volumes');
         Route::get('/kamar', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'kamar'])->name('svc-current.kamar');
         Route::get('/kamar/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportKamar'])->name('svc-current.kamar.export');
         Route::post('/kamar/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncKamarToCostReferences'])->name('svc-current.kamar.sync');
+        Route::post('/kamar/sync-to-service-volumes', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncKamarToServiceVolumes'])->name('svc-current.kamar.sync-volumes');
         Route::get('/hari-rawat', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'hariRawat'])->name('svc-current.hari-rawat');
         Route::get('/hari-rawat/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportHariRawat'])->name('svc-current.hari-rawat.export');
     });

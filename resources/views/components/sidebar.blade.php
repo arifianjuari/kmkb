@@ -18,6 +18,7 @@
         request()->routeIs('divisions.*') || 
         request()->routeIs('expense-categories.*') || 
         request()->routeIs('allocation-drivers.*') || 
+        request()->routeIs('units-of-measurement.*') || 
         request()->routeIs('tariff-classes.*')) {
         $openGroups['setup'] = true;
     }
@@ -27,6 +28,7 @@
         request()->routeIs('divisions.*') || 
         request()->routeIs('expense-categories.*') || 
         request()->routeIs('allocation-drivers.*') || 
+        request()->routeIs('units-of-measurement.*') || 
         request()->routeIs('tariff-classes.*')) {
         $openGroups['setup-costing'] = true;
     }
@@ -283,6 +285,10 @@
                                     <a href="{{ route('allocation-drivers.index') }}" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('allocation-drivers.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
                                         <span class="truncate">Allocation Drivers</span>
+                                    </a>
+                                    <a href="{{ route('units-of-measurement.index') }}" 
+                                       class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('units-of-measurement.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Units of Measurement</span>
                                     </a>
                                     <a href="{{ route('tariff-classes.index') }}" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors {{ request()->routeIs('tariff-classes.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">

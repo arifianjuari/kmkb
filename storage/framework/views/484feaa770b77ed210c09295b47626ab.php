@@ -18,6 +18,7 @@
         request()->routeIs('divisions.*') || 
         request()->routeIs('expense-categories.*') || 
         request()->routeIs('allocation-drivers.*') || 
+        request()->routeIs('units-of-measurement.*') || 
         request()->routeIs('tariff-classes.*')) {
         $openGroups['setup'] = true;
     }
@@ -27,6 +28,7 @@
         request()->routeIs('divisions.*') || 
         request()->routeIs('expense-categories.*') || 
         request()->routeIs('allocation-drivers.*') || 
+        request()->routeIs('units-of-measurement.*') || 
         request()->routeIs('tariff-classes.*')) {
         $openGroups['setup-costing'] = true;
     }
@@ -322,6 +324,10 @@
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('allocation-drivers.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
                                         <span class="truncate">Allocation Drivers</span>
                                     </a>
+                                    <a href="<?php echo e(route('units-of-measurement.index')); ?>" 
+                                       class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('units-of-measurement.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Units of Measurement</span>
+                                    </a>
                                     <a href="<?php echo e(route('tariff-classes.index')); ?>" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('tariff-classes.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
                                         <span class="truncate">Charge Classes</span>
@@ -461,6 +467,14 @@
                                     <a href="<?php echo e(route('svc-current.operasi')); ?>"
                                        class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.operasi') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
                                         <span class="truncate">Operasi</span>
+                                    </a>
+                                    <a href="<?php echo e(route('svc-current.kamar')); ?>"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.kamar') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Kamar</span>
+                                    </a>
+                                    <a href="<?php echo e(route('svc-current.hari-rawat')); ?>"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.hari-rawat') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Hari Rawat</span>
                                     </a>
                                 </div>
                             </div>

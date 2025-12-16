@@ -12,6 +12,17 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ServiceVolumeController extends Controller
 {
+    // Category options matching cost-references
+    public const CATEGORY_OPTIONS = [
+        'barang' => 'Obat/BHP',
+        'tindakan_rj' => 'Tindakan Rawat Jalan',
+        'tindakan_ri' => 'Tindakan Rawat Inap',
+        'laboratorium' => 'Laboratorium',
+        'radiologi' => 'Radiologi',
+        'operasi' => 'Operasi',
+        'kamar' => 'Kamar',
+    ];
+
     public function index(Request $request)
     {
         $search = $request->get('search');
@@ -19,6 +30,7 @@ class ServiceVolumeController extends Controller
         $periodYear = $request->get('period_year', date('Y'));
         $costReferenceId = $request->get('cost_reference_id');
         $tariffClassId = $request->get('tariff_class_id');
+        $category = $request->get('category');
         
         $query = ServiceVolume::where('hospital_id', hospital('id'))
             ->with(['costReference', 'tariffClass']);
@@ -39,6 +51,10 @@ class ServiceVolumeController extends Controller
             $query->where('tariff_class_id', $tariffClassId);
         }
         
+        if ($category) {
+            $query->where('category', $category);
+        }
+        
         if ($search) {
             $query->whereHas('costReference', function($q) use ($search) {
                 $q->where('service_code', 'LIKE', "%{$search}%")
@@ -50,16 +66,18 @@ class ServiceVolumeController extends Controller
         
         $costReferences = CostReference::where('hospital_id', hospital('id'))->orderBy('service_code')->get();
         $tariffClasses = TariffClass::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('name')->get();
+        $categoryOptions = self::CATEGORY_OPTIONS;
         
-        return view('service-volumes.index', compact('serviceVolumes', 'search', 'periodMonth', 'periodYear', 'costReferenceId', 'tariffClassId', 'costReferences', 'tariffClasses'));
+        return view('service-volumes.index', compact('serviceVolumes', 'search', 'periodMonth', 'periodYear', 'costReferenceId', 'tariffClassId', 'costReferences', 'tariffClasses', 'category', 'categoryOptions'));
     }
 
     public function create()
     {
         $costReferences = CostReference::where('hospital_id', hospital('id'))->orderBy('service_code')->get();
         $tariffClasses = TariffClass::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('name')->get();
+        $categoryOptions = self::CATEGORY_OPTIONS;
         
-        return view('service-volumes.create', compact('costReferences', 'tariffClasses'));
+        return view('service-volumes.create', compact('costReferences', 'tariffClasses', 'categoryOptions'));
     }
 
     public function store(Request $request)
@@ -69,6 +87,7 @@ class ServiceVolumeController extends Controller
             'period_year' => 'required|integer|min:2000|max:2100',
             'cost_reference_id' => 'required|exists:cost_references,id',
             'tariff_class_id' => 'nullable|exists:tariff_classes,id',
+            'category' => 'nullable|string|in:barang,tindakan_rj,tindakan_ri,laboratorium,radiologi,operasi,kamar',
             'total_quantity' => 'required|numeric|min:0',
         ]);
 
@@ -118,8 +137,9 @@ class ServiceVolumeController extends Controller
         
         $costReferences = CostReference::where('hospital_id', hospital('id'))->orderBy('service_code')->get();
         $tariffClasses = TariffClass::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('name')->get();
+        $categoryOptions = self::CATEGORY_OPTIONS;
         
-        return view('service-volumes.edit', compact('serviceVolume', 'costReferences', 'tariffClasses'));
+        return view('service-volumes.edit', compact('serviceVolume', 'costReferences', 'tariffClasses', 'categoryOptions'));
     }
 
     public function update(Request $request, ServiceVolume $serviceVolume)
@@ -133,6 +153,7 @@ class ServiceVolumeController extends Controller
             'period_year' => 'required|integer|min:2000|max:2100',
             'cost_reference_id' => 'required|exists:cost_references,id',
             'tariff_class_id' => 'nullable|exists:tariff_classes,id',
+            'category' => 'nullable|string|in:barang,tindakan_rj,tindakan_ri,laboratorium,radiologi,operasi,kamar',
             'total_quantity' => 'required|numeric|min:0',
         ]);
 

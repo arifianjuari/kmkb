@@ -39,6 +39,13 @@
                     {{ __('Export Excel') }}
                 </a>
                 @if(!auth()->user()?->isObserver())
+                <button
+                    x-data=""
+                    x-on:click.prevent="$dispatch('open-modal', 'import-allocation-driver-modal')"
+                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                >
+                    {{ __('Import Excel') }}
+                </button>
                 <a href="{{ route('allocation-drivers.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                     {{ __('Add New Allocation Driver') }}
                 </a>
@@ -76,6 +83,21 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('warning'))
+            <div class="mb-6 rounded-md bg-yellow-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-yellow-800">{{ session('warning') }}</p>
                     </div>
                 </div>
             </div>
@@ -177,6 +199,45 @@
             </div>
         </div>
     </div>
+
+    {{-- Import Modal --}}
+    <x-modal name="import-allocation-driver-modal" :show="false" focusable>
+        <div class="p-6">
+            <h2 class="text-lg font-medium text-gray-900">
+                {{ __('Import Allocation Drivers') }}
+            </h2>
+
+            <p class="mt-1 text-sm text-gray-600">
+                {{ __('Upload an Excel file to import allocation drivers. Existing records with the same Name will be updated.') }}
+            </p>
+
+            <div class="mt-4">
+                <a href="{{ route('allocation-drivers.template') }}" class="text-sm text-blue-600 hover:text-blue-900 underline">
+                    {{ __('Download Template') }}
+                </a>
+            </div>
+
+            <form method="POST" action="{{ route('allocation-drivers.import') }}" enctype="multipart/form-data" class="mt-6">
+                @csrf
+                
+                <div>
+                    <x-input-label for="file" :value="__('Excel File')" />
+                    <input id="file" class="block mt-1 w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" type="file" name="file" accept=".xlsx, .xls" required>
+                    <x-input-error :messages="$errors->get('file')" class="mt-2" />
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <x-secondary-button x-on:click="$dispatch('close')">
+                        {{ __('Cancel') }}
+                    </x-secondary-button>
+
+                    <x-primary-button class="ml-3">
+                        {{ __('Import') }}
+                    </x-primary-button>
+                </div>
+            </form>
+        </div>
+    </x-modal>
 </div>
 @endsection
 

@@ -16,6 +16,7 @@ class ServiceVolume extends Model
         'period_year',
         'cost_reference_id',
         'tariff_class_id',
+        'category',
         'total_quantity',
     ];
 

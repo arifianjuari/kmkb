@@ -31,12 +31,32 @@
                         </div>
                         
                         <div class="col-span-12 md:col-span-6">
-                            <label for="unit_measurement" class="block text-sm font-medium text-gray-700">{{ __('Unit Measurement') }} <span class="text-red-500">*</span></label>
+                            <label for="unit_of_measurement_id" class="block text-sm font-medium text-gray-700">{{ __('Unit Measurement') }} <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <input type="text" id="unit_measurement" name="unit_measurement" value="{{ old('unit_measurement', $allocationDriver->unit_measurement) }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
-                                @error('unit_measurement')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                @if(isset($uoms) && $uoms->count() > 0)
+                                    <select id="unit_of_measurement_id" name="unit_of_measurement_id" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                        <option value="">{{ __('Select Unit') }}</option>
+                                        @foreach($uoms as $uom)
+                                            <option value="{{ $uom->id }}" {{ old('unit_of_measurement_id', $allocationDriver->unit_of_measurement_id) == $uom->id ? 'selected' : '' }}>
+                                                {{ $uom->name }} ({{ $uom->symbol ?? $uom->code }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('unit_of_measurement_id')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    @if($allocationDriver->unit_measurement && !$allocationDriver->unit_of_measurement_id)
+                                        <p class="mt-1 text-xs text-yellow-600">Legacy: {{ $allocationDriver->unit_measurement }}</p>
+                                    @endif
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        <a href="{{ route('units-of-measurement.create') }}" class="text-biru-dongker-700 hover:underline" target="_blank">{{ __('+ Add new unit') }}</a>
+                                    </p>
+                                @else
+                                    <input type="text" id="unit_measurement" name="unit_measurement" value="{{ old('unit_measurement', $allocationDriver->unit_measurement) }}" required class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                    @error('unit_measurement')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                @endif
                             </div>
                         </div>
                         

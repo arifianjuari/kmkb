@@ -74,6 +74,7 @@ coverage/
 
 # Backup files
 *.bak
+/.backups/
 
 # IDE helper files
 _ide_helper.php

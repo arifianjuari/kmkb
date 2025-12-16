@@ -87,6 +87,21 @@
                                 @enderror
                             </div>
                         </div>
+
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="category" class="block text-sm font-medium text-gray-700">{{ __('Category (optional)') }}</label>
+                            <div class="mt-1">
+                                <select id="category" name="category" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                    <option value="">{{ __('Select Category') }}</option>
+                                    @foreach($categoryOptions as $value => $label)
+                                        <option value="{{ $value }}" {{ old('category') == $value ? 'selected' : '' }}>{{ __($label) }}</option>
+                                    @endforeach
+                                </select>
+                                @error('category')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mt-6">

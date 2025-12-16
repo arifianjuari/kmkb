@@ -22,6 +22,7 @@ class CostReference extends Model
         'selling_price_unit',
         'selling_price_total',
         'unit',
+        'unit_of_measurement_id',
         'source',
         'hospital_id',
         'simrs_kode_brng',
@@ -74,6 +75,25 @@ class CostReference extends Model
     public function expenseCategory()
     {
         return $this->belongsTo(ExpenseCategory::class);
+    }
+
+    /**
+     * Get the unit of measurement for this cost reference.
+     */
+    public function unitOfMeasurement()
+    {
+        return $this->belongsTo(UnitOfMeasurement::class);
+    }
+
+    /**
+     * Get the display unit (from UoM or legacy field).
+     */
+    public function getUnitDisplayAttribute()
+    {
+        if ($this->unitOfMeasurement) {
+            return $this->unitOfMeasurement->symbol ?? $this->unitOfMeasurement->name;
+        }
+        return $this->unit;
     }
 
     /**

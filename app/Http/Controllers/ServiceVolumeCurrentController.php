@@ -2095,6 +2095,128 @@ class ServiceVolumeCurrentController extends Controller
     }
 
     /**
+     * Sync selected tindakan rawat jalan from service volume current to service volumes
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncTindakanRawatJalanToServiceVolumes(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            $year = (int) $request->get('year', now()->year);
+            
+            if (empty($items)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No items provided for sync'
+                ], 400);
+            }
+            
+            // Check if user is authenticated
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ], 401);
+            }
+            
+            $user = auth()->user();
+            
+            // Check if user has hospital_id or a selected hospital context
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            if (!$hospitalId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User has no associated hospital'
+                ], 400);
+            }
+            
+            $syncedCount = 0;
+            $monthMap = [
+                'jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4,
+                'may' => 5, 'jun' => 6, 'jul' => 7, 'aug' => 8,
+                'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12
+            ];
+            
+            foreach ($items as $item) {
+                // Validate required fields
+                if (!isset($item['kode']) || !isset($item['nama'])) {
+                    Log::warning('Invalid item data for service volume sync', ['item' => $item]);
+                    continue;
+                }
+                
+                // First, ensure the item exists in cost references
+                $costReference = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)
+                    ->first();
+                
+                // Create cost reference if it doesn't exist
+                if (!$costReference) {
+                    $costReference = \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'] ?? 0,
+                        'standard_cost' => $item['harga'] ?? 0,
+                        'unit' => 'Tindakan',
+                        'source' => 'Service Volume Current - Tindakan Rawat Jalan',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'tindakan_rj',
+                    ]);
+                }
+                
+                // Sync monthly volumes
+                foreach ($monthMap as $monthKey => $monthNumber) {
+                    $volume = (int) ($item[$monthKey] ?? 0);
+                    
+                    if ($volume > 0) {
+                        // Check if service volume already exists for this period
+                        $existing = \App\Models\ServiceVolume::where('hospital_id', $hospitalId)
+                            ->where('cost_reference_id', $costReference->id)
+                            ->where('period_month', $monthNumber)
+                            ->where('period_year', $year)
+                            ->first();
+                        
+                        if ($existing) {
+                            // Update existing record
+                            $existing->update([
+                                'total_quantity' => $volume,
+                                'category' => 'tindakan_rj',
+                            ]);
+                        } else {
+                            // Create new record
+                            \App\Models\ServiceVolume::create([
+                                'hospital_id' => $hospitalId,
+                                'cost_reference_id' => $costReference->id,
+                                'period_month' => $monthNumber,
+                                'period_year' => $year,
+                                'total_quantity' => $volume,
+                                'category' => 'tindakan_rj',
+                            ]);
+                        }
+                        
+                        $syncedCount++;
+                    }
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount volume records successfully synced to service volumes"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing tindakan rawat jalan to service volumes: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error syncing data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Sync selected tindakan rawat inap from service volume current to cost references
      *
      * @param Request $request
@@ -2181,6 +2303,128 @@ class ServiceVolumeCurrentController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error syncing tindakan rawat inap from service volume: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error syncing data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Sync selected tindakan rawat inap from service volume current to service volumes
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncTindakanRawatInapToServiceVolumes(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            $year = (int) $request->get('year', now()->year);
+            
+            if (empty($items)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No items provided for sync'
+                ], 400);
+            }
+            
+            // Check if user is authenticated
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ], 401);
+            }
+            
+            $user = auth()->user();
+            
+            // Check if user has hospital_id or a selected hospital context
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            if (!$hospitalId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User has no associated hospital'
+                ], 400);
+            }
+            
+            $syncedCount = 0;
+            $monthMap = [
+                'jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4,
+                'may' => 5, 'jun' => 6, 'jul' => 7, 'aug' => 8,
+                'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12
+            ];
+            
+            foreach ($items as $item) {
+                // Validate required fields
+                if (!isset($item['kode']) || !isset($item['nama'])) {
+                    Log::warning('Invalid item data for service volume sync', ['item' => $item]);
+                    continue;
+                }
+                
+                // First, ensure the item exists in cost references
+                $costReference = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)
+                    ->first();
+                
+                // Create cost reference if it doesn't exist
+                if (!$costReference) {
+                    $costReference = \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'] ?? 0,
+                        'standard_cost' => $item['harga'] ?? 0,
+                        'unit' => 'Tindakan',
+                        'source' => 'Service Volume Current - Tindakan Rawat Inap',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'tindakan_ri',
+                    ]);
+                }
+                
+                // Sync monthly volumes
+                foreach ($monthMap as $monthKey => $monthNumber) {
+                    $volume = (int) ($item[$monthKey] ?? 0);
+                    
+                    if ($volume > 0) {
+                        // Check if service volume already exists for this period
+                        $existing = \App\Models\ServiceVolume::where('hospital_id', $hospitalId)
+                            ->where('cost_reference_id', $costReference->id)
+                            ->where('period_month', $monthNumber)
+                            ->where('period_year', $year)
+                            ->first();
+                        
+                        if ($existing) {
+                            // Update existing record
+                            $existing->update([
+                                'total_quantity' => $volume,
+                                'category' => 'tindakan_ri',
+                            ]);
+                        } else {
+                            // Create new record
+                            \App\Models\ServiceVolume::create([
+                                'hospital_id' => $hospitalId,
+                                'cost_reference_id' => $costReference->id,
+                                'period_month' => $monthNumber,
+                                'period_year' => $year,
+                                'total_quantity' => $volume,
+                                'category' => 'tindakan_ri',
+                            ]);
+                        }
+                        
+                        $syncedCount++;
+                    }
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount volume records successfully synced to service volumes"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing tindakan rawat inap to service volumes: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error syncing data: ' . $e->getMessage()
@@ -2849,6 +3093,396 @@ class ServiceVolumeCurrentController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error syncing kamar from service volume: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error syncing data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Sync selected laboratorium from service volume current to service volumes
+     */
+    public function syncLaboratoriumToServiceVolumes(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            $year = (int) $request->get('year', now()->year);
+            
+            if (empty($items)) {
+                return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
+            }
+            
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+            }
+            
+            $user = auth()->user();
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            
+            if (!$hospitalId) {
+                return response()->json(['success' => false, 'message' => 'User has no associated hospital'], 400);
+            }
+            
+            $syncedCount = 0;
+            $monthMap = [
+                'jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4,
+                'may' => 5, 'jun' => 6, 'jul' => 7, 'aug' => 8,
+                'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12
+            ];
+            
+            foreach ($items as $item) {
+                if (!isset($item['kode']) || !isset($item['nama'])) {
+                    Log::warning('Invalid item data for service volume sync (laboratorium)', ['item' => $item]);
+                    continue;
+                }
+                
+                // First, ensure the item exists in cost references
+                $costReference = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)
+                    ->first();
+                
+                if (!$costReference) {
+                    $costReference = \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'] ?? 0,
+                        'standard_cost' => $item['harga'] ?? 0,
+                        'unit' => 'Pemeriksaan',
+                        'source' => 'Service Volume Current - Laboratorium',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'laboratorium',
+                    ]);
+                }
+                
+                // Sync monthly volumes
+                foreach ($monthMap as $monthKey => $monthNumber) {
+                    $volume = (int) ($item[$monthKey] ?? 0);
+                    
+                    if ($volume > 0) {
+                        $existing = \App\Models\ServiceVolume::where('hospital_id', $hospitalId)
+                            ->where('cost_reference_id', $costReference->id)
+                            ->where('period_month', $monthNumber)
+                            ->where('period_year', $year)
+                            ->first();
+                        
+                        if ($existing) {
+                            $existing->update([
+                                'total_quantity' => $volume,
+                                'category' => 'laboratorium',
+                            ]);
+                        } else {
+                            \App\Models\ServiceVolume::create([
+                                'hospital_id' => $hospitalId,
+                                'cost_reference_id' => $costReference->id,
+                                'period_month' => $monthNumber,
+                                'period_year' => $year,
+                                'total_quantity' => $volume,
+                                'category' => 'laboratorium',
+                            ]);
+                        }
+                        $syncedCount++;
+                    }
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount volume records successfully synced to service volumes"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing laboratorium to service volumes: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error syncing data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Sync selected radiologi from service volume current to service volumes
+     */
+    public function syncRadiologiToServiceVolumes(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            $year = (int) $request->get('year', now()->year);
+            
+            if (empty($items)) {
+                return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
+            }
+            
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+            }
+            
+            $user = auth()->user();
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            
+            if (!$hospitalId) {
+                return response()->json(['success' => false, 'message' => 'User has no associated hospital'], 400);
+            }
+            
+            $syncedCount = 0;
+            $monthMap = [
+                'jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4,
+                'may' => 5, 'jun' => 6, 'jul' => 7, 'aug' => 8,
+                'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12
+            ];
+            
+            foreach ($items as $item) {
+                if (!isset($item['kode']) || !isset($item['nama'])) {
+                    Log::warning('Invalid item data for service volume sync (radiologi)', ['item' => $item]);
+                    continue;
+                }
+                
+                $costReference = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)
+                    ->first();
+                
+                if (!$costReference) {
+                    $costReference = \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'] ?? 0,
+                        'standard_cost' => $item['harga'] ?? 0,
+                        'unit' => 'Pemeriksaan',
+                        'source' => 'Service Volume Current - Radiologi',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'radiologi',
+                    ]);
+                }
+                
+                foreach ($monthMap as $monthKey => $monthNumber) {
+                    $volume = (int) ($item[$monthKey] ?? 0);
+                    
+                    if ($volume > 0) {
+                        $existing = \App\Models\ServiceVolume::where('hospital_id', $hospitalId)
+                            ->where('cost_reference_id', $costReference->id)
+                            ->where('period_month', $monthNumber)
+                            ->where('period_year', $year)
+                            ->first();
+                        
+                        if ($existing) {
+                            $existing->update([
+                                'total_quantity' => $volume,
+                                'category' => 'radiologi',
+                            ]);
+                        } else {
+                            \App\Models\ServiceVolume::create([
+                                'hospital_id' => $hospitalId,
+                                'cost_reference_id' => $costReference->id,
+                                'period_month' => $monthNumber,
+                                'period_year' => $year,
+                                'total_quantity' => $volume,
+                                'category' => 'radiologi',
+                            ]);
+                        }
+                        $syncedCount++;
+                    }
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount volume records successfully synced to service volumes"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing radiologi to service volumes: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error syncing data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Sync selected operasi from service volume current to service volumes
+     */
+    public function syncOperasiToServiceVolumes(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            $year = (int) $request->get('year', now()->year);
+            
+            if (empty($items)) {
+                return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
+            }
+            
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+            }
+            
+            $user = auth()->user();
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            
+            if (!$hospitalId) {
+                return response()->json(['success' => false, 'message' => 'User has no associated hospital'], 400);
+            }
+            
+            $syncedCount = 0;
+            $monthMap = [
+                'jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4,
+                'may' => 5, 'jun' => 6, 'jul' => 7, 'aug' => 8,
+                'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12
+            ];
+            
+            foreach ($items as $item) {
+                if (!isset($item['kode']) || !isset($item['nama'])) {
+                    Log::warning('Invalid item data for service volume sync (operasi)', ['item' => $item]);
+                    continue;
+                }
+                
+                $costReference = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)
+                    ->first();
+                
+                if (!$costReference) {
+                    $costReference = \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'] ?? 0,
+                        'standard_cost' => $item['harga'] ?? 0,
+                        'unit' => 'Tindakan',
+                        'source' => 'Service Volume Current - Operasi',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'operasi',
+                    ]);
+                }
+                
+                foreach ($monthMap as $monthKey => $monthNumber) {
+                    $volume = (int) ($item[$monthKey] ?? 0);
+                    
+                    if ($volume > 0) {
+                        $existing = \App\Models\ServiceVolume::where('hospital_id', $hospitalId)
+                            ->where('cost_reference_id', $costReference->id)
+                            ->where('period_month', $monthNumber)
+                            ->where('period_year', $year)
+                            ->first();
+                        
+                        if ($existing) {
+                            $existing->update([
+                                'total_quantity' => $volume,
+                                'category' => 'operasi',
+                            ]);
+                        } else {
+                            \App\Models\ServiceVolume::create([
+                                'hospital_id' => $hospitalId,
+                                'cost_reference_id' => $costReference->id,
+                                'period_month' => $monthNumber,
+                                'period_year' => $year,
+                                'total_quantity' => $volume,
+                                'category' => 'operasi',
+                            ]);
+                        }
+                        $syncedCount++;
+                    }
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount volume records successfully synced to service volumes"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing operasi to service volumes: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error syncing data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Sync selected kamar from service volume current to service volumes
+     */
+    public function syncKamarToServiceVolumes(Request $request)
+    {
+        try {
+            $items = $request->get('items', []);
+            $year = (int) $request->get('year', now()->year);
+            
+            if (empty($items)) {
+                return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
+            }
+            
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+            }
+            
+            $user = auth()->user();
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            
+            if (!$hospitalId) {
+                return response()->json(['success' => false, 'message' => 'User has no associated hospital'], 400);
+            }
+            
+            $syncedCount = 0;
+            $monthMap = [
+                'jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4,
+                'may' => 5, 'jun' => 6, 'jul' => 7, 'aug' => 8,
+                'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12
+            ];
+            
+            foreach ($items as $item) {
+                if (!isset($item['kode']) || !isset($item['nama'])) {
+                    Log::warning('Invalid item data for service volume sync (kamar)', ['item' => $item]);
+                    continue;
+                }
+                
+                $costReference = \App\Models\CostReference::where('service_code', $item['kode'])
+                    ->where('hospital_id', $hospitalId)
+                    ->first();
+                
+                if (!$costReference) {
+                    $costReference = \App\Models\CostReference::create([
+                        'service_code' => $item['kode'],
+                        'service_description' => $item['nama'],
+                        'purchase_price' => $item['harga'] ?? 0,
+                        'standard_cost' => $item['harga'] ?? 0,
+                        'unit' => 'Hari',
+                        'source' => 'Service Volume Current - Kamar',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'kamar',
+                    ]);
+                }
+                
+                foreach ($monthMap as $monthKey => $monthNumber) {
+                    $volume = (int) ($item[$monthKey] ?? 0);
+                    
+                    if ($volume > 0) {
+                        $existing = \App\Models\ServiceVolume::where('hospital_id', $hospitalId)
+                            ->where('cost_reference_id', $costReference->id)
+                            ->where('period_month', $monthNumber)
+                            ->where('period_year', $year)
+                            ->first();
+                        
+                        if ($existing) {
+                            $existing->update([
+                                'total_quantity' => $volume,
+                                'category' => 'kamar',
+                            ]);
+                        } else {
+                            \App\Models\ServiceVolume::create([
+                                'hospital_id' => $hospitalId,
+                                'cost_reference_id' => $costReference->id,
+                                'period_month' => $monthNumber,
+                                'period_year' => $year,
+                                'total_quantity' => $volume,
+                                'category' => 'kamar',
+                            ]);
+                        }
+                        $syncedCount++;
+                    }
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount volume records successfully synced to service volumes"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing kamar to service volumes: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Error syncing data: ' . $e->getMessage()], 500);
         }
     }

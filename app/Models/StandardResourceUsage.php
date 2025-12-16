@@ -24,6 +24,7 @@ class StandardResourceUsage extends Model
         'bmhp_id',
         'quantity',
         'unit',
+        'unit_of_measurement_id',
         'notes',
         'is_active',
         'created_by',
@@ -80,6 +81,25 @@ class StandardResourceUsage extends Model
     public function updater()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Get the unit of measurement for this standard resource usage.
+     */
+    public function unitOfMeasurement()
+    {
+        return $this->belongsTo(UnitOfMeasurement::class);
+    }
+
+    /**
+     * Get the display unit (from UoM or legacy field).
+     */
+    public function getUnitDisplayAttribute()
+    {
+        if ($this->unitOfMeasurement) {
+            return $this->unitOfMeasurement->symbol ?? $this->unitOfMeasurement->name;
+        }
+        return $this->unit;
     }
 
     /**

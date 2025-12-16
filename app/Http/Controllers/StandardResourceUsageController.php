@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StandardResourceUsage;
 use App\Models\CostReference;
+use App\Models\UnitOfMeasurement;
 use App\Http\Requests\StoreStandardResourceUsageRequest;
 use App\Http\Requests\UpdateStandardResourceUsageRequest;
 use Illuminate\Http\Request;
@@ -171,6 +172,11 @@ class StandardResourceUsageController extends Controller
             ->orderBy('service_description')
             ->get();
 
+        $uoms = UnitOfMeasurement::where('hospital_id', $hospitalId)
+            ->active()
+            ->orderBy('name')
+            ->get();
+
         return view('setup.service-catalog.standard-resource-usages.form', [
             'isEditMode' => false,
             'serviceId' => null,
@@ -183,6 +189,7 @@ class StandardResourceUsageController extends Controller
             'bmhpItems' => [],
             'services' => $services,
             'bmhpList' => $bmhpList,
+            'uoms' => $uoms,
         ]);
     }
 
@@ -299,6 +306,7 @@ class StandardResourceUsageController extends Controller
                 'bmhp_id' => $item->bmhp_id,
                 'quantity' => $item->quantity,
                 'unit' => $item->unit,
+                'unit_of_measurement_id' => $item->unit_of_measurement_id,
             ];
         }
 
@@ -554,7 +562,7 @@ class StandardResourceUsageController extends Controller
                     $bmhpCode,
                     $bmhpName,
                     (float) $item->quantity,
-                    $item->unit,
+                    $item->unitDisplay,
                     (float) $bmhpPrice,
                     (float) $totalCost,
                     $status,

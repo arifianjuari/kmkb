@@ -149,20 +149,38 @@
                                                     <input type="number" name="bmhp_items[{{ $index }}][quantity]" value="{{ $item['quantity'] }}" min="0.01" step="0.01" required class="bmhp-quantity block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-500 focus:ring-biru-dongker-500 sm:text-sm" onchange="calculateRowTotal(this)">
                                                 </td>
                                                 <td class="px-4 py-3 whitespace-nowrap">
-                                                    <input type="text" name="bmhp_items[{{ $index }}][unit]" value="{{ $item['unit'] }}" list="unit-suggestions-{{ $index }}" maxlength="50" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-500 focus:ring-biru-dongker-500 sm:text-sm">
-                                                    <datalist id="unit-suggestions-{{ $index }}">
-                                                        <option value="pcs">
-                                                        <option value="ml">
-                                                        <option value="mg">
-                                                        <option value="gr">
-                                                        <option value="kg">
-                                                        <option value="unit">
-                                                        <option value="botol">
-                                                        <option value="vial">
-                                                        <option value="ampul">
-                                                        <option value="tablet">
-                                                        <option value="kapsul">
-                                                    </datalist>
+                                                    @if($uoms->count() > 0)
+                                                        <select name="bmhp_items[{{ $index }}][unit_of_measurement_id]" id="unit-select-{{ $index }}" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-500 focus:ring-biru-dongker-500 sm:text-sm" required>
+                                                            <option value="">-- Pilih Satuan --</option>
+                                                            @foreach($uoms as $uom)
+                                                                <option value="{{ $uom->id }}" {{ ($item['unit_of_measurement_id'] ?? '') == $uom->id ? 'selected' : '' }}>
+                                                                    {{ $uom->name }} ({{ $uom->symbol }})
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        <div class="mt-2" style="display: none;">
+                                                            <label for="unit-input-{{ $index }}" class="block text-xs text-gray-500">Manual Input (jika tidak ada di list):</label>
+                                                            <input type="text" id="unit-input-{{ $index }}" name="bmhp_items[{{ $index }}][unit]" value="{{ $item['unit'] }}" maxlength="50" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-500 focus:ring-biru-dongker-500 sm:text-sm mt-1">
+                                                        </div>
+                                                        <a href="{{ route('units-of-measurement.create') }}" target="_blank" class="text-xs text-biru-dongker-600 hover:text-biru-dongker-800 mt-1 inline-block">
+                                                            + Tambah Satuan Baru
+                                                        </a>
+                                                    @else
+                                                        <input type="text" name="bmhp_items[{{ $index }}][unit]" value="{{ $item['unit'] }}" list="unit-suggestions-{{ $index }}" maxlength="50" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-500 focus:ring-biru-dongker-500 sm:text-sm">
+                                                        <datalist id="unit-suggestions-{{ $index }}">
+                                                            <option value="pcs">
+                                                            <option value="ml">
+                                                            <option value="mg">
+                                                            <option value="gr">
+                                                            <option value="kg">
+                                                            <option value="unit">
+                                                            <option value="botol">
+                                                            <option value="vial">
+                                                            <option value="ampul">
+                                                            <option value="tablet">
+                                                            <option value="kapsul">
+                                                        </datalist>
+                                                    @endif
                                                 </td>
                                                 <td class="px-4 py-3 whitespace-nowrap text-right">
                                                     <span class="row-total font-semibold text-gray-900">Rp 0</span>
@@ -199,20 +217,38 @@
                                                 <input type="number" name="bmhp_items[0][quantity]" value="1" min="0.01" step="0.01" class="bmhp-quantity block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-500 focus:ring-biru-dongker-500 sm:text-sm" onchange="calculateRowTotal(this)">
                                             </td>
                                             <td class="px-4 py-3 whitespace-nowrap">
-                                                <input type="text" name="bmhp_items[0][unit]" value="pcs" list="unit-suggestions-0" maxlength="50" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-500 focus:ring-biru-dongker-500 sm:text-sm">
-                                                <datalist id="unit-suggestions-0">
-                                                    <option value="pcs">
-                                                    <option value="ml">
-                                                    <option value="mg">
-                                                    <option value="gr">
-                                                    <option value="kg">
-                                                    <option value="unit">
-                                                    <option value="botol">
-                                                    <option value="vial">
-                                                    <option value="ampul">
-                                                    <option value="tablet">
-                                                    <option value="kapsul">
-                                                </datalist>
+                                                @if($uoms->count() > 0)
+                                                    <select name="bmhp_items[0][unit_of_measurement_id]" class="unit-select block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-500 focus:ring-biru-dongker-500 sm:text-sm" required>
+                                                        <option value="">-- Pilih Satuan --</option>
+                                                        @foreach($uoms as $uom)
+                                                            <option value="{{ $uom->id }}">
+                                                                {{ $uom->name }} ({{ $uom->symbol }})
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    
+                                                    <!-- Fallback text input (hidden by default unless JS logic changes or used as backup) -->
+                                                    <input type="text" name="bmhp_items[0][unit]" class="unit-input hidden w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-500 focus:ring-biru-dongker-500 sm:text-sm mt-1" placeholder="Manual unit" maxlength="50">
+                                                    
+                                                    <a href="{{ route('units-of-measurement.create') }}" target="_blank" class="text-xs text-biru-dongker-600 hover:text-biru-dongker-800 mt-1 inline-block">
+                                                        + Tambah Satuan Baru
+                                                    </a>
+                                                @else
+                                                    <input type="text" name="bmhp_items[0][unit]" value="pcs" list="unit-suggestions-0" maxlength="50" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-500 focus:ring-biru-dongker-500 sm:text-sm">
+                                                    <datalist id="unit-suggestions-0">
+                                                        <option value="pcs">
+                                                        <option value="ml">
+                                                        <option value="mg">
+                                                        <option value="gr">
+                                                        <option value="kg">
+                                                        <option value="unit">
+                                                        <option value="botol">
+                                                        <option value="vial">
+                                                        <option value="ampul">
+                                                        <option value="tablet">
+                                                        <option value="kapsul">
+                                                    </datalist>
+                                                @endif
                                             </td>
                                             <td class="px-4 py-3 whitespace-nowrap text-right">
                                                 <span class="row-total font-semibold text-gray-900">Rp 0</span>
@@ -308,7 +344,7 @@ function addBmhpRow() {
         }
     });
 
-    // Update datalist id
+    // Update datalist id if exists
     const datalist = newRow.querySelector('datalist');
     if (datalist) {
         datalist.id = `unit-suggestions-${rowIndexCounter}`;
@@ -316,6 +352,12 @@ function addBmhpRow() {
         if (unitInput) {
             unitInput.setAttribute('list', `unit-suggestions-${rowIndexCounter}`);
         }
+    }
+    
+    // Reset selections for new row
+    const uomSelect = newRow.querySelector('select[name*="[unit_of_measurement_id]"]');
+    if (uomSelect) {
+        uomSelect.selectedIndex = 0;
     }
 
     // Reset values

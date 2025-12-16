@@ -19,6 +19,7 @@ class AllocationDriver extends Model
         'hospital_id',
         'name',
         'unit_measurement',
+        'unit_of_measurement_id',
         'description',
         'is_static',
     ];
@@ -35,6 +36,14 @@ class AllocationDriver extends Model
     ];
 
     /**
+     * Get the unit of measurement for this allocation driver.
+     */
+    public function unitOfMeasurement()
+    {
+        return $this->belongsTo(UnitOfMeasurement::class);
+    }
+
+    /**
      * Get the driver statistics for this allocation driver.
      */
     public function driverStatistics()
@@ -48,6 +57,17 @@ class AllocationDriver extends Model
     public function allocationMaps()
     {
         return $this->hasMany(AllocationMap::class);
+    }
+
+    /**
+     * Get the display unit (from UoM or legacy field).
+     */
+    public function getUnitDisplayAttribute()
+    {
+        if ($this->unitOfMeasurement) {
+            return $this->unitOfMeasurement->symbol ?? $this->unitOfMeasurement->name;
+        }
+        return $this->unit_measurement;
     }
 }
 
