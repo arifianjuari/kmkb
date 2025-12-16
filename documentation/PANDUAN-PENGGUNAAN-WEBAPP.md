@@ -670,29 +670,352 @@ Pemahaman fundamental yang solid tentang terminologi dan konsep dasar akuntansi 
 
 ### Modul 2: Cost Center Rumah Sakit
 
-**🎯 Tujuan:**
-Mampu mengidentifikasi unit layanan sebagai cost center.
+**🎯 Tujuan Pembelajaran:**
+Mampu mengidentifikasi, mengklasifikasikan, dan mendesain struktur cost center yang selaras dengan organisasi rumah sakit untuk keperluan akumulasi dan alokasi biaya.
 
-**📘 Materi:**
-- **Support/Overhead**: Administrasi, Keuangan, SDM, Laundry, CSSD, IPSRS, IT, Gizi
-- **Intermediate/Penunjang**: Lab, Radiologi, Farmasi, Kamar Bedah
-- **Revenue Center**: IGD, Poliklinik, Rawat Inap, OK
+---
 
-**🛠 Aktivitas di Webapp:**
+#### 2.1. Pengertian Cost Center
 
-| Langkah | Menu | Aksi |
-|---------|------|------|
-| 1 | `Master Data → Cost Centers` | Klik **Add New** |
-| 2 | Form | Isi kode, nama, tipe (`support`/`revenue`) |
-| 3 | Form | Isi building, floor, division jika perlu |
-| 4 | Form | Pilih parent (untuk hierarki) |
-| 5 | - | Simpan |
+**Definisi:**
+> **Cost Center** (Pusat Biaya) adalah unit organisasi, aktivitas, atau lokasi di mana biaya dikumpulkan, diukur, dan dikendalikan. Setiap cost center memiliki manajer/penanggungjawab yang accountable terhadap penggunaan sumber daya di unitnya.
 
-**📤 Output:**
-Struktur cost center siap dipakai untuk alokasi.
+**Karakteristik Cost Center:**
 
-**Sumber Data:** Struktur organisasi, bagan unit kerja  
-**Pemilik Data:** Direksi / Keuangan / SDM
+| Aspek | Deskripsi |
+|-------|-----------|
+| **Identitas** | Memiliki kode dan nama unik |
+| **Batasan** | Jelas secara organisasi atau fisik |
+| **Akuntabilitas** | Ada penanggung jawab/manajer |
+| **Measurable** | Aktivitas dan output dapat diukur |
+| **Cost Accumulation** | Tempat biaya dikumpulkan |
+
+**Mengapa Cost Center Penting?**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    FUNGSI COST CENTER                           │
+├─────────────────────────────────────────────────────────────────┤
+│  1. AKUMULASI BIAYA                                             │
+│     └── Mengumpulkan semua biaya yang terjadi di unit tersebut  │
+│                                                                 │
+│  2. PENGENDALIAN BIAYA                                          │
+│     └── Membandingkan realisasi vs anggaran per unit            │
+│                                                                 │
+│  3. ALOKASI BIAYA                                               │
+│     └── Sebagai source/target dalam proses cost allocation      │
+│                                                                 │
+│  4. PERHITUNGAN UNIT COST                                       │
+│     └── Basis untuk menghitung biaya per layanan                │
+│                                                                 │
+│  5. PELAPORAN MANAJERIAL                                        │
+│     └── Laporan kinerja per unit/departemen                     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 2.2. Klasifikasi Cost Center di Rumah Sakit
+
+Berdasarkan **fungsi dan karakteristik pendapatan**, cost center rumah sakit diklasifikasikan menjadi tiga kategori utama:
+
+##### a) Revenue Center (Pusat Pendapatan)
+
+**Definisi:**
+> Cost center yang **menghasilkan pendapatan langsung** dari layanan kepada pasien. Layanan ini dapat ditagihkan (billable) dan memiliki tarif.
+
+**Karakteristik:**
+- Berinteraksi langsung dengan pasien
+- Memiliki tarif layanan
+- Output dapat diukur (kunjungan, hari rawat, tindakan)
+- Menjadi **target akhir** alokasi biaya (final cost centre)
+
+**Contoh Revenue Center:**
+
+| Kategori | Unit | Satuan Output |
+|----------|------|---------------|
+| **Rawat Jalan** | Poliklinik Umum, Spesialis | Kunjungan (visit) |
+| **Rawat Inap** | Bangsal per Kelas, ICU, NICU, HCU | Hari rawat (patient-day) |
+| **Gawat Darurat** | IGD, Triage | Kunjungan |
+| **Kamar Operasi** | OK Mayor, OK Minor, OK Cito | Jumlah operasi |
+| **Penunjang Klinis** | Lab, Radiologi, Rehabilitasi Medik | Jumlah pemeriksaan |
+
+##### b) Support Center / Overhead Center (Pusat Pendukung)
+
+**Definisi:**
+> Cost center yang **tidak menghasilkan pendapatan langsung** tetapi menyediakan layanan pendukung untuk operasional rumah sakit secara keseluruhan.
+
+**Karakteristik:**
+- Tidak berinteraksi langsung dengan pasien dalam konteks klinis
+- Tidak memiliki tarif kepada pasien
+- Biayanya **dialokasikan** ke revenue center
+- Menjadi **source** dalam proses step-down allocation
+
+**Contoh Support Center:**
+
+| Kategori | Unit | Layanan yang Diberikan |
+|----------|------|------------------------|
+| **Administrasi Umum** | Direksi, Sekretariat | Manajemen, koordinasi |
+| **Keuangan** | Akuntansi, Kasir, Penagihan | Pengelolaan keuangan |
+| **SDM** | HRD, Diklat | Pengelolaan pegawai |
+| **Logistik** | Gudang, Pengadaan | Pengelolaan barang |
+| **Rumah Tangga** | Housekeeping, Laundry, Keamanan | Kebersihan, keamanan |
+| **Pemeliharaan** | IPSRS, IPAL | Maintenance gedung & alat |
+| **IT** | Sistem Informasi | Pengelolaan TI |
+| **Gizi** | Instalasi Gizi | Makanan pasien & pegawai |
+
+##### c) Intermediate Center (Pusat Penunjang Klinis)
+
+**Definisi:**
+> Cost center yang menyediakan **layanan klinis penunjang** yang dapat diperlakukan sebagai:
+> - **Final product** → dihitung unit cost tersendiri, ATAU
+> - **Intermediate** → biayanya dialokasikan ke rawat inap/jalan
+
+**Karakteristik:**
+- Berinteraksi dengan pasien tetapi bukan layanan utama
+- Memiliki tarif (jika sebagai final product)
+- Fleksibel: bisa sebagai penghasil pendapatan atau cost pool yang dialokasikan
+
+**Contoh Intermediate Center:**
+
+| Unit | Sebagai Final Product | Sebagai Intermediate |
+|------|----------------------|---------------------|
+| **Laboratorium** | Unit cost per tes lab | Biaya lab masuk ke unit cost rawat inap |
+| **Radiologi** | Unit cost per pemeriksaan | Biaya imaging masuk ke unit cost rawat jalan |
+| **Farmasi** | Unit cost per resep | Biaya farmasi dialokasikan ke layanan klinis |
+| **CSSD** | Unit cost per set steril | Biaya CSSD dialokasikan ke OK, rawat inap |
+
+> [!IMPORTANT]
+> **Keputusan Desain:** Tentukan di awal apakah unit penunjang diperlakukan sebagai final product atau intermediate. Keputusan ini mempengaruhi setup **Allocation Maps** dan hasil unit cost.
+
+---
+
+#### 2.3. Visualisasi Alur Biaya Antar Cost Center
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        ALUR BIAYA RUMAH SAKIT                           │
+│                         (Step-Down Method)                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  LAYER 1: OVERHEAD / SUPPORT                                            │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
+│  │Administrasi│ │ Keuangan │ │   SDM    │ │ Laundry  │ │   Gizi   │      │
+│  └─────┬────┘ └─────┬────┘ └─────┬────┘ └─────┬────┘ └─────┬────┘       │
+│        │            │            │            │            │            │
+│        ▼            ▼            ▼            ▼            ▼            │
+│  ══════════════════════════════════════════════════════════════════     │
+│                          ALOKASI STEP 1-5                               │
+│  ══════════════════════════════════════════════════════════════════     │
+│        │            │            │            │            │            │
+│        ▼            ▼            ▼            ▼            ▼            │
+│  LAYER 2: INTERMEDIATE (Opsional sebagai final)                         │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐                    │
+│  │   Lab    │ │ Radiologi│ │  Farmasi │ │   CSSD   │                    │
+│  └─────┬────┘ └─────┬────┘ └─────┬────┘ └─────┬────┘                    │
+│        │            │            │            │                         │
+│        ▼            ▼            ▼            ▼                         │
+│  ══════════════════════════════════════════════════════════════════     │
+│                     ALOKASI STEP 6-8 (jika intermediate)                │
+│  ══════════════════════════════════════════════════════════════════     │
+│        │            │            │            │                         │
+│        ▼            ▼            ▼            ▼                         │
+│  LAYER 3: REVENUE CENTER (Final Cost Centre)                            │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
+│  │   IGD    │ │Rawat Jalan│ │Rawat Inap│ │    OK    │ │   VK     │      │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
+│                                                                         │
+│  ─────────────────────────────────────────────────────────────────      │
+│  OUTPUT: Total Cost per Revenue Center → Unit Cost per Layanan          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 2.4. Hierarki Cost Center
+
+Dalam praktik, cost center dapat disusun secara **hierarkis** (parent-child) untuk kebutuhan:
+- **Agregasi pelaporan**: Lihat total biaya per direktorat/divisi
+- **Drill-down analysis**: Detail biaya per sub-unit
+- **Fleksibilitas alokasi**: Alokasi ke parent atau child
+
+**Contoh Hierarki:**
+
+```
+Rumah Sakit XYZ (Root)
+├── Direktorat Pelayanan Medis
+│   ├── Instalasi Rawat Jalan
+│   │   ├── Poliklinik Umum
+│   │   ├── Poliklinik Penyakit Dalam
+│   │   ├── Poliklinik Bedah
+│   │   └── Poliklinik Anak
+│   ├── Instalasi Rawat Inap
+│   │   ├── Bangsal VIP
+│   │   ├── Bangsal Kelas 1
+│   │   ├── Bangsal Kelas 2
+│   │   ├── Bangsal Kelas 3
+│   │   └── ICU
+│   └── Instalasi Gawat Darurat
+│       └── IGD
+├── Direktorat Penunjang Medis
+│   ├── Instalasi Laboratorium
+│   │   ├── Lab Klinik
+│   │   └── Lab Patologi Anatomi
+│   ├── Instalasi Radiologi
+│   │   ├── X-Ray
+│   │   ├── CT-Scan
+│   │   └── MRI
+│   └── Instalasi Farmasi
+└── Direktorat Umum & Keuangan
+    ├── Bagian Keuangan
+    ├── Bagian SDM
+    ├── Bagian Umum
+    │   ├── Housekeeping
+    │   ├── Laundry
+    │   └── Keamanan
+    └── Bagian IT
+```
+
+**Implementasi di Webapp:**
+- Field `Parent` pada form Cost Center memungkinkan pembuatan hierarki
+- Hierarki ditampilkan di halaman index dengan indentasi
+
+---
+
+#### 2.5. Atribut Cost Center di Webapp KMKB
+
+Setiap cost center di webapp memiliki atribut berikut:
+
+| Atribut | Deskripsi | Contoh | Kegunaan |
+|---------|-----------|--------|----------|
+| **Kode** | Identifikasi unik | `CC-RI-VIP-01` | Referensi di laporan, import |
+| **Nama** | Nama lengkap unit | `Rawat Inap VIP` | Display, navigasi |
+| **Tipe** | Klasifikasi | `revenue` atau `support` | Logika alokasi |
+| **Building** | Gedung lokasi | `Gedung A` | Grouping, alokasi utilitas |
+| **Floor** | Lantai | `Lantai 2` | Alokasi kebersihan, listrik |
+| **Division** | Divisi/Direktorat | `Pelayanan Medis` | Struktur organisasi |
+| **Parent** | Induk hierarki | `Instalasi Rawat Inap` | Agregasi laporan |
+
+**Kode Penamaan yang Disarankan:**
+
+```
+Format: [PREFIX]-[KATEGORI]-[SUBKATEGORI]-[NOMOR]
+
+Contoh:
+├── CC-ADM-KEU-01    → Cost Center Administrasi Keuangan
+├── CC-SUP-LDR-01    → Cost Center Support Laundry
+├── CC-INT-LAB-01    → Cost Center Intermediate Lab Klinik
+├── CC-REV-RJ-01     → Cost Center Revenue Rawat Jalan Umum
+└── CC-REV-RI-VIP    → Cost Center Revenue Rawat Inap VIP
+```
+
+---
+
+#### 2.6. Best Practices Desain Cost Center
+
+| No | Prinsip | Penjelasan | ✅ Do | ❌ Don't |
+|----|---------|------------|-------|---------|
+| 1 | **Selaras dengan Organisasi** | Cost center mengikuti struktur organisasi RS | Satu unit kerja = satu cost center | Cost center tidak jelas siapa penanggungjawabnya |
+| 2 | **Granularitas Sesuai Kebutuhan** | Detail cukup untuk analisis yang diinginkan | Pisah bangsal per kelas jika perlu analisis per kelas | Terlalu detail tanpa kebutuhan analisis jelas |
+| 3 | **Konsistensi Sepanjang Periode** | Struktur tidak berubah-ubah | Pertahankan struktur selama periode analisis | Mengubah struktur setiap bulan |
+| 4 | **Measurable Output** | Ada ukuran output yang jelas | Revenue center punya satuan output | Cost center tanpa cara mengukur aktivitasnya |
+| 5 | **Dokumentasi Keputusan** | Catat alasan desain cost center | Simpan di Knowledge References | Tidak ada dokumentasi mengapa struktur dipilih |
+
+---
+
+#### 2.7. Menentukan Jumlah Cost Center yang Tepat
+
+**Faktor Pertimbangan:**
+
+| Aspek | Pertanyaan | Implikasi |
+|-------|------------|-----------|
+| **Tujuan Analisis** | Apakah perlu analisis per bangsal? | Jika ya → pisahkan per bangsal |
+| **Ketersediaan Data** | Apakah GL tersedia per sub-unit? | Jika tidak → gabungkan unit |
+| **Kapasitas Tim** | Berapa banyak data yang bisa dikelola? | Lebih detail = lebih banyak input |
+| **Benchmarking** | Apakah akan dibandingkan dengan RS lain? | Standarisasi struktur antar RS |
+
+**Rekomendasi Jumlah:**
+
+| Ukuran RS | Jumlah Cost Center | Keterangan |
+|-----------|-------------------|------------|
+| RS Tipe D (< 100 bed) | 15-25 | Agregasi layanan sejenis |
+| RS Tipe C (100-200 bed) | 25-40 | Detail moderat |
+| RS Tipe B (200-400 bed) | 40-60 | Detail per sub-instalasi |
+| RS Tipe A (> 400 bed) | 60-100+ | Detail per bangsal/poliklinik |
+
+---
+
+#### 🛠 Aktivitas Praktik di Webapp
+
+**Tujuan:** Membuat struktur cost center yang lengkap dan terorganisir.
+
+##### Langkah 1: Persiapan Data
+
+| No | Data yang Diperlukan | Sumber | Pemilik Data |
+|----|---------------------|--------|--------------|
+| 1 | Struktur organisasi RS | SK Direksi | Sekretariat/SDM |
+| 2 | Daftar unit kerja | Bagan organisasi | SDM |
+| 3 | Denah gedung & lantai | Sarpras | Bagian Umum |
+| 4 | Daftar layanan per unit | SIMRS | IT/Rekam Medis |
+
+##### Langkah 2: Mapping Organisasi → Cost Center
+
+| Struktur Organisasi | Cost Center | Tipe |
+|--------------------|-------------|------|
+| Direktorat Umum | → | `support` (parent) |
+| ├── Bagian Keuangan | → CC-SUP-KEU | `support` |
+| ├── Bagian SDM | → CC-SUP-SDM | `support` |
+| Direktorat Medis | → | `revenue` (parent) |
+| ├── Instalasi Rawat Jalan | → CC-REV-RJ | `revenue` |
+| ├── Instalasi Rawat Inap | → | `revenue` (parent) |
+| │   ├── Bangsal VIP | → CC-REV-RI-VIP | `revenue` |
+| │   ├── Bangsal Kelas 1 | → CC-REV-RI-K1 | `revenue` |
+
+##### Langkah 3: Input di Webapp
+
+| Langkah | Menu | Aksi | Tips |
+|---------|------|------|------|
+| 1 | `Master Data → Cost Centers` | Klik **Add New** | Mulai dari support centers |
+| 2 | Form → Kode | Isi kode unik | Gunakan format standar |
+| 3 | Form → Nama | Isi nama lengkap | Sesuai nama resmi unit |
+| 4 | Form → Tipe | Pilih `support` atau `revenue` | Support = tidak ada tarif |
+| 5 | Form → Building/Floor | Isi lokasi | Berguna untuk alokasi utilitas |
+| 6 | Form → Division | Isi divisi/direktorat | Untuk grouping laporan |
+| 7 | Form → Parent | Pilih induk (jika sub-unit) | Biarkan kosong untuk top-level |
+| 8 | - | Klik **Simpan** | Ulangi untuk semua unit |
+
+##### Langkah 4: Validasi Struktur
+
+| Checklist | ✓ |
+|-----------|---|
+| Semua unit kerja sudah ada cost center-nya | ☐ |
+| Revenue centers memiliki layanan/tarif | ☐ |
+| Hierarki parent-child sudah benar | ☐ |
+| Tidak ada duplikasi kode | ☐ |
+| Building/Floor terisi untuk kebutuhan alokasi | ☐ |
+
+---
+
+#### 📤 Output Modul
+
+Setelah menyelesaikan modul ini, Anda akan memiliki:
+
+1. **Struktur cost center lengkap** yang mencerminkan organisasi RS
+2. **Klasifikasi jelas** antara support dan revenue center
+3. **Hierarki terorganisir** untuk agregasi dan drill-down
+4. **Dokumentasi** keputusan desain cost center
+5. **Fondasi siap** untuk proses alokasi dan perhitungan unit cost
+
+**Checklist Pemahaman:**
+- [ ] Saya memahami perbedaan revenue, support, dan intermediate center
+- [ ] Saya dapat mendesain hierarki cost center sesuai struktur organisasi
+- [ ] Saya mengerti atribut-atribut cost center di webapp
+- [ ] Saya memahami pertimbangan granularitas cost center
+
+---
+
+**Sumber Data:** Struktur organisasi, bagan unit kerja, denah gedung  
+**Pemilik Data:** Direksi / Keuangan / SDM / Sarpras
 
 ---
 
