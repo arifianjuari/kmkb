@@ -337,24 +337,334 @@ Biaya per admission rawat inap:
 ### Modul 1: Dasar-Dasar Biaya Rumah Sakit
 
 **🎯 Tujuan Pembelajaran:**
-Memahami konsep dasar akuntansi biaya rumah sakit.
+Memahami konsep dasar akuntansi biaya rumah sakit dan terminologi yang digunakan dalam proses costing.
 
-**📘 Materi:**
-- Apa itu biaya, cost object, cost pool
-- Jenis biaya: Fixed, Variable, Semi-fixed
-- Direct vs Indirect cost
-- Overhead & cost center
-- Mengapa unit cost penting
+---
 
-**🛠 Aktivitas di Webapp:**
+#### 1.1. Pengertian Biaya (Cost)
 
-| Langkah | Menu | Aksi |
-|---------|------|------|
-| 1 | `Master Data → Expense Categories` | Lihat struktur kategori biaya |
-| 2 | `Master Data → Cost Centers` | Pahami struktur unit biaya RS |
+**Definisi:**
+> **Biaya (Cost)** adalah pengorbanan sumber daya ekonomi yang dapat diukur dalam satuan uang, yang terjadi atau berpotensi terjadi untuk mencapai tujuan tertentu.
+
+**Komponen penting:**
+- **Pengorbanan ekonomi**: Uang tunai, aset, atau kewajiban
+- **Dapat diukur**: Dalam satuan moneter (Rupiah)
+- **Tujuan tertentu**: Menghasilkan barang/jasa
+
+**Perbedaan Biaya vs Beban:**
+
+| Aspek | Biaya (Cost) | Beban (Expense) |
+|-------|--------------|-----------------|
+| Waktu | Saat pengorbanan terjadi | Saat diakui dalam laporan laba-rugi |
+| Contoh | Pembelian obat Rp 10 juta | Obat yang sudah terpakai pasien |
+| Posisi | Aset (jika belum habis) | Laporan laba-rugi |
+
+**Implementasi di Webapp:**
+- Menu `GL & Expenses → GL Expenses` mencatat **beban/expense** yang sudah direalisasi per periode
+- Sistem mengkonversi beban menjadi biaya per cost center untuk perhitungan unit cost
+
+---
+
+#### 1.2. Cost Object (Objek Biaya)
+
+**Definisi:**
+> **Cost Object** adalah entitas yang menjadi target pengukuran biaya — sesuatu yang ingin kita ketahui berapa biayanya.
+
+**Contoh Cost Object di Rumah Sakit:**
+
+| Tingkat | Cost Object | Contoh Pertanyaan |
+|---------|-------------|-------------------|
+| Layanan | Tes laboratorium | Berapa biaya 1 tes darah lengkap? |
+| Pasien | Episode perawatan | Berapa biaya merawat pasien apendisitis? |
+| Departemen | Unit rawat inap | Berapa total biaya operasional rawat inap? |
+| Produk | Clinical pathway | Berapa biaya standar appendectomy? |
+
+**Implementasi di Webapp:**
+- **Cost References** (`Master Data → Cost References`) adalah representasi cost object untuk layanan individual
+- Setiap Cost Reference memiliki: kode layanan, nama, kategori, satuan, dan keterkaitan dengan cost center
+- Unit cost dihitung per cost reference berdasarkan beban + alokasi overhead
+
+---
+
+#### 1.3. Cost Pool (Kelompok Biaya)
+
+**Definisi:**
+> **Cost Pool** adalah sekumpulan biaya yang dikelompokkan berdasarkan karakteristik yang sama untuk kemudian dialokasikan ke cost object.
+
+**Jenis-jenis Cost Pool:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    TOTAL BIAYA RUMAH SAKIT                  │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐  │
+│  │  DIRECT COST    │  │  INDIRECT COST  │  │  OVERHEAD   │  │
+│  │     POOL        │  │     POOL        │  │    POOL     │  │
+│  ├─────────────────┤  ├─────────────────┤  ├─────────────┤  │
+│  │ • Obat          │  │ • Gaji admin    │  │ • Listrik   │  │
+│  │ • BHP Medis     │  │ • Depresiasi    │  │ • Air       │  │
+│  │ • Gaji dokter   │  │   gedung        │  │ • Keamanan  │  │
+│  │   spesialis     │  │ • IT Support    │  │ • Laundry   │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Implementasi di Webapp:**
+- **Expense Categories** (`Master Data → Expense Categories`) mendefinisikan struktur cost pool
+- Hierarki COA (Chart of Accounts) membantu mengelompokkan biaya serupa
+- Contoh: Kategori "Gaji & Tunjangan" mengelompokkan semua biaya personel
+
+---
+
+#### 1.4. Klasifikasi Biaya Berdasarkan Perilaku
+
+##### a) Fixed Cost (Biaya Tetap)
+
+**Definisi:**
+> Biaya yang total nominalnya **tetap** dalam rentang aktivitas tertentu, tidak terpengaruh oleh naik-turunnya volume layanan.
+
+**Karakteristik:**
+- Total tetap, per unit berubah (turun jika volume naik)
+- Periode: jangka pendek hingga menengah
+
+**Contoh di Rumah Sakit:**
+
+| Jenis Biaya | Nominal/Bulan | Berubah oleh Volume? |
+|-------------|---------------|----------------------|
+| Gaji pegawai tetap | Rp 500 juta | ❌ Tidak |
+| Sewa gedung | Rp 100 juta | ❌ Tidak |
+| Depresiasi alat CT-Scan | Rp 50 juta | ❌ Tidak |
+| Lisensi software SIMRS | Rp 10 juta | ❌ Tidak |
+
+**Formula:**
+```
+Fixed Cost per Unit = Total Fixed Cost / Volume
+Contoh: Rp 500 juta / 1.000 pasien = Rp 500.000/pasien
+        Rp 500 juta / 2.000 pasien = Rp 250.000/pasien ← turun!
+```
+
+##### b) Variable Cost (Biaya Variabel)
+
+**Definisi:**
+> Biaya yang total nominalnya **berubah proporsional** dengan volume aktivitas, namun biaya per unitnya cenderung tetap.
+
+**Karakteristik:**
+- Total berubah, per unit tetap
+- Langsung terkait dengan output/layanan
+
+**Contoh di Rumah Sakit:**
+
+| Jenis Biaya | Biaya/Unit | Volume | Total |
+|-------------|------------|--------|-------|
+| Obat per pasien | Rp 100.000 | 1.000 | Rp 100 juta |
+| Obat per pasien | Rp 100.000 | 2.000 | Rp 200 juta |
+| Reagent lab per tes | Rp 15.000 | 5.000 | Rp 75 juta |
+| BHP per tindakan | Rp 50.000 | 200 | Rp 10 juta |
+
+##### c) Semi-Variable / Mixed Cost (Biaya Semi-Variabel)
+
+**Definisi:**
+> Biaya yang memiliki **komponen tetap** dan **komponen variabel** sekaligus.
+
+**Formula:**
+```
+Total Cost = Fixed Component + (Variable Rate × Volume)
+```
+
+**Contoh di Rumah Sakit:**
+
+| Jenis Biaya | Komponen Tetap | Komponen Variabel |
+|-------------|----------------|-------------------|
+| Listrik | Rp 50 juta (abodemen) | + Rp 1.500/kWh pemakaian |
+| Telepon | Rp 5 juta (langganan) | + Rp 500/menit panggilan |
+| Gaji dengan lembur | Rp 10 juta (gaji pokok) | + Rp 100.000/jam lembur |
+
+**Relevansi untuk Webapp:**
+
+> [!NOTE]
+> Webapp KMKB saat ini tidak membedakan fixed/variable dalam perhitungan otomatis. Semua biaya di GL Expenses diperlakukan sebagai total cost per periode. Pemisahan fixed/variable dilakukan pada analisis lanjutan atau pelaporan manual.
+
+---
+
+#### 1.5. Direct Cost vs Indirect Cost
+
+##### Direct Cost (Biaya Langsung)
+
+**Definisi:**
+> Biaya yang dapat **ditelusuri secara langsung** dan **ekonomis** ke cost object tertentu.
+
+**Kriteria "langsung":**
+- ✅ Ada hubungan sebab-akibat jelas
+- ✅ Dapat diukur untuk objek tersebut
+- ✅ Secara ekonomis layak ditelusuri
+
+**Contoh:**
+
+| Cost Object | Direct Cost | Mengapa Langsung? |
+|-------------|-------------|-------------------|
+| Tes Lab Darah Lengkap | Reagent, tabung sampel | Terpakai khusus untuk tes ini |
+| Rawat Inap VIP | Makanan pasien VIP, amenities | Khusus untuk pasien tersebut |
+| Operasi Appendectomy | Disposable surgical kit | Terpakai habis untuk operasi ini |
+
+##### Indirect Cost (Biaya Tidak Langsung)
+
+**Definisi:**
+> Biaya yang **tidak dapat ditelusuri langsung** ke cost object tertentu karena dipakai bersama oleh banyak cost object.
+
+**Contoh:**
+
+| Biaya | Dipakai Oleh | Cara Alokasi |
+|-------|--------------|--------------|
+| Gaji satpam | Semua unit | Dibagi berdasarkan luas lantai |
+| Listrik gedung | Semua lantai | Dibagi berdasarkan meter/pemakaian |
+| Gaji direktur | Semua departemen | Dibagi berdasarkan eksposur manajemen |
+
+**Implementasi di Webapp:**
+
+| Konsep | Fitur di Webapp | Menu |
+|--------|-----------------|------|
+| Direct Cost | GL Expenses langsung ke cost center | `GL & Expenses → GL Expenses` |
+| Indirect Cost | Dialokasikan via Allocation Engine | `Allocation → Run Allocation` |
+| Allocation Driver | Dasar pembagi (luas, FTE, kg) | `Master Data → Allocation Drivers` |
+| Allocation Map | Aturan source → target | `Allocation → Allocation Maps` |
+
+---
+
+#### 1.6. Overhead & Cost Center
+
+##### Overhead (Biaya Overhead)
+
+**Definisi:**
+> Semua biaya **tidak langsung** yang diperlukan untuk menjalankan operasional tetapi tidak dapat ditelusuri ke layanan spesifik.
+
+**Kategori Overhead Rumah Sakit:**
+
+```
+OVERHEAD
+├── Overhead Umum (General Overhead)
+│   ├── Manajemen & Administrasi
+│   ├── Keuangan & Akuntansi
+│   ├── SDM & Kepegawaian
+│   └── IT & Sistem Informasi
+│
+├── Overhead Fasilitas (Facility Overhead)
+│   ├── Depresiasi gedung
+│   ├── Pemeliharaan gedung
+│   ├── Utilitas (listrik, air, gas)
+│   └── Keamanan & kebersihan
+│
+└── Overhead Penunjang (Support Overhead)
+    ├── Laundry
+    ├── Gizi / Catering
+    ├── CSSD (Sterilisasi)
+    └── IPSRS (Pemeliharaan alat)
+```
+
+##### Cost Center (Pusat Biaya)
+
+**Definisi:**
+> Unit organisasi di mana biaya dikumpulkan dan diukur. Manajer cost center bertanggung jawab atas pengendalian biaya di unitnya.
+
+**Tipe Cost Center:**
+
+| Tipe | Deskripsi | Contoh | Di Webapp |
+|------|-----------|--------|-----------|
+| **Revenue Center** | Menghasilkan pendapatan langsung | IGD, Poliklinik, Rawat Inap, OK | Tipe: `revenue` |
+| **Support Center** | Mendukung operasional, tidak ada pendapatan | Administrasi, Laundry, Gizi | Tipe: `support` |
+
+**Implementasi di Webapp:**
+
+```
+Menu: Master Data → Cost Centers
+
+┌────────────────────────────────────────────────────────────────┐
+│  Field               │  Deskripsi                              │
+├────────────────────────────────────────────────────────────────┤
+│  Kode               │  Kode unik (mis: CC-RI-01)               │
+│  Nama               │  Nama cost center                        │
+│  Tipe               │  revenue / support                       │
+│  Building           │  Gedung lokasi                           │
+│  Floor              │  Lantai                                  │
+│  Division           │  Divisi/direktorat                       │
+│  Parent             │  Induk (untuk hierarki)                  │
+└────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 1.7. Mengapa Unit Cost Penting?
+
+**Definisi Unit Cost:**
+> **Unit Cost** adalah total biaya yang diperlukan untuk menghasilkan/menyediakan **satu unit** layanan atau produk.
+
+**Formula Dasar:**
+```
+Unit Cost = Total Cost / Volume Layanan
+         = (Direct Cost + Allocated Overhead) / Jumlah Unit
+```
+
+**Manfaat Perhitungan Unit Cost:**
+
+| No | Manfaat | Contoh Penggunaan |
+|----|---------|-------------------|
+| 1 | **Penetapan Tarif** | Unit cost + margin = tarif layanan |
+| 2 | **Analisis Profitabilitas** | Bandingkan tarif vs unit cost per layanan |
+| 3 | **Efisiensi Operasional** | Identifikasi layanan berbiaya tinggi |
+| 4 | **Negosiasi Kontrak** | Dasar negosiasi dengan BPJS/asuransi |
+| 5 | **Budgeting** | Proyeksi biaya berdasarkan target volume |
+| 6 | **Benchmarking** | Perbandingan antar RS atau antar periode |
+
+**Contoh Perhitungan Sederhana:**
+
+```
+Layanan: Tes Laboratorium Darah Lengkap
+─────────────────────────────────────────
+Direct Cost per bulan:
+  • Reagent:              Rp 15.000.000
+  • BHP (tabung, dll):    Rp  3.000.000
+  • Gaji analis lab:      Rp 10.000.000
+                          ─────────────
+  Subtotal Direct:        Rp 28.000.000
+
+Allocated Overhead:
+  • Listrik lab:          Rp  2.000.000
+  • Depresiasi alat:      Rp  5.000.000
+  • Overhead RS:          Rp  3.000.000
+                          ─────────────
+  Subtotal Overhead:      Rp 10.000.000
+
+Total Cost:               Rp 38.000.000
+Volume bulan ini:         2.000 tes
+─────────────────────────────────────────
+Unit Cost = Rp 38.000.000 / 2.000
+          = Rp 19.000 per tes
+```
+
+---
+
+#### 🛠 Aktivitas Praktik di Webapp
+
+**Tujuan:** Mengenali implementasi konsep-konsep di atas dalam sistem KMKB.
+
+| No | Langkah | Menu | Aksi | Konsep yang Dipelajari |
+|----|---------|------|------|------------------------|
+| 1 | Lihat struktur COA | `Master Data → Expense Categories` | Eksplorasi hierarki kategori | Cost Pool |
+| 2 | Pahami tipe kategori | `Master Data → Expense Categories` | Perhatikan pengelompokan | Direct vs Indirect |
+| 3 | Lihat cost center | `Master Data → Cost Centers` | Filter by tipe | Revenue vs Support |
+| 4 | Lihat layanan | `Master Data → Cost References` | Klik detail | Cost Object |
+| 5 | Lihat driver | `Master Data → Allocation Drivers` | Pahami jenis driver | Dasar alokasi overhead |
+
+**Checklist Pemahaman:**
+- [ ] Saya dapat membedakan fixed, variable, dan semi-variable cost
+- [ ] Saya memahami perbedaan direct vs indirect cost
+- [ ] Saya mengerti mengapa overhead perlu dialokasikan
+- [ ] Saya paham cost center sebagai pusat akumulasi biaya
+- [ ] Saya memahami pentingnya unit cost untuk pengambilan keputusan
+
+---
 
 **📤 Output:**
-Pemahaman fundamental untuk proses costing.
+Pemahaman fundamental yang solid tentang terminologi dan konsep dasar akuntansi biaya rumah sakit, sebagai fondasi untuk modul-modul selanjutnya.
 
 ---
 
