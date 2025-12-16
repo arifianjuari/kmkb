@@ -409,6 +409,7 @@ Menyiapkan semua data referensi untuk costing.
 **📘 Materi:**
 - Cost Center
 - Expense Category / COA
+- Units of Measurement (Satuan)
 - Allocation Driver
 - Service Catalog (Cost References)
 - Tariff Class
@@ -417,13 +418,16 @@ Menyiapkan semua data referensi untuk costing.
 
 | No | Menu | Tindakan | Sumber Data |
 |----|------|----------|-------------|
-| 1 | `Master Data → Cost Centers` | Buat semua unit RS | Struktur organisasi |
-| 2 | `Master Data → Expense Categories` | Import/input COA | Buku COA, trial balance |
-| 3 | `Master Data → Allocation Drivers` | Definisikan driver | Kebijakan costing RS |
-| 4 | `Master Data → Tariff Classes` | Buat kelas tarif | SK Tarif internal |
-| 5 | `Master Data → Cost References` | Import layanan | Master SIMRS |
+| 1 | `Master Data → Units of Measurement` | Setup satuan standar (m², kg, jam) | Standar RS |
+| 2 | `Master Data → Cost Centers` | Buat semua unit RS | Struktur organisasi |
+| 3 | `Master Data → Expense Categories` | Import/input COA | Buku COA, trial balance |
+| 4 | `Master Data → Allocation Drivers` | Definisikan driver (pilih satuan) | Kebijakan costing RS |
+| 5 | `Master Data → Tariff Classes` | Buat kelas tarif | SK Tarif internal |
+| 6 | `Master Data → Cost References` | Import layanan (pilih satuan) | Master SIMRS |
+| 7 | `Service Catalog → Standard Resource Usage` | Setup BOM (pilih satuan) | Farmasi / Logistik |
 
 **Checklist Master Data:**
+- [ ] Units of Measurement selesai (standarisasi satuan)
 - [ ] Cost Centers selesai (semua unit)
 - [ ] Expense Categories selesai (COA lengkap)
 - [ ] Allocation Drivers selesai
@@ -852,11 +856,13 @@ graph LR
 ## Lampiran & Template
 
 ### Checklist Setup Hospital Baru
+- [ ] Units of Measurement selesai
 - [ ] Cost Centers selesai
 - [ ] Expense Categories selesai
 - [ ] Allocation Drivers selesai
 - [ ] Tariff Classes selesai
 - [ ] Cost References selesai
+- [ ] Standard Resource Usage selesai (opsional)
 - [ ] Knowledge References minimal 1 SOP
 - [ ] JKN CBG Codes (opsional)
 - [ ] Allocation Maps dibuat
