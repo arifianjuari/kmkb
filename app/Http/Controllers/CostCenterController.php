@@ -44,7 +44,7 @@ class CostCenterController extends Controller
             });
         }
         if ($division) {
-            $typeCountQuery->where('name', $division);
+            $typeCountQuery->where('division', $division);
         }
         if ($isActive !== null && $isActive !== '') {
             $typeCountQuery->where('is_active', $isActive);
@@ -73,7 +73,7 @@ class CostCenterController extends Controller
             if ($isActive !== null && $isActive !== '') {
                 $divisionCountQuery->where('is_active', $isActive);
             }
-            $divisionCounts[$div->name] = $divisionCountQuery->where('name', $div->name)->count();
+            $divisionCounts[$div->name] = $divisionCountQuery->where('division', $div->name)->count();
         }
         
         if ($viewMode === 'tree') {
@@ -101,7 +101,7 @@ class CostCenterController extends Controller
                     }
                     
                     if ($division) {
-                        $matchesDivision = $costCenter->name === $division;
+                        $matchesDivision = $costCenter->division === $division;
                     }
                     
                     if ($isActive !== null && $isActive !== '') {
@@ -135,7 +135,7 @@ class CostCenterController extends Controller
             }
             
             if ($division) {
-                $query->where('name', $division);
+                $query->where('division', $division);
             }
             
             if ($isActive !== null && $isActive !== '') {
