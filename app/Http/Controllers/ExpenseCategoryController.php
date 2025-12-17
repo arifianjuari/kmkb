@@ -42,7 +42,7 @@ class ExpenseCategoryController extends Controller
             $query->where('is_active', $isActive);
         }
         
-        $expenseCategories = $query->latest()->paginate(15)->appends($request->query());
+        $expenseCategories = $query->orderBy('account_code', 'asc')->paginate(15)->appends($request->query());
         
         // Calculate counts for cost type tabs (considering other filters but not cost_type)
         $costTypeCountQuery = clone $baseQuery;

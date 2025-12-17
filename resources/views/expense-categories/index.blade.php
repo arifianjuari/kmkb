@@ -22,7 +22,7 @@
     <div>
         <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
             <div class="flex items-center gap-3 flex-shrink-0">
-                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Cost Elements (COA Mapping)') }}</h2>
+                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Expense Categories') }}</h2>
                 <button
                     type="button"
                     class="flex-shrink-0 text-xs font-semibold text-biru-dongker-800 border border-biru-dongker-400 rounded-full w-5 h-5 flex items-center justify-center hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700 transition-colors"

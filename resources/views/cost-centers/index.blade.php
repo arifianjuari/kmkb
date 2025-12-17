@@ -259,8 +259,19 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        @foreach($costCenters->sortBy('building_name') as $costCenter)
-                                            @include('cost-centers.partials.tree-row', ['costCenter' => $costCenter, 'divisionId' => $divisionId])
+                                        @php
+                                            // Only render root cost centers (no parent or parent not in current filtered set)
+                                            $rootCostCenters = $costCenters->filter(function($cc) use ($costCenters) {
+                                                return is_null($cc->parent_id) || !$costCenters->contains('id', $cc->parent_id);
+                                            })->sortBy('name');
+                                        @endphp
+                                        @foreach($rootCostCenters as $costCenter)
+                                            @include('cost-centers.partials.tree-row', [
+                                                'costCenter' => $costCenter, 
+                                                'divisionId' => $divisionId,
+                                                'allCostCenters' => $costCenters,
+                                                'level' => 0
+                                            ])
                                         @endforeach
                                     @endforeach
                                     @if($groupedByDivision->count() === 0)
@@ -306,9 +317,67 @@
                             }
                         }
 
-                        // Initialize: all divisions are expanded by default
+                        function toggleCostCenterTree(uniqueId, button) {
+                            // Get the cost center id from uniqueId (format: cc-{id})
+                            const costCenterId = uniqueId.replace('cc-', '');
+                            
+                            // Find all rows that have this cost center as parent (direct or nested)
+                            const allRows = document.querySelectorAll('tr.cost-center-row');
+                            
+                            const chevronDown = button.querySelector('.chevron-down');
+                            const chevronRight = button.querySelector('.chevron-right');
+                            
+                            // Check current state
+                            const isExpanded = chevronDown && !chevronDown.classList.contains('hidden');
+                            
+                            // Find all descendant rows
+                            function getDescendants(parentId) {
+                                const descendants = [];
+                                allRows.forEach(row => {
+                                    if (row.dataset.parentId === parentId) {
+                                        descendants.push(row);
+                                        // Recursively get children of this child
+                                        const childId = row.dataset.costCenterId;
+                                        if (childId) {
+                                            descendants.push(...getDescendants(childId));
+                                        }
+                                    }
+                                });
+                                return descendants;
+                            }
+                            
+                            const descendantRows = getDescendants(costCenterId);
+                            
+                            if (isExpanded) {
+                                // Collapse: hide all descendants
+                                descendantRows.forEach(row => {
+                                    row.classList.add('hidden');
+                                    // Also collapse nested toggles
+                                    const nestedToggle = row.querySelector('.tree-toggle');
+                                    if (nestedToggle) {
+                                        const nestedDown = nestedToggle.querySelector('.chevron-down');
+                                        const nestedRight = nestedToggle.querySelector('.chevron-right');
+                                        if (nestedDown) nestedDown.classList.add('hidden');
+                                        if (nestedRight) nestedRight.classList.remove('hidden');
+                                    }
+                                });
+                                if (chevronDown) chevronDown.classList.add('hidden');
+                                if (chevronRight) chevronRight.classList.remove('hidden');
+                            } else {
+                                // Expand: show direct children only
+                                allRows.forEach(row => {
+                                    if (row.dataset.parentId === costCenterId) {
+                                        row.classList.remove('hidden');
+                                    }
+                                });
+                                if (chevronDown) chevronDown.classList.remove('hidden');
+                                if (chevronRight) chevronRight.classList.add('hidden');
+                            }
+                        }
+
+                        // Initialize: all cost centers are expanded by default
                         document.addEventListener('DOMContentLoaded', function() {
-                            // All divisions are visible by default, so chevrons should show down arrow
+                            // All items are visible by default, so chevrons should show down arrow
                             // This is already the default state from the HTML
                         });
                     </script>

@@ -337,74 +337,1042 @@ Biaya per admission rawat inap:
 ### Modul 1: Dasar-Dasar Biaya Rumah Sakit
 
 **🎯 Tujuan Pembelajaran:**
-Memahami konsep dasar akuntansi biaya rumah sakit.
+Memahami konsep dasar akuntansi biaya rumah sakit dan terminologi yang digunakan dalam proses costing.
 
-**📘 Materi:**
-- Apa itu biaya, cost object, cost pool
-- Jenis biaya: Fixed, Variable, Semi-fixed
-- Direct vs Indirect cost
-- Overhead & cost center
-- Mengapa unit cost penting
+---
 
-**🛠 Aktivitas di Webapp:**
+#### 1.1. Pengertian Biaya (Cost)
 
-| Langkah | Menu | Aksi |
-|---------|------|------|
-| 1 | `Master Data → Expense Categories` | Lihat struktur kategori biaya |
-| 2 | `Master Data → Cost Centers` | Pahami struktur unit biaya RS |
+**Definisi:**
+> **Biaya (Cost)** adalah pengorbanan sumber daya ekonomi yang dapat diukur dalam satuan uang, yang terjadi atau berpotensi terjadi untuk mencapai tujuan tertentu.
+
+**Komponen penting:**
+- **Pengorbanan ekonomi**: Uang tunai, aset, atau kewajiban
+- **Dapat diukur**: Dalam satuan moneter (Rupiah)
+- **Tujuan tertentu**: Menghasilkan barang/jasa
+
+**Perbedaan Biaya vs Beban:**
+
+| Aspek | Biaya (Cost) | Beban (Expense) |
+|-------|--------------|-----------------|
+| Waktu | Saat pengorbanan terjadi | Saat diakui dalam laporan laba-rugi |
+| Contoh | Pembelian obat Rp 10 juta | Obat yang sudah terpakai pasien |
+| Posisi | Aset (jika belum habis) | Laporan laba-rugi |
+
+**Implementasi di Webapp:**
+- Menu `GL & Expenses → GL Expenses` mencatat **beban/expense** yang sudah direalisasi per periode
+- Sistem mengkonversi beban menjadi biaya per cost center untuk perhitungan unit cost
+
+---
+
+#### 1.2. Cost Object (Objek Biaya)
+
+**Definisi:**
+> **Cost Object** adalah entitas yang menjadi target pengukuran biaya — sesuatu yang ingin kita ketahui berapa biayanya.
+
+**Contoh Cost Object di Rumah Sakit:**
+
+| Tingkat | Cost Object | Contoh Pertanyaan |
+|---------|-------------|-------------------|
+| Layanan | Tes laboratorium | Berapa biaya 1 tes darah lengkap? |
+| Pasien | Episode perawatan | Berapa biaya merawat pasien apendisitis? |
+| Departemen | Unit rawat inap | Berapa total biaya operasional rawat inap? |
+| Produk | Clinical pathway | Berapa biaya standar appendectomy? |
+
+**Implementasi di Webapp:**
+- **Cost References** (`Master Data → Cost References`) adalah representasi cost object untuk layanan individual
+- Setiap Cost Reference memiliki: kode layanan, nama, kategori, satuan, dan keterkaitan dengan cost center
+- Unit cost dihitung per cost reference berdasarkan beban + alokasi overhead
+
+---
+
+#### 1.3. Cost Pool (Kelompok Biaya)
+
+**Definisi:**
+> **Cost Pool** adalah sekumpulan biaya yang dikelompokkan berdasarkan karakteristik yang sama untuk kemudian dialokasikan ke cost object.
+
+**Jenis-jenis Cost Pool:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    TOTAL BIAYA RUMAH SAKIT                  │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐  │
+│  │  DIRECT COST    │  │  INDIRECT COST  │  │  OVERHEAD   │  │
+│  │     POOL        │  │     POOL        │  │    POOL     │  │
+│  ├─────────────────┤  ├─────────────────┤  ├─────────────┤  │
+│  │ • Obat          │  │ • Gaji admin    │  │ • Listrik   │  │
+│  │ • BHP Medis     │  │ • Depresiasi    │  │ • Air       │  │
+│  │ • Gaji dokter   │  │   gedung        │  │ • Keamanan  │  │
+│  │   spesialis     │  │ • IT Support    │  │ • Laundry   │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Implementasi di Webapp:**
+- **Expense Categories** (`Master Data → Expense Categories`) mendefinisikan struktur cost pool
+- Hierarki COA (Chart of Accounts) membantu mengelompokkan biaya serupa
+- Contoh: Kategori "Gaji & Tunjangan" mengelompokkan semua biaya personel
+
+---
+
+#### 1.4. Klasifikasi Biaya Berdasarkan Perilaku
+
+##### a) Fixed Cost (Biaya Tetap)
+
+**Definisi:**
+> Biaya yang total nominalnya **tetap** dalam rentang aktivitas tertentu, tidak terpengaruh oleh naik-turunnya volume layanan.
+
+**Karakteristik:**
+- Total tetap, per unit berubah (turun jika volume naik)
+- Periode: jangka pendek hingga menengah
+
+**Contoh di Rumah Sakit:**
+
+| Jenis Biaya | Nominal/Bulan | Berubah oleh Volume? |
+|-------------|---------------|----------------------|
+| Gaji pegawai tetap | Rp 500 juta | ❌ Tidak |
+| Sewa gedung | Rp 100 juta | ❌ Tidak |
+| Depresiasi alat CT-Scan | Rp 50 juta | ❌ Tidak |
+| Lisensi software SIMRS | Rp 10 juta | ❌ Tidak |
+
+**Formula:**
+```
+Fixed Cost per Unit = Total Fixed Cost / Volume
+Contoh: Rp 500 juta / 1.000 pasien = Rp 500.000/pasien
+        Rp 500 juta / 2.000 pasien = Rp 250.000/pasien ← turun!
+```
+
+##### b) Variable Cost (Biaya Variabel)
+
+**Definisi:**
+> Biaya yang total nominalnya **berubah proporsional** dengan volume aktivitas, namun biaya per unitnya cenderung tetap.
+
+**Karakteristik:**
+- Total berubah, per unit tetap
+- Langsung terkait dengan output/layanan
+
+**Contoh di Rumah Sakit:**
+
+| Jenis Biaya | Biaya/Unit | Volume | Total |
+|-------------|------------|--------|-------|
+| Obat per pasien | Rp 100.000 | 1.000 | Rp 100 juta |
+| Obat per pasien | Rp 100.000 | 2.000 | Rp 200 juta |
+| Reagent lab per tes | Rp 15.000 | 5.000 | Rp 75 juta |
+| BHP per tindakan | Rp 50.000 | 200 | Rp 10 juta |
+
+##### c) Semi-Variable / Mixed Cost (Biaya Semi-Variabel)
+
+**Definisi:**
+> Biaya yang memiliki **komponen tetap** dan **komponen variabel** sekaligus.
+
+**Formula:**
+```
+Total Cost = Fixed Component + (Variable Rate × Volume)
+```
+
+**Contoh di Rumah Sakit:**
+
+| Jenis Biaya | Komponen Tetap | Komponen Variabel |
+|-------------|----------------|-------------------|
+| Listrik | Rp 50 juta (abodemen) | + Rp 1.500/kWh pemakaian |
+| Telepon | Rp 5 juta (langganan) | + Rp 500/menit panggilan |
+| Gaji dengan lembur | Rp 10 juta (gaji pokok) | + Rp 100.000/jam lembur |
+
+**Relevansi untuk Webapp:**
+
+> [!NOTE]
+> Webapp KMKB saat ini tidak membedakan fixed/variable dalam perhitungan otomatis. Semua biaya di GL Expenses diperlakukan sebagai total cost per periode. Pemisahan fixed/variable dilakukan pada analisis lanjutan atau pelaporan manual.
+
+---
+
+#### 1.5. Direct Cost vs Indirect Cost
+
+##### Direct Cost (Biaya Langsung)
+
+**Definisi:**
+> Biaya yang dapat **ditelusuri secara langsung** dan **ekonomis** ke cost object tertentu.
+
+**Kriteria "langsung":**
+- ✅ Ada hubungan sebab-akibat jelas
+- ✅ Dapat diukur untuk objek tersebut
+- ✅ Secara ekonomis layak ditelusuri
+
+**Contoh:**
+
+| Cost Object | Direct Cost | Mengapa Langsung? |
+|-------------|-------------|-------------------|
+| Tes Lab Darah Lengkap | Reagent, tabung sampel | Terpakai khusus untuk tes ini |
+| Rawat Inap VIP | Makanan pasien VIP, amenities | Khusus untuk pasien tersebut |
+| Operasi Appendectomy | Disposable surgical kit | Terpakai habis untuk operasi ini |
+
+##### Indirect Cost (Biaya Tidak Langsung)
+
+**Definisi:**
+> Biaya yang **tidak dapat ditelusuri langsung** ke cost object tertentu karena dipakai bersama oleh banyak cost object.
+
+**Contoh:**
+
+| Biaya | Dipakai Oleh | Cara Alokasi |
+|-------|--------------|--------------|
+| Gaji satpam | Semua unit | Dibagi berdasarkan luas lantai |
+| Listrik gedung | Semua lantai | Dibagi berdasarkan meter/pemakaian |
+| Gaji direktur | Semua departemen | Dibagi berdasarkan eksposur manajemen |
+
+**Implementasi di Webapp:**
+
+| Konsep | Fitur di Webapp | Menu |
+|--------|-----------------|------|
+| Direct Cost | GL Expenses langsung ke cost center | `GL & Expenses → GL Expenses` |
+| Indirect Cost | Dialokasikan via Allocation Engine | `Allocation → Run Allocation` |
+| Allocation Driver | Dasar pembagi (luas, FTE, kg) | `Master Data → Allocation Drivers` |
+| Allocation Map | Aturan source → target | `Allocation → Allocation Maps` |
+
+---
+
+#### 1.6. Overhead & Cost Center
+
+##### Overhead (Biaya Overhead)
+
+**Definisi:**
+> Semua biaya **tidak langsung** yang diperlukan untuk menjalankan operasional tetapi tidak dapat ditelusuri ke layanan spesifik.
+
+**Kategori Overhead Rumah Sakit:**
+
+```
+OVERHEAD
+├── Overhead Umum (General Overhead)
+│   ├── Manajemen & Administrasi
+│   ├── Keuangan & Akuntansi
+│   ├── SDM & Kepegawaian
+│   └── IT & Sistem Informasi
+│
+├── Overhead Fasilitas (Facility Overhead)
+│   ├── Depresiasi gedung
+│   ├── Pemeliharaan gedung
+│   ├── Utilitas (listrik, air, gas)
+│   └── Keamanan & kebersihan
+│
+└── Overhead Penunjang (Support Overhead)
+    ├── Laundry
+    ├── Gizi / Catering
+    ├── CSSD (Sterilisasi)
+    └── IPSRS (Pemeliharaan alat)
+```
+
+##### Cost Center (Pusat Biaya)
+
+**Definisi:**
+> Unit organisasi di mana biaya dikumpulkan dan diukur. Manajer cost center bertanggung jawab atas pengendalian biaya di unitnya.
+
+**Tipe Cost Center:**
+
+| Tipe | Deskripsi | Contoh | Di Webapp |
+|------|-----------|--------|-----------|
+| **Revenue Center** | Menghasilkan pendapatan langsung | IGD, Poliklinik, Rawat Inap, OK | Tipe: `revenue` |
+| **Support Center** | Mendukung operasional, tidak ada pendapatan | Administrasi, Laundry, Gizi | Tipe: `support` |
+
+**Implementasi di Webapp:**
+
+```
+Menu: Master Data → Cost Centers
+
+┌────────────────────────────────────────────────────────────────┐
+│  Field               │  Deskripsi                              │
+├────────────────────────────────────────────────────────────────┤
+│  Kode               │  Kode unik (mis: CC-RI-01)               │
+│  Nama               │  Nama cost center                        │
+│  Tipe               │  revenue / support                       │
+│  Building           │  Gedung lokasi                           │
+│  Floor              │  Lantai                                  │
+│  Division           │  Divisi/direktorat                       │
+│  Parent             │  Induk (untuk hierarki)                  │
+└────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 1.7. Mengapa Unit Cost Penting?
+
+**Definisi Unit Cost:**
+> **Unit Cost** adalah total biaya yang diperlukan untuk menghasilkan/menyediakan **satu unit** layanan atau produk.
+
+**Formula Dasar:**
+```
+Unit Cost = Total Cost / Volume Layanan
+         = (Direct Cost + Allocated Overhead) / Jumlah Unit
+```
+
+**Manfaat Perhitungan Unit Cost:**
+
+| No | Manfaat | Contoh Penggunaan |
+|----|---------|-------------------|
+| 1 | **Penetapan Tarif** | Unit cost + margin = tarif layanan |
+| 2 | **Analisis Profitabilitas** | Bandingkan tarif vs unit cost per layanan |
+| 3 | **Efisiensi Operasional** | Identifikasi layanan berbiaya tinggi |
+| 4 | **Negosiasi Kontrak** | Dasar negosiasi dengan BPJS/asuransi |
+| 5 | **Budgeting** | Proyeksi biaya berdasarkan target volume |
+| 6 | **Benchmarking** | Perbandingan antar RS atau antar periode |
+
+**Contoh Perhitungan Sederhana:**
+
+```
+Layanan: Tes Laboratorium Darah Lengkap
+─────────────────────────────────────────
+Direct Cost per bulan:
+  • Reagent:              Rp 15.000.000
+  • BHP (tabung, dll):    Rp  3.000.000
+  • Gaji analis lab:      Rp 10.000.000
+                          ─────────────
+  Subtotal Direct:        Rp 28.000.000
+
+Allocated Overhead:
+  • Listrik lab:          Rp  2.000.000
+  • Depresiasi alat:      Rp  5.000.000
+  • Overhead RS:          Rp  3.000.000
+                          ─────────────
+  Subtotal Overhead:      Rp 10.000.000
+
+Total Cost:               Rp 38.000.000
+Volume bulan ini:         2.000 tes
+─────────────────────────────────────────
+Unit Cost = Rp 38.000.000 / 2.000
+          = Rp 19.000 per tes
+```
+
+---
+
+#### 🛠 Aktivitas Praktik di Webapp
+
+**Tujuan:** Mengenali implementasi konsep-konsep di atas dalam sistem KMKB.
+
+| No | Langkah | Menu | Aksi | Konsep yang Dipelajari |
+|----|---------|------|------|------------------------|
+| 1 | Lihat struktur COA | `Master Data → Expense Categories` | Eksplorasi hierarki kategori | Cost Pool |
+| 2 | Pahami tipe kategori | `Master Data → Expense Categories` | Perhatikan pengelompokan | Direct vs Indirect |
+| 3 | Lihat cost center | `Master Data → Cost Centers` | Filter by tipe | Revenue vs Support |
+| 4 | Lihat layanan | `Master Data → Cost References` | Klik detail | Cost Object |
+| 5 | Lihat driver | `Master Data → Allocation Drivers` | Pahami jenis driver | Dasar alokasi overhead |
+
+**Checklist Pemahaman:**
+- [ ] Saya dapat membedakan fixed, variable, dan semi-variable cost
+- [ ] Saya memahami perbedaan direct vs indirect cost
+- [ ] Saya mengerti mengapa overhead perlu dialokasikan
+- [ ] Saya paham cost center sebagai pusat akumulasi biaya
+- [ ] Saya memahami pentingnya unit cost untuk pengambilan keputusan
+
+---
 
 **📤 Output:**
-Pemahaman fundamental untuk proses costing.
+Pemahaman fundamental yang solid tentang terminologi dan konsep dasar akuntansi biaya rumah sakit, sebagai fondasi untuk modul-modul selanjutnya.
 
 ---
 
 ### Modul 2: Cost Center Rumah Sakit
 
-**🎯 Tujuan:**
-Mampu mengidentifikasi unit layanan sebagai cost center.
+**🎯 Tujuan Pembelajaran:**
+Mampu mengidentifikasi, mengklasifikasikan, dan mendesain struktur cost center yang selaras dengan organisasi rumah sakit untuk keperluan akumulasi dan alokasi biaya.
 
-**📘 Materi:**
-- **Support/Overhead**: Administrasi, Keuangan, SDM, Laundry, CSSD, IPSRS, IT, Gizi
-- **Intermediate/Penunjang**: Lab, Radiologi, Farmasi, Kamar Bedah
-- **Revenue Center**: IGD, Poliklinik, Rawat Inap, OK
+---
 
-**🛠 Aktivitas di Webapp:**
+#### 2.1. Pengertian Cost Center
 
-| Langkah | Menu | Aksi |
-|---------|------|------|
-| 1 | `Master Data → Cost Centers` | Klik **Add New** |
-| 2 | Form | Isi kode, nama, tipe (`support`/`revenue`) |
-| 3 | Form | Isi building, floor, division jika perlu |
-| 4 | Form | Pilih parent (untuk hierarki) |
-| 5 | - | Simpan |
+**Definisi:**
+> **Cost Center** (Pusat Biaya) adalah unit organisasi, aktivitas, atau lokasi di mana biaya dikumpulkan, diukur, dan dikendalikan. Setiap cost center memiliki manajer/penanggungjawab yang accountable terhadap penggunaan sumber daya di unitnya.
 
-**📤 Output:**
-Struktur cost center siap dipakai untuk alokasi.
+**Karakteristik Cost Center:**
 
-**Sumber Data:** Struktur organisasi, bagan unit kerja  
-**Pemilik Data:** Direksi / Keuangan / SDM
+| Aspek | Deskripsi |
+|-------|-----------|
+| **Identitas** | Memiliki kode dan nama unik |
+| **Batasan** | Jelas secara organisasi atau fisik |
+| **Akuntabilitas** | Ada penanggung jawab/manajer |
+| **Measurable** | Aktivitas dan output dapat diukur |
+| **Cost Accumulation** | Tempat biaya dikumpulkan |
+
+**Mengapa Cost Center Penting?**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    FUNGSI COST CENTER                           │
+├─────────────────────────────────────────────────────────────────┤
+│  1. AKUMULASI BIAYA                                             │
+│     └── Mengumpulkan semua biaya yang terjadi di unit tersebut  │
+│                                                                 │
+│  2. PENGENDALIAN BIAYA                                          │
+│     └── Membandingkan realisasi vs anggaran per unit            │
+│                                                                 │
+│  3. ALOKASI BIAYA                                               │
+│     └── Sebagai source/target dalam proses cost allocation      │
+│                                                                 │
+│  4. PERHITUNGAN UNIT COST                                       │
+│     └── Basis untuk menghitung biaya per layanan                │
+│                                                                 │
+│  5. PELAPORAN MANAJERIAL                                        │
+│     └── Laporan kinerja per unit/departemen                     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 2.2. Klasifikasi Cost Center di Rumah Sakit
+
+Berdasarkan **fungsi dan karakteristik pendapatan**, cost center rumah sakit diklasifikasikan menjadi tiga kategori utama:
+
+##### a) Revenue Center (Pusat Pendapatan)
+
+**Definisi:**
+> Cost center yang **menghasilkan pendapatan langsung** dari layanan kepada pasien. Layanan ini dapat ditagihkan (billable) dan memiliki tarif.
+
+**Karakteristik:**
+- Berinteraksi langsung dengan pasien
+- Memiliki tarif layanan
+- Output dapat diukur (kunjungan, hari rawat, tindakan)
+- Menjadi **target akhir** alokasi biaya (final cost centre)
+
+**Contoh Revenue Center:**
+
+| Kategori | Unit | Satuan Output |
+|----------|------|---------------|
+| **Rawat Jalan** | Poliklinik Umum, Spesialis | Kunjungan (visit) |
+| **Rawat Inap** | Bangsal per Kelas, ICU, NICU, HCU | Hari rawat (patient-day) |
+| **Gawat Darurat** | IGD, Triage | Kunjungan |
+| **Kamar Operasi** | OK Mayor, OK Minor, OK Cito | Jumlah operasi |
+| **Penunjang Klinis** | Lab, Radiologi, Rehabilitasi Medik | Jumlah pemeriksaan |
+
+##### b) Support Center / Overhead Center (Pusat Pendukung)
+
+**Definisi:**
+> Cost center yang **tidak menghasilkan pendapatan langsung** tetapi menyediakan layanan pendukung untuk operasional rumah sakit secara keseluruhan.
+
+**Karakteristik:**
+- Tidak berinteraksi langsung dengan pasien dalam konteks klinis
+- Tidak memiliki tarif kepada pasien
+- Biayanya **dialokasikan** ke revenue center
+- Menjadi **source** dalam proses step-down allocation
+
+**Contoh Support Center:**
+
+| Kategori | Unit | Layanan yang Diberikan |
+|----------|------|------------------------|
+| **Administrasi Umum** | Direksi, Sekretariat | Manajemen, koordinasi |
+| **Keuangan** | Akuntansi, Kasir, Penagihan | Pengelolaan keuangan |
+| **SDM** | HRD, Diklat | Pengelolaan pegawai |
+| **Logistik** | Gudang, Pengadaan | Pengelolaan barang |
+| **Rumah Tangga** | Housekeeping, Laundry, Keamanan | Kebersihan, keamanan |
+| **Pemeliharaan** | IPSRS, IPAL | Maintenance gedung & alat |
+| **IT** | Sistem Informasi | Pengelolaan TI |
+| **Gizi** | Instalasi Gizi | Makanan pasien & pegawai |
+
+##### c) Intermediate Center (Pusat Penunjang Klinis)
+
+**Definisi:**
+> Cost center yang menyediakan **layanan klinis penunjang** yang dapat diperlakukan sebagai:
+> - **Final product** → dihitung unit cost tersendiri, ATAU
+> - **Intermediate** → biayanya dialokasikan ke rawat inap/jalan
+
+**Karakteristik:**
+- Berinteraksi dengan pasien tetapi bukan layanan utama
+- Memiliki tarif (jika sebagai final product)
+- Fleksibel: bisa sebagai penghasil pendapatan atau cost pool yang dialokasikan
+
+**Contoh Intermediate Center:**
+
+| Unit | Sebagai Final Product | Sebagai Intermediate |
+|------|----------------------|---------------------|
+| **Laboratorium** | Unit cost per tes lab | Biaya lab masuk ke unit cost rawat inap |
+| **Radiologi** | Unit cost per pemeriksaan | Biaya imaging masuk ke unit cost rawat jalan |
+| **Farmasi** | Unit cost per resep | Biaya farmasi dialokasikan ke layanan klinis |
+| **CSSD** | Unit cost per set steril | Biaya CSSD dialokasikan ke OK, rawat inap |
+
+> [!IMPORTANT]
+> **Keputusan Desain:** Tentukan di awal apakah unit penunjang diperlakukan sebagai final product atau intermediate. Keputusan ini mempengaruhi setup **Allocation Maps** dan hasil unit cost.
+
+---
+
+#### 2.3. Visualisasi Alur Biaya Antar Cost Center
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        ALUR BIAYA RUMAH SAKIT                           │
+│                         (Step-Down Method)                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  LAYER 1: OVERHEAD / SUPPORT                                            │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
+│  │Administrasi│ │ Keuangan │ │   SDM    │ │ Laundry  │ │   Gizi   │      │
+│  └─────┬────┘ └─────┬────┘ └─────┬────┘ └─────┬────┘ └─────┬────┘       │
+│        │            │            │            │            │            │
+│        ▼            ▼            ▼            ▼            ▼            │
+│  ══════════════════════════════════════════════════════════════════     │
+│                          ALOKASI STEP 1-5                               │
+│  ══════════════════════════════════════════════════════════════════     │
+│        │            │            │            │            │            │
+│        ▼            ▼            ▼            ▼            ▼            │
+│  LAYER 2: INTERMEDIATE (Opsional sebagai final)                         │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐                    │
+│  │   Lab    │ │ Radiologi│ │  Farmasi │ │   CSSD   │                    │
+│  └─────┬────┘ └─────┬────┘ └─────┬────┘ └─────┬────┘                    │
+│        │            │            │            │                         │
+│        ▼            ▼            ▼            ▼                         │
+│  ══════════════════════════════════════════════════════════════════     │
+│                     ALOKASI STEP 6-8 (jika intermediate)                │
+│  ══════════════════════════════════════════════════════════════════     │
+│        │            │            │            │                         │
+│        ▼            ▼            ▼            ▼                         │
+│  LAYER 3: REVENUE CENTER (Final Cost Centre)                            │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
+│  │   IGD    │ │Rawat Jalan│ │Rawat Inap│ │    OK    │ │   VK     │      │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
+│                                                                         │
+│  ─────────────────────────────────────────────────────────────────      │
+│  OUTPUT: Total Cost per Revenue Center → Unit Cost per Layanan          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 2.4. Hierarki Cost Center
+
+Dalam praktik, cost center dapat disusun secara **hierarkis** (parent-child) untuk kebutuhan:
+- **Agregasi pelaporan**: Lihat total biaya per direktorat/divisi
+- **Drill-down analysis**: Detail biaya per sub-unit
+- **Fleksibilitas alokasi**: Alokasi ke parent atau child
+
+**Contoh Hierarki:**
+
+```
+Rumah Sakit XYZ
+├── Bidang Pelayanan Medis
+│   ├── Instalasi Rawat Jalan
+│   │   ├── Poliklinik Umum
+│   │   ├── Poliklinik Penyakit Dalam
+│   │   ├── Poliklinik Bedah
+│   │   └── Poliklinik Anak
+│   ├── Instalasi Rawat Inap
+│   │   ├── Bangsal VIP
+│   │   ├── Bangsal Kelas 1
+│   │   ├── Bangsal Kelas 2
+│   │   ├── Bangsal Kelas 3
+│   │   └── ICU
+│   └── Instalasi Gawat Darurat
+│       └── IGD
+├── Bidang Penunjang Medis
+│   ├── Instalasi Laboratorium
+│   │   ├── Lab Klinik
+│   │   └── Lab Patologi Anatomi
+│   ├── Instalasi Radiologi
+│   │   ├── X-Ray
+│   │   ├── CT-Scan
+│   │   └── MRI
+│   └── Instalasi Farmasi
+└── Bagian Umum & Keuangan
+    ├── Bagian Keuangan
+    ├── Bagian SDM
+    ├── Bagian Umum
+    │   ├── Housekeeping
+    │   ├── Laundry
+    │   └── Keamanan
+    └── Bagian IT
+```
+
+**Implementasi di Webapp:**
+- Field `Parent` pada form Cost Center memungkinkan pembuatan hierarki
+- Hierarki ditampilkan di halaman index dengan indentasi
+
+---
+
+#### 2.5. Atribut Cost Center di Webapp KMKB
+
+Setiap cost center di webapp memiliki atribut berikut:
+
+| Atribut | Deskripsi | Contoh | Kegunaan |
+|---------|-----------|--------|----------|
+| **Kode** | Identifikasi unik | `CC-RI-VIP-01` | Referensi di laporan, import |
+| **Nama** | Nama lengkap unit | `Rawat Inap VIP` | Display, navigasi |
+| **Tipe** | Klasifikasi | `revenue` atau `support` | Logika alokasi |
+| **Building** | Gedung lokasi | `Gedung A` | Grouping, alokasi utilitas |
+| **Floor** | Lantai | `Lantai 2` | Alokasi kebersihan, listrik |
+| **Division** | Divisi/Direktorat | `Pelayanan Medis` | Struktur organisasi |
+| **Parent** | Induk hierarki | `Instalasi Rawat Inap` | Agregasi laporan |
+
+**Kode Penamaan yang Disarankan:**
+
+```
+Format: [PREFIX]-[KATEGORI]-[SUBKATEGORI]-[NOMOR]
+
+Contoh:
+├── CC-ADM-KEU-01    → Cost Center Administrasi Keuangan
+├── CC-SUP-LDR-01    → Cost Center Support Laundry
+├── CC-INT-LAB-01    → Cost Center Intermediate Lab Klinik
+├── CC-REV-RJ-01     → Cost Center Revenue Rawat Jalan Umum
+└── CC-REV-RI-VIP    → Cost Center Revenue Rawat Inap VIP
+```
+
+---
+
+#### 2.6. Best Practices Desain Cost Center
+
+| No | Prinsip | Penjelasan | ✅ Do | ❌ Don't |
+|----|---------|------------|-------|---------|
+| 1 | **Selaras dengan Organisasi** | Cost center mengikuti struktur organisasi RS | Satu unit kerja = satu cost center | Cost center tidak jelas siapa penanggungjawabnya |
+| 2 | **Granularitas Sesuai Kebutuhan** | Detail cukup untuk analisis yang diinginkan | Pisah bangsal per kelas jika perlu analisis per kelas | Terlalu detail tanpa kebutuhan analisis jelas |
+| 3 | **Konsistensi Sepanjang Periode** | Struktur tidak berubah-ubah | Pertahankan struktur selama periode analisis | Mengubah struktur setiap bulan |
+| 4 | **Measurable Output** | Ada ukuran output yang jelas | Revenue center punya satuan output | Cost center tanpa cara mengukur aktivitasnya |
+| 5 | **Dokumentasi Keputusan** | Catat alasan desain cost center | Simpan di Knowledge References | Tidak ada dokumentasi mengapa struktur dipilih |
+
+---
+
+#### 2.7. Menentukan Jumlah Cost Center yang Tepat
+
+**Faktor Pertimbangan:**
+
+| Aspek | Pertanyaan | Implikasi |
+|-------|------------|-----------|
+| **Tujuan Analisis** | Apakah perlu analisis per bangsal? | Jika ya → pisahkan per bangsal |
+| **Ketersediaan Data** | Apakah GL tersedia per sub-unit? | Jika tidak → gabungkan unit |
+| **Kapasitas Tim** | Berapa banyak data yang bisa dikelola? | Lebih detail = lebih banyak input |
+| **Benchmarking** | Apakah akan dibandingkan dengan RS lain? | Standarisasi struktur antar RS |
+
+**Rekomendasi Jumlah:**
+
+| Ukuran RS | Jumlah Cost Center | Keterangan |
+|-----------|-------------------|------------|
+| RS Tipe D (< 100 bed) | 15-25 | Agregasi layanan sejenis |
+| RS Tipe C (100-200 bed) | 25-40 | Detail moderat |
+| RS Tipe B (200-400 bed) | 40-60 | Detail per sub-instalasi |
+| RS Tipe A (> 400 bed) | 60-100+ | Detail per bangsal/poliklinik |
+
+---
+
+#### 🛠 Aktivitas Praktik di Webapp
+
+**Tujuan:** Membuat struktur cost center yang lengkap dan terorganisir.
+
+##### Langkah 1: Persiapan Data
+
+| No | Data yang Diperlukan | Sumber | Pemilik Data |
+|----|---------------------|--------|--------------|
+| 1 | Struktur organisasi RS | SK Direksi | Sekretariat/SDM |
+| 2 | Daftar unit kerja | Bagan organisasi | SDM |
+| 3 | Denah gedung & lantai | Sarpras | Bagian Umum |
+| 4 | Daftar layanan per unit | SIMRS | IT/Rekam Medis |
+
+##### Langkah 2: Mapping Organisasi → Cost Center
+
+| Struktur Organisasi | Cost Center | Tipe |
+|--------------------|-------------|------|
+| Direktorat Umum | → | `support` (parent) |
+| ├── Bagian Keuangan | → CC-SUP-KEU | `support` |
+| ├── Bagian SDM | → CC-SUP-SDM | `support` |
+| Direktorat Medis | → | `revenue` (parent) |
+| ├── Instalasi Rawat Jalan | → CC-REV-RJ | `revenue` |
+| ├── Instalasi Rawat Inap | → | `revenue` (parent) |
+| │   ├── Bangsal VIP | → CC-REV-RI-VIP | `revenue` |
+| │   ├── Bangsal Kelas 1 | → CC-REV-RI-K1 | `revenue` |
+
+##### Langkah 3: Input di Webapp
+
+| Langkah | Menu | Aksi | Tips |
+|---------|------|------|------|
+| 1 | `Master Data → Cost Centers` | Klik **Add New** | Mulai dari support centers |
+| 2 | Form → Kode | Isi kode unik | Gunakan format standar |
+| 3 | Form → Nama | Isi nama lengkap | Sesuai nama resmi unit |
+| 4 | Form → Tipe | Pilih `support` atau `revenue` | Support = tidak ada tarif |
+| 5 | Form → Building/Floor | Isi lokasi | Berguna untuk alokasi utilitas |
+| 6 | Form → Division | Isi divisi/direktorat | Untuk grouping laporan |
+| 7 | Form → Parent | Pilih induk (jika sub-unit) | Biarkan kosong untuk top-level |
+| 8 | - | Klik **Simpan** | Ulangi untuk semua unit |
+
+##### Langkah 4: Validasi Struktur
+
+| Checklist | ✓ |
+|-----------|---|
+| Semua unit kerja sudah ada cost center-nya | ☐ |
+| Revenue centers memiliki layanan/tarif | ☐ |
+| Hierarki parent-child sudah benar | ☐ |
+| Tidak ada duplikasi kode | ☐ |
+| Building/Floor terisi untuk kebutuhan alokasi | ☐ |
+
+---
+
+#### 📤 Output Modul
+
+Setelah menyelesaikan modul ini, Anda akan memiliki:
+
+1. **Struktur cost center lengkap** yang mencerminkan organisasi RS
+2. **Klasifikasi jelas** antara support dan revenue center
+3. **Hierarki terorganisir** untuk agregasi dan drill-down
+4. **Dokumentasi** keputusan desain cost center
+5. **Fondasi siap** untuk proses alokasi dan perhitungan unit cost
+
+**Checklist Pemahaman:**
+- [ ] Saya memahami perbedaan revenue, support, dan intermediate center
+- [ ] Saya dapat mendesain hierarki cost center sesuai struktur organisasi
+- [ ] Saya mengerti atribut-atribut cost center di webapp
+- [ ] Saya memahami pertimbangan granularitas cost center
+
+---
+
+**Sumber Data:** Struktur organisasi, bagan unit kerja, denah gedung  
+**Pemilik Data:** Direksi / Keuangan / SDM / Sarpras
 
 ---
 
 ### Modul 3: Konsep Alokasi Biaya (Step-Down)
 
-**🎯 Tujuan:**
-Memahami teori dasar sebelum menggunakan engine alokasi.
+**🎯 Tujuan Pembelajaran:**
+Memahami teori dasar cost allocation, jenis-jenis metode alokasi, dan konsep allocation driver sebagai fondasi sebelum menggunakan engine alokasi di webapp.
 
-**📘 Materi:**
-- Alokasi overhead
-- Allocation driver (dasar pembagi)
-- Step-down vs reciprocal method
+---
 
-**🛠 Aktivitas di Webapp:**
+#### 3.1. Mengapa Perlu Alokasi Biaya?
+
+**Permasalahan:**
+> Cost center pendukung (support) seperti Administrasi, Laundry, Gizi tidak menghasilkan pendapatan langsung, tetapi biayanya **harus diperhitungkan** dalam unit cost layanan yang dijual ke pasien.
+
+**Solusi:**
+> **Cost Allocation** adalah proses **mendistribusikan biaya** dari cost center pendukung (support/overhead) ke cost center penghasil pendapatan (revenue) menggunakan dasar pembagi yang logis.
+
+**Ilustrasi Kebutuhan Alokasi:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    MENGAPA ALOKASI DIPERLUKAN?                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  SEBELUM ALOKASI:                                                       │
+│  ┌────────────────┐      ┌────────────────┐      ┌────────────────┐     │
+│  │   Laundry      │      │   Rawat Inap   │      │   Poliklinik   │     │
+│  │   Rp 50 juta   │      │   Rp 200 juta  │      │   Rp 100 juta  │     │
+│  │   (Support)    │      │   (Revenue)    │      │   (Revenue)    │     │
+│  └────────────────┘      └────────────────┘      └────────────────┘     │
+│         ↓                                                               │
+│  Biaya Laundry tidak termasuk dalam unit cost layanan                   │
+│  → Unit cost TERLALU RENDAH → Tarif tidak menutup biaya sebenarnya      │
+│                                                                         │
+│  ═══════════════════════════════════════════════════════════════════    │
+│                                                                         │
+│  SETELAH ALOKASI:                                                       │
+│  ┌────────────────┐      ┌────────────────┐      ┌────────────────┐     │
+│  │   Laundry      │──┬──▶│   Rawat Inap   │      │   Poliklinik   │     │
+│  │   Rp 50 juta   │  │   │ Rp 200 + 40jt  │      │ Rp 100 + 10jt  │     │
+│  │   (Rp 0)       │  └──▶│ = Rp 240 juta  │      │ = Rp 110 juta  │     │
+│  └────────────────┘      └────────────────┘      └────────────────┘     │
+│                                                                         │
+│  → Biaya Laundry sudah masuk ke unit cost layanan                       │
+│  → Unit cost AKURAT → Tarif mencerminkan biaya sebenarnya               │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 3.2. Metode Alokasi Biaya
+
+Ada tiga metode utama dalam alokasi biaya overhead:
+
+##### a) Direct Allocation Method (Metode Langsung)
+
+**Konsep:**
+> Biaya support center dialokasikan **langsung ke revenue center** tanpa memperhitungkan layanan antar support center.
+
+**Karakteristik:**
+- ✅ Sederhana, mudah dipahami
+- ❌ Mengabaikan layanan antar support (misal: SDM melayani Laundry)
+- ❌ Kurang akurat
+
+**Diagram:**
+```
+Support Centers          Revenue Centers
+┌──────────┐            ┌──────────┐
+│ Laundry  │───────────▶│Rawat Inap│
+└──────────┘            └──────────┘
+┌──────────┐            ┌──────────┐
+│   SDM    │───────────▶│Poliklinik│
+└──────────┘            └──────────┘
+      ✗ Tidak ada alokasi antar support
+```
+
+##### b) Step-Down Allocation Method (Metode Bertahap) ⭐
+
+**Konsep:**
+> Biaya dialokasikan secara **bertahap/berurutan** dari support center yang paling banyak melayani unit lain, kemudian dilanjutkan ke support center berikutnya, hingga akhirnya semua biaya sampai ke revenue center.
+
+**Karakteristik:**
+- ✅ Memperhitungkan layanan antar support (satu arah)
+- ✅ Lebih akurat dari direct method
+- ✅ Praktis untuk implementasi
+- ⚠️ Urutan (sequence) alokasi mempengaruhi hasil
+
+**Diagram:**
+```
+Step 1: Administrasi dialokasikan ke semua unit (termasuk support lain)
+Step 2: SDM dialokasikan ke unit yang tersisa
+Step 3: Laundry dialokasikan ke revenue centers
+
+┌─────────────┐
+│Administrasi │══╦═══════════════════════════════════════════╗
+└─────────────┘  ║ Step 1                                    ║
+                 ▼                                           ▼
+          ┌──────────┐                                ┌──────────┐
+          │   SDM    │══════════════════════════╦════▶│Rawat Inap│
+          └──────────┘  Step 2                  ║     └──────────┘
+                 ▼                              ▼
+          ┌──────────┐                   ┌──────────┐
+          │ Laundry  │═══════════════════▶│Poliklinik│
+          └──────────┘  Step 3           └──────────┘
+```
+
+> [!IMPORTANT]
+> **Webapp KMKB menggunakan Step-Down Method** karena keseimbangan antara akurasi dan kepraktisan implementasi.
+
+##### c) Reciprocal Allocation Method (Metode Timbal Balik)
+
+**Konsep:**
+> Memperhitungkan layanan **timbal balik antar support center** menggunakan persamaan simultan atau iterasi.
+
+**Karakteristik:**
+- ✅ Paling akurat secara teoritis
+- ❌ Kompleks, membutuhkan perhitungan matriks
+- ❌ Sulit dijelaskan ke manajemen
+
+**Contoh Layanan Timbal Balik:**
+- SDM mengelola pegawai Laundry
+- Laundry mencuci seragam pegawai SDM
+
+> [!NOTE]
+> **Catatan Pengembangan:** Reciprocal method belum tersedia di webapp. Untuk kasus dengan layanan timbal balik signifikan, pertimbangkan estimasi proporsi dan masukkan dalam step-down sequence.
+
+---
+
+#### 3.3. Allocation Driver (Dasar Alokasi)
+
+**Definisi:**
+> **Allocation Driver** (atau **Cost Driver**) adalah dasar/basis yang digunakan untuk **mendistribusikan biaya** dari source cost center ke target cost center secara proporsional.
+
+**Kriteria Driver yang Baik:**
+
+| Kriteria | Penjelasan | Contoh Baik | Contoh Buruk |
+|----------|------------|-------------|--------------|
+| **Kausalitas** | Ada hubungan sebab-akibat dengan biaya | Kg linen untuk Laundry | Jumlah pasien untuk Laundry |
+| **Measurable** | Dapat diukur secara objektif | m² luas lantai | "Tingkat kompleksitas" |
+| **Tersedia** | Data tersedia dengan biaya wajar | Jumlah pegawai dari HRD | Survey waktu tiap aktivitas |
+| **Proporsional** | Mencerminkan penggunaan sumber daya | kWh listrik | Flat rate sama rata |
+
+**Contoh Allocation Driver per Support Center:**
+
+| Support Center | Driver yang Direkomendasikan | Alternatif | Satuan |
+|----------------|------------------------------|------------|--------|
+| **Administrasi Umum** | FTE Pegawai | Proporsi anggaran | orang |
+| **Keuangan** | Jumlah transaksi | FTE | transaksi |
+| **SDM** | FTE Pegawai | Jumlah formasi | orang |
+| **IT** | Jumlah PC/workstation | FTE | unit |
+| **Housekeeping** | Luas lantai | Jumlah tempat tidur | m² |
+| **Laundry** | Berat linen | Jumlah tempat tidur × LOS | kg |
+| **Gizi** | Jumlah porsi makanan | Hari rawat | porsi |
+| **IPSRS** | Nilai aset | Luas lantai | rupiah |
+| **Keamanan** | Luas lantai total | Jumlah pintu akses | m² |
+| **CSSD** | Jumlah set steril | Jumlah tindakan | set |
+
+---
+
+#### 3.4. Formula Alokasi Step-Down
+
+**Formula Dasar:**
+
+```
+Alokasi ke Target = Biaya Source × (Driver Target / Total Driver)
+```
+
+**Contoh Perhitungan:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  CONTOH ALOKASI LAUNDRY                                                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  Biaya Laundry Total: Rp 60.000.000                                     │
+│  Driver: Kg Linen                                                       │
+│                                                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │  Target Cost Center    │  Kg Linen  │  Proporsi  │  Alokasi     │    │
+│  ├────────────────────────┼────────────┼────────────┼──────────────│    │
+│  │  Rawat Inap VIP        │    500 kg  │    25%     │  Rp 15 juta  │    │
+│  │  Rawat Inap Kelas 1    │    400 kg  │    20%     │  Rp 12 juta  │    │
+│  │  Rawat Inap Kelas 2    │    600 kg  │    30%     │  Rp 18 juta  │    │
+│  │  Rawat Inap Kelas 3    │    300 kg  │    15%     │  Rp  9 juta  │    │
+│  │  Kamar Operasi         │    200 kg  │    10%     │  Rp  6 juta  │    │
+│  ├────────────────────────┼────────────┼────────────┼──────────────│    │
+│  │  TOTAL                 │  2.000 kg  │   100%     │  Rp 60 juta  │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+│                                                                         │
+│  Contoh Perhitungan Rawat Inap VIP:                                     │
+│  Alokasi = Rp 60.000.000 × (500 / 2.000) = Rp 15.000.000               │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 3.5. Step Sequence (Urutan Alokasi)
+
+**Prinsip Penentuan Urutan:**
+> Support center yang **paling banyak melayani** unit lain (termasuk support lain) dialokasikan **lebih dulu**.
+
+**Kriteria Penentuan Urutan:**
+
+| Prioritas | Kriteria | Contoh |
+|-----------|----------|--------|
+| 1 | Melayani semua unit (termasuk support) | Administrasi, SDM |
+| 2 | Melayani banyak unit tapi tidak semua | IT, Keuangan |
+| 3 | Melayani unit tertentu saja | Laundry (rawat inap), Gizi |
+| 4 | Melayani sedikit unit spesifik | CSSD (OK, rawat inap) |
+
+**Contoh Step Sequence:**
+
+```
+┌───────────────────────────────────────────────────────────────────────┐
+│  CONTOH URUTAN STEP-DOWN ALLOCATION                                   │
+├───────────────────────────────────────────────────────────────────────┤
+│                                                                       │
+│  Step │ Source Center    │ Driver        │ Target                    │
+│  ─────┼──────────────────┼───────────────┼─────────────────────────  │
+│   1   │ Administrasi     │ FTE Pegawai   │ Semua unit                │
+│   2   │ SDM              │ FTE Pegawai   │ Semua unit (kecuali Adm)  │
+│   3   │ Keuangan         │ Transaksi     │ Revenue + remaining supp  │
+│   4   │ IT               │ Workstation   │ Revenue + remaining supp  │
+│   5   │ Housekeeping     │ Luas Lantai   │ Revenue centers           │
+│   6   │ IPSRS            │ Nilai Aset    │ Revenue centers           │
+│   7   │ Laundry          │ Kg Linen      │ Rawat Inap, OK            │
+│   8   │ Gizi             │ Porsi Makan   │ Rawat Inap                │
+│   9   │ CSSD             │ Set Steril    │ OK, Rawat Inap            │
+│                                                                       │
+└───────────────────────────────────────────────────────────────────────┘
+```
+
+> [!TIP]
+> **Best Practice:** Dokumentasikan alasan pemilihan urutan di Knowledge References agar dapat dijelaskan ke auditor atau manajemen.
+
+---
+
+#### 3.6. Implementasi di Webapp KMKB
+
+##### a) Master Data → Allocation Drivers
+
+Sebelum membuat allocation map, definisikan driver yang akan digunakan:
+
+| Field | Deskripsi | Contoh |
+|-------|-----------|--------|
+| **Kode** | Identifikasi unik | `DRV-LUAS`, `DRV-FTE` |
+| **Nama** | Nama deskriptif | `Luas Lantai`, `FTE Pegawai` |
+| **Satuan** | Unit of Measurement | `m²`, `orang`, `kg` |
+| **Deskripsi** | Penjelasan penggunaan | "Untuk alokasi biaya fasilitas" |
+
+##### b) GL & Expenses → Driver Statistics
+
+Input nilai driver per cost center per periode:
+
+| Cost Center | Driver | Nilai | Periode |
+|-------------|--------|-------|---------|
+| Rawat Inap VIP | Luas Lantai | 500 m² | Jan 2025 |
+| Rawat Inap VIP | Kg Linen | 500 kg | Jan 2025 |
+| Rawat Inap Kelas 1 | Luas Lantai | 400 m² | Jan 2025 |
+| ... | ... | ... | ... |
+
+##### c) Allocation → Allocation Maps
+
+Setup aturan alokasi:
+
+| Field | Deskripsi |
+|-------|-----------|
+| **Source Cost Center** | Support center yang biayanya akan dialokasikan |
+| **Driver** | Dasar pembagi yang digunakan |
+| **Step Sequence** | Urutan eksekusi (angka kecil = duluan) |
+| **Target Cost Centers** | Otomatis ke semua revenue (atau pilih manual) |
+
+**Contoh Setup di Webapp:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ALLOCATION MAP - Laundry                                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Source:    CC-SUP-LDR (Instalasi Laundry)                              │
+│  Driver:    DRV-LINEN (Kg Linen)                                        │
+│  Sequence:  7                                                           │
+│  Targets:   CC-REV-RI-VIP, CC-REV-RI-K1, CC-REV-RI-K2,                  │
+│             CC-REV-RI-K3, CC-REV-OK                                     │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 🛠 Aktivitas Praktik di Webapp
+
+**Tujuan:** Memahami dan menyiapkan konfigurasi alokasi biaya.
+
+##### Langkah 1: Identifikasi Driver yang Dibutuhkan
+
+| Support Center | Driver Dipilih | Alasan | Sumber Data |
+|----------------|----------------|--------|-------------|
+| Administrasi | FTE Pegawai | Proporsional dengan beban manajemen | HRD |
+| Housekeeping | Luas Lantai | Biaya cleaning proporsional luas | Sarpras |
+| Laundry | Kg Linen | Direct causality | Log Laundry |
+| Gizi | Porsi Makan | Direct causality | Log Gizi |
+| ... | ... | ... | ... |
+
+##### Langkah 2: Setup Allocation Drivers
 
 | Langkah | Menu | Aksi |
 |---------|------|------|
-| 1 | `Master Data → Allocation Drivers` | Buat driver (Luas Lantai, FTE, Kg Laundry, dll) |
-| 2 | `Allocation → Allocation Maps` | Preview flow alokasi |
+| 1 | `Master Data → Allocation Drivers` | Klik **Add New** |
+| 2 | Form | Isi kode (mis: `DRV-LUAS`) |
+| 3 | Form | Isi nama (mis: `Luas Lantai`) |
+| 4 | Form | Pilih satuan dari UoM (mis: `m²`) |
+| 5 | - | Simpan, ulangi untuk driver lainnya |
 
-**📤 Output:**
-Dasar teori step-down allocation.
+##### Langkah 3: Tentukan Step Sequence
+
+| No | Support Center | Step | Driver | Alasan Urutan |
+|----|----------------|------|--------|---------------|
+| 1 | Administrasi | 1 | FTE | Melayani semua |
+| 2 | SDM | 2 | FTE | Melayani semua |
+| 3 | Keuangan | 3 | Transaksi | Melayani banyak |
+| ... | ... | ... | ... | ... |
+
+##### Langkah 4: Preview di Allocation Maps
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Allocation → Allocation Maps` | Lihat existing maps |
+| 2 | - | Klik **Add New** jika perlu |
+| 3 | Form | Pilih source, driver, sequence |
+| 4 | - | Preview targets yang akan menerima alokasi |
+| 5 | - | Validasi logika alokasi |
+
+---
+
+#### 📤 Output Modul
+
+Setelah menyelesaikan modul ini, Anda akan memiliki:
+
+1. **Pemahaman teoritis** tentang metode alokasi (direct, step-down, reciprocal)
+2. **Daftar allocation drivers** yang diperlukan untuk RS Anda
+3. **Step sequence** yang terdokumentasi dengan alasan
+4. **Konfigurasi Allocation Maps** siap di webapp
+5. **Fondasi** untuk menjalankan proses alokasi di Modul 6-8
+
+**Checklist Pemahaman:**
+- [ ] Saya memahami mengapa alokasi biaya diperlukan
+- [ ] Saya dapat membedakan metode direct, step-down, dan reciprocal
+- [ ] Saya mengerti kriteria pemilihan allocation driver yang baik
+- [ ] Saya memahami prinsip penentuan step sequence
+- [ ] Saya dapat melakukan setup Allocation Drivers dan Maps di webapp
+
+---
+
+**Referensi Teori:**
+- Cost Accounting: A Managerial Emphasis (Horngren, Datar, Rajan)
+- Costing of Health Services for Provider Payment (WHO)
+- Hospital Cost Accounting (Steven A. Finkler)
 
 ---
 

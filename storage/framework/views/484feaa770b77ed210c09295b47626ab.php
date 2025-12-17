@@ -318,7 +318,7 @@
                                     </a>
                                     <a href="<?php echo e(route('expense-categories.index')); ?>" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('expense-categories.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                        <span class="truncate">Cost Elements (COA Mapping)</span>
+                                        <span class="truncate">Expense Categories</span>
                                     </a>
                                     <a href="<?php echo e(route('allocation-drivers.index')); ?>" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('allocation-drivers.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
