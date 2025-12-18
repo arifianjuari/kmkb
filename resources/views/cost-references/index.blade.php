@@ -5,13 +5,13 @@
     <div>
         <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
             <div class="flex items-center gap-3 flex-shrink-0">
-                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Cost Catalogue') }}</h2>
+                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap">{{ __('Cost References') }}</h2>
                 <button
                     type="button"
                     class="flex-shrink-0 text-xs font-semibold text-biru-dongker-800 border border-biru-dongker-400 rounded-full w-5 h-5 flex items-center justify-center hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700 transition-colors"
                     onclick="const p = document.getElementById('cost-references-help'); if (p) { p.classList.toggle('hidden'); }"
                     aria-label="{{ __('What is Cost Reference?') }}"
-                    title="{{ __('What is Cost Catalogue?') }}"
+                    title="{{ __('What is Cost References?') }}"
                 >
                     i
                 </button>
@@ -40,13 +40,13 @@
                     {{ __('Export Excel') }}
                 </a>
                 <a href="{{ route('cost-references.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
-                    {{ __('Add New Cost Catalogue Item') }}
+                    {{ __('Add New Cost Reference Item') }}
                 </a>
             </div>
         </div>
         <div id="cost-references-help" class="mb-4 hidden text-xs text-gray-700 bg-biru-dongker-200 border border-biru-dongker-300 rounded-md p-3">
             <p class="mb-2">
-                <span class="font-semibold">Cost Catalogue</span> adalah "buku besar" daftar layanan & item di rumah sakit yang bisa muncul di pathway, unit cost, dan tarif.
+                <span class="font-semibold">Cost References</span> adalah "buku besar" daftar layanan & item di rumah sakit yang bisa muncul di pathway, unit cost, dan tarif.
             </p>
             <div class="mb-2">
                 <p class="font-semibold mb-1">Isi utama:</p>
@@ -260,7 +260,7 @@
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900">{{ __('Import Cost Catalogue') }}</h3>
+                <h3 class="text-lg font-medium text-gray-900">{{ __('Import Cost References') }}</h3>
                 <button onclick="closeImportModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
