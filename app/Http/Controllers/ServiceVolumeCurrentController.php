@@ -409,11 +409,21 @@ class ServiceVolumeCurrentController extends Controller
             $search
         );
 
+        // Get only polyclinics that have tindakan rawat jalan data for the selected year
         $poliOptions = DB::connection('simrs')->select("
-            SELECT kd_poli, nm_poli
-            FROM poliklinik
-            ORDER BY nm_poli ASC
-        ");
+            SELECT DISTINCT p.kd_poli, p.nm_poli, COUNT(*) as total_tindakan
+            FROM poliklinik p
+            INNER JOIN reg_periksa reg ON reg.kd_poli = p.kd_poli
+            INNER JOIN (
+                SELECT no_rawat, tgl_perawatan FROM rawat_jl_dr
+                UNION ALL
+                SELECT no_rawat, tgl_perawatan FROM rawat_jl_pr
+            ) AS rj ON rj.no_rawat = reg.no_rawat
+            WHERE YEAR(rj.tgl_perawatan) = ?
+            GROUP BY p.kd_poli, p.nm_poli
+            HAVING COUNT(*) > 0
+            ORDER BY p.nm_poli ASC
+        ", [$selectedYear]);
 
         return view('service-volume-current.tindakan-rawat-jalan', [
             'year' => $selectedYear,
@@ -2105,6 +2115,7 @@ class ServiceVolumeCurrentController extends Controller
         try {
             $items = $request->get('items', []);
             $year = (int) $request->get('year', now()->year);
+            $kdPoli = $request->get('kd_poli', null);
             
             if (empty($items)) {
                 return response()->json([
@@ -2165,6 +2176,13 @@ class ServiceVolumeCurrentController extends Controller
                         'last_synced_at' => now(),
                         'category' => 'tindakan_rj',
                     ]);
+                } else {
+                    // Update existing cost reference category and sync info
+                    $costReference->update([
+                        'category' => 'tindakan_rj',
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                    ]);
                 }
                 
                 // Sync monthly volumes
@@ -2184,6 +2202,7 @@ class ServiceVolumeCurrentController extends Controller
                             $existing->update([
                                 'total_quantity' => $volume,
                                 'category' => 'tindakan_rj',
+                                'kd_poli' => $kdPoli ?: $existing->kd_poli,
                             ]);
                         } else {
                             // Create new record
@@ -2194,6 +2213,7 @@ class ServiceVolumeCurrentController extends Controller
                                 'period_year' => $year,
                                 'total_quantity' => $volume,
                                 'category' => 'tindakan_rj',
+                                'kd_poli' => $kdPoli,
                             ]);
                         }
                         
@@ -2321,6 +2341,9 @@ class ServiceVolumeCurrentController extends Controller
         try {
             $items = $request->get('items', []);
             $year = (int) $request->get('year', now()->year);
+            $kdBangsalArray = $request->get('kd_bangsal', []);
+            // Take first bangsal if multiple selected, or null if empty
+            $kdBangsal = !empty($kdBangsalArray) ? (is_array($kdBangsalArray) ? $kdBangsalArray[0] : $kdBangsalArray) : null;
             
             if (empty($items)) {
                 return response()->json([
@@ -2381,6 +2404,13 @@ class ServiceVolumeCurrentController extends Controller
                         'last_synced_at' => now(),
                         'category' => 'tindakan_ri',
                     ]);
+                } else {
+                    // Update existing cost reference category and sync info
+                    $costReference->update([
+                        'category' => 'tindakan_ri',
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                    ]);
                 }
                 
                 // Sync monthly volumes
@@ -2400,6 +2430,7 @@ class ServiceVolumeCurrentController extends Controller
                             $existing->update([
                                 'total_quantity' => $volume,
                                 'category' => 'tindakan_ri',
+                                'kd_bangsal' => $kdBangsal ?: $existing->kd_bangsal,
                             ]);
                         } else {
                             // Create new record
@@ -2410,6 +2441,7 @@ class ServiceVolumeCurrentController extends Controller
                                 'period_year' => $year,
                                 'total_quantity' => $volume,
                                 'category' => 'tindakan_ri',
+                                'kd_bangsal' => $kdBangsal,
                             ]);
                         }
                         
@@ -3105,6 +3137,8 @@ class ServiceVolumeCurrentController extends Controller
         try {
             $items = $request->get('items', []);
             $year = (int) $request->get('year', now()->year);
+            $kdPoli = $request->get('kd_poli');
+            $status = $request->get('status');
             
             if (empty($items)) {
                 return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
@@ -3152,6 +3186,13 @@ class ServiceVolumeCurrentController extends Controller
                         'last_synced_at' => now(),
                         'category' => 'laboratorium',
                     ]);
+                } else {
+                    // Update existing cost reference category and sync info
+                    $costReference->update([
+                        'category' => 'laboratorium',
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                    ]);
                 }
                 
                 // Sync monthly volumes
@@ -3169,6 +3210,8 @@ class ServiceVolumeCurrentController extends Controller
                             $existing->update([
                                 'total_quantity' => $volume,
                                 'category' => 'laboratorium',
+                                'kd_poli' => $kdPoli ?: $existing->kd_poli,
+                                'status' => $status ?: $existing->status,
                             ]);
                         } else {
                             \App\Models\ServiceVolume::create([
@@ -3178,6 +3221,8 @@ class ServiceVolumeCurrentController extends Controller
                                 'period_year' => $year,
                                 'total_quantity' => $volume,
                                 'category' => 'laboratorium',
+                                'kd_poli' => $kdPoli,
+                                'status' => $status,
                             ]);
                         }
                         $syncedCount++;
@@ -3197,6 +3242,147 @@ class ServiceVolumeCurrentController extends Controller
     }
 
     /**
+     * Sync ALL laboratorium data from SIMRS to service volumes with auto-status detection
+     * This queries SIMRS directly and groups by kode AND status (Ralan/Ranap)
+     */
+    public function syncAllLaboratoriumToServiceVolumes(Request $request)
+    {
+        try {
+            $year = (int) $request->get('year', now()->year);
+            $kdPoli = $request->get('kd_poli');
+            
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+            }
+            
+            $user = auth()->user();
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            
+            if (!$hospitalId) {
+                return response()->json(['success' => false, 'message' => 'User has no associated hospital'], 400);
+            }
+            
+            // Query SIMRS directly with grouping by kode AND status
+            $sql = "
+                SELECT
+                    jpl.kd_jenis_prw,
+                    jpl.nm_perawatan,
+                    jpl.total_byr AS harga,
+                    pl.status,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 1 THEN 1 ELSE 0 END) AS jan,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 2 THEN 1 ELSE 0 END) AS feb,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 3 THEN 1 ELSE 0 END) AS mar,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 4 THEN 1 ELSE 0 END) AS apr,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 5 THEN 1 ELSE 0 END) AS may,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 6 THEN 1 ELSE 0 END) AS jun,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 7 THEN 1 ELSE 0 END) AS jul,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 8 THEN 1 ELSE 0 END) AS aug,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 9 THEN 1 ELSE 0 END) AS sep,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 10 THEN 1 ELSE 0 END) AS oct,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 11 THEN 1 ELSE 0 END) AS nov,
+                    SUM(CASE WHEN MONTH(pl.tgl_periksa) = 12 THEN 1 ELSE 0 END) AS `dec`
+                FROM periksa_lab pl
+                INNER JOIN jns_perawatan_lab jpl ON jpl.kd_jenis_prw = pl.kd_jenis_prw
+                LEFT JOIN reg_periksa reg ON reg.no_rawat = pl.no_rawat
+                WHERE YEAR(pl.tgl_periksa) = ?
+            ";
+            
+            $bindings = [$year];
+            
+            if ($kdPoli) {
+                $sql .= " AND reg.kd_poli = ? ";
+                $bindings[] = $kdPoli;
+            }
+            
+            $sql .= "
+                GROUP BY jpl.kd_jenis_prw, jpl.nm_perawatan, jpl.total_byr, pl.status
+                ORDER BY jpl.nm_perawatan ASC, pl.status ASC
+            ";
+            
+            $rows = DB::connection('simrs')->select($sql, $bindings);
+            
+            $syncedCount = 0;
+            $monthMap = [
+                'jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4,
+                'may' => 5, 'jun' => 6, 'jul' => 7, 'aug' => 8,
+                'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12
+            ];
+            
+            foreach ($rows as $row) {
+                // First, ensure the item exists in cost references
+                $costReference = \App\Models\CostReference::where('service_code', $row->kd_jenis_prw)
+                    ->where('hospital_id', $hospitalId)
+                    ->first();
+                
+                if (!$costReference) {
+                    $costReference = \App\Models\CostReference::create([
+                        'service_code' => $row->kd_jenis_prw,
+                        'service_description' => $row->nm_perawatan,
+                        'purchase_price' => $row->harga ?? 0,
+                        'standard_cost' => $row->harga ?? 0,
+                        'unit' => 'Pemeriksaan',
+                        'source' => 'Service Volume Current - Laboratorium',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'laboratorium',
+                    ]);
+                } else {
+                    $costReference->update([
+                        'category' => 'laboratorium',
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                    ]);
+                }
+                
+                // Sync monthly volumes with status
+                foreach ($monthMap as $monthKey => $monthNumber) {
+                    $volume = (int) ($row->$monthKey ?? 0);
+                    
+                    if ($volume > 0) {
+                        // Find existing record with same status
+                        $existing = \App\Models\ServiceVolume::where('hospital_id', $hospitalId)
+                            ->where('cost_reference_id', $costReference->id)
+                            ->where('period_month', $monthNumber)
+                            ->where('period_year', $year)
+                            ->where('status', $row->status)
+                            ->first();
+                        
+                        if ($existing) {
+                            $existing->update([
+                                'total_quantity' => $volume,
+                                'category' => 'laboratorium',
+                                'kd_poli' => $kdPoli ?: $existing->kd_poli,
+                            ]);
+                        } else {
+                            \App\Models\ServiceVolume::create([
+                                'hospital_id' => $hospitalId,
+                                'cost_reference_id' => $costReference->id,
+                                'period_month' => $monthNumber,
+                                'period_year' => $year,
+                                'total_quantity' => $volume,
+                                'category' => 'laboratorium',
+                                'kd_poli' => $kdPoli,
+                                'status' => $row->status,
+                            ]);
+                        }
+                        $syncedCount++;
+                    }
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount volume records (Ralan + Ranap) successfully synced to service volumes"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing all laboratorium to service volumes: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error syncing data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Sync selected radiologi from service volume current to service volumes
      */
     public function syncRadiologiToServiceVolumes(Request $request)
@@ -3204,6 +3390,8 @@ class ServiceVolumeCurrentController extends Controller
         try {
             $items = $request->get('items', []);
             $year = (int) $request->get('year', now()->year);
+            $kdPoli = $request->get('kd_poli');
+            $status = $request->get('status');
             
             if (empty($items)) {
                 return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
@@ -3250,6 +3438,12 @@ class ServiceVolumeCurrentController extends Controller
                         'last_synced_at' => now(),
                         'category' => 'radiologi',
                     ]);
+                } else {
+                    $costReference->update([
+                        'category' => 'radiologi',
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                    ]);
                 }
                 
                 foreach ($monthMap as $monthKey => $monthNumber) {
@@ -3266,6 +3460,8 @@ class ServiceVolumeCurrentController extends Controller
                             $existing->update([
                                 'total_quantity' => $volume,
                                 'category' => 'radiologi',
+                                'kd_poli' => $kdPoli ?: $existing->kd_poli,
+                                'status' => $status ?: $existing->status,
                             ]);
                         } else {
                             \App\Models\ServiceVolume::create([
@@ -3275,6 +3471,8 @@ class ServiceVolumeCurrentController extends Controller
                                 'period_year' => $year,
                                 'total_quantity' => $volume,
                                 'category' => 'radiologi',
+                                'kd_poli' => $kdPoli,
+                                'status' => $status,
                             ]);
                         }
                         $syncedCount++;
@@ -3294,6 +3492,147 @@ class ServiceVolumeCurrentController extends Controller
     }
 
     /**
+     * Sync ALL radiologi data from SIMRS to service volumes with auto-status detection
+     * This queries SIMRS directly and groups by kode AND status (Ralan/Ranap)
+     */
+    public function syncAllRadiologiToServiceVolumes(Request $request)
+    {
+        try {
+            $year = (int) $request->get('year', now()->year);
+            $kdPoli = $request->get('kd_poli');
+            
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+            }
+            
+            $user = auth()->user();
+            $hospitalId = session('hospital_id', $user->hospital_id);
+            
+            if (!$hospitalId) {
+                return response()->json(['success' => false, 'message' => 'User has no associated hospital'], 400);
+            }
+            
+            // Query SIMRS directly with grouping by kode AND status
+            $sql = "
+                SELECT
+                    jpr.kd_jenis_prw,
+                    jpr.nm_perawatan,
+                    jpr.total_byr AS harga,
+                    pr.status,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 1 THEN 1 ELSE 0 END) AS jan,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 2 THEN 1 ELSE 0 END) AS feb,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 3 THEN 1 ELSE 0 END) AS mar,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 4 THEN 1 ELSE 0 END) AS apr,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 5 THEN 1 ELSE 0 END) AS may,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 6 THEN 1 ELSE 0 END) AS jun,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 7 THEN 1 ELSE 0 END) AS jul,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 8 THEN 1 ELSE 0 END) AS aug,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 9 THEN 1 ELSE 0 END) AS sep,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 10 THEN 1 ELSE 0 END) AS oct,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 11 THEN 1 ELSE 0 END) AS nov,
+                    SUM(CASE WHEN MONTH(pr.tgl_periksa) = 12 THEN 1 ELSE 0 END) AS `dec`
+                FROM periksa_radiologi pr
+                INNER JOIN jns_perawatan_radiologi jpr ON jpr.kd_jenis_prw = pr.kd_jenis_prw
+                LEFT JOIN reg_periksa reg ON reg.no_rawat = pr.no_rawat
+                WHERE YEAR(pr.tgl_periksa) = ?
+            ";
+            
+            $bindings = [$year];
+            
+            if ($kdPoli) {
+                $sql .= " AND reg.kd_poli = ? ";
+                $bindings[] = $kdPoli;
+            }
+            
+            $sql .= "
+                GROUP BY jpr.kd_jenis_prw, jpr.nm_perawatan, jpr.total_byr, pr.status
+                ORDER BY jpr.nm_perawatan ASC, pr.status ASC
+            ";
+            
+            $rows = DB::connection('simrs')->select($sql, $bindings);
+            
+            $syncedCount = 0;
+            $monthMap = [
+                'jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4,
+                'may' => 5, 'jun' => 6, 'jul' => 7, 'aug' => 8,
+                'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12
+            ];
+            
+            foreach ($rows as $row) {
+                // First, ensure the item exists in cost references
+                $costReference = \App\Models\CostReference::where('service_code', $row->kd_jenis_prw)
+                    ->where('hospital_id', $hospitalId)
+                    ->first();
+                
+                if (!$costReference) {
+                    $costReference = \App\Models\CostReference::create([
+                        'service_code' => $row->kd_jenis_prw,
+                        'service_description' => $row->nm_perawatan,
+                        'purchase_price' => $row->harga ?? 0,
+                        'standard_cost' => $row->harga ?? 0,
+                        'unit' => 'Pemeriksaan',
+                        'source' => 'Service Volume Current - Radiologi',
+                        'hospital_id' => $hospitalId,
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                        'category' => 'radiologi',
+                    ]);
+                } else {
+                    $costReference->update([
+                        'category' => 'radiologi',
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                    ]);
+                }
+                
+                // Sync monthly volumes with status
+                foreach ($monthMap as $monthKey => $monthNumber) {
+                    $volume = (int) ($row->$monthKey ?? 0);
+                    
+                    if ($volume > 0) {
+                        // Find existing record with same status
+                        $existing = \App\Models\ServiceVolume::where('hospital_id', $hospitalId)
+                            ->where('cost_reference_id', $costReference->id)
+                            ->where('period_month', $monthNumber)
+                            ->where('period_year', $year)
+                            ->where('status', $row->status)
+                            ->first();
+                        
+                        if ($existing) {
+                            $existing->update([
+                                'total_quantity' => $volume,
+                                'category' => 'radiologi',
+                                'kd_poli' => $kdPoli ?: $existing->kd_poli,
+                            ]);
+                        } else {
+                            \App\Models\ServiceVolume::create([
+                                'hospital_id' => $hospitalId,
+                                'cost_reference_id' => $costReference->id,
+                                'period_month' => $monthNumber,
+                                'period_year' => $year,
+                                'total_quantity' => $volume,
+                                'category' => 'radiologi',
+                                'kd_poli' => $kdPoli,
+                                'status' => $row->status,
+                            ]);
+                        }
+                        $syncedCount++;
+                    }
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'synced_count' => $syncedCount,
+                'message' => "$syncedCount volume records (Ralan + Ranap) successfully synced to service volumes"
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error syncing all radiologi to service volumes: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error syncing data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Sync selected operasi from service volume current to service volumes
      */
     public function syncOperasiToServiceVolumes(Request $request)
@@ -3301,6 +3640,8 @@ class ServiceVolumeCurrentController extends Controller
         try {
             $items = $request->get('items', []);
             $year = (int) $request->get('year', now()->year);
+            $kdPoli = $request->get('kd_poli');
+            $status = $request->get('status');
             
             if (empty($items)) {
                 return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
@@ -3347,6 +3688,12 @@ class ServiceVolumeCurrentController extends Controller
                         'last_synced_at' => now(),
                         'category' => 'operasi',
                     ]);
+                } else {
+                    $costReference->update([
+                        'category' => 'operasi',
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                    ]);
                 }
                 
                 foreach ($monthMap as $monthKey => $monthNumber) {
@@ -3363,6 +3710,8 @@ class ServiceVolumeCurrentController extends Controller
                             $existing->update([
                                 'total_quantity' => $volume,
                                 'category' => 'operasi',
+                                'kd_poli' => $kdPoli ?: $existing->kd_poli,
+                                'status' => $status ?: $existing->status,
                             ]);
                         } else {
                             \App\Models\ServiceVolume::create([
@@ -3372,6 +3721,8 @@ class ServiceVolumeCurrentController extends Controller
                                 'period_year' => $year,
                                 'total_quantity' => $volume,
                                 'category' => 'operasi',
+                                'kd_poli' => $kdPoli,
+                                'status' => $status,
                             ]);
                         }
                         $syncedCount++;
@@ -3398,6 +3749,7 @@ class ServiceVolumeCurrentController extends Controller
         try {
             $items = $request->get('items', []);
             $year = (int) $request->get('year', now()->year);
+            $kdBangsal = $request->get('kd_bangsal');
             
             if (empty($items)) {
                 return response()->json(['success' => false, 'message' => 'No items provided for sync'], 400);
@@ -3444,6 +3796,12 @@ class ServiceVolumeCurrentController extends Controller
                         'last_synced_at' => now(),
                         'category' => 'kamar',
                     ]);
+                } else {
+                    $costReference->update([
+                        'category' => 'kamar',
+                        'is_synced_from_simrs' => true,
+                        'last_synced_at' => now(),
+                    ]);
                 }
                 
                 foreach ($monthMap as $monthKey => $monthNumber) {
@@ -3460,6 +3818,7 @@ class ServiceVolumeCurrentController extends Controller
                             $existing->update([
                                 'total_quantity' => $volume,
                                 'category' => 'kamar',
+                                'kd_bangsal' => $kdBangsal ?: $existing->kd_bangsal,
                             ]);
                         } else {
                             \App\Models\ServiceVolume::create([
@@ -3469,6 +3828,7 @@ class ServiceVolumeCurrentController extends Controller
                                 'period_year' => $year,
                                 'total_quantity' => $volume,
                                 'category' => 'kamar',
+                                'kd_bangsal' => $kdBangsal,
                             ]);
                         }
                         $syncedCount++;

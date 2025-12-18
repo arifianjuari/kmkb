@@ -28,57 +28,171 @@ class ServiceVolumeController extends Controller
         $search = $request->get('search');
         $periodYear = $request->get('period_year', date('Y'));
         $category = $request->get('category');
+        $kdPoli = $request->get('kd_poli');
+        $kdBangsal = $request->get('kd_bangsal');
+        $status = $request->get('status');
         
-        // Base query for counts (Search only, NO Category filter yet)
-        $baseQuery = CostReference::where('hospital_id', hospital('id'))
+        // Base query for service_volumes with joined cost_references for the selected year
+        $baseVolumeQuery = ServiceVolume::where('service_volumes.hospital_id', hospital('id'))
+            ->where('period_year', $periodYear)
+            ->join('cost_references', 'service_volumes.cost_reference_id', '=', 'cost_references.id')
             ->when($search, function($q) use ($search) {
                 return $q->where(function($sub) use ($search) {
-                    $sub->where('service_code', 'LIKE', "%{$search}%")
-                        ->orWhere('service_description', 'LIKE', "%{$search}%");
+                    $sub->where('cost_references.service_code', 'LIKE', "%{$search}%")
+                        ->orWhere('cost_references.service_description', 'LIKE', "%{$search}%");
                 });
             });
 
-        // Calculate counts for tabs
+        // Get unique cost_reference_ids that have volumes in the selected year
+        $serviceIdsBase = (clone $baseVolumeQuery)->select('cost_reference_id')->distinct()->pluck('cost_reference_id')->toArray();
+        
+        // Calculate counts for tabs based on actual service_volumes data
         $categoryCounts = [
-            'all' => $baseQuery->count(),
-            'barang' => (clone $baseQuery)->where('category', 'barang')->count(),
-            'tindakan_rj' => (clone $baseQuery)->where('category', 'tindakan_rj')->count(),
-            'tindakan_ri' => (clone $baseQuery)->where('category', 'tindakan_ri')->count(),
-            'laboratorium' => (clone $baseQuery)->where('category', 'laboratorium')->count(),
-            'radiologi' => (clone $baseQuery)->where('category', 'radiologi')->count(),
-            'operasi' => (clone $baseQuery)->where('category', 'operasi')->count(),
-            'kamar' => (clone $baseQuery)->where('category', 'kamar')->count(),
+            'all' => count($serviceIdsBase),
+            'barang' => (clone $baseVolumeQuery)->where('cost_references.category', 'barang')->distinct('cost_reference_id')->count('cost_reference_id'),
+            'tindakan_rj' => (clone $baseVolumeQuery)->where('cost_references.category', 'tindakan_rj')->distinct('cost_reference_id')->count('cost_reference_id'),
+            'tindakan_ri' => (clone $baseVolumeQuery)->where('cost_references.category', 'tindakan_ri')->distinct('cost_reference_id')->count('cost_reference_id'),
+            'laboratorium' => (clone $baseVolumeQuery)->where('cost_references.category', 'laboratorium')->distinct('cost_reference_id')->count('cost_reference_id'),
+            'radiologi' => (clone $baseVolumeQuery)->where('cost_references.category', 'radiologi')->distinct('cost_reference_id')->count('cost_reference_id'),
+            'operasi' => (clone $baseVolumeQuery)->where('cost_references.category', 'operasi')->distinct('cost_reference_id')->count('cost_reference_id'),
+            'kamar' => (clone $baseVolumeQuery)->where('cost_references.category', 'kamar')->distinct('cost_reference_id')->count('cost_reference_id'),
         ];
 
-        // Clone base query for the main list and apply category filter
-        $query = clone $baseQuery;
+        // Build query to get cost_reference_ids with filters
+        $volumeQuery = clone $baseVolumeQuery;
         
         if ($category) {
-            $query->where('category', $category);
+            $volumeQuery->where('cost_references.category', $category);
         }
-
-        // 1. Get paginated services
-        $services = $query->orderBy('category')
+        
+        if ($kdPoli) {
+            $volumeQuery->where('service_volumes.kd_poli', $kdPoli);
+        }
+        
+        if ($kdBangsal) {
+            $volumeQuery->where('service_volumes.kd_bangsal', $kdBangsal);
+        }
+        
+        if ($status) {
+            $volumeQuery->where('service_volumes.status', $status);
+        }
+        
+        // Get unique cost_reference_ids with the applied filters
+        $filteredServiceIds = $volumeQuery->select('cost_reference_id')->distinct()->pluck('cost_reference_id')->toArray();
+        
+        // Get paginated services from cost_references based on the filtered IDs
+        $services = CostReference::whereIn('id', $filteredServiceIds)
+            ->orderBy('category')
             ->orderBy('service_description')
-            ->paginate(50) // Higher pagination for matrix view
+            ->paginate(50)
             ->appends($request->query());
 
-        // 2. Fetch volumes for these services for the selected year
+        // Fetch volumes for these services for the selected year
         $serviceIds = $services->pluck('id');
-        $volumes = ServiceVolume::where('hospital_id', hospital('id'))
+        $volumesQueryData = ServiceVolume::where('hospital_id', hospital('id'))
             ->whereIn('cost_reference_id', $serviceIds)
-            ->where('period_year', $periodYear)
+            ->where('period_year', $periodYear);
+        
+        if ($kdPoli) {
+            $volumesQueryData->where('kd_poli', $kdPoli);
+        }
+        
+        if ($kdBangsal) {
+            $volumesQueryData->where('kd_bangsal', $kdBangsal);
+        }
+        
+        if ($status) {
+            $volumesQueryData->where('status', $status);
+        }
+        
+        $volumes = $volumesQueryData
             ->selectRaw('cost_reference_id, period_month, SUM(total_quantity) as total_quantity')
             ->groupBy('cost_reference_id', 'period_month')
             ->get();
 
-        // 3. Map volumes to structure: [cost_reference_id][month] = quantity
+        // Map volumes to structure: [cost_reference_id][month] = quantity
         $volumeMap = [];
         foreach ($volumes as $vol) {
             $volumeMap[$vol->cost_reference_id][$vol->period_month] = $vol->total_quantity;
         }
         
-        $costReferences = CostReference::where('hospital_id', hospital('id'))->orderBy('service_code')->get(); // kept for filters/modals if needed
+        // Get available polyclinics that have data in service_volumes for the selected year
+        $poliCodes = ServiceVolume::where('hospital_id', hospital('id'))
+            ->where('period_year', $periodYear)
+            ->whereNotNull('kd_poli')
+            ->where('kd_poli', '!=', '')
+            ->select('kd_poli')
+            ->selectRaw('COUNT(DISTINCT cost_reference_id) as total')
+            ->groupBy('kd_poli')
+            ->orderBy('kd_poli')
+            ->get();
+        
+        // Get polyclinic names from SIMRS
+        $poliOptions = collect();
+        if ($poliCodes->count() > 0) {
+            try {
+                $poliNames = \DB::connection('simrs')
+                    ->table('poliklinik')
+                    ->whereIn('kd_poli', $poliCodes->pluck('kd_poli'))
+                    ->pluck('nm_poli', 'kd_poli');
+                
+                foreach ($poliCodes as $poli) {
+                    $poliOptions->push((object)[
+                        'kd_poli' => $poli->kd_poli,
+                        'nm_poli' => $poliNames[$poli->kd_poli] ?? $poli->kd_poli,
+                        'total' => $poli->total
+                    ]);
+                }
+            } catch (\Exception $e) {
+                // Fallback to just using codes if SIMRS connection fails
+                $poliOptions = $poliCodes;
+            }
+        }
+        
+        // Get available wards (bangsal) that have data in service_volumes for the selected year
+        $bangsalCodes = ServiceVolume::where('hospital_id', hospital('id'))
+            ->where('period_year', $periodYear)
+            ->whereNotNull('kd_bangsal')
+            ->where('kd_bangsal', '!=', '')
+            ->select('kd_bangsal')
+            ->selectRaw('COUNT(DISTINCT cost_reference_id) as total')
+            ->groupBy('kd_bangsal')
+            ->orderBy('kd_bangsal')
+            ->get();
+        
+        // Get ward names from SIMRS
+        $bangsalOptions = collect();
+        if ($bangsalCodes->count() > 0) {
+            try {
+                $bangsalNames = \DB::connection('simrs')
+                    ->table('bangsal')
+                    ->whereIn('kd_bangsal', $bangsalCodes->pluck('kd_bangsal'))
+                    ->pluck('nm_bangsal', 'kd_bangsal');
+                
+                foreach ($bangsalCodes as $bangsal) {
+                    $bangsalOptions->push((object)[
+                        'kd_bangsal' => $bangsal->kd_bangsal,
+                        'nm_bangsal' => $bangsalNames[$bangsal->kd_bangsal] ?? $bangsal->kd_bangsal,
+                        'total' => $bangsal->total
+                    ]);
+                }
+            } catch (\Exception $e) {
+                // Fallback to just using codes if SIMRS connection fails
+                $bangsalOptions = $bangsalCodes;
+            }
+        }
+        
+        // Get available statuses (Ralan/Ranap) that have data in service_volumes for the selected year
+        $statusOptions = ServiceVolume::where('hospital_id', hospital('id'))
+            ->where('period_year', $periodYear)
+            ->whereNotNull('status')
+            ->where('status', '!=', '')
+            ->select('status')
+            ->selectRaw('COUNT(DISTINCT cost_reference_id) as total')
+            ->groupBy('status')
+            ->orderBy('status')
+            ->get();
+        
         $categoryOptions = self::CATEGORY_OPTIONS;
         
         return view('service-volumes.index', compact(
@@ -88,7 +202,13 @@ class ServiceVolumeController extends Controller
             'periodYear', 
             'category', 
             'categoryOptions',
-            'categoryCounts'
+            'categoryCounts',
+            'poliOptions',
+            'kdPoli',
+            'bangsalOptions',
+            'kdBangsal',
+            'statusOptions',
+            'status'
         ));
     }
 

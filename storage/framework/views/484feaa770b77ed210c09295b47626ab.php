@@ -346,7 +346,7 @@
                                 <div x-show="isGroupOpen('setup-service-catalog')" class="ml-4 mt-0.5 space-y-0.5">
                                     <a href="<?php echo e(route('cost-references.index')); ?>" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('cost-references.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
-                                        <span class="truncate">Cost Catalogue</span>
+                                        <span class="truncate">Cost References</span>
                                     </a>
                                     <a href="<?php echo e(route('rvu-values.index')); ?>" 
                                        class="flex items-center px-3 py-1 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('rvu-values.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">

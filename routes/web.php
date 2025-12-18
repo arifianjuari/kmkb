@@ -291,10 +291,12 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         Route::get('/laboratorium/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportLaboratorium'])->name('svc-current.laboratorium.export');
         Route::post('/laboratorium/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncLaboratoriumToCostReferences'])->name('svc-current.laboratorium.sync');
         Route::post('/laboratorium/sync-to-service-volumes', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncLaboratoriumToServiceVolumes'])->name('svc-current.laboratorium.sync-volumes');
+        Route::post('/laboratorium/sync-all-to-service-volumes', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncAllLaboratoriumToServiceVolumes'])->name('svc-current.laboratorium.sync-all-volumes');
         Route::get('/radiologi', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'radiologi'])->name('svc-current.radiologi');
         Route::get('/radiologi/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportRadiologi'])->name('svc-current.radiologi.export');
         Route::post('/radiologi/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncRadiologiToCostReferences'])->name('svc-current.radiologi.sync');
         Route::post('/radiologi/sync-to-service-volumes', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncRadiologiToServiceVolumes'])->name('svc-current.radiologi.sync-volumes');
+        Route::post('/radiologi/sync-all-to-service-volumes', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncAllRadiologiToServiceVolumes'])->name('svc-current.radiologi.sync-all-volumes');
         Route::get('/operasi', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'operasi'])->name('svc-current.operasi');
         Route::get('/operasi/export', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'exportOperasi'])->name('svc-current.operasi.export');
         Route::post('/operasi/sync-to-cost-references', [App\Http\Controllers\ServiceVolumeCurrentController::class, 'syncOperasiToCostReferences'])->name('svc-current.operasi.sync');

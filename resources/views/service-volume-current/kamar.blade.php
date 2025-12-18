@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({ items: itemsToSync, year: {{ $year }} }),
+            body: JSON.stringify({ items: itemsToSync, year: {{ $year }}, kd_bangsal: '{{ isset($bangsal) && count($bangsal) > 0 ? $bangsal[0] : '' }}' }),
             credentials: 'same-origin'
         })
         .then(response => response.json())

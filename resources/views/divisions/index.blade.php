@@ -305,10 +305,15 @@
                     }
                 }
 
-                // Initialize: all children are expanded by default
+                // Initialize: all children are collapsed by default
                 document.addEventListener('DOMContentLoaded', function() {
-                    // All children are visible by default, so chevrons should show down arrow
-                    // This is already the default state from the HTML
+                    // Hide all non-root rows (rows with a parent_id)
+                    const allRows = document.querySelectorAll('tr.division-row');
+                    allRows.forEach(row => {
+                        if (row.getAttribute('data-parent-id')) {
+                            row.classList.add('hidden');
+                        }
+                    });
                 });
             </script>
             @endpush
@@ -352,13 +357,23 @@
                                         {{ $division->is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="{{ route('divisions.edit', $division) }}" class="text-biru-dongker-800 hover:text-biru-dongker-900 mr-3">Edit</a>
-                                    <form action="{{ route('divisions.destroy', $division) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this organization unit?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
-                                    </form>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('divisions.edit', $division) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-800 hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm2.92 2.83H5v-.92l9.06-9.06.92.92L5.92 20.08ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                                            </svg>
+                                        </a>
+                                        <form action="{{ route('divisions.destroy', $division) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('Are you sure you want to delete this organization unit?') }}')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500" title="{{ __('Delete') }}" aria-label="{{ __('Delete') }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                                                    <path d="M9 3h6a1 1 0 0 1 1 1v1h4v2H4V5h4V4a1 1 0 0 1 1-1Zm-3 6h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 9Zm3 2v8h2v-8H9Zm4 0v8h2v-8h-2Z"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

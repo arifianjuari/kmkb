@@ -17,6 +17,9 @@ class ServiceVolume extends Model
         'cost_reference_id',
         'tariff_class_id',
         'category',
+        'kd_poli',
+        'kd_bangsal',
+        'status',
         'total_quantity',
     ];
 

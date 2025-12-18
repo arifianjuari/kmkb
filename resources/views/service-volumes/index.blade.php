@@ -87,9 +87,12 @@
         
         <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
             <div class="px-4 py-5 sm:p-6">
-                <form method="GET" action="{{ route('service-volumes.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                <form method="GET" action="{{ route('service-volumes.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-5">
                     @if($search ?? '')
                         <input type="hidden" name="search" value="{{ $search }}">
+                    @endif
+                    @if($category ?? '')
+                        <input type="hidden" name="category" value="{{ $category }}">
                     @endif
                     <div>
                         <label for="period_year" class="block text-sm font-medium text-gray-700">{{ __('Year') }}</label>
@@ -100,12 +103,46 @@
                         </select>
                     </div>
 
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700">Pemeriksaan Penunjang</label>
+                        <select id="status" name="status" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                            <option value="">Semua Status</option>
+                            <option value="Ralan" {{ ($status ?? '') === 'Ralan' ? 'selected' : '' }}>Rawat Jalan</option>
+                            <option value="Ranap" {{ ($status ?? '') === 'Ranap' ? 'selected' : '' }}>Rawat Inap</option>
+                        </select>
+                    </div>
 
+                    <div>
+                        <label for="kd_poli" class="block text-sm font-medium text-gray-700">Poliklinik</label>
+                        <select id="kd_poli" name="kd_poli" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                            <option value="">Semua Poli</option>
+                            @if(isset($poliOptions))
+                                @foreach($poliOptions as $poli)
+                                    <option value="{{ $poli->kd_poli }}" {{ ($kdPoli ?? '') === $poli->kd_poli ? 'selected' : '' }}>{{ $poli->nm_poli ?? $poli->kd_poli }} ({{ $poli->total }})</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
 
-                    <div class="flex items-end">
-                        <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
+                    <div>
+                        <label for="kd_bangsal" class="block text-sm font-medium text-gray-700">Bangsal</label>
+                        <select id="kd_bangsal" name="kd_bangsal" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                            <option value="">Semua Bangsal</option>
+                            @if(isset($bangsalOptions))
+                                @foreach($bangsalOptions as $bangsal)
+                                    <option value="{{ $bangsal->kd_bangsal }}" {{ ($kdBangsal ?? '') === $bangsal->kd_bangsal ? 'selected' : '' }}>{{ $bangsal->nm_bangsal ?? $bangsal->kd_bangsal }} ({{ $bangsal->total }})</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+                    <div class="flex items-end gap-2">
+                        <button type="submit" class="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                             {{ __('Filter') }}
                         </button>
+                        <a href="{{ route('service-volumes.index') }}" class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            {{ __('Reset') }}
+                        </a>
                     </div>
                 </form>
             </div>
@@ -143,6 +180,8 @@
                 @endforeach
             </div>
         </div>
+
+
 
         <div class="bg-white shadow overflow-hidden sm:rounded-lg">
             <div class="flex flex-col">

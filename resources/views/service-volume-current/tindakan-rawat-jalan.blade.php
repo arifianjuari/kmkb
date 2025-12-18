@@ -5,39 +5,52 @@
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
     <div class="bg-white shadow rounded-lg p-6">
-        <form method="GET" class="grid gap-6 md:grid-cols-4">
-            <div>
-                <label for="year" class="block text-sm font-medium text-gray-700 mb-1">Tahun</label>
-                <select id="year" name="year" class="w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700">
-                    @foreach($availableYears as $yearOption)
-                        <option value="{{ $yearOption }}" {{ (int) $year === (int) $yearOption ? 'selected' : '' }}>{{ $yearOption }}</option>
-                    @endforeach
-                </select>
+        <form method="GET" class="space-y-4">
+            <div class="grid gap-6 md:grid-cols-3">
+                <div>
+                    <label for="year" class="block text-sm font-medium text-gray-700 mb-1">Tahun</label>
+                    <select id="year" name="year" class="w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700">
+                        @foreach($availableYears as $yearOption)
+                            <option value="{{ $yearOption }}" {{ (int) $year === (int) $yearOption ? 'selected' : '' }}>{{ $yearOption }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Cari Nama Tindakan</label>
+                    <input type="text" id="search" name="search" value="{{ $search }}" placeholder="Nama tindakan..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700">
+                </div>
+                <div class="flex items-end space-x-2">
+                    <button type="submit" class="inline-flex items-center justify-center w-full md:w-auto px-4 py-2 bg-biru-dongker-800 text-white rounded-md shadow hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
+                        Terapkan Filter
+                    </button>
+                    <button type="submit"
+                            formaction="{{ route('svc-current.tindakan-rawat-jalan.export') }}"
+                            class="inline-flex items-center justify-center w-full md:w-auto px-4 py-2 bg-emerald-600 text-white rounded-md shadow hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                        Export Excel
+                    </button>
+                </div>
             </div>
-            <div>
-                <label for="poli" class="block text-sm font-medium text-gray-700 mb-1">Poliklinik</label>
-                <select id="poli" name="poli" class="w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700">
-                    <option value="">Semua Poli</option>
+
+            {{-- Hidden input for poli, updated by tab click --}}
+            <input type="hidden" name="poli" id="poli-input" value="{{ $poli }}">
+
+            {{-- Poliklinik Tabs --}}
+            <div class="border-t border-gray-200 pt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Filter Poliklinik</label>
+                <div class="flex flex-wrap gap-2">
+                    <button type="submit" 
+                            onclick="document.getElementById('poli-input').value='';"
+                            class="px-3 py-1.5 text-sm font-medium rounded-full transition-colors {{ empty($poli) ? 'bg-biru-dongker-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                        Semua Poli
+                    </button>
                     @foreach($poliOptions as $option)
-                        <option value="{{ $option->kd_poli }}" {{ $poli === $option->kd_poli ? 'selected' : '' }}>
-                            {{ $option->kd_poli }} - {{ $option->nm_poli }}
-                        </option>
+                        <button type="submit" 
+                                onclick="document.getElementById('poli-input').value='{{ $option->kd_poli }}';"
+                                class="px-3 py-1.5 text-sm font-medium rounded-full transition-colors {{ $poli === $option->kd_poli ? 'bg-biru-dongker-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                            {{ $option->nm_poli }}
+                        </button>
                     @endforeach
-                </select>
-            </div>
-            <div>
-                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Cari Nama Tindakan</label>
-                <input type="text" id="search" name="search" value="{{ $search }}" placeholder="Nama tindakan..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-biru-dongker-700 focus:ring-biru-dongker-700">
-            </div>
-            <div class="flex items-end space-x-2">
-                <button type="submit" class="inline-flex items-center justify-center w-full md:w-auto px-4 py-2 bg-biru-dongker-800 text-white rounded-md shadow hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
-                    Terapkan Filter
-                </button>
-                <button type="submit"
-                        formaction="{{ route('svc-current.tindakan-rawat-jalan.export') }}"
-                        class="inline-flex items-center justify-center w-full md:w-auto px-4 py-2 bg-emerald-600 text-white rounded-md shadow hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
-                    Export Excel
-                </button>
+                </div>
             </div>
         </form>
     </div>
@@ -307,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({ items: itemsToSync, year: {{ $year }} }),
+            body: JSON.stringify({ items: itemsToSync, year: {{ $year }}, kd_poli: '{{ $poli ?? '' }}' }),
             credentials: 'same-origin'
         })
         .then(response => response.json())

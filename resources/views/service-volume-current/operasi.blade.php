@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('{{ route("svc-current.operasi.sync-volumes") }}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
-            body: JSON.stringify({ items: items, year: {{ $year }} }),
+            body: JSON.stringify({ items: items, year: {{ $year }}, kd_poli: '{{ $poli ?? '' }}', status: '{{ $status ?? '' }}' }),
             credentials: 'same-origin'
         })
         .then(r => r.json())

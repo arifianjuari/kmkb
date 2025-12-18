@@ -25,10 +25,10 @@
                         class="tree-toggle inline-flex items-center mr-2 cursor-pointer hover:bg-gray-200 rounded p-1 transition-colors" 
                         onclick="toggleCostCenterTree('{{ $uniqueId }}', this)"
                         aria-label="Toggle children">
-                    <svg class="w-4 h-4 text-gray-600 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-gray-600 chevron-icon chevron-down hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
-                    <svg class="w-4 h-4 text-gray-600 chevron-icon chevron-right hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-gray-600 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </button>
@@ -40,6 +40,9 @@
             <span class="{{ $level > 0 ? 'text-gray-700' : 'text-gray-900 font-semibold' }}">
                 {{ $costCenter->name }}
             </span>
+            @if($hasChildren)
+                <span class="ml-1 text-xs text-gray-500">({{ $children->count() }})</span>
+            @endif
         </div>
     </td>
     <td class="px-6 py-2 text-sm text-gray-500">
