@@ -1378,39 +1378,433 @@ Setelah menyelesaikan modul ini, Anda akan memiliki:
 
 ### Modul 4: Master Data Costing
 
-**🎯 Tujuan:**
-Menyiapkan semua data referensi untuk costing.
+**🎯 Tujuan Pembelajaran:**
+Memahami komponen-komponen master data yang diperlukan untuk proses costing, urutan setup yang benar, serta cara mengisi data di webapp dengan lengkap dan konsisten.
 
-**📘 Materi:**
-- Cost Center
-- Expense Category / COA
-- Units of Measurement (Satuan)
-- Allocation Driver
-- Service Catalog (Cost References)
-- Tariff Class
+---
 
-**🛠 Aktivitas di Webapp (Urutan Setup):**
+#### 4.1. Mengapa Master Data Penting?
 
-| No | Menu | Tindakan | Sumber Data |
-|----|------|----------|-------------|
-| 1 | `Master Data → Units of Measurement` | Setup satuan standar (m², kg, jam) | Standar RS |
-| 2 | `Master Data → Cost Centers` | Buat semua unit RS | Struktur organisasi |
-| 3 | `Master Data → Expense Categories` | Import/input COA | Buku COA, trial balance |
-| 4 | `Master Data → Allocation Drivers` | Definisikan driver (pilih satuan) | Kebijakan costing RS |
-| 5 | `Master Data → Tariff Classes` | Buat kelas tarif | SK Tarif internal |
-| 6 | `Master Data → Cost References` | Import layanan (pilih satuan) | Master SIMRS |
-| 7 | `Service Catalog → Standard Resource Usage` | Setup BOM (pilih satuan) | Farmasi / Logistik |
+**Prinsip:**
+> **Master data** adalah fondasi dari seluruh proses costing. Kesalahan atau ketidaklengkapan data master akan berdampak pada **keakuratan hasil unit cost**.
 
-**Checklist Master Data:**
-- [ ] Units of Measurement selesai (standarisasi satuan)
-- [ ] Cost Centers selesai (semua unit)
-- [ ] Expense Categories selesai (COA lengkap)
+**Analogi:**
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    MASTER DATA SEBAGAI FONDASI                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│                         ┌───────────────┐                               │
+│                         │  UNIT COST    │  ← Hasil akhir                │
+│                         └───────┬───────┘                               │
+│                                 │                                       │
+│                    ┌────────────┴────────────┐                          │
+│                    │    ALLOCATION ENGINE    │  ← Proses                │
+│                    └────────────┬────────────┘                          │
+│                                 │                                       │
+│          ┌──────────────────────┼──────────────────────┐                │
+│          │                      │                      │                │
+│   ┌──────┴──────┐       ┌───────┴───────┐      ┌───────┴───────┐        │
+│   │ GL Expenses │       │Driver Stats   │      │Service Volume │        │
+│   └──────┬──────┘       └───────┬───────┘      └───────┬───────┘        │
+│          │                      │                      │                │
+│   ═══════╪══════════════════════╪══════════════════════╪════════════    │
+│          │                      │                      │                │
+│   ┌──────┴──────┐       ┌───────┴───────┐      ┌───────┴───────┐        │
+│   │Cost Centers │       │  Allocation   │      │     Cost      │        │
+│   │Expense Cats │       │   Drivers     │      │  References   │        │
+│   └─────────────┘       └───────────────┘      └───────────────┘        │
+│                                                                         │
+│                    M A S T E R   D A T A (Fondasi)                      │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+> [!IMPORTANT]
+> **Setup master data harus dilakukan SEBELUM input data transaksional (GL, Driver Stats, Service Volumes).**
+
+---
+
+#### 4.2. Komponen Master Data & Dependencies
+
+Master data memiliki **urutan setup** yang harus diikuti karena adanya dependencies:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                    DEPENDENCY GRAPH MASTER DATA                         │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  [1] Units of Measurement                                              │
+│       │                                                                │
+│       ├──────────────────────────┐                                     │
+│       │                          │                                     │
+│       ▼                          ▼                                     │
+│  [2] Cost Centers         [4] Allocation Drivers                       │
+│       │                          │                                     │
+│       ├─────────┐                │                                     │
+│       │         │                │                                     │
+│       ▼         ▼                │                                     │
+│  [3] Expense   [5] Tariff        │                                     │
+│      Categories    Classes       │                                     │
+│       │              │           │                                     │
+│       │              │           │                                     │
+│       ▼              ▼           │                                     │
+│  [6] Cost References ◄───────────┘                                     │
+│       │                                                                │
+│       ▼                                                                │
+│  [7] Standard Resource Usage (BOM)                                     │
+│                                                                        │
+│  Keterangan:                                                           │
+│  ────────────                                                          │
+│  [1] harus selesai sebelum [2], [4], [6], [7]                         │
+│  [2] harus selesai sebelum [3], [6]                                   │
+│  [5] harus selesai sebelum [6]                                        │
+│  [6] harus selesai sebelum [7]                                        │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 4.3. Detail Setiap Komponen Master Data
+
+##### a) Units of Measurement (Satuan)
+
+**Definisi:**
+> Standar satuan ukuran yang digunakan secara konsisten di seluruh sistem untuk mengukur kuantitas layanan, driver, dan material.
+
+**Mengapa Penting:**
+- Memastikan konsistensi satuan antar modul
+- Memudahkan konversi dan perhitungan
+- Menghindari kesalahan input (kg vs gram, m² vs cm²)
+
+**Contoh Data:**
+
+| Kode | Nama | Simbol | Kategori | Contoh Penggunaan |
+|------|------|--------|----------|-------------------|
+| `UOM-M2` | Meter Persegi | m² | Luas | Driver Housekeeping |
+| `UOM-KG` | Kilogram | kg | Berat | Driver Laundry |
+| `UOM-PCS` | Pieces/Unit | pcs | Jumlah | Obat, BHP |
+| `UOM-HR` | Jam | jam | Waktu | Jasa Medis |
+| `UOM-ORG` | Orang | org | Jumlah | FTE |
+| `UOM-PORSI` | Porsi | porsi | Jumlah | Driver Gizi |
+| `UOM-SET` | Set | set | Jumlah | Set Steril CSSD |
+| `UOM-ML` | Mililiter | ml | Volume | Cairan infus |
+| `UOM-TAB` | Tablet | tab | Jumlah | Obat oral |
+
+**Menu:** `Master Data → Units of Measurement`
+
+**Tips:**
+- Buat satuan dasar (base unit) terlebih dahulu
+- Gunakan kode yang singkat dan konsisten
+- Dokumentasikan konversi jika ada (mis: 1 kg = 1000 gram)
+
+---
+
+##### b) Cost Centers (Pusat Biaya)
+
+**Definisi:**
+> Unit organisasi tempat biaya dikumpulkan dan diukur. Sudah dibahas detail di **Modul 2**.
+
+**Ringkasan Atribut:**
+
+| Field | Wajib | Contoh |
+|-------|-------|--------|
+| Kode | ✅ | `CC-REV-RI-VIP` |
+| Nama | ✅ | `Rawat Inap VIP` |
+| Tipe | ✅ | `revenue` / `support` |
+| Building | ❌ | `Gedung A` |
+| Floor | ❌ | `Lantai 2` |
+| Division | ❌ | `Pelayanan Medis` |
+| Parent | ❌ | `Instalasi Rawat Inap` |
+
+**Menu:** `Master Data → Cost Centers`
+
+**Checklist:**
+- [ ] Semua unit kerja RS sudah terdaftar
+- [ ] Tipe (revenue/support) sudah benar
+- [ ] Hierarki parent-child sudah sesuai struktur organisasi
+
+---
+
+##### c) Expense Categories (Kategori Biaya / COA)
+
+**Definisi:**
+> Struktur chart of accounts (COA) untuk mengklasifikasikan jenis-jenis beban/biaya yang terjadi di rumah sakit.
+
+**Tujuan:**
+- Standardisasi pelaporan keuangan
+- Memudahkan analisis per jenis biaya
+- Konsistensi dengan buku besar/trial balance
+
+**Contoh Struktur Hierarkis:**
+
+```
+BEBAN OPERASIONAL
+├── Beban Pegawai
+│   ├── Gaji Pokok
+│   ├── Tunjangan
+│   ├── Jasa Medis
+│   └── Lembur
+├── Beban Bahan
+│   ├── Obat-obatan
+│   ├── Bahan Habis Pakai Medis
+│   ├── Bahan Habis Pakai Non-Medis
+│   └── Bahan Makanan
+├── Beban Jasa
+│   ├── Jasa Konsultan
+│   ├── Jasa Outsourcing
+│   └── Jasa Pemeliharaan
+├── Beban Penyusutan
+│   ├── Penyusutan Gedung
+│   ├── Penyusutan Alat Medis
+│   └── Penyusutan Kendaraan
+└── Beban Umum
+    ├── Listrik
+    ├── Air
+    ├── Telepon
+    └── Internet
+```
+
+**Atribut di Webapp:**
+
+| Field | Deskripsi | Contoh |
+|-------|-----------|--------|
+| Account Code | Kode akun (dari COA keuangan) | `5.1.01.001` |
+| Nama | Nama kategori | `Gaji Pokok Pegawai Tetap` |
+| Parent | Induk (untuk hierarki) | `Beban Pegawai` |
+| Tipe | Klasifikasi | `direct` / `indirect` / `overhead` |
+
+**Menu:** `Master Data → Expense Categories`
+
+**Tips:**
+- Import dari file COA yang sudah ada (Excel)
+- Pastikan kode akun match dengan buku besar
+- Buat hierarki untuk agregasi pelaporan
+
+---
+
+##### d) Allocation Drivers (Dasar Alokasi)
+
+**Definisi:**
+> Basis yang digunakan untuk mendistribusikan biaya overhead. Sudah dibahas detail di **Modul 3**.
+
+**Ringkasan Atribut:**
+
+| Field | Contoh |
+|-------|--------|
+| Kode | `DRV-LUAS` |
+| Nama | `Luas Lantai` |
+| Satuan | `m²` (dari UoM) |
+| Deskripsi | `Untuk alokasi biaya fasilitas` |
+
+**Menu:** `Master Data → Allocation Drivers`
+
+**Checklist:**
+- [ ] Driver untuk setiap support center sudah terdefinisi
+- [ ] Satuan sudah dipilih dari UoM master
+- [ ] Deskripsi menjelaskan penggunaan driver
+
+---
+
+##### e) Tariff Classes (Kelas Tarif)
+
+**Definisi:**
+> Klasifikasi kelas layanan yang mempengaruhi tarif dan terkadang unit cost (misal: kelas rawat inap).
+
+**Tujuan:**
+- Diferensiasi tarif berdasarkan kelas
+- Analisis profitabilitas per kelas
+- Cross-subsidy analysis
+
+**Contoh Data:**
+
+| Kode | Nama | Deskripsi | Urutan |
+|------|------|-----------|--------|
+| `TC-VIP` | VIP | Kelas VIP/Suite | 1 |
+| `TC-K1` | Kelas 1 | Kelas 1 (2 bed) | 2 |
+| `TC-K2` | Kelas 2 | Kelas 2 (4 bed) | 3 |
+| `TC-K3` | Kelas 3 | Kelas 3 (6+ bed) | 4 |
+| `TC-ICU` | ICU | Intensive Care Unit | 5 |
+| `TC-UMUM` | Umum | Tarif Umum (non-kelas) | 99 |
+
+**Menu:** `Master Data → Tariff Classes`
+
+**Tips:**
+- Urutkan dari kelas tertinggi ke terendah
+- Buat kelas "Umum" untuk layanan yang tidak berbasis kelas
+- Sesuaikan dengan SK Tarif internal RS
+
+---
+
+##### f) Cost References (Katalog Layanan)
+
+**Definisi:**
+> Daftar semua layanan, tindakan, dan produk yang dapat dihitung unit cost-nya. Ini adalah **cost object utama** dalam sistem.
+
+**Sumber Data:**
+- Master tindakan SIMRS
+- Katalog layanan penunjang (Lab, Radiologi)
+- Daftar obat dan BHP
+- Paket layanan bundling
+
+**Atribut di Webapp:**
+
+| Field | Wajib | Deskripsi | Contoh |
+|-------|-------|-----------|--------|
+| Kode | ✅ | Kode layanan | `LAB-001` |
+| Nama | ✅ | Nama layanan | `Darah Lengkap` |
+| Kategori | ✅ | Jenis layanan | `Laboratorium` |
+| Cost Center | ✅ | Unit penghasil | `Instalasi Lab` |
+| Satuan | ✅ | Unit of Measurement | `pemeriksaan` |
+| Harga | ❌ | Harga referensi/pokok | `Rp 50.000` |
+| Aktif | ✅ | Status | `Ya` |
+
+**Menu:** `Master Data → Cost References`
+
+**Kategori Layanan:**
+
+| Kategori | Contoh | Satuan Umum |
+|----------|--------|-------------|
+| Tindakan Rawat Jalan | Konsultasi, Injeksi | tindakan |
+| Tindakan Rawat Inap | Akomodasi, Visit | hari |
+| Laboratorium | CBC, Urinalysis | pemeriksaan |
+| Radiologi | X-Ray, CT-Scan | pemeriksaan |
+| Operasi | Appendectomy, Sectio | tindakan |
+| Obat/BHP | Paracetamol, Spuit | pcs/tablet |
+
+**Tips:**
+- Sync dengan master SIMRS jika memungkinkan
+- Gunakan fitur import Excel untuk data besar
+- Pastikan cost center sudah ada sebelum assign ke cost reference
+
+---
+
+##### g) Standard Resource Usage / BOM (Bill of Materials)
+
+**Definisi:**
+> Daftar standar bahan/material yang dibutuhkan untuk satu layanan. Berguna untuk perhitungan **direct material cost**.
+
+**Tujuan:**
+- Estimasi biaya material standar
+- Pengendalian pemakaian
+- Perhitungan variance
+
+**Contoh BOM untuk Layanan "Sirkumsisi":**
+
+| No | Item | Kategori | Qty | Satuan | Harga Satuan | Total |
+|----|------|----------|-----|--------|--------------|-------|
+| 1 | Lidocaine 2% | Obat | 1 | ampul | Rp 15.000 | Rp 15.000 |
+| 2 | Povidone Iodine | BHP | 50 | ml | Rp 100 | Rp 5.000 |
+| 3 | Disposable Scalpel | BHP | 1 | pcs | Rp 25.000 | Rp 25.000 |
+| 4 | Benang Catgut | BHP | 1 | pack | Rp 45.000 | Rp 45.000 |
+| 5 | Kassa Steril | BHP | 5 | pcs | Rp 2.000 | Rp 10.000 |
+| | | | | | **Total BOM** | **Rp 100.000** |
+
+**Menu:** `Service Catalog → Standard Resource Usage`
+
+**Tips:**
+- Mulai dari layanan dengan volume tinggi
+- Libatkan unit terkait (Farmasi, Logistik, Klinik)
+- Update berkala jika ada perubahan harga/item
+
+---
+
+#### 4.4. Urutan Setup yang Direkomendasikan
+
+| Step | Komponen | Estimasi Waktu | Prerequisite | PIC |
+|------|----------|----------------|--------------|-----|
+| 1 | Units of Measurement | 1-2 jam | - | Tim Costing |
+| 2 | Cost Centers | 2-4 jam | UoM selesai | Tim Costing + SDM |
+| 3 | Expense Categories | 2-4 jam | - | Keuangan |
+| 4 | Allocation Drivers | 1-2 jam | UoM selesai | Tim Costing |
+| 5 | Tariff Classes | 30 menit | - | Keuangan/Tarif |
+| 6 | Cost References | 4-8 jam | CC, UoM, TC selesai | Tim Costing + IT |
+| 7 | Standard Resource Usage | Ongoing | CR selesai | Farmasi + Klinik |
+
+---
+
+#### 🛠 Aktivitas Praktik di Webapp
+
+**Tujuan:** Melengkapi seluruh master data yang diperlukan.
+
+##### Langkah 1: Setup Units of Measurement
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Master Data → Units of Measurement` | Klik **Add New** |
+| 2 | Form | Isi kode, nama, simbol |
+| 3 | - | Ulangi untuk semua satuan yang diperlukan |
+
+**Minimal satuan untuk mulai:**
+- `m²`, `kg`, `orang`, `jam`, `pcs`, `porsi`
+
+##### Langkah 2: Setup Cost Centers
+
+Lihat **Modul 2** untuk detail aktivitas.
+
+##### Langkah 3: Import Expense Categories
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Master Data → Expense Categories` | Klik **Download Template** |
+| 2 | Excel | Isi template dengan data COA |
+| 3 | Webapp | Klik **Import** → Upload file |
+| 4 | - | Validasi hasil import |
+
+##### Langkah 4: Setup Allocation Drivers
+
+Lihat **Modul 3** untuk detail aktivitas.
+
+##### Langkah 5: Setup Tariff Classes
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Master Data → Tariff Classes` | Klik **Add New** |
+| 2 | Form | Isi kode, nama, urutan |
+| 3 | - | Ulangi untuk semua kelas tarif |
+
+##### Langkah 6: Import Cost References
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Master Data → Cost References` | Klik **Download Template** |
+| 2 | Excel | Isi dengan data layanan dari SIMRS |
+| 3 | Webapp | Klik **Import** → Upload file |
+| 4 | - | Validasi: cek kategori, cost center, satuan |
+
+**Alternatif:** Gunakan fitur **Sync** dari menu `Service Volume Current` untuk menarik data layanan langsung dari SIMRS (jika terintegrasi).
+
+##### Langkah 7: Setup Standard Resource Usage
+
+| Langkah | Menu | Aksi |
+|---------|------|------|
+| 1 | `Service Catalog → Standard Resource Usage` | Pilih Cost Reference |
+| 2 | - | Klik **Add Item** |
+| 3 | Form | Pilih item, qty, satuan |
+| 4 | - | Ulangi untuk semua item dalam BOM |
+| 5 | - | Simpan |
+
+---
+
+#### 📤 Output Modul
+
+Setelah menyelesaikan modul ini, Anda akan memiliki:
+
+1. **Daftar satuan standar** yang konsisten di seluruh sistem
+2. **Struktur cost center** lengkap (dari Modul 2)
+3. **Hierarki expense categories** sesuai COA keuangan
+4. **Allocation drivers** untuk setiap support center
+5. **Kelas tarif** sesuai SK internal
+6. **Katalog layanan (Cost References)** yang lengkap
+7. **Standard Resource Usage** untuk layanan prioritas
+
+**Checklist Master Data Lengkap:**
+- [ ] Units of Measurement selesai
+- [ ] Cost Centers selesai & tervalidasi
+- [ ] Expense Categories selesai & match dengan COA
 - [ ] Allocation Drivers selesai
 - [ ] Tariff Classes selesai
-- [ ] Cost References selesai (sync SIMRS jika ada)
-
-**📤 Output:**
-Master data siap untuk perhitungan biaya.
+- [ ] Cost References selesai (import/sync)
+- [ ] Standard Resource Usage (minimal untuk layanan utama)
 
 ---
 
