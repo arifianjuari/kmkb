@@ -1810,52 +1810,360 @@ Setelah menyelesaikan modul ini, Anda akan memiliki:
 
 ### Modul 5: Pengumpulan Data Operasional
 
-**🎯 Tujuan:**
-Mengisi semua data bulanan costing.
+**🎯 Tujuan Pembelajaran:**
+Memahami jenis data operasional yang diperlukan untuk proses costing, sumber data masing-masing komponen, serta cara mengisi dan memvalidasi data di webapp secara rutin per periode.
 
-**📘 Materi:**
-- GL Expenses (biaya per cost center)
-- Driver Statistics (nilai driver)
-- Service Volumes (volume layanan)
+---
 
-**🛠 Aktivitas di Webapp:**
+#### 5.1. Gambaran Umum Data Operasional
 
-#### 5.1. Input GL Expenses
+**Prinsip:**
+> Setelah master data selesai (Modul 4), langkah selanjutnya adalah **input data transaksional** yang berubah setiap periode (bulanan). Data ini adalah "bahan baku" untuk perhitungan unit cost.
+
+**Tiga Komponen Data Operasional:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    DATA OPERASIONAL UNTUK COSTING                       │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │                      UNIT COST                                  │   │
+│   │                                                                 │   │
+│   │   Unit Cost = (Direct Cost + Allocated Overhead)               │   │
+│   │               ────────────────────────────────────              │   │
+│   │                      Service Volume                             │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+│          ▲                    ▲                    ▲                    │
+│          │                    │                    │                    │
+│   ┌──────┴──────┐      ┌──────┴──────┐      ┌──────┴──────┐            │
+│   │[1] GL       │      │[2] Driver   │      │[3] Service  │            │
+│   │  Expenses   │      │  Statistics │      │   Volumes   │            │
+│   ├─────────────┤      ├─────────────┤      ├─────────────┤            │
+│   │Biaya per    │      │Nilai driver │      │Volume layanan│           │
+│   │cost center  │      │per cost     │      │per cost     │            │
+│   │per kategori │      │center       │      │reference    │            │
+│   └─────────────┘      └─────────────┘      └─────────────┘            │
+│                                                                         │
+│   Sumber:              Sumber:              Sumber:                     │
+│   Buku Besar           Unit Terkait         SIMRS                       │
+│   Trial Balance        (Sarpras, HRD,       Rekam Medis                 │
+│                         Laundry, dll)       Statistik RS                │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Frekuensi Input:**
+
+| Data | Frekuensi Ideal | Deadline | Koordinator |
+|------|-----------------|----------|-------------|
+| GL Expenses | Bulanan | Tanggal 10 bulan berikutnya | Keuangan |
+| Driver Statistics | Bulanan | Tanggal 5 bulan berikutnya | Tim Costing |
+| Service Volumes | Bulanan | Tanggal 5 bulan berikutnya | Rekam Medis/IT |
+
+---
+
+#### 5.2. GL Expenses (Beban/Biaya)
+
+##### Pengertian
+
+**Definisi:**
+> **GL Expenses** adalah data beban/biaya yang diambil dari buku besar (General Ledger) dan didistribusikan ke masing-masing cost center berdasarkan kategori biaya.
+
+**Struktur Data:**
+
+| Field | Deskripsi | Contoh |
+|-------|-----------|--------|
+| Periode | Bulan & tahun | Januari 2025 |
+| Cost Center | Unit yang menanggung biaya | Rawat Inap VIP |
+| Expense Category | Jenis biaya (dari COA) | Gaji Pokok |
+| Amount | Nominal biaya | Rp 50.000.000 |
+| Keterangan | Catatan opsional | "Termasuk tunj. khusus" |
+
+##### Sumber Data & Pemilik
+
+| Jenis Biaya | Sumber Data | Pemilik | Cara Mapping |
+|-------------|-------------|---------|--------------|
+| Gaji & Tunjangan | Payroll | HRD/Keuangan | Per unit kerja pegawai |
+| Obat & BHP | Inventory/Farmasi | Farmasi | Per unit pemakai |
+| Utilitas (Listrik, Air) | Tagihan bulanan | Keuangan | Proporsi atau meter per gedung |
+| Penyusutan | Fixed Asset Register | Keuangan | Per lokasi aset |
+| Jasa Luar | Invoice & kontrak | Keuangan | Per unit pengguna |
+
+##### Metode Mapping Biaya ke Cost Center
+
+Beberapa biaya tidak otomatis terdistribusi ke cost center. Berikut strategi mapping:
+
+| Kondisi | Strategi | Contoh |
+|---------|----------|--------|
+| Biaya sudah per unit | Direct assign | Gaji pegawai unit X → CC unit X |
+| Biaya belum per unit | Proporsi atau estimasi | Listrik gedung → proporsi luas |
+| Biaya pusat | Masuk ke support center | Gaji Direksi → CC Administrasi |
+
+> [!IMPORTANT]
+> **Prinsip:** Semua biaya HARUS masuk ke salah satu cost center. Tidak boleh ada biaya "menggantung" tanpa cost center.
+
+##### Validasi GL Expenses
+
+| No | Pengecekan | Cara Validasi |
+|----|------------|---------------|
+| 1 | Total GL = Trial Balance | Bandingkan total amount dengan TB periode yang sama |
+| 2 | Semua cost center ada isinya | Cek cost center dengan GL = 0 (waspada) |
+| 3 | Tidak ada amount negatif | Kecuali memang ada koreksi jurnal |
+| 4 | Expense category sesuai | Tidak ada kategori salah (misal gaji masuk ke obat) |
+
+##### Aktivitas di Webapp
+
+| Langkah | Menu | Aksi | Tips |
+|---------|------|------|------|
+| 1 | `GL & Expenses → GL Expenses` | Filter periode (bulan, tahun) | - |
+| 2 | - | Klik **Download Template** | Gunakan template terbaru |
+| 3 | Excel | Isi data sesuai buku besar | Match kode CC dan Expense Cat |
+| 4 | Webapp | Klik **Import** → Upload file | - |
+| 5 | - | Review hasil import | Cek error jika ada |
+| 6 | - | Bandingkan total dengan TB | Harus match |
+
+**Format Template Excel:**
+
+| cost_center_code | expense_category_code | amount | description |
+|------------------|----------------------|--------|-------------|
+| CC-REV-RI-VIP | 5.1.01.001 | 50000000 | Gaji Jan |
+| CC-REV-RI-VIP | 5.1.02.001 | 10000000 | Tunjangan |
+| CC-SUP-ADM | 5.1.01.001 | 30000000 | Gaji Admin |
+
+---
+
+#### 5.3. Driver Statistics (Nilai Driver)
+
+##### Pengertian
+
+**Definisi:**
+> **Driver Statistics** adalah data kuantitatif yang menjadi dasar pembagi (driver) untuk mengalokasikan biaya dari support center ke revenue center.
+
+**Hubungan dengan Allocation:**
+
+```
+Biaya Support Center = Rp 60 juta
+Driver: Luas Lantai (m²)
+                                    
+Cost Center A: 500 m² → 500/2000 = 25% → Rp 15 juta
+Cost Center B: 800 m² → 800/2000 = 40% → Rp 24 juta
+Cost Center C: 700 m² → 700/2000 = 35% → Rp 21 juta
+─────────────────────────────────────────────────────
+Total:        2000 m²       100%        Rp 60 juta
+```
+
+##### Data Driver yang Diperlukan
+
+| Driver | Satuan | Cost Center yang Perlu Diisi | Sumber | PIC |
+|--------|--------|------------------------------|--------|-----|
+| Luas Lantai | m² | Semua (termasuk support) | Denah gedung | Sarpras |
+| FTE Pegawai | orang | Semua | Data kepegawaian | HRD |
+| Kg Linen | kg | Hanya yang pakai laundry | Log Laundry | Inst. Laundry |
+| Porsi Makan | porsi | Hanya rawat inap | Log Gizi | Inst. Gizi |
+| Set Steril | set | OK, Rawat Inap, VK | Log CSSD | CSSD |
+| Nilai Aset | Rp | Semua | Fixed Asset | Keuangan |
+| Jumlah PC | unit | Semua | Inventaris IT | IT |
+| kWh Listrik | kWh | Per gedung/lantai | Meter listrik | Sarpras |
+
+##### Karakteristik Data Driver
+
+| Kategori | Deskripsi | Contoh | Frekuensi Update |
+|----------|-----------|--------|------------------|
+| **Statis** | Jarang berubah | Luas lantai, FTE (jika stabil) | Tahunan/saat ada perubahan |
+| **Dinamis** | Berubah setiap periode | Kg linen, porsi makan | Bulanan |
+
+> [!TIP]
+> Untuk driver statis (seperti luas lantai), cukup input sekali dan salin ke periode berikutnya. Untuk driver dinamis, kumpulkan data aktual setiap bulan.
+
+##### Validasi Driver Statistics
+
+| No | Pengecekan | Cara Validasi |
+|----|------------|---------------|
+| 1 | Tidak ada nilai 0 untuk cost center aktif | Cek semua CC punya nilai > 0 |
+| 2 | Total masuk akal | Bandingkan dengan periode sebelumnya |
+| 3 | Unit konsisten | Semua dalam satuan yang sama (m², bukan cm² dan m²) |
+| 4 | Driver lengkap | Semua driver yang dipakai di Allocation Maps ada nilainya |
+
+##### Aktivitas di Webapp
+
+| Langkah | Menu | Aksi | Tips |
+|---------|------|------|------|
+| 1 | `GL & Expenses → Driver Statistics` | Filter periode | - |
+| 2 | - | Klik **Download Template** atau **Add New** | - |
+| 3 | Form/Excel | Isi: cost center, driver, value | Pastikan satuan benar |
+| 4 | Webapp | Import atau Simpan | - |
+| 5 | - | Validasi: tidak ada nilai 0 | - |
+
+**Contoh Data Driver Statistics:**
+
+| Period | Cost Center | Driver | Value | Unit |
+|--------|-------------|--------|-------|------|
+| Jan 2025 | Rawat Inap VIP | Luas Lantai | 500 | m² |
+| Jan 2025 | Rawat Inap VIP | Kg Linen | 450 | kg |
+| Jan 2025 | Rawat Inap VIP | FTE | 15 | orang |
+| Jan 2025 | Rawat Inap Kelas 1 | Luas Lantai | 400 | m² |
+| Jan 2025 | Rawat Inap Kelas 1 | Kg Linen | 380 | kg |
+
+---
+
+#### 5.4. Service Volumes (Volume Layanan)
+
+##### Pengertian
+
+**Definisi:**
+> **Service Volumes** adalah jumlah/volume layanan yang dihasilkan oleh setiap revenue center dalam satu periode. Data ini menjadi **pembagi** dalam perhitungan unit cost.
+
+**Formula:**
+```
+Unit Cost = Total Cost ÷ Service Volume
+
+Contoh:
+Total Cost Laboratorium bulan Januari = Rp 200.000.000
+Volume Pemeriksaan Lab = 10.000 tes
+────────────────────────────────────────────────────
+Unit Cost per Tes = Rp 200.000.000 ÷ 10.000 = Rp 20.000/tes
+```
+
+##### Jenis-Jenis Volume
+
+| Layanan | Satuan Volume | Sumber Data | PIC |
+|---------|---------------|-------------|-----|
+| Rawat Jalan | Kunjungan (visit) | SIMRS - Registrasi | Rekam Medis |
+| Rawat Inap | Hari rawat (patient-day) | SIMRS - Sensus harian | Rekam Medis |
+| IGD | Kunjungan | SIMRS - Registrasi IGD | Rekam Medis |
+| Laboratorium | Jumlah pemeriksaan | LIS / SIMRS | Lab |
+| Radiologi | Jumlah pemeriksaan | RIS / SIMRS | Radiologi |
+| Operasi | Jumlah operasi | SIMRS - OK | Kamar Operasi |
+| Farmasi | Jumlah resep/item | SIMRS - Apotek | Farmasi |
+| Kamar | Hari terpakai (occupied bed-days) | Sensus | Rekam Medis |
+
+##### Level Detail Volume
+
+| Level | Deskripsi | Contoh Data | Kegunaan |
+|-------|-----------|-------------|----------|
+| **Per Cost Center** | Agregat per unit | Lab Klinik: 10.000 tes | Unit cost agregat |
+| **Per Cost Reference** | Detail per layanan | CBC: 3.000, Urinalisis: 2.000 | Unit cost per layanan |
+| **Per Tariff Class** | Breakdown per kelas | VIP: 1.000, Kelas 1: 2.000 | Analisis per kelas |
+
+> [!NOTE]
+> Webapp mendukung input volume hingga level **Per Cost Reference**. Breakdown per Tariff Class opsional untuk analisis lebih detail.
+
+##### Cara Mendapatkan Data Volume
+
+**Opsi 1: Import dari SIMRS (Manual Excel)**
+
+| Langkah | Aksi |
+|---------|------|
+| 1 | Export data volume dari SIMRS/LIS/RIS |
+| 2 | Mapping ke format template webapp |
+| 3 | Import via menu Service Volumes |
+
+**Opsi 2: Sync dari Service Volume Current (Rekomendasi)**
+
 | Langkah | Menu | Aksi |
 |---------|------|------|
-| 1 | `GL & Expenses → GL Expenses` | Pilih periode |
-| 2 | - | Import Excel atau input manual |
-| 3 | - | Isi: cost center, expense category, amount |
-| 4 | - | Validasi dengan trial balance |
+| 1 | `Service Volume Current → [Kategori]` | Pilih kategori (Lab, Radiologi, dll) |
+| 2 | - | Pilih tahun, centang layanan yang ingin di-sync |
+| 3 | - | Klik **Sync ke Service Volumes** |
+| 4 | - | Data otomatis masuk ke Service Volumes |
 
-**Sumber:** Buku besar, trial balance  
-**Pemilik:** Bagian Keuangan
+**Kategori yang Tersedia di Service Volume Current:**
+- Laboratorium
+- Radiologi
+- Operasi (Bedah Sentral)
+- Rawat Jalan (Tindakan)
+- Rawat Inap (Tindakan)
+- Kamar (Hari Rawat)
 
-#### 5.2. Input Driver Statistics
-| Langkah | Menu | Aksi |
-|---------|------|------|
-| 1 | `GL & Expenses → Driver Statistics` | Pilih periode |
-| 2 | - | Isi nilai driver per cost center |
+##### Validasi Service Volumes
 
-**Contoh nilai driver:**
+| No | Pengecekan | Cara Validasi |
+|----|------------|---------------|
+| 1 | Tidak ada volume 0 untuk layanan aktif | Layanan aktif harus punya volume |
+| 2 | Konsisten dengan laporan RS | Bandingkan dengan RL RS |
+| 3 | Tidak ada lonjakan/penurunan ekstrem | Bandingkan dengan periode sebelumnya |
+| 4 | Coverage lengkap | Semua layanan yang akan dihitung UC punya volume |
 
-| Driver | Unit | Contoh Sumber |
-|--------|------|---------------|
-| Luas Lantai | m² | Sarpras |
-| FTE Pegawai | orang | HRD |
-| Kg Laundry | kg | Instalasi Laundry |
-| Jam Layanan | jam | SIMRS |
+##### Aktivitas di Webapp
 
-#### 5.3. Input Service Volumes
-| Langkah | Menu | Aksi |
-|---------|------|------|
-| 1 | `GL & Expenses → Service Volumes` | Pilih periode |
-| 2 | - | Import/isi volume per cost reference |
-| 3 | - | Opsional: breakdown per tariff class |
+| Langkah | Menu | Aksi | Tips |
+|---------|------|------|------|
+| 1 | `GL & Expenses → Service Volumes` | Filter periode | - |
+| 2 | - | Pilih metode: Import atau Sync | Sync lebih cepat jika data ada |
+| 3a | **Import:** Download template | Isi dengan data dari SIMRS | - |
+| 3b | **Sync:** Buka `Service Volume Current` | Pilih & sync layanan | - |
+| 4 | - | Validasi total volume | - |
 
-**📤 Output:**
-Dataset bulanan siap masuk proses costing.
+**Contoh Data Service Volumes:**
 
+| Period | Cost Reference | Cost Center | Volume | Unit |
+|--------|----------------|-------------|--------|------|
+| Jan 2025 | Darah Lengkap (CBC) | Lab Klinik | 3500 | pemeriksaan |
+| Jan 2025 | Urinalisis | Lab Klinik | 2200 | pemeriksaan |
+| Jan 2025 | X-Ray Thorax | Radiologi | 1800 | pemeriksaan |
+| Jan 2025 | Akomodasi VIP | Rawat Inap VIP | 450 | hari |
+
+---
+
+#### 5.5. Siklus Pengumpulan Data Bulanan
+
+**Timeline Rekomendasi:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                 SIKLUS PENGUMPULAN DATA BULANAN                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  Bulan N                          Bulan N+1                             │
+│  ─────────────────────────────────~──────────────────────────────       │
+│                                                                         │
+│  │                                │      │      │      │      │         │
+│  │                                Tgl 1  Tgl 5  Tgl 10 Tgl 15 Tgl 20    │
+│  │                                │      │      │      │      │         │
+│  │                                ▼      ▼      ▼      ▼      ▼         │
+│  │                                ┌──────┬──────┬──────┬──────┐         │
+│  │                                │Driver│ GL   │ Pre- │ Run  │         │
+│  │  Periode data                  │Stats │Exp.  │Alloc │Alloc │         │
+│  │  (operasional RS)              │ &    │Import│Check │ &    │         │
+│  │                                │Volume│      │      │ UC   │         │
+│  │                                └──────┴──────┴──────┴──────┘         │
+│  │                                                                      │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+| Tanggal | Aktivitas | PIC | Input | Output |
+|---------|-----------|-----|-------|--------|
+| 1-5 | Kumpulkan data driver & volume | Tim Costing | Log unit, SIMRS | Data siap input |
+| 1-5 | Input Driver Statistics | Tim Costing | Data unit | DS di webapp |
+| 1-5 | Sync/Input Service Volumes | Tim Costing | SIMRS | SV di webapp |
+| 6-10 | Tutup buku GL | Keuangan | Jurnal | TB final |
+| 6-10 | Import GL Expenses | Keuangan | Trial Balance | GL di webapp |
+| 11-15 | Pre-Allocation Check | Tim Costing | GL, DS, SV | Data validated |
+| 15-20 | Run Allocation & Unit Cost | Tim Costing | Validated data | Unit Cost |
+
+---
+
+#### 📤 Output Modul
+
+Setelah menyelesaikan modul ini, Anda akan memiliki:
+
+1. **GL Expenses** periode tersebut sudah terimport dan tervalidasi
+2. **Driver Statistics** lengkap untuk semua driver yang dipakai
+3. **Service Volumes** lengkap untuk semua layanan yang akan dihitung UC
+4. **Pemahaman timeline** pengumpulan data bulanan
+
+**Checklist Data Operasional Lengkap:**
+- [ ] GL Expenses sudah diimport dan match dengan Trial Balance
+- [ ] Semua cost center aktif punya GL > 0
+- [ ] Driver Statistics lengkap untuk semua driver di Allocation Maps
+- [ ] Service Volumes lengkap untuk semua layanan di Cost References
+- [ ] Tidak ada error/warning di Pre-Allocation Check
+
+---
+
+> [!TIP]
+> **Best Practice:** Buat SOP internal untuk pengumpulan data bulanan dengan deadline yang jelas per PIC. Konsistensi timeline sangat penting untuk kelancaran proses costing.
 ---
 
 ## MODUL 6-8: COST ALLOCATION
