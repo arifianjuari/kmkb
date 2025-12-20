@@ -347,6 +347,32 @@ class EmployeeController extends Controller
     }
 
     /**
+     * Bulk delete employees.
+     */
+    public function bulkDelete(Request $request)
+    {
+        $this->blockObserver('menghapus');
+
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:employees,id',
+        ]);
+
+        try {
+            $deleted = Employee::where('hospital_id', hospital('id'))
+                ->whereIn('id', $request->ids)
+                ->delete();
+
+            return redirect()->route('employees.index')
+                ->with('success', "Berhasil menghapus {$deleted} pegawai.");
+        } catch (\Exception $e) {
+            Log::error('Error bulk deleting employees: ' . $e->getMessage(), ['exception' => $e]);
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus pegawai: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Export employees to Excel.
      */
     public function export(Request $request)

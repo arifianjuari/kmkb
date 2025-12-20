@@ -193,12 +193,14 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::post('employees/import', [App\Http\Controllers\EmployeeController::class, 'import'])->name('employees.import');
     Route::get('employees/fte-summary', [App\Http\Controllers\EmployeeController::class, 'fteSummary'])->name('employees.fte-summary');
     Route::post('employees/generate-fte', [App\Http\Controllers\EmployeeController::class, 'generateFte'])->name('employees.generate-fte');
+    Route::delete('employees/bulk-delete', [App\Http\Controllers\EmployeeController::class, 'bulkDelete'])->name('employees.bulk-delete');
     Route::resource('employees', App\Http\Controllers\EmployeeController::class);
 
     // Household Items (Master)
     Route::get('household-items/export', [App\Http\Controllers\HouseholdItemController::class, 'export'])->name('household-items.export');
     Route::get('household-items/template', [App\Http\Controllers\HouseholdItemController::class, 'downloadTemplate'])->name('household-items.template');
     Route::post('household-items/import', [App\Http\Controllers\HouseholdItemController::class, 'import'])->name('household-items.import');
+    Route::delete('household-items/bulk-delete', [App\Http\Controllers\HouseholdItemController::class, 'bulkDelete'])->name('household-items.bulk-delete');
     Route::resource('household-items', App\Http\Controllers\HouseholdItemController::class);
 
     // Household Expenses (per Cost Center)

@@ -158,6 +158,47 @@ class HouseholdItemController extends Controller
     }
 
     /**
+     * Bulk delete household items.
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:household_items,id',
+        ]);
+
+        try {
+            // Get items to check if any are being used
+            $items = HouseholdItem::where('hospital_id', hospital('id'))
+                ->whereIn('id', $request->ids)
+                ->get();
+
+            $deletedCount = 0;
+            $skippedCount = 0;
+
+            foreach ($items as $item) {
+                if ($item->householdExpenses()->exists()) {
+                    $skippedCount++;
+                } else {
+                    $item->delete();
+                    $deletedCount++;
+                }
+            }
+
+            $message = "Berhasil menghapus {$deletedCount} item.";
+            if ($skippedCount > 0) {
+                $message .= " {$skippedCount} item tidak dapat dihapus karena masih digunakan.";
+            }
+
+            return redirect()->route('household-items.index')
+                ->with($skippedCount > 0 ? 'warning' : 'success', $message);
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus item: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Export items to Excel.
      */
     public function export(Request $request)
