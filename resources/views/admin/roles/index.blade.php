@@ -14,17 +14,7 @@
             </div>
         </div>
 
-        @if(session('success'))
-            <div class="mx-6 mt-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900 dark:text-green-200">
-                {{ session('success') }}
-            </div>
-        @endif
 
-        @if(session('error'))
-            <div class="mx-6 mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900 dark:text-red-200">
-                {{ session('error') }}
-            </div>
-        @endif
 
         <div class="p-6">
             <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-900 dark:border-blue-700">

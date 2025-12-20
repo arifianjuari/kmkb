@@ -57,9 +57,15 @@
         request()->routeIs('gl-expenses.*') || 
         request()->routeIs('driver-statistics.*') || 
         request()->routeIs('service-volumes.*') ||
-        request()->routeIs('svc-current.*')) {
+        request()->routeIs('svc-current.*') ||
+        request()->routeIs('employees.*') ||
+        request()->routeIs('household-items.*') ||
+        request()->routeIs('household-expenses.*')) {
         $openGroups['data-input'] = true;
         $openGroups['svc-simrs'] = true; // Auto-open Service Volume (SIM RS) submenu
+        if (request()->routeIs('household-items.*') || request()->routeIs('household-expenses.*')) {
+            $openGroups['household'] = true;
+        }
     }
     
     // Costing Process group
@@ -475,6 +481,31 @@
                                     <a href="<?php echo e(route('svc-current.hari-rawat')); ?>"
                                        class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('svc-current.hari-rawat') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
                                         <span class="truncate">Hari Rawat</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- HR / Data Pegawai -->
+                            <a href="<?php echo e(route('employees.index')); ?>" 
+                               class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('employees.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                <span class="truncate">Human Resources</span>
+                            </a>
+                            <!-- Household Expenses (Biaya Alat Rumah Tangga) -->
+                            <div class="mt-0.5" x-show="!collapsed">
+                                <button @click="toggleGroup('household')"
+                                        class="w-full flex items-center justify-between px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('household-items.*') || request()->routeIs('household-expenses.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                    <span class="truncate">Household Expenses</span>
+                                    <svg class="w-3 h-3 transition-transform" :class="isGroupOpen('household') ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                                <div x-show="isGroupOpen('household')" class="ml-4 mt-0.5 space-y-0.5">
+                                    <a href="<?php echo e(route('household-items.index')); ?>"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('household-items.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Master Item</span>
+                                    </a>
+                                    <a href="<?php echo e(route('household-expenses.index')); ?>"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors <?php echo e(request()->routeIs('household-expenses.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                                        <span class="truncate">Input per Cost Center</span>
                                     </a>
                                 </div>
                             </div>

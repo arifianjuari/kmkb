@@ -187,6 +187,27 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::post('driver-statistics/copy-from-previous-period', [App\Http\Controllers\DriverStatisticController::class, 'copyFromPreviousPeriod'])->name('driver-statistics.copy-from-previous-period.process');
     Route::resource('driver-statistics', App\Http\Controllers\DriverStatisticController::class);
 
+    // Employees (HR Module)
+    Route::get('employees/export', [App\Http\Controllers\EmployeeController::class, 'export'])->name('employees.export');
+    Route::get('employees/template', [App\Http\Controllers\EmployeeController::class, 'downloadTemplate'])->name('employees.download-template');
+    Route::post('employees/import', [App\Http\Controllers\EmployeeController::class, 'import'])->name('employees.import');
+    Route::get('employees/fte-summary', [App\Http\Controllers\EmployeeController::class, 'fteSummary'])->name('employees.fte-summary');
+    Route::post('employees/generate-fte', [App\Http\Controllers\EmployeeController::class, 'generateFte'])->name('employees.generate-fte');
+    Route::resource('employees', App\Http\Controllers\EmployeeController::class);
+
+    // Household Items (Master)
+    Route::get('household-items/export', [App\Http\Controllers\HouseholdItemController::class, 'export'])->name('household-items.export');
+    Route::get('household-items/template', [App\Http\Controllers\HouseholdItemController::class, 'downloadTemplate'])->name('household-items.template');
+    Route::post('household-items/import', [App\Http\Controllers\HouseholdItemController::class, 'import'])->name('household-items.import');
+    Route::resource('household-items', App\Http\Controllers\HouseholdItemController::class);
+
+    // Household Expenses (per Cost Center)
+    Route::get('household-expenses/export', [App\Http\Controllers\HouseholdExpenseController::class, 'export'])->name('household-expenses.export');
+    Route::get('household-expenses/template', [App\Http\Controllers\HouseholdExpenseController::class, 'downloadTemplate'])->name('household-expenses.template');
+    Route::post('household-expenses/import', [App\Http\Controllers\HouseholdExpenseController::class, 'import'])->name('household-expenses.import');
+    Route::delete('household-expenses/bulk-delete', [App\Http\Controllers\HouseholdExpenseController::class, 'bulkDelete'])->name('household-expenses.bulk-delete');
+    Route::resource('household-expenses', App\Http\Controllers\HouseholdExpenseController::class);
+
     // Allocation Maps
     Route::resource('allocation-maps', App\Http\Controllers\AllocationMapController::class);
 

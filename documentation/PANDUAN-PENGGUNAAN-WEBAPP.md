@@ -2478,6 +2478,418 @@ SK Tarif RS siap ditandatangani.
 
 ---
 
+## MODUL KHUSUS: Penanganan Biaya Sumber Daya Manusia (SDM)
+
+### Pendahuluan
+
+**🎯 Tujuan Pembelajaran:**
+Memahami cara mencatat dan mengalokasikan biaya SDM (gaji, tunjangan, BPJS) ke seluruh cost center, terutama ketika data dari General Ledger (GL) hanya tersedia dalam bentuk agregat.
+
+---
+
+### Prinsip Utama
+
+> [!IMPORTANT]
+> **KMKB tidak memerlukan pencatatan gaji per individu pegawai.** Sistem menggunakan pendekatan agregat per Cost Center, bukan per personal.
+
+**Yang Dicatat vs Tidak Dicatat:**
+
+| ✅ Yang Dicatat | ❌ Yang TIDAK Dicatat |
+|-----------------|----------------------|
+| Total biaya per Cost Center | Gaji per individu pegawai |
+| Total biaya per kategori | Detail tunjangan per orang |
+| Jumlah karyawan (FTE) per unit | Data personal karyawan |
+
+### Dasar Literatur & Filosofi
+
+#### Mengapa Tidak Perlu Mencatat Gaji Perorangan?
+
+**1. Prinsip Cost Accounting: Agregasi untuk Pengambilan Keputusan**
+
+Menurut literatur *Cost Accounting* (Horngren, Datar & Rajan), tujuan utama cost accounting adalah menyediakan informasi untuk **pengambilan keputusan manajerial**, bukan pencatatan detail transaksi. Untuk menghitung unit cost layanan, yang diperlukan adalah:
+
+> *"The relevant cost is the total cost assigned to a cost object, not the individual transactions that comprise it."*
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  HIERARKI KEBUTUHAN INFORMASI                                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │  LEVEL 1: OPERASIONAL (Payroll System)                          │   │
+│   │  • Gaji per individu                                            │   │
+│   │  • Potongan per orang                                           │   │
+│   │  • Slip gaji detail                                             │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                          ▼ Agregasi                                     │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │  LEVEL 2: FINANCIAL ACCOUNTING (General Ledger)                 │   │
+│   │  • Total beban gaji per bulan                                   │   │
+│   │  • Per kategori (gaji pokok, tunjangan, BPJS)                   │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                          ▼ Alokasi                                      │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │  LEVEL 3: COST ACCOUNTING (KMKB) ← FOKUS DI SINI                │   │
+│   │  • Total biaya per cost center                                  │   │
+│   │  • Unit cost per layanan                                        │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**2. Prinsip WHO Hospital Costing Manual**
+
+Berdasarkan *WHO Guide to Cost-Effectiveness Analysis* dan *Costing of Health Services*, pendekatan yang direkomendasikan adalah **top-down costing** atau **step-down allocation**:
+
+> *"Personnel costs should be allocated to cost centers based on the number of full-time equivalents (FTEs) working in each department, rather than tracking individual salaries."*
+
+**Alasan:**
+- **Efisiensi**: Menghindari duplikasi fungsi payroll
+- **Privasi**: Data gaji individual bersifat sensitif
+- **Relevansi**: Unit cost tidak berubah signifikan dengan variasi gaji individual
+- **Praktis**: Jumlah pegawai (FTE) lebih stabil dan mudah dikumpulkan
+
+**3. Prinsip Pemisahan Sistem (Separation of Concerns)**
+
+| Sistem | Fungsi | Data yang Dikelola |
+|--------|--------|-------------------|
+| **HRIS/Payroll** | Manajemen kepegawaian | Gaji per individu, slip gaji |
+| **General Ledger** | Akuntansi keuangan | Total beban per akun |
+| **KMKB (Costing)** | Analisis biaya | Biaya per cost center untuk unit cost |
+
+> [!NOTE]
+> **Filosofi Desain KMKB:** Sistem ini dirancang untuk **menganalisis biaya**, bukan menggantikan sistem payroll. Data yang dibutuhkan adalah hasil agregasi dari sistem lain, bukan data mentah transaksi.
+
+**4. Konsep "Good Enough" dalam Costing**
+
+Dalam praktik hospital costing, berlaku prinsip **materialitas** dan **cost-benefit**:
+
+| Pendekatan | Akurasi | Usaha | Rekomendasi |
+|------------|---------|-------|-------------|
+| **Gaji per individu per layanan** | Sangat tinggi | Sangat tinggi | ❌ Tidak praktis |
+| **Gaji per cost center (detail)** | Tinggi | Tinggi | ✅ Ideal jika tersedia |
+| **Gaji total + alokasi FTE** | Cukup | Rendah | ✅ Praktis & memadai |
+
+> *"The goal is not perfect accuracy, but sufficient accuracy for decision-making at reasonable cost."*
+> — Finkler, S.A. *Financial Management for Public, Health, and Not-for-Profit Organizations*
+
+---
+
+### Skenario Umum: GL Hanya Memiliki Satu Baris Total Gaji
+
+**Masalah:**
+Di banyak rumah sakit, sistem akuntansi hanya mencatat total gaji dalam satu baris agregat:
+
+```
+Akun: 5100 - Beban Gaji dan Tunjangan
+Total: Rp 2.500.000.000 (satu baris saja, tanpa breakdown per unit)
+```
+
+**Solusi: Input ke Cost Center SDM, lalu Alokasikan**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ALUR PENANGANAN BIAYA GAJI AGREGAT                                     │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   GL Rumah Sakit                                                        │
+│   ──────────────                                                        │
+│   Akun: Beban Gaji                                                      │
+│   Total: Rp 2.500.000.000                                               │
+│                                                                         │
+│                    │                                                    │
+│                    ▼                                                    │
+│                                                                         │
+│   KMKB - GL Expenses                                                    │
+│   ──────────────────                                                    │
+│   Cost Center: SDM (Support)                                            │
+│   Expense Category: Gaji & Tunjangan                                    │
+│   Amount: Rp 2.500.000.000                                              │
+│                                                                         │
+│                    │                                                    │
+│                    ▼                                                    │
+│                                                                         │
+│   KMKB - Allocation (Step-Down)                                         │
+│   ─────────────────────────────                                         │
+│   Driver: Jumlah Karyawan (FTE)                                         │
+│                                                                         │
+│   ┌─────────────┬─────────┬─────────────────┐                           │
+│   │ Cost Center │   FTE   │ Alokasi Gaji    │                           │
+│   ├─────────────┼─────────┼─────────────────┤                           │
+│   │ Laboratorium│    8    │ Rp 400.000.000  │                           │
+│   │ Radiologi   │    5    │ Rp 250.000.000  │                           │
+│   │ IGD         │   12    │ Rp 600.000.000  │                           │
+│   │ Rawat Inap  │   15    │ Rp 750.000.000  │                           │
+│   │ Farmasi     │   10    │ Rp 500.000.000  │                           │
+│   ├─────────────┼─────────┼─────────────────┤                           │
+│   │ TOTAL       │   50    │ Rp 2.500.000.000│                           │
+│   └─────────────┴─────────┴─────────────────┘                           │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Langkah Praktis di KMKB
+
+#### Langkah 1: Pastikan Cost Center SDM Ada
+
+| Menu | Aksi | Detail |
+|------|------|--------|
+| `Master Data → Cost Centers` | Cek/Buat Cost Center SDM | Tipe: `support` |
+
+**Contoh Data Cost Center SDM:**
+
+| Field | Nilai |
+|-------|-------|
+| Code | `SDM` atau `CC-SUP-SDM` |
+| Name | Sumber Daya Manusia |
+| Type | `support` |
+| Division | Direktorat Umum/Admin |
+
+---
+
+#### Langkah 2: Input Biaya Gaji ke GL Expenses
+
+| Menu | Aksi | Detail |
+|------|------|--------|
+| `GL & Expenses → GL Expenses` | Import/Input biaya | Masukkan total gaji ke CC SDM |
+
+**Contoh Input:**
+
+| Period | Cost Center | Expense Category | Amount |
+|--------|-------------|------------------|--------|
+| Jan 2025 | SDM | Gaji Pokok | 1.800.000.000 |
+| Jan 2025 | SDM | Tunjangan | 400.000.000 |
+| Jan 2025 | SDM | BPJS Kesehatan | 150.000.000 |
+| Jan 2025 | SDM | BPJS Ketenagakerjaan | 150.000.000 |
+
+> [!TIP]
+> Jika memungkinkan, pisahkan per jenis biaya (gaji pokok, tunjangan, BPJS) untuk analisis lebih detail. Jika tidak, gabungkan dalam satu kategori "Gaji & Tunjangan".
+
+---
+
+#### Langkah 3: Input Driver Statistics (FTE per Cost Center)
+
+| Menu | Aksi | Detail |
+|------|------|--------|
+| `GL & Expenses → Driver Statistics` | Input jumlah karyawan | Per cost center |
+
+**Contoh Data Driver:**
+
+| Period | Cost Center | Driver | Value | Unit |
+|--------|-------------|--------|-------|------|
+| Jan 2025 | Laboratorium | Jumlah Karyawan (FTE) | 8 | orang |
+| Jan 2025 | Radiologi | Jumlah Karyawan (FTE) | 5 | orang |
+| Jan 2025 | IGD | Jumlah Karyawan (FTE) | 12 | orang |
+| Jan 2025 | Rawat Inap VIP | Jumlah Karyawan (FTE) | 6 | orang |
+| Jan 2025 | Rawat Inap Kelas 1 | Jumlah Karyawan (FTE) | 9 | orang |
+| Jan 2025 | Farmasi | Jumlah Karyawan (FTE) | 10 | orang |
+| Jan 2025 | SDM | Jumlah Karyawan (FTE) | 4 | orang |
+
+> [!NOTE]
+> **Sumber data FTE:** Biasanya dari bagian HRD/Kepegawaian berupa rekap jumlah pegawai per unit kerja.
+
+---
+
+#### Langkah 4: Setup Allocation Maps
+
+| Menu | Aksi | Detail |
+|------|------|--------|
+| `Allocation → Allocation Maps` | Petakan SDM ke unit lain | Gunakan driver FTE |
+
+**Contoh Konfigurasi:**
+
+| Step | Source CC | Driver | Target CCs |
+|------|-----------|--------|------------|
+| 2 | SDM | Jumlah Karyawan (FTE) | Semua unit (kecuali Administrasi jika sudah dialokasi) |
+
+> [!IMPORTANT]
+> **Urutan Step Penting!** Letakkan SDM setelah unit support yang melayani paling banyak unit lain (seperti Administrasi), tapi sebelum unit support yang lebih spesifik (seperti Gizi, CSSD).
+
+---
+
+#### Langkah 5: Run Allocation
+
+| Menu | Aksi | Detail |
+|------|------|--------|
+| `Allocation → Run Allocation` | Jalankan alokasi | Pilih periode yang sesuai |
+
+Setelah proses alokasi selesai, biaya gaji dari Cost Center SDM akan terdistribusi ke semua revenue center berdasarkan proporsi jumlah karyawan (FTE).
+
+---
+
+### Contoh Perhitungan Otomatis
+
+**Input:**
+- Total Biaya Gaji di CC SDM: **Rp 2.500.000.000**
+- Driver: Jumlah Karyawan (FTE)
+
+**Hasil Alokasi:**
+
+| Cost Center | FTE | Proporsi | Alokasi Gaji |
+|-------------|-----|----------|--------------|
+| Laboratorium | 8 | 16% | Rp 400.000.000 |
+| Radiologi | 5 | 10% | Rp 250.000.000 |
+| IGD | 12 | 24% | Rp 600.000.000 |
+| Rawat Inap | 15 | 30% | Rp 750.000.000 |
+| Farmasi | 10 | 20% | Rp 500.000.000 |
+| **Total** | **50** | **100%** | **Rp 2.500.000.000** |
+
+---
+
+### Skenario Lanjutan: Biaya Sudah Terpisah Per Unit
+
+Jika sistem akuntansi RS sudah mencatat gaji per unit kerja (lebih ideal):
+
+```
+Akun: 5100 - Beban Gaji
+  - CC Laboratorium: Rp 400.000.000
+  - CC Radiologi:    Rp 250.000.000
+  - CC IGD:          Rp 600.000.000
+  ...dst
+```
+
+**Penanganan:**
+- Input langsung ke masing-masing Cost Center di GL Expenses
+- Tidak perlu melalui CC SDM dan alokasi
+- Lebih akurat karena tidak ada estimasi proporsi
+
+---
+
+### Checklist Penanganan Biaya SDM
+
+- [ ] Cost Center `SDM` (tipe: support) sudah dibuat
+- [ ] Total biaya gaji sudah diinput ke GL Expenses pada CC SDM
+- [ ] Data FTE per Cost Center sudah diinput ke Driver Statistics
+- [ ] Allocation Driver `Jumlah Karyawan (FTE)` sudah ada
+- [ ] Allocation Maps untuk SDM sudah dikonfigurasi dengan driver FTE
+- [ ] Alokasi sudah dijalankan dan hasilnya sudah direview
+
+---
+
+### Fitur: Data Pegawai (HR)
+
+> **Menu:** `Data Input → Data Pegawai (HR)`
+
+Fitur ini memungkinkan pengelolaan data pegawai dengan fokus pada perhitungan FTE (Full-Time Equivalent) untuk keperluan alokasi biaya SDM.
+
+#### Apa itu FTE?
+
+**FTE (Full-Time Equivalent)** adalah ukuran proporsi waktu kerja seorang pegawai yang dialokasikan ke suatu unit/cost center:
+
+| FTE | Artinya | Contoh |
+|-----|---------|--------|
+| **100%** | Full-time di satu unit | Perawat ditempatkan 100% di IGD |
+| **50%** | Setengah waktu kerja | Dokter bekerja 50% IGD + 50% Rawat Jalan |
+| **25%** | Seperempat waktu kerja | Kepala Unit merangkap 4 unit berbeda |
+
+#### Data yang Dikelola
+
+| Field | Deskripsi | Contoh |
+|-------|-----------|--------|
+| NIK/NIP | Nomor induk pegawai (unik) | P001 |
+| Nama | Nama lengkap | Dr. Ahmad, Sp.PD |
+| Jabatan | Posisi/job title | Dokter Spesialis |
+| Tipe Kepegawaian | PNS/ASN, Kontrak, Honorer, Outsource | PNS |
+| Pendidikan | Tingkat pendidikan terakhir | Spesialis |
+| Kategori Profesi | Klasifikasi tenaga kerja | Dokter Spesialis |
+| Gaji Pokok | Gaji bulanan dasar | Rp 6.000.000 |
+| Tunjangan | Insentif, tunjangan, kompensasi | Rp 10.000.000 |
+| Tanggal Masuk | Mulai bekerja | 2020-01-15 |
+| Status | Aktif, Non-Aktif, Resign | Aktif |
+
+#### Fitur Penempatan Unit Kerja (Split Assignment)
+
+Pegawai dapat ditempatkan di **lebih dari satu cost center** dengan persentase FTE berbeda:
+
+```
+Contoh: Dr. Ahmad
+├── IGD: 60% (Penempatan Utama)
+└── Rawat Jalan: 40%
+    ─────────────
+    Total: 100%
+```
+
+**Ketentuan:**
+- Total FTE per pegawai **tidak boleh melebihi 100%**
+- Satu penempatan ditandai sebagai **Penempatan Utama**
+- Sistem otomatis menghitung total FTE
+
+#### Workflow Penggunaan
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  1. Input Data Pegawai                                              │
+│     Menu: Data Input → Data Pegawai (HR)                           │
+│     Aksi: Tambah pegawai dengan penempatan & FTE                    │
+├─────────────────────────────────────────────────────────────────────┤
+│  2. Lihat Rekap FTE                                                 │
+│     Menu: Data Pegawai → Rekap FTE                                  │
+│     Aksi: Review FTE per cost center untuk periode tertentu         │
+├─────────────────────────────────────────────────────────────────────┤
+│  3. Generate ke Driver Statistics                                   │
+│     Menu: Rekap FTE → Tombol "Generate ke Driver Statistics"        │
+│     Aksi: Otomatis mengisi Driver Statistics dengan data FTE        │
+├─────────────────────────────────────────────────────────────────────┤
+│  4. Jalankan Alokasi                                                │
+│     Menu: Allocation → Proses Alokasi                               │
+│     Aksi: Biaya SDM teralokasi proporsional berdasarkan FTE         │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+#### Contoh Alokasi Biaya dengan FTE
+
+**Data Awal:**
+- Total Biaya Gaji di CC SDM: **Rp 10.000.000**
+- Driver: FTE dari Data Pegawai
+
+| Cost Center | Total FTE | Proporsi | Alokasi Biaya |
+|-------------|-----------|----------|---------------|
+| IGD | 5.0 | 50% | Rp 5.000.000 |
+| Rawat Inap | 3.0 | 30% | Rp 3.000.000 |
+| Rawat Jalan | 2.0 | 20% | Rp 2.000.000 |
+| **Total** | **10.0** | **100%** | **Rp 10.000.000** |
+
+#### Import/Export Excel
+
+**Export:** Unduh data pegawai lengkap dengan semua field ke Excel  
+**Template:** Unduh template kosong untuk import massal  
+**Import:** Upload data pegawai termasuk split assignment
+
+> [!TIP]
+> Untuk import split assignment, buat beberapa baris dengan NIK sama tapi Cost Center berbeda. Contoh:
+> | NIK | Nama | ... | Cost_Center_Code | FTE | Is_Primary |
+> |-----|------|-----|------------------|-----|------------|
+> | P001 | Dr. Ahmad | ... | IGD | 0.60 | Yes |
+> | P001 | Dr. Ahmad | ... | POLI-UMUM | 0.40 | No |
+
+#### Integrasi dengan Modul Lain
+
+| Modul | Integrasi | Keterangan |
+|-------|-----------|------------|
+| Driver Statistics | Generate FTE | Tombol di Rekap FTE |
+| Allocation Maps | Driver FTE | Gunakan driver "Jumlah Karyawan/FTE" |
+| Proses Alokasi | Proporsi FTE | Biaya SDM terdistribusi per unit |
+
+
+
+### Troubleshooting
+
+| Masalah | Kemungkinan Penyebab | Solusi |
+|---------|---------------------|--------|
+| Biaya SDM tidak teralokasi | Allocation Maps belum disetup | Buat mapping SDM → unit lain dengan driver FTE |
+| Alokasi tidak proporsional | FTE belum diinput di Driver Statistics | Input nilai FTE untuk semua cost center |
+| Ada cost center dengan alokasi 0 | FTE = 0 untuk cost center tersebut | Verifikasi data FTE, pastikan semua unit aktif punya nilai > 0 |
+| Total setelah alokasi tidak match | Ada cost center yang tidak termasuk target | Review Allocation Maps, pastikan semua revenue center ada di target |
+
+---
+
+> [!TIP]
+> **Best Practice:** Meskipun data gaji di GL hanya satu baris total, selalu kumpulkan data jumlah karyawan (FTE) per unit setiap bulan. Data ini sangat penting untuk akurasi alokasi biaya SDM.
+
+---
+
 # BAGIAN C: REFERENSI OPERASIONAL
 
 ## Ikhtisar Peran & Menu
