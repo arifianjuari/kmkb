@@ -251,8 +251,14 @@
                         </label>
                         <input type="file" name="file" id="file" accept=".xlsx,.xls,.csv" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-biru-dongker-50 file:text-biru-dongker-700 hover:file:bg-biru-dongker-100 dark:file:bg-biru-dongker-900 dark:file:text-biru-dongker-300">
                         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('Format: Cost Center Code, Expense Category Code, Amount') }}
+                            {{ __('Format: Cost Center Code, Account Code, Amount') }}
                         </p>
+                        <a href="{{ route('gl-expenses.template') }}" class="mt-2 inline-flex items-center text-xs text-biru-dongker-600 hover:text-biru-dongker-800 font-medium dark:text-biru-dongker-400">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            {{ __('Download Template') }}
+                        </a>
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" onclick="document.getElementById('import-modal').classList.add('hidden')" class="btn-secondary">

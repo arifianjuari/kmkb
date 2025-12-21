@@ -13,7 +13,7 @@
         <div class="bg-white shadow overflow-hidden sm:rounded-lg">
             <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
                 <h3 class="text-lg leading-6 font-medium text-gray-900">{{ __('Import GL Expenses from Excel') }}</h3>
-                <p class="mt-1 text-sm text-gray-500">{{ __('Upload Excel file with format: Cost Center Code, Expense Category Code, Amount') }}</p>
+                <p class="mt-1 text-sm text-gray-500">{{ __('Upload Excel file dengan format: Cost Center Code, Account Code, Amount') }}</p>
             </div>
             <div class="px-4 py-5 sm:p-6">
                 <form action="{{ route('gl-expenses.import.process') }}" method="POST" enctype="multipart/form-data">
@@ -56,10 +56,18 @@
                                 @error('file')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
-                                <p class="mt-2 text-sm text-gray-500">
-                                    {{ __('Format file: Cost Center Code | Expense Category Code | Amount') }}<br>
-                                    {{ __('File harus berformat .xlsx, .xls, atau .csv') }}
-                                </p>
+                                <div class="mt-2 text-sm text-gray-500">
+                                    <p>{{ __('Format file: Cost Center Code | Account Code | Amount') }}</p>
+                                    <p>{{ __('File harus berformat .xlsx, .xls, atau .csv') }}</p>
+                                    <p class="mt-2">
+                                        <a href="{{ route('gl-expenses.template') }}" class="inline-flex items-center text-biru-dongker-600 hover:text-biru-dongker-800 font-medium">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                            </svg>
+                                            {{ __('Download Template') }}
+                                        </a>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>

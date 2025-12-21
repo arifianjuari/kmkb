@@ -208,12 +208,12 @@ class GlExpenseController extends Controller
                 if (empty($row[0])) continue; // Skip empty rows
                 
                 try {
-                    // Expected format: Cost Center Code, Expense Category Code, Amount
+                    // Expected format: Cost Center Code, Account Code, Amount
                     $costCenterCode = trim($row[0] ?? '');
-                    $expenseCategoryCode = trim($row[1] ?? '');
+                    $accountCode = trim($row[1] ?? '');
                     $amount = floatval($row[2] ?? 0);
                     
-                    if (empty($costCenterCode) || empty($expenseCategoryCode) || $amount <= 0) {
+                    if (empty($costCenterCode) || empty($accountCode) || $amount <= 0) {
                         $errors[] = "Baris " . ($index + 2) . ": Data tidak lengkap";
                         continue;
                     }
@@ -228,11 +228,11 @@ class GlExpenseController extends Controller
                     }
                     
                     $expenseCategory = ExpenseCategory::where('hospital_id', hospital('id'))
-                        ->where('account_code', $expenseCategoryCode)
+                        ->where('account_code', $accountCode)
                         ->first();
                     
                     if (!$expenseCategory) {
-                        $errors[] = "Baris " . ($index + 2) . ": Expense category dengan code '{$expenseCategoryCode}' tidak ditemukan";
+                        $errors[] = "Baris " . ($index + 2) . ": Expense category dengan account code '{$accountCode}' tidak ditemukan";
                         continue;
                     }
                     
@@ -322,25 +322,27 @@ class GlExpenseController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $headers = ['Period', 'Cost Center', 'Expense Category', 'Amount'];
+        $headers = ['Period', 'Cost Center Code', 'Cost Center', 'Account Code', 'Expense Category', 'Amount'];
         $sheet->fromArray($headers, null, 'A1');
 
         if ($data->count() > 0) {
             $rows = $data->map(function ($item) {
                 return [
                     $item->period_month . '/' . $item->period_year,
-                    $item->costCenter ? $item->costCenter->name . ' (' . $item->costCenter->code . ')' : '-',
-                    $item->expenseCategory ? $item->expenseCategory->account_name . ' (' . $item->expenseCategory->account_code . ')' : '-',
+                    $item->costCenter ? $item->costCenter->code : '-',
+                    $item->costCenter ? $item->costCenter->name : '-',
+                    $item->expenseCategory ? $item->expenseCategory->account_code : '-',
+                    $item->expenseCategory ? $item->expenseCategory->account_name : '-',
                     (float) $item->amount,
                 ];
             })->toArray();
             $sheet->fromArray($rows, null, 'A2');
         }
 
-        $sheet->getStyle('D2:D' . max(2, $data->count() + 1))
+        $sheet->getStyle('F2:F' . max(2, $data->count() + 1))
             ->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_00);
         
-        foreach (range('A', 'D') as $col) {
+        foreach (range('A', 'F') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -376,6 +378,50 @@ class GlExpenseController extends Controller
             return redirect()->back()
                 ->with('error', 'Gagal menghapus GL expenses: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Download import template for GL Expenses
+     */
+    public function downloadTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Headers matching the import format
+        $headers = ['Cost Center Code', 'Account Code', 'Amount'];
+        $sheet->fromArray($headers, null, 'A1');
+
+        // Add sample data rows
+        $sheet->setCellValue('A2', 'CC001');
+        $sheet->setCellValue('B2', '511100');
+        $sheet->setCellValue('C2', 1500000);
+
+        $sheet->setCellValue('A3', 'CC001');
+        $sheet->setCellValue('B3', '512100');
+        $sheet->setCellValue('C3', 750000);
+
+        $sheet->setCellValue('A4', 'CC002');
+        $sheet->setCellValue('B4', '511100');
+        $sheet->setCellValue('C4', 2000000);
+
+        // Auto size columns
+        foreach (range('A', 'C') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Format amount column as number
+        $sheet->getStyle('C2:C4')
+            ->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_00);
+
+        $filename = 'gl_expenses_import_template.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 }
 

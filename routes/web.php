@@ -172,6 +172,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::get('locations/export', [App\Http\Controllers\LocationController::class, 'export'])->name('locations.export');
 
     // GL Expenses
+    Route::get('gl-expenses/template', [App\Http\Controllers\GlExpenseController::class, 'downloadTemplate'])->name('gl-expenses.template');
     Route::get('gl-expenses/import', [App\Http\Controllers\GlExpenseController::class, 'importForm'])->name('gl-expenses.import');
     Route::post('gl-expenses/import', [App\Http\Controllers\GlExpenseController::class, 'import'])->name('gl-expenses.import.process');
     Route::get('gl-expenses/export', [App\Http\Controllers\GlExpenseController::class, 'export'])->name('gl-expenses.export');
