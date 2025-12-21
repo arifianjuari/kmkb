@@ -75,23 +75,23 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($items as $index => $item)
                                         <tr>
-                                            <td class="px-4 py-4 whitespace-nowrap">
+                                            <td class="px-4 py-2 whitespace-nowrap">
                                                 <input type="checkbox" name="ids[]" value="{{ $item->id }}" class="row-checkbox h-4 w-4 text-biru-dongker-800 border-gray-300 rounded focus:ring-biru-dongker-700">
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $items->firstItem() + $index }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item->code ?: '-' }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">{{ $item->name }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->unit_display }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ $item->default_price ? number_format($item->default_price, 0, ',', '.') : '-' }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $items->firstItem() + $index }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $item->code ?: '-' }}</td>
+                                            <td class="px-6 py-2 text-sm text-gray-900">{{ $item->name }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $item->unit_display }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">{{ $item->default_price ? number_format($item->default_price, 0, ',', '.') : '-' }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-center">
                                                 @if($item->is_active)
                                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Aktif</span>
                                                 @else
                                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">Tidak Aktif</span>
                                                 @endif
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">{{ $item->updated_at->format('d M Y H:i') }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-500">{{ $item->updated_at->format('d M Y H:i') }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm">
                                                 <div class="flex items-center gap-2">
                                                     <a href="{{ route('household-items.edit', $item) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-800 hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">

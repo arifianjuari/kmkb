@@ -17,6 +17,8 @@ class GlExpense extends Model
         'cost_center_id',
         'expense_category_id',
         'amount',
+        'description',
+        'funding_source',
     ];
 
     protected $casts = [

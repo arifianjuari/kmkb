@@ -151,9 +151,9 @@
                                     <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                                         @foreach($casesByPathway as $data)
                                             <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $data->pathway_name }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $data->case_count }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ number_format($data->avg_compliance, 2) }}%</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $data->pathway_name }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $data->case_count }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ number_format($data->avg_compliance, 2) }}%</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -183,9 +183,9 @@
                                     <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                                         @foreach($monthlyTrend as $data)
                                             <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $data->month }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $data->case_count }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ number_format($data->avg_compliance, 2) }}%</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $data->month }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $data->case_count }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ number_format($data->avg_compliance, 2) }}%</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

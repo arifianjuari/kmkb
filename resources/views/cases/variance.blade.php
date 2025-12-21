@@ -157,14 +157,14 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($varianceByStep as $item)
                                 <tr class="{{ !$item['performed'] ? 'bg-gray-50' : '' }}">
-                                    <td class="px-6 py-4 text-sm">
+                                    <td class="px-6 py-2 text-sm">
                                         <div class="font-medium text-gray-900">{{ $item['step']->step_order ?? '-' }}</div>
                                         <div class="text-gray-500 text-xs">{{ Str::limit($item['step']->description ?? '-', 40) }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                         {{ $item['step']->category ?? '-' }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                                    <td class="px-6 py-2 whitespace-nowrap text-center text-sm">
                                         @if($item['performed'])
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                 {{ __('Performed') }}
@@ -175,13 +175,13 @@
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         Rp {{ number_format($item['estimated_cost'], 0, ',', '.') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ $item['performed'] ? 'Rp ' . number_format($item['actual_cost'], 0, ',', '.') : '-' }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right {{ $item['status'] === 'favorable' ? 'text-green-600' : 'text-red-600' }}">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-right {{ $item['status'] === 'favorable' ? 'text-green-600' : 'text-red-600' }}">
                                         @if($item['performed'])
                                             {{ $item['variance'] >= 0 ? '+' : '' }}Rp {{ number_format($item['variance'], 0, ',', '.') }}
                                             <span class="text-xs text-gray-500">({{ number_format($item['variance_percent'], 1) }}%)</span>
@@ -214,13 +214,13 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($customSteps as $item)
                                 <tr>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                    <td class="px-6 py-2 text-sm text-gray-900">
                                         {{ $item['detail']->service_item ?? 'Custom Service' }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ number_format($item['detail']->quantity ?? 1, 0, ',', '.') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         Rp {{ number_format($item['actual_cost'], 0, ',', '.') }}
                                     </td>
                                 </tr>

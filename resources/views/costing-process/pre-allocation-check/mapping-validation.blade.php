@@ -265,9 +265,9 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($supportCentersWithoutAllocation as $center)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $center->code }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $center->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $center->code }}</td>
+                                    <td class="px-6 py-2 text-sm text-gray-900">{{ $center->name }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm">
                                         <a href="{{ route('cost-centers.edit', $center) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-biru-dongker-800 hover:bg-biru-dongker-200">
                                             {{ __('Edit Cost Center') }}
                                         </a>
@@ -275,7 +275,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('All support cost centers already mapped.') }}</td>
+                                    <td colspan="3" class="px-6 py-2 text-sm text-gray-500 text-center">{{ __('All support cost centers already mapped.') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -299,9 +299,9 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($revenueCentersWithoutServices as $center)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $center->code }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $center->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $center->code }}</td>
+                                    <td class="px-6 py-2 text-sm text-gray-900">{{ $center->name }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm">
                                         <a href="{{ route('cost-centers.show', $center) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-biru-dongker-800 hover:bg-biru-dongker-200">
                                             {{ __('View Detail') }}
                                         </a>
@@ -309,7 +309,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('All revenue cost centers already have services.') }}</td>
+                                    <td colspan="3" class="px-6 py-2 text-sm text-gray-500 text-center">{{ __('All revenue cost centers already have services.') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -334,9 +334,9 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($unmappedCostReferences as $reference)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $reference->service_code }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $reference->service_description }}</td>
-                                    <td class="px-6 py-4 text-sm">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $reference->service_code }}</td>
+                                    <td class="px-6 py-2 text-sm text-gray-900">{{ $reference->service_description }}</td>
+                                    <td class="px-6 py-2 text-sm">
                                         <div class="space-y-1">
                                             @if(!$reference->cost_center_id)
                                                 <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">{{ __('Missing Cost Center') }}</span>
@@ -346,7 +346,7 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm">
                                         <a href="{{ route('cost-references.edit', $reference) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-biru-dongker-800 hover:bg-biru-dongker-200">
                                             {{ __('Fix Mapping') }}
                                         </a>
@@ -354,7 +354,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('All cost references already mapped.') }}</td>
+                                    <td colspan="4" class="px-6 py-2 text-sm text-gray-500 text-center">{{ __('All cost references already mapped.') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -378,12 +378,12 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($unusedDrivers as $driver)
                                     <tr>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $driver->name }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $driver->unit_measurement ?? '-' }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900">{{ $driver->name }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900">{{ $driver->unit_measurement ?? '-' }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="2" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('All drivers are used.') }}</td>
+                                        <td colspan="2" class="px-6 py-2 text-sm text-gray-500 text-center">{{ __('All drivers are used.') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -407,13 +407,13 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($mapsMissingDriverStats as $map)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $map->step_sequence }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $map->sourceCostCenter?->name }} <span class="text-gray-500 text-xs">({{ $map->sourceCostCenter?->code }})</span></td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $map->allocationDriver?->name }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $map->step_sequence }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900">{{ $map->sourceCostCenter?->name }} <span class="text-gray-500 text-xs">({{ $map->sourceCostCenter?->code }})</span></td>
+                                        <td class="px-6 py-2 text-sm text-gray-900">{{ $map->allocationDriver?->name }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('All allocation maps have driver statistics for this period.') }}</td>
+                                        <td colspan="3" class="px-6 py-2 text-sm text-gray-500 text-center">{{ __('All allocation maps have driver statistics for this period.') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>

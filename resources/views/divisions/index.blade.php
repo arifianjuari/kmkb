@@ -219,7 +219,7 @@
                             @include('divisions.partials.tree-row', ['division' => $division, 'allDivisions' => $allDivisions, 'level' => 0])
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                <td colspan="5" class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-center">
                                     No organization units found.
                                 </td>
                             </tr>
@@ -336,28 +336,28 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($divisions as $division)
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
                                     {{ $division->name }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                     {{ $division->code ?? '-' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                     @if($division->parent)
                                         {{ $division->parent->name }} @if($division->parent->code)({{ $division->parent->code }})@endif
                                     @else
                                         <span class="text-gray-400">-</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500">
+                                <td class="px-6 py-2 text-sm text-gray-500">
                                     {{ Str::limit($division->description, 50) ?? '-' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $division->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                         {{ $division->is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <td class="px-6 py-2 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center gap-2">
                                         <a href="{{ route('divisions.edit', $division) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-800 hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -378,7 +378,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                <td colspan="6" class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-center">
                                     No organization units found.
                                 </td>
                             </tr>

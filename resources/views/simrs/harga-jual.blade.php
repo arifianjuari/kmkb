@@ -30,7 +30,7 @@
                     <tbody id="harga-jual-table" class="bg-white divide-y divide-gray-200">
                         <!-- Data will be loaded here via AJAX -->
                         <tr>
-                            <td colspan="3" class="px-6 py-4 text-center text-gray-500">
+                            <td colspan="3" class="px-6 py-2 text-center text-gray-500">
                                 Loading data...
                             </td>
                         </tr>
@@ -53,7 +53,7 @@
     
     function loadHargaJual() {
         const tableBody = document.getElementById('harga-jual-table');
-        tableBody.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="3" class="px-6 py-2 text-center text-gray-500">Loading data...</td></tr>';
         
         fetch('/api/simrs/harga-jual')
             .then(response => response.json())
@@ -64,22 +64,22 @@
                         data.data.forEach(item => {
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kode_brng}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.nama_brng}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(item.harga_jual)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${item.kode_brng}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${item.nama_brng}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${formatRupiah(item.harga_jual)}</td>
                             `;
                             tableBody.appendChild(row);
                         });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">Tidak ada data tersedia</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="3" class="px-6 py-2 text-center text-gray-500">Tidak ada data tersedia</td></tr>';
                     }
                 } else {
-                    tableBody.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-red-500">Error loading data: ' + data.message + '</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="3" class="px-6 py-2 text-center text-red-500">Error loading data: ' + data.message + '</td></tr>';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                tableBody.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-red-500">Error loading data</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="3" class="px-6 py-2 text-center text-red-500">Error loading data</td></tr>';
             });
     }
     

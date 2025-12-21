@@ -157,10 +157,10 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($costByCategory as $item)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item['category'] }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($item['count'], 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($item['total_cost'], 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item['category'] }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($item['count'], 0, ',', '.') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($item['total_cost'], 0, ',', '.') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">
                                         {{ $summary['actual_total_cost'] > 0 ? number_format(($item['total_cost'] / $summary['actual_total_cost']) * 100, 1) : 0 }}%
                                     </td>
                                 </tr>
@@ -193,13 +193,13 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($unitCostComparison as $item)
                                 <tr>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ Str::limit($item['service'], 50) }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($item['quantity'], 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($item['unit_cost'], 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($item['actual_cost'], 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($item['unit_cost_total'], 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($item['actual_cost_total'], 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right {{ $item['variance'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                    <td class="px-6 py-2 text-sm text-gray-900">{{ Str::limit($item['service'], 50) }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($item['quantity'], 0, ',', '.') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($item['unit_cost'], 0, ',', '.') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($item['actual_cost'], 0, ',', '.') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($item['unit_cost_total'], 0, ',', '.') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($item['actual_cost_total'], 0, ',', '.') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-right {{ $item['variance'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
                                         {{ $item['variance'] >= 0 ? '+' : '' }}Rp {{ number_format($item['variance'], 0, ',', '.') }}
                                     </td>
                                 </tr>

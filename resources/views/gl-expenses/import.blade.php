@@ -57,7 +57,7 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                                 <div class="mt-2 text-sm text-gray-500">
-                                    <p>{{ __('Format file: Cost Center Code | Account Code | Amount') }}</p>
+                                    <p>{{ __('Format file: Cost Center Code | Account Code | Amount | Description (optional) | Funding Source (optional)') }}</p>
                                     <p>{{ __('File harus berformat .xlsx, .xls, atau .csv') }}</p>
                                     <p class="mt-2">
                                         <a href="{{ route('gl-expenses.template') }}" class="inline-flex items-center text-biru-dongker-600 hover:text-biru-dongker-800 font-medium">

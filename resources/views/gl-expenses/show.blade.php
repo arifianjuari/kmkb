@@ -38,6 +38,14 @@
                         <dd class="mt-1 text-sm text-gray-900 font-semibold">Rp {{ number_format($glExpense->amount, 0, ',', '.') }}</dd>
                     </div>
                     <div>
+                        <dt class="text-sm font-medium text-gray-500">{{ __('Funding Source') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $glExpense->funding_source ?: '-' }}</dd>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-gray-500">{{ __('Description') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $glExpense->description ?: '-' }}</dd>
+                    </div>
+                    <div>
                         <dt class="text-sm font-medium text-gray-500">{{ __('Created At') }}</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $glExpense->created_at->format('d/m/Y H:i') }}</dd>
                     </div>

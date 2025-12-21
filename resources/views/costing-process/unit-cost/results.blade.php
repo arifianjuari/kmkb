@@ -204,33 +204,33 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($unitCosts as $unitCost)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {{ $unitCost->costReference ? $unitCost->costReference->service_code : '-' }}
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">
+                                        <td class="px-6 py-2 text-sm text-gray-900">
                                             {{ $unitCost->costReference ? $unitCost->costReference->service_description : '-' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ $unitCost->costReference && $unitCost->costReference->costCenter ? $unitCost->costReference->costCenter->name : '-' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-biru-dongker-300 text-biru-dongker-900">
                                                 {{ $unitCost->version_label }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ str_pad($unitCost->period_month, 2, '0', STR_PAD_LEFT) }}/{{ $unitCost->period_year }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             {{ number_format($unitCost->direct_cost_material, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             {{ number_format($unitCost->direct_cost_labor, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             {{ number_format($unitCost->indirect_cost_overhead, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
                                             {{ number_format($unitCost->total_unit_cost, 0, ',', '.') }}
                                         </td>
                                     </tr>

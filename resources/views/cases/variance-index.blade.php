@@ -94,19 +94,19 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($cases as $case)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {{ $case->medical_record_number }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ $case->patient_id }}
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500">
+                                        <td class="px-6 py-2 text-sm text-gray-500">
                                             {{ $case->clinicalPathway->name ?? '-' }}
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500">
+                                        <td class="px-6 py-2 text-sm text-gray-500">
                                             {{ $case->primary_diagnosis }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-right">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                                 {{ ($case->compliance_percentage ?? 0) >= 80 ? 'bg-green-100 text-green-800' : '' }}
                                                 {{ ($case->compliance_percentage ?? 0) >= 50 && ($case->compliance_percentage ?? 0) < 80 ? 'bg-yellow-100 text-yellow-800' : '' }}
@@ -115,7 +115,7 @@
                                                 {{ number_format($case->compliance_percentage ?? 0, 1) }}%
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="{{ route('cases.variance', $case) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                                                 {{ __('View Analysis') }}
                                             </a>

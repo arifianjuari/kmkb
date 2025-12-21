@@ -148,14 +148,14 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($cases as $case)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $case->medical_record_number }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $case->patient_name }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $case->clinicalPathway->name }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $case->admission_date->format('d M Y') }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm {{ $case->compliance_percentage >= 90 ? 'text-green-600' : ($case->compliance_percentage >= 70 ? 'text-yellow-600' : 'text-red-600') }}">
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $case->medical_record_number }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $case->patient_name }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $case->clinicalPathway->name }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $case->admission_date->format('d M Y') }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm {{ $case->compliance_percentage >= 90 ? 'text-green-600' : ($case->compliance_percentage >= 70 ? 'text-yellow-600' : 'text-red-600') }}">
                                                 {{ number_format($case->compliance_percentage, 2) }}%
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm">
                                                 @if($case->compliance_percentage >= 90)
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                         {{ __('High') }}
@@ -170,7 +170,7 @@
                                                     </span>
                                                 @endif
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm">
                                                 <a href="{{ route('cases.show', $case) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                                                     {{ __('View Case') }}
                                                 </a>

@@ -111,41 +111,41 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($rvuValues as $index => $rvu)
                                     <tr class="{{ !$rvu->is_active ? 'bg-gray-50' : '' }}">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                             {{ $rvuValues->firstItem() + $index }}
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">
+                                        <td class="px-6 py-2 text-sm text-gray-900">
                                             {{ $rvu->costCenter->building_name ?? '-' }}
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">
+                                        <td class="px-6 py-2 text-sm text-gray-900">
                                             {{ $rvu->costReference->service_description ?? '-' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             {{ isset($serviceVolumes[$rvu->cost_reference_id]) ? number_format($serviceVolumes[$rvu->cost_reference_id], 0, ',', '.') : '-' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             {{ $rvu->time_factor }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                             {{ $rvu->professionalism_factor }} - {{ $rvu->professionalism_label }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
                                             {{ $rvu->difficulty_factor }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
                                             {{ number_format($rvu->rvu_value, 4, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             @if($rvu->costReference && $rvu->costReference->standard_cost)
                                                 {{ 'Rp ' . number_format($rvu->costReference->standard_cost, 0, ',', '.') }}
                                             @else
                                                 -
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ $rvu->period_year }}{{ $rvu->period_month ? '/' . str_pad($rvu->period_month, 2, '0', STR_PAD_LEFT) : '' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('rvu-values.show', $rvu) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="View" aria-label="View">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">

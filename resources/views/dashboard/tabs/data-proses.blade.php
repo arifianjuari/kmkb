@@ -84,9 +84,9 @@
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <template x-for="(check, index) in dataProses.checks" :key="index">
                         <tr>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-200" x-text="check.name"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="check.count"></td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-2 text-sm text-gray-900 dark:text-gray-200" x-text="check.name"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="check.count"></td>
+                            <td class="px-6 py-2 whitespace-nowrap">
                                 <span class="px-2 py-1 rounded-full text-xs font-semibold"
                                       :class="check.status === 'OK' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'"
                                       x-text="check.status"></span>
@@ -94,7 +94,7 @@
                         </tr>
                     </template>
                     <tr x-show="dataProses.checks.length === 0">
-                        <td colspan="3" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
+                        <td colspan="3" class="px-6 py-2 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
                     </tr>
                 </tbody>
             </table>

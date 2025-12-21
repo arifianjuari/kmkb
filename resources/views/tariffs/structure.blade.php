@@ -162,19 +162,19 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($breakdownByClass as $class)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
                                         {{ $class->code }} - {{ $class->name }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ number_format($class->count, 0, ',', '.') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ number_format($class->avg_margin, 2) }}%
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         Rp {{ number_format($class->avg_jasa_sarana, 0, ',', '.') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         Rp {{ number_format($class->avg_jasa_pelayanan, 0, ',', '.') }}
                                     </td>
                                 </tr>
@@ -259,35 +259,35 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($tariffs as $tariff)
                                     <tr class="{{ !$tariff->isActive() ? 'bg-gray-50' : '' }}">
-                                        <td class="px-6 py-4 text-sm">
+                                        <td class="px-6 py-2 text-sm">
                                             <div class="font-medium text-gray-900">{{ $tariff->costReference->service_code ?? '-' }}</div>
                                             <div class="text-gray-500 text-xs">{{ Str::limit($tariff->costReference->service_description ?? '-', 40) }}</div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ $tariff->tariffClass ? $tariff->tariffClass->code . ' - ' . $tariff->tariffClass->name : '-' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             Rp {{ number_format($tariff->base_unit_cost, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             {{ number_format($tariff->margin_percentage * 100, 2) }}%
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             Rp {{ number_format($tariff->jasa_sarana, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             Rp {{ number_format($tariff->jasa_pelayanan, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
                                             Rp {{ number_format($tariff->final_tariff_price, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ $tariff->effective_date ? \Carbon\Carbon::parse($tariff->effective_date)->locale('id')->isoFormat('DD MMM YYYY') : '-' }}
                                             @if($tariff->expired_date)
                                                 <br><span class="text-xs text-gray-400">s/d {{ \Carbon\Carbon::parse($tariff->expired_date)->locale('id')->isoFormat('DD MMM YYYY') }}</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ $tariff->sk_number }}
                                         </td>
                                     </tr>

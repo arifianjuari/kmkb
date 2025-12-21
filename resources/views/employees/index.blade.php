@@ -130,14 +130,14 @@
                             <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                                 @foreach($employees as $employee)
                                     <tr>
-                                        <td class="px-4 py-4 whitespace-nowrap">
+                                        <td class="px-4 py-2 whitespace-nowrap">
                                             <input type="checkbox" name="ids[]" value="{{ $employee->id }}" class="row-checkbox h-4 w-4 text-biru-dongker-800 border-gray-300 rounded focus:ring-biru-dongker-700">
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-gray-100">{{ $employee->employee_number }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $employee->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $employee->job_title ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $employee->professional_category_label ?? '-' }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-gray-100">{{ $employee->employee_number }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $employee->name }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $employee->job_title ?? '-' }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $employee->professional_category_label ?? '-' }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900 dark:text-gray-100">
                                             @foreach($employee->assignments->whereNull('end_date') as $assignment)
                                                 <div class="flex items-center gap-1 mb-1">
                                                     @if($assignment->is_primary)
@@ -152,15 +152,15 @@
                                                 </div>
                                             @endforeach
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-medium text-gray-900 dark:text-gray-100">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-center font-medium text-gray-900 dark:text-gray-100">
                                             {{ number_format($employee->total_fte * 100, 0) }}%
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $employee->status_badge_class }}">
                                                 {{ $employee->status_label }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('employees.show', $employee) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50" title="View">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

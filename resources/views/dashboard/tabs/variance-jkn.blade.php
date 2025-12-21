@@ -60,17 +60,17 @@
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <template x-for="(item, index) in varianceJkn.topCases" :key="index">
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.caseId"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-200" x-text="item.pathway"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.kelas"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.actualCost)"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.inaCbg)"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600" x-text="'Rp ' + formatNumber(item.selisih) + ' (' + item.selisihPercent + '%)'"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.los + ' hari'"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.caseId"></td>
+                            <td class="px-6 py-2 text-sm text-gray-900 dark:text-gray-200" x-text="item.pathway"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.kelas"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.actualCost)"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.inaCbg)"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-red-600" x-text="'Rp ' + formatNumber(item.selisih) + ' (' + item.selisihPercent + '%)'"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.los + ' hari'"></td>
                         </tr>
                     </template>
                     <tr x-show="varianceJkn.topCases.length === 0">
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
+                        <td colspan="7" class="px-6 py-2 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
                     </tr>
                 </tbody>
             </table>
@@ -96,19 +96,19 @@
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <template x-for="(item, index) in varianceJkn.byPathway" :key="index">
                         <tr>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-200" x-text="item.pathway"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.jumlahKasus"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm" 
+                            <td class="px-6 py-2 text-sm text-gray-900 dark:text-gray-200" x-text="item.pathway"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.jumlahKasus"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm" 
                                 :class="item.avgVariance >= 0 ? 'text-red-600' : 'text-green-600'"
                                 x-text="'Rp ' + formatNumber(item.avgVariance)"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm" 
+                            <td class="px-6 py-2 whitespace-nowrap text-sm" 
                                 :class="item.avgVariancePercent >= 0 ? 'text-red-600' : 'text-green-600'"
                                 x-text="item.avgVariancePercent + '%'"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.percentAboveThreshold + '%'"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.percentAboveThreshold + '%'"></td>
                         </tr>
                     </template>
                     <tr x-show="varianceJkn.byPathway.length === 0">
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
+                        <td colspan="5" class="px-6 py-2 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
                     </tr>
                 </tbody>
             </table>

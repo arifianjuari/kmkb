@@ -161,14 +161,14 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($glExpenses as $expense)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <input type="checkbox" name="ids[]" value="{{ $expense->id }}" class="row-checkbox h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $expense->period_month }}/{{ $expense->period_year }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $expense->costCenter ? $expense->costCenter->name : '-' }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $expense->expenseCategory ? $expense->expenseCategory->account_name : '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($expense->amount, 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $expense->period_month }}/{{ $expense->period_year }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900">{{ $expense->costCenter ? $expense->costCenter->name : '-' }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900">{{ $expense->expenseCategory ? $expense->expenseCategory->account_name : '-' }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($expense->amount, 0, ',', '.') }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('gl-expenses.show', $expense) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -251,7 +251,7 @@
                         </label>
                         <input type="file" name="file" id="file" accept=".xlsx,.xls,.csv" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-biru-dongker-50 file:text-biru-dongker-700 hover:file:bg-biru-dongker-100 dark:file:bg-biru-dongker-900 dark:file:text-biru-dongker-300">
                         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('Format: Cost Center Code, Account Code, Amount') }}
+                            {{ __('Format: Cost Center Code, Account Code, Amount, Description (optional), Funding Source (optional)') }}
                         </p>
                         <a href="{{ route('gl-expenses.template') }}" class="mt-2 inline-flex items-center text-xs text-biru-dongker-600 hover:text-biru-dongker-800 font-medium dark:text-biru-dongker-400">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

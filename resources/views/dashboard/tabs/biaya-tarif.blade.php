@@ -76,17 +76,17 @@
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <template x-for="(item, index) in biayaTarif.tarifVsUnitCost" :key="index">
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.kode"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-200" x-text="item.nama"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.unitCost)"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.tarifInternal)"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm" 
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.kode"></td>
+                            <td class="px-6 py-2 text-sm text-gray-900 dark:text-gray-200" x-text="item.nama"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.unitCost)"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.tarifInternal)"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm" 
                                 :class="item.margin >= 0 ? 'text-green-600' : 'text-red-600'"
                                 x-text="'Rp ' + formatNumber(item.margin)"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm" 
+                            <td class="px-6 py-2 whitespace-nowrap text-sm" 
                                 :class="item.marginPercent >= 0 ? 'text-green-600' : 'text-red-600'"
                                 x-text="item.marginPercent + '%'"></td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-2 whitespace-nowrap">
                                 <span class="px-2 py-1 rounded-full text-xs font-semibold"
                                       :class="item.status === 'Defisit' ? 'bg-red-100 text-red-800' : 
                                               item.status === 'Surplus' ? 'bg-green-100 text-green-800' : 
@@ -96,7 +96,7 @@
                         </tr>
                     </template>
                     <tr x-show="biayaTarif.tarifVsUnitCost.length === 0">
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
+                        <td colspan="7" class="px-6 py-2 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
                     </tr>
                 </tbody>
             </table>
@@ -123,20 +123,20 @@
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <template x-for="(item, index) in biayaTarif.unitCostVsCbg" :key="index">
                         <tr>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-200" x-text="item.pathway"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.avgUnitCost)"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.avgCbg)"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm" 
+                            <td class="px-6 py-2 text-sm text-gray-900 dark:text-gray-200" x-text="item.pathway"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.avgUnitCost)"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(item.avgCbg)"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm" 
                                 :class="item.selisih >= 0 ? 'text-red-600' : 'text-green-600'"
                                 x-text="'Rp ' + formatNumber(item.selisih)"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm" 
+                            <td class="px-6 py-2 whitespace-nowrap text-sm" 
                                 :class="item.selisihPercent >= 0 ? 'text-red-600' : 'text-green-600'"
                                 x-text="item.selisihPercent + '%'"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.volume"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="item.volume"></td>
                         </tr>
                     </template>
                     <tr x-show="biayaTarif.unitCostVsCbg.length === 0">
-                        <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
+                        <td colspan="6" class="px-6 py-2 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
                     </tr>
                 </tbody>
             </table>

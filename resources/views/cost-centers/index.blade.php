@@ -263,7 +263,7 @@
                                     @endforeach
                                     @if($groupedByDivision->count() === 0)
                                         <tr>
-                                            <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                            <td colspan="7" class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-center">
                                                 {{ __('No cost centers found.') }}
                                             </td>
                                         </tr>

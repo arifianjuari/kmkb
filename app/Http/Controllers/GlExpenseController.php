@@ -64,8 +64,9 @@ class GlExpenseController extends Controller
         $this->blockObserver('membuat');
         $costCenters = CostCenter::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('name')->get();
         $expenseCategories = ExpenseCategory::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('account_name')->get();
+        $fundingSources = $this->getFundingSources();
         
-        return view('gl-expenses.create', compact('costCenters', 'expenseCategories'));
+        return view('gl-expenses.create', compact('costCenters', 'expenseCategories', 'fundingSources'));
     }
 
     public function store(Request $request)
@@ -77,6 +78,8 @@ class GlExpenseController extends Controller
             'cost_center_id' => 'required|exists:cost_centers,id',
             'expense_category_id' => 'required|exists:expense_categories,id',
             'amount' => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:500',
+            'funding_source' => 'nullable|string|max:255',
         ]);
 
         // Ensure cost center and expense category belong to same hospital
@@ -124,8 +127,9 @@ class GlExpenseController extends Controller
         
         $costCenters = CostCenter::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('name')->get();
         $expenseCategories = ExpenseCategory::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('account_name')->get();
+        $fundingSources = $this->getFundingSources();
         
-        return view('gl-expenses.edit', compact('glExpense', 'costCenters', 'expenseCategories'));
+        return view('gl-expenses.edit', compact('glExpense', 'costCenters', 'expenseCategories', 'fundingSources'));
     }
 
     public function update(Request $request, GlExpense $glExpense)
@@ -141,6 +145,8 @@ class GlExpenseController extends Controller
             'cost_center_id' => 'required|exists:cost_centers,id',
             'expense_category_id' => 'required|exists:expense_categories,id',
             'amount' => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:500',
+            'funding_source' => 'nullable|string|max:255',
         ]);
 
         // Ensure cost center and expense category belong to same hospital
@@ -208,10 +214,12 @@ class GlExpenseController extends Controller
                 if (empty($row[0])) continue; // Skip empty rows
                 
                 try {
-                    // Expected format: Cost Center Code, Account Code, Amount
+                    // Expected format: Cost Center Code, Account Code, Amount, Description (optional), Funding Source (optional)
                     $costCenterCode = trim($row[0] ?? '');
                     $accountCode = trim($row[1] ?? '');
                     $amount = floatval($row[2] ?? 0);
+                    $description = trim($row[3] ?? '');
+                    $fundingSource = trim($row[4] ?? '');
                     
                     if (empty($costCenterCode) || empty($accountCode) || $amount <= 0) {
                         $errors[] = "Baris " . ($index + 2) . ": Data tidak lengkap";
@@ -245,7 +253,11 @@ class GlExpenseController extends Controller
                         ->first();
                     
                     if ($existing) {
-                        $existing->update(['amount' => $amount]);
+                        $existing->update([
+                            'amount' => $amount,
+                            'description' => $description ?: $existing->description,
+                            'funding_source' => $fundingSource ?: $existing->funding_source,
+                        ]);
                     } else {
                         GlExpense::create([
                             'hospital_id' => hospital('id'),
@@ -254,6 +266,8 @@ class GlExpenseController extends Controller
                             'cost_center_id' => $costCenter->id,
                             'expense_category_id' => $expenseCategory->id,
                             'amount' => $amount,
+                            'description' => $description,
+                            'funding_source' => $fundingSource,
                         ]);
                     }
                     
@@ -322,7 +336,7 @@ class GlExpenseController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $headers = ['Period', 'Cost Center Code', 'Cost Center', 'Account Code', 'Expense Category', 'Amount'];
+        $headers = ['Period', 'Cost Center Code', 'Cost Center', 'Account Code', 'Expense Category', 'Amount', 'Description', 'Funding Source'];
         $sheet->fromArray($headers, null, 'A1');
 
         if ($data->count() > 0) {
@@ -334,6 +348,8 @@ class GlExpenseController extends Controller
                     $item->expenseCategory ? $item->expenseCategory->account_code : '-',
                     $item->expenseCategory ? $item->expenseCategory->account_name : '-',
                     (float) $item->amount,
+                    $item->description ?? '',
+                    $item->funding_source ?? '',
                 ];
             })->toArray();
             $sheet->fromArray($rows, null, 'A2');
@@ -342,7 +358,7 @@ class GlExpenseController extends Controller
         $sheet->getStyle('F2:F' . max(2, $data->count() + 1))
             ->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_00);
         
-        foreach (range('A', 'F') as $col) {
+        foreach (range('A', 'H') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -386,33 +402,93 @@ class GlExpenseController extends Controller
     public function downloadTemplate()
     {
         $spreadsheet = new Spreadsheet();
+        
+        // Sheet 1: Template for data entry
         $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Template');
 
         // Headers matching the import format
-        $headers = ['Cost Center Code', 'Account Code', 'Amount'];
+        $headers = ['Cost Center Code', 'Account Code', 'Amount', 'Description', 'Funding Source'];
         $sheet->fromArray($headers, null, 'A1');
+
+        // Style header row
+        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE0E0E0');
 
         // Add sample data rows
         $sheet->setCellValue('A2', 'CC001');
         $sheet->setCellValue('B2', '511100');
         $sheet->setCellValue('C2', 1500000);
+        $sheet->setCellValue('D2', 'Gaji Pegawai Bulan Januari');
+        $sheet->setCellValue('E2', 'APBD');
 
         $sheet->setCellValue('A3', 'CC001');
         $sheet->setCellValue('B3', '512100');
         $sheet->setCellValue('C3', 750000);
-
-        $sheet->setCellValue('A4', 'CC002');
-        $sheet->setCellValue('B4', '511100');
-        $sheet->setCellValue('C4', 2000000);
+        $sheet->setCellValue('D3', 'Pembelian ATK');
+        $sheet->setCellValue('E3', 'BLUD');
 
         // Auto size columns
-        foreach (range('A', 'C') as $col) {
+        foreach (range('A', 'E') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
         // Format amount column as number
-        $sheet->getStyle('C2:C4')
+        $sheet->getStyle('C2:C100')
             ->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_00);
+
+        // Sheet 2: Cost Centers Reference
+        $costCenterSheet = $spreadsheet->createSheet();
+        $costCenterSheet->setTitle('Daftar Cost Center');
+        
+        $costCenterSheet->setCellValue('A1', 'Code');
+        $costCenterSheet->setCellValue('B1', 'Name');
+        $costCenterSheet->getStyle('A1:B1')->getFont()->setBold(true);
+        $costCenterSheet->getStyle('A1:B1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF4472C4');
+        $costCenterSheet->getStyle('A1:B1')->getFont()->getColor()->setARGB('FFFFFFFF');
+
+        $costCenters = CostCenter::where('hospital_id', hospital('id'))
+            ->where('is_active', true)
+            ->orderBy('code')
+            ->get(['code', 'name']);
+        
+        $row = 2;
+        foreach ($costCenters as $cc) {
+            $costCenterSheet->setCellValue('A' . $row, $cc->code);
+            $costCenterSheet->setCellValue('B' . $row, $cc->name);
+            $row++;
+        }
+
+        $costCenterSheet->getColumnDimension('A')->setAutoSize(true);
+        $costCenterSheet->getColumnDimension('B')->setAutoSize(true);
+
+        // Sheet 3: Account Codes Reference
+        $accountSheet = $spreadsheet->createSheet();
+        $accountSheet->setTitle('Daftar Account Code');
+        
+        $accountSheet->setCellValue('A1', 'Account Code');
+        $accountSheet->setCellValue('B1', 'Account Name');
+        $accountSheet->getStyle('A1:B1')->getFont()->setBold(true);
+        $accountSheet->getStyle('A1:B1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF70AD47');
+        $accountSheet->getStyle('A1:B1')->getFont()->getColor()->setARGB('FFFFFFFF');
+
+        $expenseCategories = ExpenseCategory::where('hospital_id', hospital('id'))
+            ->where('is_active', true)
+            ->orderBy('account_code')
+            ->get(['account_code', 'account_name']);
+        
+        $row = 2;
+        foreach ($expenseCategories as $ec) {
+            $accountSheet->setCellValue('A' . $row, $ec->account_code);
+            $accountSheet->setCellValue('B' . $row, $ec->account_name);
+            $row++;
+        }
+
+        $accountSheet->getColumnDimension('A')->setAutoSize(true);
+        $accountSheet->getColumnDimension('B')->setAutoSize(true);
+
+        // Set first sheet as active
+        $spreadsheet->setActiveSheetIndex(0);
 
         $filename = 'gl_expenses_import_template.xlsx';
 
@@ -422,6 +498,19 @@ class GlExpenseController extends Controller
         }, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
+    }
+
+    /**
+     * Get distinct funding sources for autocomplete
+     */
+    public function getFundingSources()
+    {
+        return GlExpense::where('hospital_id', hospital('id'))
+            ->whereNotNull('funding_source')
+            ->where('funding_source', '!=', '')
+            ->distinct()
+            ->pluck('funding_source')
+            ->toArray();
     }
 }
 

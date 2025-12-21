@@ -67,7 +67,7 @@
                         <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                             @foreach($roles as $roleName => $roleConfig)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-6 py-2 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div>
                                                 <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -84,7 +84,7 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                         @if(isset($roleConfig['menus']) && is_array($roleConfig['menus']))
                                             @if(in_array('*', $roleConfig['menus']))
                                                 <span class="text-green-600 dark:text-green-400 font-medium">All Menus</span>
@@ -96,7 +96,7 @@
                                             <span class="text-gray-400">-</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                         @if(isset($roleConfig['permissions']) && is_array($roleConfig['permissions']))
                                             @if(in_array('*', $roleConfig['permissions']))
                                                 <span class="text-green-600 dark:text-green-400 font-medium">All Permissions</span>
@@ -108,7 +108,7 @@
                                             <span class="text-gray-400">-</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium">
                                         @if($roleName === 'superadmin')
                                             <span class="text-gray-400 dark:text-gray-500 cursor-not-allowed" title="Role Superadmin tidak dapat diubah">
                                                 Edit

@@ -65,19 +65,19 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($tariffs as $tariff)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                             <div>
                                                 <div class="font-medium">{{ $tariff->costReference->service_code ?? '-' }}</div>
                                                 <div class="text-gray-500 text-xs">{{ \Illuminate\Support\Str::limit($tariff->costReference->service_description ?? '-', 50) }}</div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ $tariff->tariffClass->name ?? '-' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
                                             Rp {{ number_format($tariff->final_tariff_price, 2, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             <div>
                                                 <div>{{ $tariff->effective_date->format('d/m/Y') }}</div>
                                                 @if($tariff->expired_date)
@@ -87,10 +87,10 @@
                                                 @endif
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ $tariff->sk_number }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <a href="{{ route('tariff-explorer.show', $tariff) }}" class="text-biru-dongker-800 hover:text-biru-dongker-950">
                                                 {{ __('View Details') }}
                                             </a>

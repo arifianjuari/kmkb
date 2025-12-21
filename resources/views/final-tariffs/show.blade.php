@@ -109,9 +109,9 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($history as $h)
                                 <tr class="{{ $h->id == $finalTariff->id ? 'bg-biru-dongker-200' : '' }}">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $h->effective_date->format('d/m/Y') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($h->final_tariff_price, 2, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $h->sk_number }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $h->effective_date->format('d/m/Y') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($h->final_tariff_price, 2, ',', '.') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $h->sk_number }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

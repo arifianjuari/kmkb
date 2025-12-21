@@ -86,15 +86,15 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($tariffClasses as $tariffClass)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $tariffClass->code }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $tariffClass->name }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-500">{{ $tariffClass->description ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ $tariffClass->code }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900">{{ $tariffClass->name }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-500">{{ $tariffClass->description ?? '-' }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $tariffClass->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                                 {{ $tariffClass->is_active ? __('Active') : __('Inactive') }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('tariff-classes.show', $tariffClass) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">

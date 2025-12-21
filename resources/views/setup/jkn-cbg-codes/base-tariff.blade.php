@@ -213,10 +213,10 @@
                             <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                                 @foreach($cbgCodes as $cbgCode)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                             {{ $cbgCode->code }}
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                                        <td class="px-6 py-2 text-sm text-gray-500 dark:text-gray-300">
                                             <div class="max-w-xs">
                                                 <div class="font-medium text-gray-900 dark:text-white">{{ $cbgCode->name }}</div>
                                                 @if($cbgCode->description)
@@ -224,7 +224,7 @@
                                                 @endif
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                             @if($cbgCode->service_type)
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $cbgCode->service_type == 'Rawat Inap' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }}">
                                                     {{ $cbgCode->service_type }}
@@ -233,7 +233,7 @@
                                                 <span class="text-gray-400">-</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                             @if($cbgCode->severity_level)
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                                                     Level {{ $cbgCode->severity_level }}
@@ -242,10 +242,10 @@
                                                 <span class="text-gray-400">-</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold text-gray-900 dark:text-white">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-right font-semibold text-gray-900 dark:text-white">
                                             Rp {{ number_format($cbgCode->tariff, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                             @if($cbgCode->is_active)
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
                                                     {{ __('Active') }}
@@ -256,7 +256,7 @@
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                             {{ $cbgCode->grouping_version ?? '-' }}
                                         </td>
                                     </tr>

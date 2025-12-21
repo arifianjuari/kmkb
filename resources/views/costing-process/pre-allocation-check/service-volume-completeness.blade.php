@@ -273,15 +273,15 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($missingEntries as $index => $entry)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
+                                    <td class="px-6 py-2 text-sm text-gray-900">
                                         <div class="font-medium">{{ $entry['cost_reference']->service_code }}</div>
                                         <div class="text-gray-500 text-xs">{{ $entry['cost_reference']->service_description }}</div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                    <td class="px-6 py-2 text-sm text-gray-900">
                                         {{ $entry['tariff_class'] ? $entry['tariff_class']->name : __('Tanpa Kelas / General') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm">
                                         <a href="{{ route('service-volumes.create', [
                                             'cost_reference_id' => $entry['cost_reference']->id,
                                             'tariff_class_id' => $entry['tariff_class']?->id,
@@ -332,18 +332,18 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($summaryByService as $summary)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $summary->service_code }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $summary->service_description }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $summary->service_code }}</td>
+                                    <td class="px-6 py-2 text-sm text-gray-900">{{ $summary->service_description }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ $summary->tariff_class_count }} / {{ $expectedTariffCount }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ number_format($summary->total_quantity, 2, ',', '.') }}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">
+                                    <td colspan="4" class="px-6 py-2 text-sm text-gray-500 text-center">
                                         {{ __('No service volumes found for this period.') }}
                                     </td>
                                 </tr>
@@ -369,17 +369,17 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($summaryByTariffClass as $summary)
                                 <tr>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $summary->class_name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 text-sm text-gray-900">{{ $summary->class_name }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ $summary->service_count }} / {{ $costReferences->count() }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ number_format($summary->total_quantity, 2, ',', '.') }}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-6 py-4 text-sm text-gray-500 text-center">
+                                    <td colspan="3" class="px-6 py-2 text-sm text-gray-500 text-center">
                                         {{ __('No service volumes found for this period.') }}
                                     </td>
                                 </tr>

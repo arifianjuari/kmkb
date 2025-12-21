@@ -10,7 +10,7 @@
     data-level="{{ $level }}"
     data-parent-id="{{ $division->parent_id ?? '' }}"
     data-children-container="{{ $uniqueId }}-children">
-    <td class="px-6 py-4 text-sm font-medium text-gray-900">
+    <td class="px-6 py-2 text-sm font-medium text-gray-900">
         <div class="flex items-center">
             @if($level > 0)
                 @for($i = 0; $i < $level; $i++)
@@ -43,18 +43,18 @@
             @endif
         </div>
     </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
         {{ $division->code ?? '-' }}
     </td>
-    <td class="px-6 py-4 text-sm text-gray-500">
+    <td class="px-6 py-2 text-sm text-gray-500">
         {{ Str::limit($division->description, 50) ?? '-' }}
     </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $division->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
             {{ $division->is_active ? 'Active' : 'Inactive' }}
         </span>
     </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium">
         <div class="flex items-center gap-2">
             <a href="{{ route('divisions.edit', $division) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-biru-dongker-800 hover:bg-biru-dongker-200 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">

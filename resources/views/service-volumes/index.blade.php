@@ -236,7 +236,7 @@
                                     
                                     @if($services->count() === 0)
                                         <tr>
-                                            <td colspan="14" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                            <td colspan="14" class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-center">
                                                 {{ __('No services found matching your criteria.') }}
                                             </td>
                                         </tr>

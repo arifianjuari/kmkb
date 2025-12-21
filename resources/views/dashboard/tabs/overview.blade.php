@@ -82,13 +82,13 @@
                         <tr 
                             @click="filters.pathway = pathway.id; activeTab = 'pathway_mutu'"
                             class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="pathway.name"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="pathway.compliance + '%'"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(pathway.avgCost)"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm" 
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="pathway.name"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="pathway.compliance + '%'"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200" x-text="'Rp ' + formatNumber(pathway.avgCost)"></td>
+                            <td class="px-6 py-2 whitespace-nowrap text-sm" 
                                 :class="pathway.selisih >= 0 ? 'text-red-600' : 'text-green-600'"
                                 x-text="'Rp ' + formatNumber(pathway.selisih)"></td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-2 whitespace-nowrap">
                                 <span class="px-2 py-1 rounded-full text-xs font-semibold"
                                       :class="pathway.status === 'hijau' ? 'bg-green-100 text-green-800' : 
                                               pathway.status === 'kuning' ? 'bg-yellow-100 text-yellow-800' : 
@@ -98,7 +98,7 @@
                         </tr>
                     </template>
                     <tr x-show="overview.topPathways.length === 0">
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
+                        <td colspan="5" class="px-6 py-2 text-center text-gray-500 dark:text-gray-400">Tidak ada data</td>
                     </tr>
                 </tbody>
             </table>

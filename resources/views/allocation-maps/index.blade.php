@@ -75,24 +75,24 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($allocationMaps as $map)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-biru-dongker-300 text-biru-dongker-900">
                                                 Step {{ $map->step_sequence }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                             <div>
                                                 <div class="font-medium">{{ $map->sourceCostCenter->name ?? '-' }}</div>
                                                 <div class="text-gray-500 text-xs">{{ $map->sourceCostCenter->code ?? '-' }}</div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             <div>
                                                 <div>{{ $map->allocationDriver->name ?? '-' }}</div>
                                                 <div class="text-gray-400 text-xs">{{ $map->allocationDriver->unit_measurement ?? '-' }}</div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('allocation-maps.show', $map) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">

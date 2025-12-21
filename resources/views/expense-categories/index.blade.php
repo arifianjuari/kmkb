@@ -193,20 +193,20 @@
                                 @foreach($expenseCategories as $category)
                                     <tr>
                                         @if(!auth()->user()?->isObserver())
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <input type="checkbox" name="ids[]" value="{{ $category->id }}" class="row-checkbox h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
                                         </td>
                                         @endif
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $category->account_code }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $category->account_name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ucfirst(str_replace('_', ' ', $category->cost_type)) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ucfirst(str_replace('_', ' ', $category->allocation_category)) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ $category->account_code }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900">{{ $category->account_name }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ ucfirst(str_replace('_', ' ', $category->cost_type)) }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ ucfirst(str_replace('_', ' ', $category->allocation_category)) }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $category->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                                 {{ $category->is_active ? __('Active') : __('Inactive') }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('expense-categories.show', $category) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">

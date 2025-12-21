@@ -59,15 +59,15 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($results as $result)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $result['service_code'] }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $result['service_description'] }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($result['base_unit_cost'], 2, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($result['margin_percentage'] * 100, 2) }}%</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($result['margin_amount'], 2, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($result['jasa_sarana'], 2, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($result['jasa_pelayanan'], 2, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">Rp {{ number_format($result['final_tariff_price'], 2, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $result['service_code'] }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900">{{ $result['service_description'] }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($result['base_unit_cost'], 2, ',', '.') }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($result['margin_percentage'] * 100, 2) }}%</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($result['margin_amount'], 2, ',', '.') }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($result['jasa_sarana'], 2, ',', '.') }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">Rp {{ number_format($result['jasa_pelayanan'], 2, ',', '.') }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">Rp {{ number_format($result['final_tariff_price'], 2, ',', '.') }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <a href="{{ route('final-tariffs.create', [
                                                 'cost_reference_id' => $result['cost_reference_id'],
                                                 'unit_cost_calculation_id' => $result['unit_cost_calculation_id'],

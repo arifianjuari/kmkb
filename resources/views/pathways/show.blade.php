@@ -153,8 +153,8 @@
                                     </tr>
                                     @foreach($stepsByCategory[$category]->sortBy('step_order') as $step)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                                 <div class="flex items-center gap-2">
                                                     <span>{{ $step->service_code }}</span>
                                                     @if(method_exists($step, 'isConditional') ? $step->isConditional() : (!empty(trim($step->criteria ?? ''))))
@@ -162,10 +162,10 @@
                                                     @endif
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">{{ $step->description }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">{{ $step->criteria }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
+                                            <td class="px-6 py-2 text-sm text-gray-900">{{ $step->description }}</td>
+                                            <td class="px-6 py-2 text-sm text-gray-900">{{ $step->criteria }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
                                         </tr>
                                     @endforeach
                                 @endif
@@ -179,8 +179,8 @@
                                 </tr>
                                 @foreach($stepsByCategory[null]->sortBy('step_order') as $step)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                         <div class="flex items-center gap-2">
                                             <span>{{ $step->service_code }}</span>
                                             @if(method_exists($step, 'isConditional') ? $step->isConditional() : (!empty(trim($step->criteria ?? ''))))
@@ -188,10 +188,10 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $step->description }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $step->criteria }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-2 text-sm text-gray-900">{{ $step->description }}</td>
+                                    <td class="px-6 py-2 text-sm text-gray-900">{{ $step->criteria }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
                                 </tr>
                             @endforeach
                             @endif
@@ -221,8 +221,8 @@
                                 </tr>
                                 @foreach($steps->sortBy('display_order') as $step)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $step->step_order }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                             <div class="flex items-center gap-2">
                                                 <span>{{ $step->service_code }}</span>
                                                 @if(method_exists($step, 'isConditional') ? $step->isConditional() : (!empty(trim($step->criteria ?? ''))))
@@ -230,10 +230,10 @@
                                                 @endif
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $step->description }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">{{ $step->criteria }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900">{{ $step->description }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900">{{ $step->criteria }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format($step->estimated_cost, 0, ',', '.') }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">Rp{{ number_format(($step->estimated_cost ?? 0) * $step->quantity, 0, ',', '.') }}</td>
                                     </tr>
                                 @endforeach
                             @endforeach

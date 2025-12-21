@@ -94,22 +94,22 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($pathways as $pathway)
                                     <tr>
-                                        <td class="px-6 py-4 text-sm">
+                                        <td class="px-6 py-2 text-sm">
                                             <div class="font-medium text-gray-900">{{ $pathway->name }}</div>
                                             @if($pathway->description)
                                                 <div class="text-gray-500 text-xs mt-1">{{ Str::limit($pathway->description, 50) }}</div>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ $pathway->diagnosis_code ?? '-' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ $pathway->version ?? '1.0.0' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             {{ number_format($pathway->steps_count, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                                 {{ $pathway->status === 'approved' ? 'bg-green-100 text-green-800' : '' }}
                                                 {{ $pathway->status === 'draft' ? 'bg-gray-100 text-gray-800' : '' }}
@@ -119,10 +119,10 @@
                                                 {{ ucfirst($pathway->status) }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                             {{ $pathway->unit_cost_version ?? '-' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex justify-end gap-2">
                                                 <a href="{{ route('pathways.show', $pathway) }}" class="text-biru-dongker-800 hover:text-biru-dongker-950" title="{{ __('View') }}">
                                                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">

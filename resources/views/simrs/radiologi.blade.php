@@ -55,7 +55,7 @@
                     <tbody id="radiologi-table" class="bg-white divide-y divide-gray-200">
                         <!-- Data will be loaded here via AJAX -->
                         <tr>
-                            <td colspan="9" class="px-6 py-4 text-center text-gray-500">
+                            <td colspan="9" class="px-6 py-2 text-center text-gray-500">
                                 Loading data...
                             </td>
                         </tr>
@@ -160,7 +160,7 @@
         const syncButton = document.getElementById('sync-selected');
         const selectAllCheckbox = document.getElementById('select-all-radiologi');
         
-        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-gray-500">Loading data...</td></tr>';
         syncButton.classList.add('hidden');
         selectAllCheckbox.checked = false;
         
@@ -200,36 +200,36 @@
 
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                     <input type="checkbox" class="row-checkbox rounded border-gray-300 text-biru-dongker-800 shadow-sm focus:border-biru-dongker-500 focus:ring focus:ring-biru-dongker-400 focus:ring-opacity-50" 
                                         data-kode="${item.kd_jenis_prw}" 
                                         data-nama="${item.nm_perawatan}" 
                                         data-harga="${totalByr}">
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.nm_perawatan}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(item.bhp || 0)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(dokter)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(petugas)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(kso)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(menejemen)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(totalByr)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kd_jenis_prw}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${item.nm_perawatan}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${formatRupiah(item.bhp || 0)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${formatRupiah(dokter)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${formatRupiah(petugas)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${formatRupiah(kso)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${formatRupiah(menejemen)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${formatRupiah(totalByr)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${item.kd_jenis_prw}</td>
                             `;
                             tableBody.appendChild(row);
                         });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">Tidak ada data tersedia</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-gray-500">Tidak ada data tersedia</td></tr>';
                     }
                 } else if (data && data.message && data.message.includes('Super admin must select a hospital context')) {
                     // Redirect to hospital selection page
                     window.location.href = '/hospitals/select';
                 } else {
-                    tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-red-500">Error loading data: ' + (data ? data.message : 'Unknown error') + '</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-red-500">Error loading data: ' + (data ? data.message : 'Unknown error') + '</td></tr>';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-red-500">Error loading data</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-red-500">Error loading data</td></tr>';
             });
     }
     

@@ -196,16 +196,16 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($existingVersions as $version)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $version->version_label }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ str_pad($version->period_month, 2, '0', STR_PAD_LEFT) }}/{{ $version->period_year }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($version->services, 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $version->version_label }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ str_pad($version->period_month, 2, '0', STR_PAD_LEFT) }}/{{ $version->period_year }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($version->services, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                         {{ $version->last_run_at ? \Carbon\Carbon::parse($version->last_run_at)->locale('id')->isoFormat('DD MMM YYYY HH:mm') : '-' }}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('Belum ada perhitungan unit cost yang tersimpan.') }}</td>
+                                    <td colspan="4" class="px-6 py-2 text-sm text-gray-500 text-center">{{ __('Belum ada perhitungan unit cost yang tersimpan.') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>

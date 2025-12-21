@@ -53,7 +53,7 @@
                     <tbody id="master-barang-table" class="bg-white divide-y divide-gray-200">
                         <!-- Data will be loaded here via AJAX -->
                         <tr>
-                            <td colspan="9" class="px-6 py-4 text-center text-gray-500">
+                            <td colspan="9" class="px-6 py-2 text-center text-gray-500">
                                 Loading data...
                             </td>
                         </tr>
@@ -167,7 +167,7 @@
     
     function loadMasterBarang() {
         const tableBody = document.getElementById('master-barang-table');
-        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-gray-500">Loading data...</td></tr>';
         
         let url = `/api/simrs/master-barang?limit=${limit}&offset=${currentPage * limit}`;
         if (currentSearch) {
@@ -184,13 +184,13 @@
             .then(response => {
                 if (response.status === 401) {
                     // Handle unauthenticated response
-                    tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-red-500">Error: Anda perlu login untuk mengakses data ini.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-red-500">Error: Anda perlu login untuk mengakses data ini.</td></tr>';
                     return Promise.reject('Unauthenticated');
                 }
                 if (response.status === 400) {
                     // Handle bad request (hospital context not selected for super admin)
                     return response.json().then(data => {
-                        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-red-500">Error: ' + data.message + '</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-red-500">Error: ' + data.message + '</td></tr>';
                         return Promise.reject('Hospital context required');
                     });
                 }
@@ -207,35 +207,35 @@
                         data.data.forEach(item => {
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                                     <input type="checkbox" class="select-checkbox rounded border-gray-300 text-biru-dongker-800 shadow-sm focus:border-biru-dongker-500 focus:ring focus:ring-biru-dongker-400 focus:ring-opacity-50" 
                                            data-kode="${item.kode_brng}" 
                                            data-nama="${item.nama_brng}" 
                                            data-harga="${item.harga_beli_dasar}"
                                            data-kelas3="${item.kelas3 || 0}">
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.nama_brng}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.harga_beli_dasar)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${item.ralan ? formatRupiah(item.ralan) : '-'}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${item.kelas3 ? formatRupiah(item.kelas3) : '-'}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${item.isi}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.expire ? formatDate(item.expire) : '-'}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kode_brng}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.status === '1' ? 'Aktif' : 'Tidak Aktif'}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${item.nama_brng}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.harga_beli_dasar)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${item.ralan ? formatRupiah(item.ralan) : '-'}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${item.kelas3 ? formatRupiah(item.kelas3) : '-'}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${item.isi}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${item.expire ? formatDate(item.expire) : '-'}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${item.kode_brng}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${item.status === '1' ? 'Aktif' : 'Tidak Aktif'}</td>
                             `;
                             tableBody.appendChild(row);
                         });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">Tidak ada data tersedia</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-gray-500">Tidak ada data tersedia</td></tr>';
                     }
                 } else {
-                    tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-red-500">Error loading data: ' + data.message + '</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-red-500">Error loading data: ' + data.message + '</td></tr>';
                 }
             })
             .catch(error => {
                 if (error !== 'Unauthenticated' && error !== 'Hospital context required') {
                     console.error('Error:', error);
-                    tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-red-500">Error loading data</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-red-500">Error loading data</td></tr>';
                 }
             });
     }

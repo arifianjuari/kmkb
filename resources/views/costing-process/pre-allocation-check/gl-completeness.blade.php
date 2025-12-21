@@ -272,16 +272,16 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($missingEntries as $index => $entry)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
+                                    <td class="px-6 py-2 text-sm text-gray-900">
                                         <div class="font-medium">{{ $entry['cost_center']->name }}</div>
                                         <div class="text-gray-500 text-xs">{{ $entry['cost_center']->code }} ({{ $entry['cost_center']->type }})</div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                    <td class="px-6 py-2 text-sm text-gray-900">
                                         <div class="font-medium">{{ $entry['expense_category']->account_name }}</div>
                                         <div class="text-gray-500 text-xs">{{ $entry['expense_category']->account_code }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm">
                                         <a href="{{ route('gl-expenses.create', ['cost_center_id' => $entry['cost_center']->id, 'expense_category_id' => $entry['expense_category']->id, 'period_year' => $year, 'period_month' => $month]) }}" 
                                            class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-biru-dongker-800 hover:bg-biru-dongker-900">
                                             {{ __('Add GL Expense') }}
@@ -328,25 +328,25 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($summaryByCostCenter as $summary)
                                 <tr>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                    <td class="px-6 py-2 text-sm text-gray-900">
                                         <div class="font-medium">{{ $summary->name }}</div>
                                         <div class="text-gray-500 text-xs">{{ $summary->code }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $summary->type == 'support' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
                                             {{ $summary->type == 'support' ? __('Support') : __('Revenue') }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ $summary->expense_category_count }} / {{ $expenseCategories->count() }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ number_format($summary->total_amount, 0, ',', '.') }}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">
+                                    <td colspan="4" class="px-6 py-2 text-sm text-gray-500 text-center">
                                         {{ __('No GL Expenses found for this period.') }}
                                     </td>
                                 </tr>
@@ -373,20 +373,20 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($summaryByExpenseCategory as $summary)
                                 <tr>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                    <td class="px-6 py-2 text-sm text-gray-900">
                                         <div class="font-medium">{{ $summary->account_name }}</div>
                                         <div class="text-gray-500 text-xs">{{ $summary->account_code }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ $summary->cost_center_count }} / {{ $costCenters->count() }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                         {{ number_format($summary->total_amount, 0, ',', '.') }}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-6 py-4 text-sm text-gray-500 text-center">
+                                    <td colspan="3" class="px-6 py-2 text-sm text-gray-500 text-center">
                                         {{ __('No GL Expenses found for this period.') }}
                                     </td>
                                 </tr>

@@ -120,15 +120,15 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($units as $unit)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $unit->code }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $unit->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $unit->symbol ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ $unit->code }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $unit->name }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $unit->symbol ?? '-' }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                                 {{ $categories[$unit->category] ?? $unit->category }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-2 whitespace-nowrap">
                                             @php
                                                 $contextColors = [
                                                     'allocation' => 'bg-blue-100 text-blue-800',
@@ -140,14 +140,14 @@
                                                 {{ $contexts[$unit->context] ?? $unit->context }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-center">
                                             @if($unit->is_active)
                                                 <span class="text-green-600 font-semibold">[✓]</span>
                                             @else
                                                 <span class="text-gray-400">-</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('units-of-measurement.show', $unit) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">

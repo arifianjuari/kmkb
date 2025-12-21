@@ -262,42 +262,42 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($comparisonData as $item)
                                         <tr class="{{ !$item['version1'] ? 'bg-yellow-50' : (!$item['version2'] ? 'bg-red-50' : '') }}">
-                                            <td class="px-6 py-4 text-sm">
+                                            <td class="px-6 py-2 text-sm">
                                                 <div class="font-medium text-gray-900">{{ $item['service_code'] }}</div>
                                                 <div class="text-gray-500 text-xs">{{ Str::limit($item['service_description'], 40) }}</div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item['cost_center'] }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $item['cost_center'] }}</td>
                                             
                                             <!-- Version 1 -->
                                             @if($item['version1'])
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{{ $item['version1']['period'] }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right bg-blue-50">{{ number_format($item['version1']['direct_material'], 0, ',', '.') }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right bg-blue-50">{{ number_format($item['version1']['direct_labor'], 0, ',', '.') }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right bg-blue-50">{{ number_format($item['version1']['total'], 0, ',', '.') }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-center">{{ $item['version1']['period'] }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right bg-blue-50">{{ number_format($item['version1']['direct_material'], 0, ',', '.') }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right bg-blue-50">{{ number_format($item['version1']['direct_labor'], 0, ',', '.') }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-gray-900 text-right bg-blue-50">{{ number_format($item['version1']['total'], 0, ',', '.') }}</td>
                                             @else
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400 text-center" colspan="4">-</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-400 text-center" colspan="4">-</td>
                                             @endif
                                             
                                             <!-- Version 2 -->
                                             @if($item['version2'])
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{{ $item['version2']['period'] }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right bg-green-50">{{ number_format($item['version2']['direct_material'], 0, ',', '.') }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right bg-green-50">{{ number_format($item['version2']['direct_labor'], 0, ',', '.') }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right bg-green-50">{{ number_format($item['version2']['total'], 0, ',', '.') }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-center">{{ $item['version2']['period'] }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right bg-green-50">{{ number_format($item['version2']['direct_material'], 0, ',', '.') }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right bg-green-50">{{ number_format($item['version2']['direct_labor'], 0, ',', '.') }}</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-gray-900 text-right bg-green-50">{{ number_format($item['version2']['total'], 0, ',', '.') }}</td>
                                             @else
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400 text-center" colspan="4">-</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-400 text-center" colspan="4">-</td>
                                             @endif
                                             
                                             <!-- Variance -->
                                             @if(isset($item['variance']))
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right {{ $item['variance']['amount'] >= 0 ? 'text-red-600' : 'text-green-600' }}">
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-right {{ $item['variance']['amount'] >= 0 ? 'text-red-600' : 'text-green-600' }}">
                                                     {{ $item['variance']['amount'] >= 0 ? '+' : '' }}{{ number_format($item['variance']['amount'], 0, ',', '.') }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right {{ $item['variance']['percent'] >= 0 ? 'text-red-600' : 'text-green-600' }}">
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-right {{ $item['variance']['percent'] >= 0 ? 'text-red-600' : 'text-green-600' }}">
                                                     {{ $item['variance']['percent'] >= 0 ? '+' : '' }}{{ number_format($item['variance']['percent'], 2) }}%
                                                 </td>
                                             @else
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400 text-center" colspan="2">-</td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-400 text-center" colspan="2">-</td>
                                             @endif
                                         </tr>
                                     @endforeach

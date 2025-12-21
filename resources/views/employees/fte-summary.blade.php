@@ -74,10 +74,10 @@
                                     $totalFte += $item->total_fte; 
                                 @endphp
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-gray-100">{{ $item->code }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $item->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">{{ $item->employee_count }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-medium text-gray-900 dark:text-gray-100">{{ number_format($item->total_fte, 2) }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-gray-100">{{ $item->code }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $item->name }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">{{ $item->employee_count }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-center font-medium text-gray-900 dark:text-gray-100">{{ number_format($item->total_fte, 2) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

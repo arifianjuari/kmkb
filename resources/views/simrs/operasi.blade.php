@@ -62,7 +62,7 @@
                     <tbody id="operasi-table" class="bg-white divide-y divide-gray-200">
                         <!-- Data will be loaded here via AJAX -->
                         <tr>
-                            <td colspan="18" class="px-6 py-4 text-center text-gray-500">
+                            <td colspan="18" class="px-6 py-2 text-center text-gray-500">
                                 Loading data...
                             </td>
                         </tr>
@@ -160,7 +160,7 @@
     
     function loadOperasi() {
         const tableBody = document.getElementById('operasi-table');
-        tableBody.innerHTML = '<tr><td colspan="18" class="px-6 py-4 text-center text-gray-500">Loading data...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="18" class="px-6 py-2 text-center text-gray-500">Loading data...</td></tr>';
         
         // Calculate offset based on current page
         const offset = currentPage * limit;
@@ -187,42 +187,42 @@
                         data.data.forEach(item => {
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
                                     <input type="checkbox" class="select-checkbox rounded border-gray-300 text-biru-dongker-800 shadow-sm focus:border-biru-dongker-500 focus:ring focus:ring-biru-dongker-400 focus:ring-opacity-50" 
                                            data-id="${item.kd_jenis_prw}" 
                                            data-name="${item.nm_perawatan}" 
                                            data-price="${item.total}">
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.nm_perawatan}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.tarif_total)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.operator1)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.asisten_operator1)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.asisten_operator2)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.asisten_operator3)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.instrumen)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.dokter_anak)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.dokter_anestesi)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.asisten_anestesi)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.asisten_anestesi2)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.perawat_luar)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.bagian_rs)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.omloop)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.omloop4)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.omloop5)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.kode_paket}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${item.nm_perawatan}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.tarif_total)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.operator1)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.asisten_operator1)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.asisten_operator2)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.asisten_operator3)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.instrumen)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.dokter_anak)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.dokter_anestesi)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.asisten_anestesi)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.asisten_anestesi2)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.perawat_luar)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.bagian_rs)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.omloop)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.omloop4)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 text-right">${formatRupiah(item.omloop5)}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${item.kode_paket}</td>
                             `;
                             tableBody.appendChild(row);
                         });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="18" class="px-6 py-4 text-center text-gray-500">Tidak ada data tersedia</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="18" class="px-6 py-2 text-center text-gray-500">Tidak ada data tersedia</td></tr>';
                     }
                 } else {
-                    tableBody.innerHTML = '<tr><td colspan="18" class="px-6 py-4 text-center text-red-500">Error loading data: ' + data.message + '</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="18" class="px-6 py-2 text-center text-red-500">Error loading data: ' + data.message + '</td></tr>';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                tableBody.innerHTML = '<tr><td colspan="18" class="px-6 py-4 text-center text-red-500">Error loading data</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="18" class="px-6 py-2 text-center text-red-500">Error loading data</td></tr>';
             });
     }
     

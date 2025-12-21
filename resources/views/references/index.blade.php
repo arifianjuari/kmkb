@@ -73,7 +73,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($references as $reference)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-2 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">
                                     @if($reference->is_pinned)
                                         <span class="inline-flex items-center mr-2">
@@ -88,7 +88,7 @@
                                     </a>
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-2">
                                 <div class="flex flex-wrap gap-1">
                                     @if($reference->tags && $reference->tags->count() > 0)
                                         @foreach($reference->tags as $tag)
@@ -102,7 +102,7 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
                                     <a href="{{ route('references.export-pdf', $reference) }}"
                                        target="_blank"
@@ -151,7 +151,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
+                            <td colspan="3" class="px-6 py-2 text-center text-sm text-gray-500">
                                 {{ __('Belum ada referensi yang tersimpan.') }}
                             </td>
                         </tr>

@@ -50,7 +50,7 @@
                     <tbody id="kamar-table" class="bg-white divide-y divide-gray-200">
                         <!-- Data will be loaded here via AJAX -->
                         <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            <td colspan="5" class="px-6 py-2 text-center text-gray-500">
                                 Loading data...
                             </td>
                         </tr>
@@ -158,7 +158,7 @@
         // Show loading state
         const tableBody = document.getElementById('kamar-table');
         tableBody.innerHTML = `<tr>
-            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+            <td colspan="5" class="px-6 py-2 text-center text-gray-500">
                 Loading data...
             </td>
         </tr>`;
@@ -190,7 +190,7 @@
                 updatePagination(data.total);
             } else {
                 tableBody.innerHTML = `<tr>
-                    <td colspan="5" class="px-6 py-4 text-center text-red-500">
+                    <td colspan="5" class="px-6 py-2 text-center text-red-500">
                         Error loading data: ${data.message}
                     </td>
                 </tr>`;
@@ -199,7 +199,7 @@
         .catch(error => {
             console.error('Error:', error);
             tableBody.innerHTML = `<tr>
-                <td colspan="5" class="px-6 py-4 text-center text-red-500">
+                <td colspan="5" class="px-6 py-2 text-center text-red-500">
                     Error loading data. Please try again.
                 </td>
             </tr>`;
@@ -211,7 +211,7 @@
         
         if (data.length === 0) {
             tableBody.innerHTML = `<tr>
-                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                <td colspan="5" class="px-6 py-2 text-center text-gray-500">
                     No data found
                 </td>
             </tr>`;
@@ -227,13 +227,13 @@
             const key = item.kd_kamar;
             rows += `
                 <tr>
-                    <td class="px-4 py-4">
+                    <td class="px-4 py-2">
                         <input type="checkbox" class="row-checkbox h-4 w-4 text-biru-dongker-800 border-gray-300 rounded" data-kode="${item.kd_kamar}" data-nama="${item.kd_bangsal} - ${item.kelas}" data-harga="${item.trf_kamar}">
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.kd_kamar}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.kd_bangsal}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatRupiah(item.trf_kamar)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.kelas}</td>
+                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${item.kd_kamar}</td>
+                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${item.kd_bangsal}</td>
+                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${formatRupiah(item.trf_kamar)}</td>
+                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">${item.kelas}</td>
                 </tr>
             `;
         });

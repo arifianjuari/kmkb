@@ -177,7 +177,7 @@
                                     @endphp
                                     {{-- Baris Service Utama --}}
                                     <tr class="service-main-row bg-gray-50 hover:bg-gray-100" data-service-id="{{ $serviceId }}">
-                                        <td class="px-2 py-4 whitespace-nowrap text-center">
+                                        <td class="px-2 py-2 whitespace-nowrap text-center">
                                             <div class="flex items-center justify-center gap-2">
                                                 <input type="checkbox" class="row-checkbox rounded border-gray-300 text-biru-dongker-800 shadow-sm focus:border-biru-dongker-500 focus:ring focus:ring-biru-dongker-400 focus:ring-opacity-50" 
                                                     data-code-service="{{ $first->service->service_code ?? $first->service_code ?? '' }}" 
@@ -193,7 +193,7 @@
                                                 @endif
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                             <div class="font-medium">
                                                 {{ $first->service->service_description ?? $first->service_name ?? '-' }}
                                             </div>
@@ -201,7 +201,7 @@
                                                 {{ $first->service->service_code ?? $first->service_code ?? '-' }}
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                             @if($hasMultipleBmhp)
                                                 <span class="text-gray-500 italic">{{ $bmhpCount }} BMHP</span>
                                             @else
@@ -209,25 +209,25 @@
                                                 <div class="text-xs text-gray-500">{{ $first->bmhp->service_code ?? '-' }}</div>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             @if(!$hasMultipleBmhp)
                                                 {{ number_format($first->quantity, 2, ',', '.') }}
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                             @if(!$hasMultipleBmhp)
                                                 {{ $first->unit }}
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                             @if(!$hasMultipleBmhp)
                                                 Rp {{ number_format($first->getTotalCost(), 0, ',', '.') }}
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
                                             Rp {{ number_format($totalBiayaKeseluruhan, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <td class="px-6 py-2 whitespace-nowrap text-center">
                                             @if($first->is_active)
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                     Aktif
@@ -238,7 +238,7 @@
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <div class="flex items-center space-x-2">
                                                 <a href="{{ route('standard-resource-usages.edit', $first) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500" title="Edit">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -262,24 +262,24 @@
                                     @if($hasMultipleBmhp)
                                         @foreach($group as $index => $sru)
                                             <tr class="service-detail-row" data-service-id="{{ $serviceId }}" style="display: none;">
-                                                <td class="px-2 py-4 whitespace-nowrap"></td>
-                                                <td class="px-6 py-4 whitespace-nowrap"></td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <td class="px-2 py-2 whitespace-nowrap"></td>
+                                                <td class="px-6 py-2 whitespace-nowrap"></td>
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                                     <div class="font-medium">{{ $sru->bmhp->service_description ?? '-' }}</div>
                                                     <div class="text-xs text-gray-500">{{ $sru->bmhp->service_code ?? '-' }}</div>
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                                     {{ number_format($sru->quantity, 2, ',', '.') }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                                     {{ $sru->unit }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
                                                     Rp {{ number_format($sru->getTotalCost(), 0, ',', '.') }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap"></td>
-                                                <td class="px-6 py-4 whitespace-nowrap"></td>
-                                                <td class="px-6 py-4 whitespace-nowrap"></td>
+                                                <td class="px-6 py-2 whitespace-nowrap"></td>
+                                                <td class="px-6 py-2 whitespace-nowrap"></td>
+                                                <td class="px-6 py-2 whitespace-nowrap"></td>
                                             </tr>
                                         @endforeach
                                     @endif

@@ -88,6 +88,31 @@
                                 @enderror
                             </div>
                         </div>
+                        
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="funding_source" class="block text-sm font-medium text-gray-700">{{ __('Funding Source') }}</label>
+                            <div class="mt-1">
+                                <input type="text" id="funding_source" name="funding_source" value="{{ old('funding_source', $glExpense->funding_source) }}" list="funding-sources-list" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700" placeholder="{{ __('e.g., APBD, BLUD, Hibah') }}">
+                                <datalist id="funding-sources-list">
+                                    @foreach($fundingSources as $source)
+                                        <option value="{{ $source }}">
+                                    @endforeach
+                                </datalist>
+                                @error('funding_source')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="col-span-12">
+                            <label for="description" class="block text-sm font-medium text-gray-700">{{ __('Description') }}</label>
+                            <div class="mt-1">
+                                <textarea id="description" name="description" rows="3" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700" placeholder="{{ __('Optional description for this expense') }}">{{ old('description', $glExpense->description) }}</textarea>
+                                @error('description')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mt-6">

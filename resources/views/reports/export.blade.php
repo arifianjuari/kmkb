@@ -183,9 +183,9 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($recentExports as $export)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $export->file_name }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ ucfirst(str_replace('_', ' ', $export->data_type)) }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $export->file_name }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ ucfirst(str_replace('_', ' ', $export->data_type)) }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                                 @if($export->format == 'csv')
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">CSV</span>
                                                 @elseif($export->format == 'excel')
@@ -194,8 +194,8 @@
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">PDF</span>
                                                 @endif
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $export->created_at->format('d M Y H:i') }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $export->created_at->format('d M Y H:i') }}</td>
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                                                 @if($export->status == 'completed')
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ __('Completed') }}</span>
                                                 @elseif($export->status == 'processing')
@@ -204,7 +204,7 @@
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">{{ __('Failed') }}</span>
                                                 @endif
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <td class="px-6 py-2 whitespace-nowrap text-sm">
                                                 @if($export->status == 'completed' && $export->file_path)
                                                     <a href="{{ route('reports.export.download', $export) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                                         <!-- Download icon -->

@@ -107,17 +107,17 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($allocationDrivers as $driver)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $driver->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $driver->unit_measurement }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ $driver->name }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{{ $driver->unit_measurement }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-center">
                                             @if($driver->is_static)
                                                 <span class="text-green-600 font-semibold">[✓]</span>
                                             @else
                                                 <span class="text-gray-400">-</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500">{{ $driver->description ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 text-sm text-gray-500">{{ $driver->description ?? '-' }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('allocation-drivers.show', $driver) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">

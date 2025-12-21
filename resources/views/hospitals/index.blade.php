@@ -41,7 +41,7 @@
                     <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                         @forelse($hospitals as $hospital)
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                     <div class="flex items-center">
                                         @php $logoPath = $hospital->logo_path; @endphp
                                         @if($logoPath && Storage::disk(uploads_disk())->exists($logoPath))
@@ -52,10 +52,10 @@
                                         <span>{{ $hospital->name }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $hospital->code }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ Str::limit($hospital->address, 50) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $hospital->contact }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $hospital->code }}</td>
+                                <td class="px-6 py-2 text-sm text-gray-500 dark:text-gray-400">{{ Str::limit($hospital->address, 50) }}</td>
+                                <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $hospital->contact }}</td>
+                                <td class="px-6 py-2 whitespace-nowrap">
                                     @if($hospital->is_active)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
                                             {{ __('Aktif') }}
@@ -66,7 +66,7 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center justify-end gap-2">
                                         <a href="{{ route('hospitals.show', $hospital) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700" title="{{ __('Lihat') }}" aria-label="{{ __('Lihat') }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -92,7 +92,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                <td colspan="6" class="px-6 py-2 text-center text-sm text-gray-500 dark:text-gray-400">
                                     {{ __('Tidak ada data rumah sakit.') }}
                                 </td>
                             </tr>

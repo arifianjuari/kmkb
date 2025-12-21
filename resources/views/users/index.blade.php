@@ -77,9 +77,9 @@
                         <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                             @foreach($users as $user)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->email }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->name }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->email }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm">
                                         @php
                                             $roleLabels = [
                                                 'superadmin' => ['label' => __('Superadmin'), 'class' => 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'],
@@ -104,12 +104,12 @@
                                         @endphp
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $roleInfo['class'] }}">{{ $roleInfo['label'] }}</span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->department }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->department }}</td>
                                     @if(auth()->user()->isSuperadmin())
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->hospital ? $user->hospital->name : '-' }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->hospital ? $user->hospital->name : '-' }}</td>
                                     @endif
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->created_at->format('d M Y') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $user->created_at->format('d M Y') }}</td>
+                                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium">
                                         <div class="flex items-center gap-2">
                                             @php
                                                 $canManage = auth()->user()->isSuperadmin() ||

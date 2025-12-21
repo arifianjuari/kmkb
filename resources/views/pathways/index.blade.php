@@ -43,11 +43,11 @@
                         <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                                 @foreach($pathways as $pathway)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $pathway->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $pathway->diagnosis_code }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $pathway->version }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $pathway->effective_date->format('d M Y') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $pathway->name }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $pathway->diagnosis_code }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $pathway->version }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $pathway->effective_date->format('d M Y') }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap">
                                             @if($pathway->status == 'active')
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">{{ __('Active') }}</span>
                                             @elseif($pathway->status == 'draft')
@@ -56,9 +56,9 @@
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">{{ __('Inactive') }}</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">Rp{{ number_format($pathway->steps->sum(function($step) { return ($step->estimated_cost ?? 0) * $step->quantity; }), 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $pathway->creator->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">Rp{{ number_format($pathway->steps->sum(function($step) { return ($step->estimated_cost ?? 0) * $step->quantity; }), 0, ',', '.') }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $pathway->creator->name }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('pathways.show', $pathway) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                     <!-- Eye icon -->

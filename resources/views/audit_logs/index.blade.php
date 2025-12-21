@@ -86,14 +86,14 @@
                             <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                                 @foreach($auditLogs as $log)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             @if($log->user)
                                                 {{ $log->user->name }}
                                             @else
                                                 <span class="text-gray-500 dark:text-gray-400">{{ __('System') }}</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             @if($log->action == 'login')
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">{{ __('Login') }}</span>
                                             @elseif($log->action == 'logout')
@@ -112,11 +112,11 @@
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">{{ $log->action }}</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ $log->description }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $log->ip_address }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ Str::limit($log->user_agent, 30) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $log->created_at->format('d M Y H:i:s') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <td class="px-6 py-2 text-sm text-gray-900 dark:text-gray-100">{{ $log->description }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $log->ip_address }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-900 dark:text-gray-100">{{ Str::limit($log->user_agent, 30) }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $log->created_at->format('d M Y H:i:s') }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('audit-logs.show', $log) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-biru-dongker-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700" title="{{ __('View') }}" aria-label="{{ __('View') }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
