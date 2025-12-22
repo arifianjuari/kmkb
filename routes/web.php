@@ -211,6 +211,48 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::delete('household-expenses/bulk-delete', [App\Http\Controllers\HouseholdExpenseController::class, 'bulkDelete'])->name('household-expenses.bulk-delete');
     Route::resource('household-expenses', App\Http\Controllers\HouseholdExpenseController::class);
 
+    // Asset Categories (Fixed Asset types)
+    Route::resource('asset-categories', App\Http\Controllers\AssetCategoryController::class);
+
+    // Fixed Assets (Depreciation module)
+    Route::get('fixed-assets/depreciation', [App\Http\Controllers\FixedAssetController::class, 'depreciation'])->name('fixed-assets.depreciation');
+    Route::post('fixed-assets/calculate-depreciation', [App\Http\Controllers\FixedAssetController::class, 'calculateDepreciation'])->name('fixed-assets.calculate-depreciation');
+    Route::get('fixed-assets/export-depreciation', [App\Http\Controllers\FixedAssetController::class, 'exportDepreciation'])->name('fixed-assets.export-depreciation');
+    Route::get('fixed-assets/template', [App\Http\Controllers\FixedAssetController::class, 'downloadTemplate'])->name('fixed-assets.template');
+    Route::post('fixed-assets/import', [App\Http\Controllers\FixedAssetController::class, 'import'])->name('fixed-assets.import');
+    Route::resource('fixed-assets', App\Http\Controllers\FixedAssetController::class);
+
+    // Service Fees (Jasa Tenaga Kesehatan)
+    Route::prefix('service-fees')->name('service-fees.')->group(function () {
+        // Revenue Sources
+        Route::get('revenue-sources/seed-defaults', [App\Http\Controllers\RevenueSourceController::class, 'seedDefaults'])->name('revenue-sources.seed-defaults');
+        Route::resource('revenue-sources', App\Http\Controllers\RevenueSourceController::class);
+        
+        // Revenue Records
+        Route::get('revenue-records/import', [App\Http\Controllers\RevenueRecordController::class, 'importForm'])->name('revenue-records.import');
+        Route::post('revenue-records/import', [App\Http\Controllers\RevenueRecordController::class, 'import'])->name('revenue-records.import.process');
+        Route::get('revenue-records/template', [App\Http\Controllers\RevenueRecordController::class, 'template'])->name('revenue-records.template');
+        Route::resource('revenue-records', App\Http\Controllers\RevenueRecordController::class);
+        
+        // Service Fee Configs
+        Route::post('configs/{config}/duplicate', [App\Http\Controllers\ServiceFeeConfigController::class, 'duplicate'])->name('configs.duplicate');
+        Route::resource('configs', App\Http\Controllers\ServiceFeeConfigController::class);
+        
+        // Service Fee Indexes
+        Route::resource('indexes', App\Http\Controllers\ServiceFeeIndexController::class);
+        
+        // Service Fee Assignments
+        Route::get('assignments/by-service/{costReference}', [App\Http\Controllers\ServiceFeeAssignmentController::class, 'byService'])->name('assignments.by-service');
+        Route::resource('assignments', App\Http\Controllers\ServiceFeeAssignmentController::class);
+        
+        // Service Fee Calculations
+        Route::get('calculations', [App\Http\Controllers\ServiceFeeCalculationController::class, 'index'])->name('calculations.index');
+        Route::get('calculations/form', [App\Http\Controllers\ServiceFeeCalculationController::class, 'form'])->name('calculations.form');
+        Route::post('calculations/run', [App\Http\Controllers\ServiceFeeCalculationController::class, 'run'])->name('calculations.run');
+        Route::get('calculations/export', [App\Http\Controllers\ServiceFeeCalculationController::class, 'export'])->name('calculations.export');
+        Route::get('calculations/{calculation}', [App\Http\Controllers\ServiceFeeCalculationController::class, 'show'])->name('calculations.show');
+    });
+
     // Allocation Maps
     Route::resource('allocation-maps', App\Http\Controllers\AllocationMapController::class);
 

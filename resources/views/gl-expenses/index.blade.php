@@ -151,22 +151,76 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             <input id="select-all" type="checkbox" class="h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
                                         </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Period') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Cost Center') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <a href="{{ route('gl-expenses.index', array_merge(request()->query(), ['sort_by' => 'cost_center', 'sort_dir' => ($sortBy ?? '') === 'cost_center' && ($sortDir ?? 'desc') === 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center gap-1 hover:text-biru-dongker-800">
+                                            {{ __('Cost Center') }}
+                                            @if(($sortBy ?? '') === 'cost_center')
+                                                @if(($sortDir ?? 'desc') === 'asc')
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-biru-dongker-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>
+                                                @else
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-biru-dongker-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                                @endif
+                                            @else
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                            @endif
+                                        </a>
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <a href="{{ route('gl-expenses.index', array_merge(request()->query(), ['sort_by' => 'account_code', 'sort_dir' => ($sortBy ?? '') === 'account_code' && ($sortDir ?? 'desc') === 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center gap-1 hover:text-biru-dongker-800">
+                                            {{ __('Account Code') }}
+                                            @if(($sortBy ?? '') === 'account_code')
+                                                @if(($sortDir ?? 'desc') === 'asc')
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-biru-dongker-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>
+                                                @else
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-biru-dongker-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                                @endif
+                                            @else
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                            @endif
+                                        </a>
+                                    </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Expense Category') }}</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Amount (Rp)') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Description') }}</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <a href="{{ route('gl-expenses.index', array_merge(request()->query(), ['sort_by' => 'amount', 'sort_dir' => ($sortBy ?? '') === 'amount' && ($sortDir ?? 'desc') === 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center justify-end gap-1 hover:text-biru-dongker-800">
+                                            {{ __('Amount (Rp)') }}
+                                            @if(($sortBy ?? '') === 'amount')
+                                                @if(($sortDir ?? 'desc') === 'asc')
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-biru-dongker-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>
+                                                @else
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-biru-dongker-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                                @endif
+                                            @else
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                            @endif
+                                        </a>
+                                    </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
+                                @php $currentPeriod = null; @endphp
                                 @foreach($glExpenses as $expense)
+                                    @php $expensePeriod = $expense->period_month . '/' . $expense->period_year; @endphp
+                                    @if($currentPeriod !== $expensePeriod)
+                                        @php $currentPeriod = $expensePeriod; @endphp
+                                        <tr class="bg-biru-dongker-100">
+                                            <td colspan="7" class="px-6 py-2 text-sm font-semibold text-biru-dongker-800">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                {{ __('Period') }}: {{ date('F', mktime(0, 0, 0, $expense->period_month, 1)) }} {{ $expense->period_year }}
+                                            </td>
+                                        </tr>
+                                    @endif
                                     <tr>
                                         <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <input type="checkbox" name="ids[]" value="{{ $expense->id }}" class="row-checkbox h-4 w-4 text-biru-dongker-800 border-gray-300 rounded">
                                         </td>
-                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $expense->period_month }}/{{ $expense->period_year }}</td>
                                         <td class="px-6 py-2 text-sm text-gray-900">{{ $expense->costCenter ? $expense->costCenter->name : '-' }}</td>
+                                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900">{{ $expense->expenseCategory ? $expense->expenseCategory->account_code : '-' }}</td>
                                         <td class="px-6 py-2 text-sm text-gray-900">{{ $expense->expenseCategory ? $expense->expenseCategory->account_name : '-' }}</td>
+                                        <td class="px-6 py-2 text-sm text-gray-500">{{ $expense->description ?? '-' }}</td>
                                         <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($expense->amount, 0, ',', '.') }}</td>
                                         <td class="px-6 py-2 whitespace-nowrap text-sm">
                                             <div class="flex items-center gap-2">

@@ -60,11 +60,22 @@
         request()->routeIs('svc-current.*') ||
         request()->routeIs('employees.*') ||
         request()->routeIs('household-items.*') ||
-        request()->routeIs('household-expenses.*')) {
+        request()->routeIs('household-expenses.*') ||
+        request()->routeIs('asset-categories.*') ||
+        request()->routeIs('fixed-assets.*') ||
+        request()->routeIs('service-fees.*')) {
         $openGroups['data-input'] = true;
-        $openGroups['svc-simrs'] = true; // Auto-open Service Volume (SIM RS) submenu
+        if (request()->routeIs('svc-current.*')) {
+            $openGroups['svc-simrs'] = true;
+        }
         if (request()->routeIs('household-items.*') || request()->routeIs('household-expenses.*')) {
             $openGroups['household'] = true;
+        }
+        if (request()->routeIs('asset-categories.*') || request()->routeIs('fixed-assets.*')) {
+            $openGroups['fixed-assets'] = true;
+        }
+        if (request()->routeIs('service-fees.*')) {
+            $openGroups['service-fees'] = true;
         }
     }
     
@@ -468,6 +479,66 @@
                                     <a href="{{ route('household-expenses.index') }}"
                                        class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('household-expenses.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
                                         <span class="truncate">Input per Cost Center</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- Fixed Assets (Aset Tetap & Depresiasi) -->
+                            <div class="mt-0.5" x-show="!collapsed">
+                                <button @click="toggleGroup('fixed-assets')"
+                                        class="w-full flex items-center justify-between px-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('asset-categories.*') || request()->routeIs('fixed-assets.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                    <span class="truncate">Fixed Assets</span>
+                                    <svg class="w-3 h-3 transition-transform" :class="isGroupOpen('fixed-assets') ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                                <div x-show="isGroupOpen('fixed-assets')" class="ml-4 mt-0.5 space-y-0.5">
+                                    <a href="{{ route('asset-categories.index') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('asset-categories.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Asset Categories</span>
+                                    </a>
+                                    <a href="{{ route('fixed-assets.index') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('fixed-assets.index') || request()->routeIs('fixed-assets.create') || request()->routeIs('fixed-assets.edit') || request()->routeIs('fixed-assets.show') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Asset Register</span>
+                                    </a>
+                                    <a href="{{ route('fixed-assets.depreciation') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('fixed-assets.depreciation') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Depreciation Calculator</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- Jasa Tenaga Kesehatan (Service Fees) -->
+                            <div class="mt-0.5" x-show="!collapsed">
+                                <button @click="toggleGroup('service-fees')"
+                                        class="w-full flex items-center justify-between px-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('service-fees.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                    <span class="truncate">Jasa Tenaga Kesehatan</span>
+                                    <svg class="w-3 h-3 transition-transform" :class="isGroupOpen('service-fees') ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                                <div x-show="isGroupOpen('service-fees')" class="ml-4 mt-0.5 space-y-0.5">
+                                    <a href="{{ route('service-fees.revenue-sources.index') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('service-fees.revenue-sources.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Sumber Pendapatan</span>
+                                    </a>
+                                    <a href="{{ route('service-fees.revenue-records.index') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('service-fees.revenue-records.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Import Pendapatan</span>
+                                    </a>
+                                    <a href="{{ route('service-fees.configs.index') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('service-fees.configs.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Konfigurasi Jasa</span>
+                                    </a>
+                                    <a href="{{ route('service-fees.indexes.index') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('service-fees.indexes.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Indeks Jasa</span>
+                                    </a>
+                                    <a href="{{ route('service-fees.assignments.index') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('service-fees.assignments.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Penugasan Jasa</span>
+                                    </a>
+                                    <a href="{{ route('service-fees.calculations.form') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('service-fees.calculations.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Hitung Jasa</span>
                                     </a>
                                 </div>
                             </div>

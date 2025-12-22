@@ -21,42 +21,67 @@ class GlExpenseController extends Controller
         $periodYear = $request->get('period_year', date('Y'));
         $costCenterId = $request->get('cost_center_id');
         $expenseCategoryId = $request->get('expense_category_id');
+        $sortBy = $request->get('sort_by', 'period');
+        $sortDir = $request->get('sort_dir', 'desc');
         
-        $query = GlExpense::where('hospital_id', hospital('id'))
+        $query = GlExpense::where('gl_expenses.hospital_id', hospital('id'))
             ->with(['costCenter', 'expenseCategory']);
         
         if ($periodMonth) {
-            $query->where('period_month', $periodMonth);
+            $query->where('gl_expenses.period_month', $periodMonth);
         }
         
         if ($periodYear) {
-            $query->where('period_year', $periodYear);
+            $query->where('gl_expenses.period_year', $periodYear);
         }
         
         if ($costCenterId) {
-            $query->where('cost_center_id', $costCenterId);
+            $query->where('gl_expenses.cost_center_id', $costCenterId);
         }
         
         if ($expenseCategoryId) {
-            $query->where('expense_category_id', $expenseCategoryId);
+            $query->where('gl_expenses.expense_category_id', $expenseCategoryId);
         }
         
         if ($search) {
-            $query->whereHas('costCenter', function($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('code', 'LIKE', "%{$search}%");
-            })->orWhereHas('expenseCategory', function($q) use ($search) {
-                $q->where('account_name', 'LIKE', "%{$search}%")
-                  ->orWhere('account_code', 'LIKE', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->whereHas('costCenter', function($sub) use ($search) {
+                    $sub->where('name', 'LIKE', "%{$search}%")
+                        ->orWhere('code', 'LIKE', "%{$search}%");
+                })->orWhereHas('expenseCategory', function($sub) use ($search) {
+                    $sub->where('account_name', 'LIKE', "%{$search}%")
+                        ->orWhere('account_code', 'LIKE', "%{$search}%");
+                });
             });
         }
         
-        $glExpenses = $query->latest()->paginate(20)->appends($request->query());
+        // Apply sorting
+        switch ($sortBy) {
+            case 'cost_center':
+                $query->leftJoin('cost_centers', 'gl_expenses.cost_center_id', '=', 'cost_centers.id')
+                      ->orderBy('cost_centers.name', $sortDir)
+                      ->select('gl_expenses.*');
+                break;
+            case 'account_code':
+                $query->leftJoin('expense_categories', 'gl_expenses.expense_category_id', '=', 'expense_categories.id')
+                      ->orderBy('expense_categories.account_code', $sortDir)
+                      ->select('gl_expenses.*');
+                break;
+            case 'amount':
+                $query->orderBy('gl_expenses.amount', $sortDir);
+                break;
+            default:
+                // Default sort by period (year desc, month desc)
+                $query->orderBy('gl_expenses.period_year', 'desc')->orderBy('gl_expenses.period_month', 'desc');
+                break;
+        }
+        
+        $glExpenses = $query->paginate(20)->appends($request->query());
         
         $costCenters = CostCenter::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('name')->get();
         $expenseCategories = ExpenseCategory::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('account_name')->get();
         
-        return view('gl-expenses.index', compact('glExpenses', 'search', 'periodMonth', 'periodYear', 'costCenterId', 'expenseCategoryId', 'costCenters', 'expenseCategories'));
+        return view('gl-expenses.index', compact('glExpenses', 'search', 'periodMonth', 'periodYear', 'costCenterId', 'expenseCategoryId', 'costCenters', 'expenseCategories', 'sortBy', 'sortDir'));
     }
 
     public function create()
