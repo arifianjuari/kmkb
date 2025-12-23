@@ -16,13 +16,17 @@ class GlExpense extends Model
         'period_year',
         'cost_center_id',
         'expense_category_id',
+        'line_number',
         'amount',
+        'transaction_date',
+        'reference_number',
         'description',
         'funding_source',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'transaction_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

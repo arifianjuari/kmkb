@@ -90,6 +90,26 @@
                         </div>
                         
                         <div class="col-span-12 md:col-span-6">
+                            <label for="transaction_date" class="block text-sm font-medium text-gray-700">{{ __('Transaction Date') }}</label>
+                            <div class="mt-1">
+                                <input type="date" id="transaction_date" name="transaction_date" value="{{ old('transaction_date', $glExpense->transaction_date?->format('Y-m-d')) }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700">
+                                @error('transaction_date')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="reference_number" class="block text-sm font-medium text-gray-700">{{ __('Reference/Invoice Number') }}</label>
+                            <div class="mt-1">
+                                <input type="text" id="reference_number" name="reference_number" value="{{ old('reference_number', $glExpense->reference_number) }}" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700" placeholder="{{ __('e.g., INV-001, SPJ-001') }}">
+                                @error('reference_number')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="col-span-12 md:col-span-6">
                             <label for="funding_source" class="block text-sm font-medium text-gray-700">{{ __('Funding Source') }}</label>
                             <div class="mt-1">
                                 <input type="text" id="funding_source" name="funding_source" value="{{ old('funding_source', $glExpense->funding_source) }}" list="funding-sources-list" class="py-2 px-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-biru-dongker-700 focus:border-biru-dongker-700" placeholder="{{ __('e.g., APBD, BLUD, Hibah') }}">

@@ -113,6 +113,8 @@ class GlExpenseController extends Controller
             'cost_center_id' => 'required|exists:cost_centers,id',
             'expense_category_id' => 'required|exists:expense_categories,id',
             'amount' => 'required|numeric|min:0',
+            'transaction_date' => 'nullable|date',
+            'reference_number' => 'nullable|string|max:50',
             'description' => 'nullable|string|max:500',
             'funding_source' => 'nullable|string|max:255',
         ]);
@@ -134,8 +136,17 @@ class GlExpenseController extends Controller
             return back()->withErrors(['expense_category_id' => 'Expense category tidak valid.'])->withInput();
         }
 
+        // Auto-generate line_number
+        $maxLineNumber = GlExpense::where('hospital_id', hospital('id'))
+            ->where('period_month', $validated['period_month'])
+            ->where('period_year', $validated['period_year'])
+            ->where('cost_center_id', $validated['cost_center_id'])
+            ->where('expense_category_id', $validated['expense_category_id'])
+            ->max('line_number') ?? 0;
+
         GlExpense::create(array_merge($validated, [
             'hospital_id' => hospital('id'),
+            'line_number' => $maxLineNumber + 1,
         ]));
 
         return redirect()->route('gl-expenses.index')
@@ -180,6 +191,8 @@ class GlExpenseController extends Controller
             'cost_center_id' => 'required|exists:cost_centers,id',
             'expense_category_id' => 'required|exists:expense_categories,id',
             'amount' => 'required|numeric|min:0',
+            'transaction_date' => 'nullable|date',
+            'reference_number' => 'nullable|string|max:50',
             'description' => 'nullable|string|max:500',
             'funding_source' => 'nullable|string|max:255',
         ]);
@@ -243,22 +256,23 @@ class GlExpenseController extends Controller
             array_shift($rows);
             
             $imported = 0;
-            $aggregated = 0;
             $errors = [];
             
-            // Step 1: Aggregate rows by cost_center_code + account_code
-            $aggregatedData = [];
+            // Cache for line numbers per cost_center + account_code combination
+            $lineNumberCache = [];
             
             foreach ($rows as $index => $row) {
                 if (empty($row[0])) continue; // Skip empty rows
                 
                 try {
-                    // Expected format: Cost Center Code, Account Code, Amount, Description (optional), Funding Source (optional)
+                    // Expected format: Cost Center Code, Account Code, Amount, Description, Funding Source, Transaction Date (optional), Reference Number (optional)
                     $costCenterCode = trim($row[0] ?? '');
                     $accountCode = trim($row[1] ?? '');
                     $amount = floatval($row[2] ?? 0);
                     $description = trim($row[3] ?? '');
                     $fundingSource = trim($row[4] ?? '');
+                    $transactionDate = !empty($row[5]) ? $this->parseDate($row[5]) : null;
+                    $referenceNumber = trim($row[6] ?? '');
                     
                     if (empty($costCenterCode) || empty($accountCode)) {
                         $errors[] = "Baris " . ($index + 2) . ": Cost Center Code atau Account Code kosong";
@@ -270,109 +284,67 @@ class GlExpenseController extends Controller
                         continue;
                     }
                     
-                    // Create unique key for aggregation
-                    $key = $costCenterCode . '|' . $accountCode;
+                    // Find cost center
+                    $costCenter = CostCenter::where('hospital_id', hospital('id'))
+                        ->where('code', $costCenterCode)
+                        ->first();
                     
-                    if (!isset($aggregatedData[$key])) {
-                        $aggregatedData[$key] = [
-                            'cost_center_code' => $costCenterCode,
-                            'account_code' => $accountCode,
-                            'amount' => 0,
-                            'descriptions' => [],
-                            'funding_sources' => [],
-                            'row_numbers' => [],
-                        ];
+                    if (!$costCenter) {
+                        $errors[] = "Baris " . ($index + 2) . ": Cost center dengan code '{$costCenterCode}' tidak ditemukan";
+                        continue;
                     }
                     
-                    // Aggregate amount
-                    $aggregatedData[$key]['amount'] += $amount;
-                    $aggregatedData[$key]['row_numbers'][] = $index + 2;
+                    // Find expense category
+                    $expenseCategory = ExpenseCategory::where('hospital_id', hospital('id'))
+                        ->where('account_code', $accountCode)
+                        ->first();
                     
-                    // Collect unique descriptions
-                    if (!empty($description) && !in_array($description, $aggregatedData[$key]['descriptions'])) {
-                        $aggregatedData[$key]['descriptions'][] = $description;
+                    if (!$expenseCategory) {
+                        $errors[] = "Baris " . ($index + 2) . ": Expense category dengan account code '{$accountCode}' tidak ditemukan";
+                        continue;
                     }
                     
-                    // Collect unique funding sources
-                    if (!empty($fundingSource) && !in_array($fundingSource, $aggregatedData[$key]['funding_sources'])) {
-                        $aggregatedData[$key]['funding_sources'][] = $fundingSource;
+                    // Generate line_number
+                    $cacheKey = $costCenter->id . '|' . $expenseCategory->id;
+                    
+                    if (!isset($lineNumberCache[$cacheKey])) {
+                        // Get max line_number from database for this combination
+                        $maxLineNumber = GlExpense::where('hospital_id', hospital('id'))
+                            ->where('period_month', $request->period_month)
+                            ->where('period_year', $request->period_year)
+                            ->where('cost_center_id', $costCenter->id)
+                            ->where('expense_category_id', $expenseCategory->id)
+                            ->max('line_number') ?? 0;
+                        
+                        $lineNumberCache[$cacheKey] = $maxLineNumber;
                     }
                     
-                    // Track if this key has multiple rows
-                    if (count($aggregatedData[$key]['row_numbers']) > 1) {
-                        $aggregated++;
-                    }
+                    // Increment line number
+                    $lineNumberCache[$cacheKey]++;
+                    $lineNumber = $lineNumberCache[$cacheKey];
                     
+                    // Create new record (no aggregation)
+                    GlExpense::create([
+                        'hospital_id' => hospital('id'),
+                        'period_month' => $request->period_month,
+                        'period_year' => $request->period_year,
+                        'cost_center_id' => $costCenter->id,
+                        'expense_category_id' => $expenseCategory->id,
+                        'line_number' => $lineNumber,
+                        'amount' => $amount,
+                        'transaction_date' => $transactionDate,
+                        'reference_number' => $referenceNumber ?: null,
+                        'description' => $description,
+                        'funding_source' => $fundingSource,
+                    ]);
+                    
+                    $imported++;
                 } catch (\Exception $e) {
                     $errors[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
                 }
             }
             
-            // Step 2: Process aggregated data
-            foreach ($aggregatedData as $key => $data) {
-                try {
-                    $costCenter = CostCenter::where('hospital_id', hospital('id'))
-                        ->where('code', $data['cost_center_code'])
-                        ->first();
-                    
-                    if (!$costCenter) {
-                        $rowInfo = implode(', ', $data['row_numbers']);
-                        $errors[] = "Baris {$rowInfo}: Cost center dengan code '{$data['cost_center_code']}' tidak ditemukan";
-                        continue;
-                    }
-                    
-                    $expenseCategory = ExpenseCategory::where('hospital_id', hospital('id'))
-                        ->where('account_code', $data['account_code'])
-                        ->first();
-                    
-                    if (!$expenseCategory) {
-                        $rowInfo = implode(', ', $data['row_numbers']);
-                        $errors[] = "Baris {$rowInfo}: Expense category dengan account code '{$data['account_code']}' tidak ditemukan";
-                        continue;
-                    }
-                    
-                    // Combine descriptions and funding sources
-                    $combinedDescription = implode('; ', $data['descriptions']);
-                    $combinedFundingSource = implode('; ', $data['funding_sources']);
-                    
-                    // Check if record already exists in database
-                    $existing = GlExpense::where('hospital_id', hospital('id'))
-                        ->where('period_month', $request->period_month)
-                        ->where('period_year', $request->period_year)
-                        ->where('cost_center_id', $costCenter->id)
-                        ->where('expense_category_id', $expenseCategory->id)
-                        ->first();
-                    
-                    if ($existing) {
-                        $existing->update([
-                            'amount' => $data['amount'],
-                            'description' => $combinedDescription ?: $existing->description,
-                            'funding_source' => $combinedFundingSource ?: $existing->funding_source,
-                        ]);
-                    } else {
-                        GlExpense::create([
-                            'hospital_id' => hospital('id'),
-                            'period_month' => $request->period_month,
-                            'period_year' => $request->period_year,
-                            'cost_center_id' => $costCenter->id,
-                            'expense_category_id' => $expenseCategory->id,
-                            'amount' => $data['amount'],
-                            'description' => $combinedDescription,
-                            'funding_source' => $combinedFundingSource,
-                        ]);
-                    }
-                    
-                    $imported++;
-                } catch (\Exception $e) {
-                    $rowInfo = implode(', ', $data['row_numbers']);
-                    $errors[] = "Baris {$rowInfo}: " . $e->getMessage();
-                }
-            }
-            
-            $message = "Berhasil mengimpor {$imported} data.";
-            if ($aggregated > 0) {
-                $message .= " ({$aggregated} baris digabungkan karena kombinasi Cost Center + Account Code yang sama)";
-            }
+            $message = "Berhasil mengimpor {$imported} data sebagai record terpisah.";
             if (count($errors) > 0) {
                 $message .= " Terdapat " . count($errors) . " error: " . implode(', ', array_slice($errors, 0, 5));
             }
@@ -384,6 +356,30 @@ class GlExpenseController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['file' => 'Error membaca file: ' . $e->getMessage()])->withInput();
         }
+    }
+    
+    /**
+     * Parse date from Excel format
+     */
+    private function parseDate($value)
+    {
+        if (empty($value)) return null;
+        
+        // If numeric (Excel serial date)
+        if (is_numeric($value)) {
+            return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format('Y-m-d');
+        }
+        
+        // Try common formats
+        $formats = ['Y-m-d', 'd/m/Y', 'd-m-Y', 'm/d/Y'];
+        foreach ($formats as $format) {
+            $date = \DateTime::createFromFormat($format, $value);
+            if ($date) {
+                return $date->format('Y-m-d');
+            }
+        }
+        
+        return null;
     }
 
     public function export(Request $request)
@@ -431,8 +427,13 @@ class GlExpenseController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $headers = ['Period', 'Cost Center Code', 'Cost Center', 'Account Code', 'Expense Category', 'Amount', 'Description', 'Funding Source'];
+        // Updated headers with new columns
+        $headers = ['Period', 'Cost Center Code', 'Cost Center', 'Account Code', 'Expense Category', 'Line #', 'Amount', 'Transaction Date', 'Reference Number', 'Description', 'Funding Source'];
         $sheet->fromArray($headers, null, 'A1');
+        
+        // Style header
+        $sheet->getStyle('A1:K1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:K1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE0E0E0');
 
         if ($data->count() > 0) {
             $rows = $data->map(function ($item) {
@@ -442,7 +443,10 @@ class GlExpenseController extends Controller
                     $item->costCenter ? $item->costCenter->name : '-',
                     $item->expenseCategory ? $item->expenseCategory->account_code : '-',
                     $item->expenseCategory ? $item->expenseCategory->account_name : '-',
+                    $item->line_number ?? 1,
                     (float) $item->amount,
+                    $item->transaction_date ? $item->transaction_date->format('Y-m-d') : '',
+                    $item->reference_number ?? '',
                     $item->description ?? '',
                     $item->funding_source ?? '',
                 ];
@@ -450,10 +454,12 @@ class GlExpenseController extends Controller
             $sheet->fromArray($rows, null, 'A2');
         }
 
-        $sheet->getStyle('F2:F' . max(2, $data->count() + 1))
+        // Format amount column (G)
+        $sheet->getStyle('G2:G' . max(2, $data->count() + 1))
             ->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_00);
         
-        foreach (range('A', 'H') as $col) {
+        // Auto-size all columns
+        foreach (range('A', 'K') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -502,13 +508,13 @@ class GlExpenseController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Template');
 
-        // Headers matching the import format
-        $headers = ['Cost Center Code', 'Account Code', 'Amount', 'Description', 'Funding Source'];
+        // Headers matching the import format (with new columns)
+        $headers = ['Cost Center Code', 'Account Code', 'Amount', 'Description', 'Funding Source', 'Transaction Date', 'Reference Number'];
         $sheet->fromArray($headers, null, 'A1');
 
         // Style header row
-        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE0E0E0');
+        $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:G1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE0E0E0');
 
         // Add sample data rows
         $sheet->setCellValue('A2', 'CC001');
@@ -516,21 +522,35 @@ class GlExpenseController extends Controller
         $sheet->setCellValue('C2', 1500000);
         $sheet->setCellValue('D2', 'Gaji Pegawai Bulan Januari');
         $sheet->setCellValue('E2', 'APBD');
+        $sheet->setCellValue('F2', '2025-01-15');
+        $sheet->setCellValue('G2', 'INV-001');
 
         $sheet->setCellValue('A3', 'CC001');
         $sheet->setCellValue('B3', '512100');
         $sheet->setCellValue('C3', 750000);
-        $sheet->setCellValue('D3', 'Pembelian ATK');
+        $sheet->setCellValue('D3', 'Pembelian ATK Batch 1');
         $sheet->setCellValue('E3', 'BLUD');
+        $sheet->setCellValue('F3', '2025-01-10');
+        $sheet->setCellValue('G3', 'INV-002');
+        
+        // Second ATK purchase (same CC + Account - different record)
+        $sheet->setCellValue('A4', 'CC001');
+        $sheet->setCellValue('B4', '512100');
+        $sheet->setCellValue('C4', 500000);
+        $sheet->setCellValue('D4', 'Pembelian ATK Batch 2');
+        $sheet->setCellValue('E4', 'BLUD');
+        $sheet->setCellValue('F4', '2025-01-20');
+        $sheet->setCellValue('G4', 'INV-003');
 
         // Auto size columns
-        foreach (range('A', 'E') as $col) {
+        foreach (range('A', 'G') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
         // Format amount column as number
         $sheet->getStyle('C2:C100')
             ->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_00);
+
 
         // Sheet 2: Cost Centers Reference
         $costCenterSheet = $spreadsheet->createSheet();
