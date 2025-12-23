@@ -78,14 +78,43 @@ class GlExpenseController extends Controller
         
         $glExpenses = $query->paginate(20)->appends($request->query());
         
-        // Calculate total amount per period for the current page items
+        // Get unique periods from current page to calculate totals
+        $periodsOnPage = $glExpenses->unique(function ($item) {
+            return $item->period_month . '-' . $item->period_year;
+        })->map(function ($item) {
+            return ['month' => $item->period_month, 'year' => $item->period_year];
+        })->values()->toArray();
+        
+        // Calculate total amount per period from ALL data (not just current page)
         $periodTotals = [];
-        foreach ($glExpenses as $expense) {
-            $periodKey = $expense->period_month . '/' . $expense->period_year;
-            if (!isset($periodTotals[$periodKey])) {
-                $periodTotals[$periodKey] = 0;
+        foreach ($periodsOnPage as $period) {
+            $periodKey = $period['month'] . '/' . $period['year'];
+            
+            // Build query with same filters but for specific period
+            $totalQuery = GlExpense::where('hospital_id', hospital('id'))
+                ->where('period_month', $period['month'])
+                ->where('period_year', $period['year']);
+            
+            // Apply same filters as main query (except period filters since we're targeting specific period)
+            if ($costCenterId) {
+                $totalQuery->where('cost_center_id', $costCenterId);
             }
-            $periodTotals[$periodKey] += $expense->amount;
+            if ($expenseCategoryId) {
+                $totalQuery->where('expense_category_id', $expenseCategoryId);
+            }
+            if ($search) {
+                $totalQuery->where(function($q) use ($search) {
+                    $q->whereHas('costCenter', function($sub) use ($search) {
+                        $sub->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('code', 'LIKE', "%{$search}%");
+                    })->orWhereHas('expenseCategory', function($sub) use ($search) {
+                        $sub->where('account_name', 'LIKE', "%{$search}%")
+                            ->orWhere('account_code', 'LIKE', "%{$search}%");
+                    });
+                });
+            }
+            
+            $periodTotals[$periodKey] = $totalQuery->sum('amount');
         }
         
         $costCenters = CostCenter::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('name')->get();

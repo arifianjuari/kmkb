@@ -24,7 +24,7 @@ class PreAllocationCheckController extends Controller
         
         $hospitalId = hospital('id');
         
-        // Get all active cost centers and expense categories
+        // Get all active cost centers and expense categories (for reference)
         $costCenters = CostCenter::where('hospital_id', $hospitalId)
             ->where('is_active', true)
             ->orderBy('name')
@@ -35,31 +35,83 @@ class PreAllocationCheckController extends Controller
             ->orderBy('account_name')
             ->get();
         
-        // Get existing GL expenses for the period
-        $existingGlExpenses = GlExpense::where('hospital_id', $hospitalId)
-            ->where('period_year', $year)
-            ->where('period_month', $month)
+        // Historical-based approach: Get unique combinations from previous 12 months
+        $currentDate = \Carbon\Carbon::createFromDate($year, $month, 1);
+        $startDate = $currentDate->copy()->subMonths(12);
+        
+        // Get historical combinations (excluding current period)
+        $historicalCombinations = GlExpense::where('hospital_id', $hospitalId)
+            ->where(function ($query) use ($year, $month, $startDate) {
+                $query->where(function ($q) use ($startDate) {
+                    $q->where('period_year', '>', $startDate->year)
+                        ->orWhere(function ($q2) use ($startDate) {
+                            $q2->where('period_year', $startDate->year)
+                                ->where('period_month', '>=', $startDate->month);
+                        });
+                })
+                ->where(function ($q) use ($year, $month) {
+                    // Exclude current period
+                    $q->where('period_year', '<', $year)
+                        ->orWhere(function ($q2) use ($year, $month) {
+                            $q2->where('period_year', $year)
+                                ->where('period_month', '<', $month);
+                        });
+                });
+            })
+            ->select('cost_center_id', 'expense_category_id')
+            ->distinct()
             ->get()
             ->map(function ($expense) {
                 return $expense->cost_center_id . '-' . $expense->expense_category_id;
             })
+            ->unique()
+            ->values()
             ->toArray();
         
-        // Find missing combinations
-        $missingEntries = [];
-        $totalExpected = 0;
-        $totalFound = count($existingGlExpenses);
+        // Get existing GL expenses for the current period
+        $existingGlExpenses = GlExpense::where('hospital_id', $hospitalId)
+            ->where('period_year', $year)
+            ->where('period_month', $month)
+            ->select('cost_center_id', 'expense_category_id')
+            ->distinct()
+            ->get()
+            ->map(function ($expense) {
+                return $expense->cost_center_id . '-' . $expense->expense_category_id;
+            })
+            ->unique()
+            ->values()
+            ->toArray();
         
-        foreach ($costCenters as $costCenter) {
-            foreach ($expenseCategories as $expenseCategory) {
-                $totalExpected++;
-                $key = $costCenter->id . '-' . $expenseCategory->id;
+        $existingLookup = array_flip($existingGlExpenses);
+        
+        // Find missing combinations (historical combinations not in current period)
+        $missingEntries = [];
+        $totalExpected = count($historicalCombinations);
+        $totalFound = 0;
+        
+        // Create lookup for cost centers and expense categories
+        $costCenterLookup = $costCenters->keyBy('id');
+        $expenseCategoryLookup = $expenseCategories->keyBy('id');
+        
+        foreach ($historicalCombinations as $combination) {
+            if (isset($existingLookup[$combination])) {
+                $totalFound++;
+            } else {
+                // Parse the combination to get cost_center_id and expense_category_id
+                list($costCenterId, $expenseCategoryId) = explode('-', $combination);
                 
-                if (!in_array($key, $existingGlExpenses)) {
+                $costCenter = $costCenterLookup->get($costCenterId);
+                $expenseCategory = $expenseCategoryLookup->get($expenseCategoryId);
+                
+                // Only add if both still exist and are active
+                if ($costCenter && $expenseCategory) {
                     $missingEntries[] = [
                         'cost_center' => $costCenter,
                         'expense_category' => $expenseCategory,
                     ];
+                } else {
+                    // If cost center or expense category no longer exists/active, reduce expected
+                    $totalExpected--;
                 }
             }
         }
@@ -67,7 +119,7 @@ class PreAllocationCheckController extends Controller
         // Calculate statistics
         $completenessPercentage = $totalExpected > 0 
             ? round(($totalFound / $totalExpected) * 100, 2) 
-            : 0;
+            : 100; // If no historical data, consider it 100% complete
         
         // Get summary by cost center
         $summaryByCostCenter = DB::table('gl_expenses')

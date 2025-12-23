@@ -83,23 +83,22 @@
         
         <div id="gl-completeness-help" class="mb-4 hidden text-xs text-gray-700 bg-biru-dongker-200 border border-biru-dongker-300 rounded-md p-3">
             <p class="mb-2">
-                <span class="font-semibold">GL Completeness Check</span> memeriksa kelengkapan data GL Expenses untuk periode tertentu.
+                <span class="font-semibold">GL Completeness Check</span> memeriksa kelengkapan data GL Expenses untuk periode tertentu berdasarkan data historis.
             </p>
             <div class="mb-2">
-                <p class="font-semibold mb-1">🔹 Apa yang dicek?</p>
+                <p class="font-semibold mb-1">🔹 Bagaimana cara kerjanya?</p>
                 <ul class="list-disc list-inside space-y-1 ml-2">
-                    <li>Apakah semua kombinasi Cost Center × Expense Category sudah memiliki data GL</li>
-                    <li>Missing entries report (kombinasi yang belum ada datanya)</li>
-                    <li>Validasi periode data</li>
-                    <li>Summary per Cost Center dan Expense Category</li>
+                    <li>Sistem mengambil kombinasi Cost Center × Expense Category dari <strong>12 bulan terakhir</strong></li>
+                    <li>Kombinasi tersebut dijadikan acuan (expected) untuk periode yang dicek</li>
+                    <li>Missing entries = kombinasi yang ada di 12 bulan terakhir, tapi belum ada di periode ini</li>
                 </ul>
             </div>
             <div>
-                <p class="font-semibold mb-1">🔹 Mengapa penting?</p>
+                <p class="font-semibold mb-1">🔹 Mengapa menggunakan data historis?</p>
                 <ul class="list-disc list-inside space-y-1 ml-2">
-                    <li>Memastikan data GL lengkap sebelum proses allocation</li>
-                    <li>Menghindari kesalahan perhitungan karena data tidak lengkap</li>
-                    <li>Membantu identifikasi gap data yang perlu dilengkapi</li>
+                    <li>Lebih realistis - hanya mengecek kombinasi yang memang pernah terjadi</li>
+                    <li>Mengurangi false positive dari kombinasi yang tidak relevan</li>
+                    <li>Membantu mendeteksi jika ada data biaya rutin yang terlewat</li>
                 </ul>
             </div>
         </div>
@@ -157,7 +156,7 @@
                                     <div class="tooltip-container">
                                         <span class="tooltip-icon">i</span>
                                         <span class="tooltip-text">
-                                            <strong>Total Expected:</strong> Jumlah total kombinasi yang diharapkan dari semua Cost Center × Expense Category yang aktif. Ini adalah target kelengkapan data GL untuk periode ini.
+                                            <strong>Total Expected:</strong> Jumlah kombinasi Cost Center × Expense Category yang ditemukan dalam 12 bulan terakhir. Ini menjadi acuan untuk mengecek kelengkapan data periode ini.
                                         </span>
                                     </div>
                                 </dt>
