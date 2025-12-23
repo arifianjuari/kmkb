@@ -78,10 +78,20 @@ class GlExpenseController extends Controller
         
         $glExpenses = $query->paginate(20)->appends($request->query());
         
+        // Calculate total amount per period for the current page items
+        $periodTotals = [];
+        foreach ($glExpenses as $expense) {
+            $periodKey = $expense->period_month . '/' . $expense->period_year;
+            if (!isset($periodTotals[$periodKey])) {
+                $periodTotals[$periodKey] = 0;
+            }
+            $periodTotals[$periodKey] += $expense->amount;
+        }
+        
         $costCenters = CostCenter::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('name')->get();
         $expenseCategories = ExpenseCategory::where('hospital_id', hospital('id'))->where('is_active', true)->orderBy('account_name')->get();
         
-        return view('gl-expenses.index', compact('glExpenses', 'search', 'periodMonth', 'periodYear', 'costCenterId', 'expenseCategoryId', 'costCenters', 'expenseCategories', 'sortBy', 'sortDir'));
+        return view('gl-expenses.index', compact('glExpenses', 'search', 'periodMonth', 'periodYear', 'costCenterId', 'expenseCategoryId', 'costCenters', 'expenseCategories', 'sortBy', 'sortDir', 'periodTotals'));
     }
 
     public function create()
@@ -233,7 +243,11 @@ class GlExpenseController extends Controller
             array_shift($rows);
             
             $imported = 0;
+            $aggregated = 0;
             $errors = [];
+            
+            // Step 1: Aggregate rows by cost_center_code + account_code
+            $aggregatedData = [];
             
             foreach ($rows as $index => $row) {
                 if (empty($row[0])) continue; // Skip empty rows
@@ -246,30 +260,82 @@ class GlExpenseController extends Controller
                     $description = trim($row[3] ?? '');
                     $fundingSource = trim($row[4] ?? '');
                     
-                    if (empty($costCenterCode) || empty($accountCode) || $amount <= 0) {
-                        $errors[] = "Baris " . ($index + 2) . ": Data tidak lengkap";
+                    if (empty($costCenterCode) || empty($accountCode)) {
+                        $errors[] = "Baris " . ($index + 2) . ": Cost Center Code atau Account Code kosong";
                         continue;
                     }
                     
+                    if ($amount <= 0) {
+                        $errors[] = "Baris " . ($index + 2) . ": Amount harus lebih dari 0";
+                        continue;
+                    }
+                    
+                    // Create unique key for aggregation
+                    $key = $costCenterCode . '|' . $accountCode;
+                    
+                    if (!isset($aggregatedData[$key])) {
+                        $aggregatedData[$key] = [
+                            'cost_center_code' => $costCenterCode,
+                            'account_code' => $accountCode,
+                            'amount' => 0,
+                            'descriptions' => [],
+                            'funding_sources' => [],
+                            'row_numbers' => [],
+                        ];
+                    }
+                    
+                    // Aggregate amount
+                    $aggregatedData[$key]['amount'] += $amount;
+                    $aggregatedData[$key]['row_numbers'][] = $index + 2;
+                    
+                    // Collect unique descriptions
+                    if (!empty($description) && !in_array($description, $aggregatedData[$key]['descriptions'])) {
+                        $aggregatedData[$key]['descriptions'][] = $description;
+                    }
+                    
+                    // Collect unique funding sources
+                    if (!empty($fundingSource) && !in_array($fundingSource, $aggregatedData[$key]['funding_sources'])) {
+                        $aggregatedData[$key]['funding_sources'][] = $fundingSource;
+                    }
+                    
+                    // Track if this key has multiple rows
+                    if (count($aggregatedData[$key]['row_numbers']) > 1) {
+                        $aggregated++;
+                    }
+                    
+                } catch (\Exception $e) {
+                    $errors[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
+                }
+            }
+            
+            // Step 2: Process aggregated data
+            foreach ($aggregatedData as $key => $data) {
+                try {
                     $costCenter = CostCenter::where('hospital_id', hospital('id'))
-                        ->where('code', $costCenterCode)
+                        ->where('code', $data['cost_center_code'])
                         ->first();
                     
                     if (!$costCenter) {
-                        $errors[] = "Baris " . ($index + 2) . ": Cost center dengan code '{$costCenterCode}' tidak ditemukan";
+                        $rowInfo = implode(', ', $data['row_numbers']);
+                        $errors[] = "Baris {$rowInfo}: Cost center dengan code '{$data['cost_center_code']}' tidak ditemukan";
                         continue;
                     }
                     
                     $expenseCategory = ExpenseCategory::where('hospital_id', hospital('id'))
-                        ->where('account_code', $accountCode)
+                        ->where('account_code', $data['account_code'])
                         ->first();
                     
                     if (!$expenseCategory) {
-                        $errors[] = "Baris " . ($index + 2) . ": Expense category dengan account code '{$accountCode}' tidak ditemukan";
+                        $rowInfo = implode(', ', $data['row_numbers']);
+                        $errors[] = "Baris {$rowInfo}: Expense category dengan account code '{$data['account_code']}' tidak ditemukan";
                         continue;
                     }
                     
-                    // Check if record already exists
+                    // Combine descriptions and funding sources
+                    $combinedDescription = implode('; ', $data['descriptions']);
+                    $combinedFundingSource = implode('; ', $data['funding_sources']);
+                    
+                    // Check if record already exists in database
                     $existing = GlExpense::where('hospital_id', hospital('id'))
                         ->where('period_month', $request->period_month)
                         ->where('period_year', $request->period_year)
@@ -279,9 +345,9 @@ class GlExpenseController extends Controller
                     
                     if ($existing) {
                         $existing->update([
-                            'amount' => $amount,
-                            'description' => $description ?: $existing->description,
-                            'funding_source' => $fundingSource ?: $existing->funding_source,
+                            'amount' => $data['amount'],
+                            'description' => $combinedDescription ?: $existing->description,
+                            'funding_source' => $combinedFundingSource ?: $existing->funding_source,
                         ]);
                     } else {
                         GlExpense::create([
@@ -290,19 +356,23 @@ class GlExpenseController extends Controller
                             'period_year' => $request->period_year,
                             'cost_center_id' => $costCenter->id,
                             'expense_category_id' => $expenseCategory->id,
-                            'amount' => $amount,
-                            'description' => $description,
-                            'funding_source' => $fundingSource,
+                            'amount' => $data['amount'],
+                            'description' => $combinedDescription,
+                            'funding_source' => $combinedFundingSource,
                         ]);
                     }
                     
                     $imported++;
                 } catch (\Exception $e) {
-                    $errors[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
+                    $rowInfo = implode(', ', $data['row_numbers']);
+                    $errors[] = "Baris {$rowInfo}: " . $e->getMessage();
                 }
             }
             
             $message = "Berhasil mengimpor {$imported} data.";
+            if ($aggregated > 0) {
+                $message .= " ({$aggregated} baris digabungkan karena kombinasi Cost Center + Account Code yang sama)";
+            }
             if (count($errors) > 0) {
                 $message .= " Terdapat " . count($errors) . " error: " . implode(', ', array_slice($errors, 0, 5));
             }

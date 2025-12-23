@@ -48,6 +48,7 @@
     
     // Other Output group
     if (request()->routeIs('locations.*') || 
+        request()->routeIs('expense-breakdown.*') ||
         request()->routeIs('other-output.*')) {
         $openGroups['other-output'] = true;
     }
@@ -866,6 +867,10 @@
                         <a href="<?php echo e(route('locations.index')); ?>" 
                            class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('locations.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
                             <span class="truncate"><?php echo e(__('Location')); ?></span>
+                        </a>
+                        <a href="<?php echo e(route('expense-breakdown.index')); ?>" 
+                           class="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors <?php echo e(request()->routeIs('expense-breakdown.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900'); ?>">
+                            <span class="truncate"><?php echo e(__('Rekap Pengeluaran')); ?></span>
                         </a>
                     </div>
                 </div>

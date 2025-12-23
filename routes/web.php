@@ -171,6 +171,10 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::get('locations', [App\Http\Controllers\LocationController::class, 'index'])->name('locations.index');
     Route::get('locations/export', [App\Http\Controllers\LocationController::class, 'export'])->name('locations.export');
 
+    // Other Output - Expense Breakdown (Rekap Pengeluaran)
+    Route::get('expense-breakdown', [App\Http\Controllers\ExpenseBreakdownController::class, 'index'])->name('expense-breakdown.index');
+    Route::get('expense-breakdown/export', [App\Http\Controllers\ExpenseBreakdownController::class, 'export'])->name('expense-breakdown.export');
+
     // GL Expenses
     Route::get('gl-expenses/template', [App\Http\Controllers\GlExpenseController::class, 'downloadTemplate'])->name('gl-expenses.template');
     Route::get('gl-expenses/import', [App\Http\Controllers\GlExpenseController::class, 'importForm'])->name('gl-expenses.import');

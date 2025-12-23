@@ -205,12 +205,16 @@
                                     @if($currentPeriod !== $expensePeriod)
                                         @php $currentPeriod = $expensePeriod; @endphp
                                         <tr class="bg-biru-dongker-100">
-                                            <td colspan="7" class="px-6 py-2 text-sm font-semibold text-biru-dongker-800">
+                                            <td colspan="5" class="px-6 py-2 text-sm font-semibold text-biru-dongker-800">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
                                                 {{ __('Period') }}: {{ date('F', mktime(0, 0, 0, $expense->period_month, 1)) }} {{ $expense->period_year }}
                                             </td>
+                                            <td class="px-6 py-2 text-sm font-bold text-biru-dongker-800 text-right whitespace-nowrap">
+                                                Total: Rp {{ number_format($periodTotals[$expensePeriod] ?? 0, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-6 py-2"></td>
                                         </tr>
                                     @endif
                                     <tr>
