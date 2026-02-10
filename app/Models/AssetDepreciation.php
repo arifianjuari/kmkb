@@ -18,6 +18,7 @@ class AssetDepreciation extends Model
         'book_value',
         'is_synced_to_gl',
         'gl_expense_id',
+        'notes',
     ];
 
     protected $casts = [
@@ -50,6 +51,11 @@ class AssetDepreciation extends Model
      */
     public function getPeriodDisplayAttribute(): string
     {
+        // Historical data has period 0/0
+        if ($this->period_month == 0 && $this->period_year == 0) {
+            return 'Data Historis';
+        }
+        
         $months = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret',
             4 => 'April', 5 => 'Mei', 6 => 'Juni',

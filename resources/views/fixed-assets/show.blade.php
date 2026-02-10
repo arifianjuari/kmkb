@@ -51,43 +51,41 @@
         </div>
     </div>
 
-    <!-- Depreciation History -->
-    @if($fixedAsset->depreciations->count() > 0)
-    <div class="mt-6 bg-white shadow sm:rounded-lg">
+    <!-- Depreciation Calculation Info -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg">
         <div class="px-4 py-5 sm:p-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Riwayat Depresiasi</h3>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Periode</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Depresiasi</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Akumulasi</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Nilai Buku</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Sync GL</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @foreach($fixedAsset->depreciations as $dep)
-                        <tr>
-                            <td class="px-4 py-2 text-sm text-gray-900">{{ $dep->period_display }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-900 text-right">Rp {{ number_format($dep->depreciation_amount, 0, ',', '.') }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-500 text-right">Rp {{ number_format($dep->accumulated_depreciation, 0, ',', '.') }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-900 text-right">Rp {{ number_format($dep->book_value, 0, ',', '.') }}</td>
-                            <td class="px-4 py-2 text-sm text-center">
-                                @if($dep->is_synced_to_gl)
-                                    <span class="text-green-600">✓</span>
-                                @else
-                                    <span class="text-gray-400">-</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <h3 class="text-lg font-medium text-blue-800 mb-3">📊 Kalkulasi Depresiasi (Otomatis)</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <dt class="text-blue-600">Bulan Berlalu</dt>
+                    <dd class="font-semibold text-blue-900">{{ number_format($fixedAsset->months_elapsed) }} bulan</dd>
+                </div>
+                <div>
+                    <dt class="text-blue-600">Maks Bulan Depresiasi</dt>
+                    <dd class="font-semibold text-blue-900">{{ number_format($fixedAsset->max_depreciation_months) }} bulan</dd>
+                </div>
+                <div>
+                    <dt class="text-blue-600">Progress Depresiasi</dt>
+                    <dd class="font-semibold text-blue-900">
+                        {{ $fixedAsset->max_depreciation_months > 0 ? round(($fixedAsset->months_elapsed / $fixedAsset->max_depreciation_months) * 100, 1) : 0 }}%
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-blue-600">Sisa Bulan</dt>
+                    <dd class="font-semibold text-blue-900">{{ max(0, $fixedAsset->max_depreciation_months - $fixedAsset->months_elapsed) }} bulan</dd>
+                </div>
             </div>
+            <div class="mt-4">
+                <div class="w-full bg-blue-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{ min(100, $fixedAsset->max_depreciation_months > 0 ? ($fixedAsset->months_elapsed / $fixedAsset->max_depreciation_months) * 100 : 0) }}%"></div>
+                </div>
+            </div>
+            <p class="mt-3 text-xs text-blue-600">
+                <strong>Metode:</strong> Garis Lurus (Straight-Line) | 
+                <strong>Rumus:</strong> (Harga Perolehan - Nilai Sisa) ÷ (Umur Ekonomis × 12) × Bulan Berlalu
+            </p>
         </div>
     </div>
-    @endif
 </div>
 @endsection
+

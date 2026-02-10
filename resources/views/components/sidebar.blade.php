@@ -493,6 +493,10 @@
                                     </svg>
                                 </button>
                                 <div x-show="isGroupOpen('fixed-assets')" class="ml-4 mt-0.5 space-y-0.5">
+                                    <a href="{{ route('fixed-assets.dashboard') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('fixed-assets.dashboard') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Dashboard</span>
+                                    </a>
                                     <a href="{{ route('asset-categories.index') }}"
                                        class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('asset-categories.*') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
                                         <span class="truncate">Asset Categories</span>
@@ -504,6 +508,10 @@
                                     <a href="{{ route('fixed-assets.depreciation') }}"
                                        class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('fixed-assets.depreciation') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
                                         <span class="truncate">Depreciation Calculator</span>
+                                    </a>
+                                    <a href="{{ route('fixed-assets.depreciation-report') }}"
+                                       class="flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors {{ request()->routeIs('fixed-assets.depreciation-report') ? 'bg-biru-dongker-800 text-white' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-900' }}">
+                                        <span class="truncate">Depreciation Report</span>
                                     </a>
                                 </div>
                             </div>

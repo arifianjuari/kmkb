@@ -10,6 +10,46 @@
         </div>
     </div>
 
+    <!-- Notifications -->
+    @if(session('success'))
+        <div class="mb-6 rounded-md bg-green-50 p-4 border border-green-200">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if(session('warning'))
+        <div class="mb-6 rounded-md bg-yellow-50 p-4 border border-yellow-200">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-yellow-800">{{ session('warning') }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 rounded-md bg-red-50 p-4 border border-red-200">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white p-4 rounded-lg shadow">
@@ -54,6 +94,58 @@
                 </div>
                 <button type="submit" class="btn-primary">Hitung Depresiasi</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Sync to GL Form -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg mb-6">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                    <h3 class="text-lg font-medium text-blue-800">Sync ke GL Expenses</h3>
+                    <p class="text-sm text-blue-700 mt-1">Kirim hasil depresiasi ke tabel GL Expenses agar masuk dalam perhitungan Unit Cost.</p>
+                    <form action="{{ route('fixed-assets.sync-depreciation') }}" method="POST" class="mt-4 flex flex-wrap items-end gap-4">
+                        @csrf
+                        <div>
+                            <label for="sync_month" class="block text-sm font-medium text-blue-800">Bulan</label>
+                            <select name="period_month" id="sync_month" required class="mt-1 block w-full border-blue-300 rounded-md shadow-sm sm:text-sm bg-white">
+                                @for($m = 1; $m <= 12; $m++)
+                                    <option value="{{ $m }}" {{ $m == date('n') ? 'selected' : '' }}>{{ DateTime::createFromFormat('!m', $m)->format('F') }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div>
+                            <label for="sync_year" class="block text-sm font-medium text-blue-800">Tahun</label>
+                            <select name="period_year" id="sync_year" required class="mt-1 block w-full border-blue-300 rounded-md shadow-sm sm:text-sm bg-white">
+                                @for($y = date('Y') - 2; $y <= date('Y') + 1; $y++)
+                                    <option value="{{ $y }}" {{ $y == date('Y') ? 'selected' : '' }}>{{ $y }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div class="flex-1 min-w-[200px]">
+                            <label for="expense_category_id" class="block text-sm font-medium text-blue-800">Kode Akun (COA) <span class="text-xs font-normal">(opsional)</span></label>
+                            <select name="expense_category_id" id="expense_category_id" class="mt-1 block w-full border-blue-300 rounded-md shadow-sm sm:text-sm bg-white">
+                                <option value="">-- Buat otomatis (6900 - Biaya Penyusutan) --</option>
+                                @foreach($expenseCategories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->account_code }} - {{ $cat->account_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Sync ke GL
+                        </button>
+                        <a href="{{ route('fixed-assets.depreciation-report') }}" class="btn-secondary">Lihat Laporan</a>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 

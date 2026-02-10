@@ -219,11 +219,19 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     Route::resource('asset-categories', App\Http\Controllers\AssetCategoryController::class);
 
     // Fixed Assets (Depreciation module)
+    Route::get('fixed-assets/dashboard', [App\Http\Controllers\FixedAssetController::class, 'dashboard'])->name('fixed-assets.dashboard');
     Route::get('fixed-assets/depreciation', [App\Http\Controllers\FixedAssetController::class, 'depreciation'])->name('fixed-assets.depreciation');
     Route::post('fixed-assets/calculate-depreciation', [App\Http\Controllers\FixedAssetController::class, 'calculateDepreciation'])->name('fixed-assets.calculate-depreciation');
+    Route::post('fixed-assets/sync-depreciation', [App\Http\Controllers\FixedAssetController::class, 'syncDepreciationToGl'])->name('fixed-assets.sync-depreciation');
+    Route::get('fixed-assets/depreciation-report', [App\Http\Controllers\FixedAssetController::class, 'depreciationReport'])->name('fixed-assets.depreciation-report');
     Route::get('fixed-assets/export-depreciation', [App\Http\Controllers\FixedAssetController::class, 'exportDepreciation'])->name('fixed-assets.export-depreciation');
     Route::get('fixed-assets/template', [App\Http\Controllers\FixedAssetController::class, 'downloadTemplate'])->name('fixed-assets.template');
     Route::post('fixed-assets/import', [App\Http\Controllers\FixedAssetController::class, 'import'])->name('fixed-assets.import');
+    Route::delete('fixed-assets/bulk-delete', [App\Http\Controllers\FixedAssetController::class, 'bulkDelete'])->name('fixed-assets.bulk-delete');
+    Route::post('fixed-assets/bulk-calculate', [App\Http\Controllers\FixedAssetController::class, 'bulkCalculate'])->name('fixed-assets.bulk-calculate');
+    Route::post('fixed-assets/{fixedAsset}/depreciation', [App\Http\Controllers\FixedAssetController::class, 'storeDepreciation'])->name('fixed-assets.store-depreciation');
+    Route::put('fixed-assets/{fixedAsset}/depreciation/{depreciation}', [App\Http\Controllers\FixedAssetController::class, 'updateDepreciation'])->name('fixed-assets.update-depreciation');
+    Route::delete('fixed-assets/{fixedAsset}/depreciation/{depreciation}', [App\Http\Controllers\FixedAssetController::class, 'deleteDepreciation'])->name('fixed-assets.delete-depreciation');
     Route::resource('fixed-assets', App\Http\Controllers\FixedAssetController::class);
 
     // Service Fees (Jasa Tenaga Kesehatan)

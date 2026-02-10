@@ -98,6 +98,7 @@ class AllocationDriverController extends Controller
 
         AllocationDriver::create(array_merge($validated, [
             'hospital_id' => hospital('id'),
+            'is_static' => $request->boolean('is_static'),
         ]));
 
         return redirect()->route('allocation-drivers.index')
@@ -163,6 +164,7 @@ class AllocationDriverController extends Controller
             }
         }
 
+        $validated['is_static'] = $request->boolean('is_static');
         $allocationDriver->update($validated);
 
         return redirect()->route('allocation-drivers.index')
