@@ -161,6 +161,13 @@ php artisan route:cache || true
 php artisan view:cache || true
 chmod -R ug+rwX storage/framework storage/logs bootstrap/cache 2>/dev/null || true
 
+# PHP-FPM (www-data) harus bisa membaca vendor setelah composer sebagai deploy
+if [ "$(whoami)" = "deploy" ]; then
+    find "$APP_DIR" -type d -exec chmod 2775 {} \; 2>/dev/null || true
+    find "$APP_DIR" -type f -exec chmod 664 {} \; 2>/dev/null || true
+    chmod 775 "$APP_DIR/artisan" 2>/dev/null || true
+fi
+
 if [ -n "$HEALTH_URL" ]; then
     health_check "$HEALTH_URL" || { trap - ERR; rollback; exit 1; }
 fi
