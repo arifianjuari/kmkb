@@ -44,7 +44,7 @@
                                 <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                     <div class="flex items-center">
                                         @php $logoPath = $hospital->logo_path; @endphp
-                                        @if($logoPath && Storage::disk(uploads_disk())->exists($logoPath))
+                                        @if($logoPath && uploads_file_exists($logoPath))
                                             <img src="{{ storage_url($logoPath) }}" alt="{{ $hospital->name }}" class="h-8 w-8 rounded-full mr-3">
                                         @else
                                             <x-hospital-avatar name="{{ $hospital->name }}" color="{{ $hospital->theme_color }}" size="8" class="mr-3" />

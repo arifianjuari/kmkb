@@ -112,6 +112,35 @@ if (!function_exists('uploads_disk')) {
     }
 }
 
+if (!function_exists('uploads_file_exists')) {
+    /**
+     * Cek file upload tanpa melempar exception (mis. kredensial R2/S3 sementara invalid).
+     */
+    function uploads_file_exists(?string $path): bool
+    {
+        if ($path === null || $path === '') {
+            return false;
+        }
+
+        $normalizedPath = ltrim(str_replace('storage/', '', ltrim($path, '/')), '/');
+
+        try {
+            return \Illuminate\Support\Facades\Storage::disk(uploads_disk())->exists($normalizedPath);
+        } catch (\Throwable) {
+            $publicBase = rtrim((string) env('AWS_URL', ''), '/');
+            if ($publicBase !== '') {
+                $url = $publicBase . '/' . $normalizedPath;
+                $headers = @get_headers($url);
+                if (is_array($headers) && isset($headers[0]) && str_contains($headers[0], '200')) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+}
+
 if (!function_exists('storage_url')) {
     /**
      * Get the URL for a file in uploads storage.

@@ -18,7 +18,17 @@ class UploadProxyController extends Controller
         $disk = uploads_disk();
         $storage = Storage::disk($disk);
 
-        if (!$storage->exists($cleanPath)) {
+        try {
+            $exists = $storage->exists($cleanPath);
+        } catch (\Throwable) {
+            $exists = false;
+        }
+
+        if (!$exists) {
+            $publicBase = rtrim((string) config('filesystems.disks.s3.url', env('AWS_URL', '')), '/');
+            if ($publicBase !== '') {
+                return redirect($publicBase . '/' . $cleanPath);
+            }
             abort(404);
         }
 

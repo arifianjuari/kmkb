@@ -221,7 +221,7 @@
             </svg>
         </button>
         <a href="{{ route('dashboard') }}" x-show="!collapsed" class="flex items-start space-x-3 min-w-0 flex-1">
-            @if($isAbsoluteUrl || ($normalizedPath && Storage::disk(uploads_disk())->exists($normalizedPath)))
+            @if($isAbsoluteUrl || ($normalizedPath && uploads_file_exists($normalizedPath)))
                 <img src="{{ $isAbsoluteUrl ? $logoPath : storage_url($normalizedPath) }}" alt="{{ hospital('name') }}" class="h-8 w-auto flex-shrink-0 mt-0.5" />
             @else
                 <x-hospital-avatar name="{{ hospital('name') }}" color="{{ hospital('theme_color') }}" size="8" class="block flex-shrink-0 mt-0.5" />
@@ -229,7 +229,7 @@
             <span class="hidden lg:block text-lg font-semibold break-words min-w-0 leading-tight">{{ hospital('name') ?? config('app.name', 'Laravel') }}</span>
         </a>
         <a href="{{ route('dashboard') }}" x-show="collapsed" class="flex items-center justify-center w-full h-full min-w-0">
-            @if($isAbsoluteUrl || ($normalizedPath && Storage::disk(uploads_disk())->exists($normalizedPath)))
+            @if($isAbsoluteUrl || ($normalizedPath && uploads_file_exists($normalizedPath)))
                 <img src="{{ $isAbsoluteUrl ? $logoPath : storage_url($normalizedPath) }}" alt="{{ hospital('name') }}" class="h-8 w-auto max-h-8 max-w-[3rem] object-contain" />
             @else
                 <x-hospital-avatar name="{{ hospital('name') }}" color="{{ hospital('theme_color') }}" size="8" class="block flex-shrink-0" />
