@@ -24,24 +24,18 @@ class SimrsController extends Controller
     public function testConnection()
     {
         try {
-            $connected = $this->simrsService->testConnection();
-            
-            if ($connected) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Successfully connected to SIMRS database'
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to connect to SIMRS database'
-                ], 500);
-            }
+            $status = $this->connectionStatus(true);
+
+            return response()->json(array_merge([
+                'success' => $status['available'],
+            ], $status), $status['available'] ? 200 : 503);
         } catch (\Exception $e) {
             Log::error('Error testing SIMRS connection: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error testing SIMRS connection: ' . $e->getMessage()
+                'configured' => false,
+                'available' => false,
+                'message' => 'Error testing SIMRS connection: ' . $e->getMessage(),
             ], 500);
         }
     }

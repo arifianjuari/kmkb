@@ -3,6 +3,7 @@
 @section('title', 'SIMRS Tindakan Rawat Jalan')
 
 @section('content')
+@include('simrs.partials.connection-status')
 <div class="max-w-7xl mx-auto">
     <div>
         <div class="flex justify-between items-center mb-6">
@@ -163,6 +164,11 @@
         
         fetch(url, { credentials: 'same-origin' })
             .then(response => {
+                if (response.status === 503) {
+                    return response.json().then(function (data) {
+                        throw { type: 'simrs', message: data.message || 'Database SIMRS tidak tersedia.' };
+                    });
+                }
                 // Check if response is JSON
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {

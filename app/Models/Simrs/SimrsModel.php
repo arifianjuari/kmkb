@@ -23,13 +23,20 @@ class SimrsModel extends Model
     public $timestamps = false;
 
     /**
-     * Get data from SIM RS database using raw queries
-     *
-     * @param string $query
-     * @return \Illuminate\Support\Collection
+     * Resolve the active SIMRS connection name.
      */
+    public static function connectionName(): string
+    {
+        return app(\App\Services\HospitalSimrsConnection::class)->connectionName();
+    }
+
+    public static function db()
+    {
+        return DB::connection(static::connectionName());
+    }
+
     public static function fetchData($query)
     {
-        return DB::connection('simrs')->select($query);
+        return static::db()->select($query);
     }
 }

@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Setup;
 
 use App\Http\Controllers\Controller;
+use App\Services\SimrsService;
 use Illuminate\Http\Request;
 
 class SimrsIntegrationController extends Controller
 {
-    public function settings()
+    public function settings(SimrsService $simrsService)
     {
         return view('setup.simrs-integration.settings', [
-            'title' => 'SIMRS Connection Settings',
-            'message' => 'Fitur untuk mengatur koneksi database SIMRS sedang dalam tahap pengembangan.'
+            'simrsConnectionStatus' => $simrsService->connectionStatus(true),
         ]);
     }
 }

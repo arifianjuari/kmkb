@@ -3,6 +3,7 @@
 @section('title', 'SIMRS Laboratorium')
 
 @section('content')
+@include('simrs.partials.connection-status')
 <div class="max-w-7xl mx-auto">
     <div>
         <div class="flex justify-between items-center mb-6">
@@ -166,6 +167,11 @@
         
         fetch(url)
             .then(response => {
+                if (response.status === 503) {
+                    return response.json().then(function (data) {
+                        throw { type: 'simrs', message: data.message || 'Database SIMRS tidak tersedia.' };
+                    });
+                }
                 // Check if response is JSON
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {
@@ -208,6 +214,9 @@
                 }
             })
             .catch(error => {
+                if (error && error.type === 'simrs') {
+                    return;
+                }
                 console.error('Error:', error);
                 tableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-2 text-center text-red-500">Error loading data</td></tr>';
             });

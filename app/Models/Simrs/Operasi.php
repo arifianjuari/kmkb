@@ -27,7 +27,7 @@ class Operasi extends SimrsModel
 
         // Total count
         $countSql = "SELECT COUNT(*) AS total FROM paket_operasi po" . $whereSql;
-        $countRow = DB::connection('simrs')->selectOne($countSql, $bindings);
+        $countRow = self::db()->selectOne($countSql, $bindings);
         $total = $countRow ? (int)($countRow->total ?? 0) : 0;
 
         // Data query including columns expected by frontend (safe set) and layanan constant
@@ -94,7 +94,7 @@ class Operasi extends SimrsModel
         LIMIT ? OFFSET ?";
 
         $dataBindings = array_merge($bindings, [$limit, $offset]);
-        $data = DB::connection('simrs')->select($dataSql, $dataBindings);
+        $data = self::db()->select($dataSql, $dataBindings);
 
         return [
             'data' => $data,

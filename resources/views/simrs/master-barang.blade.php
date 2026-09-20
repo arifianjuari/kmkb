@@ -3,6 +3,7 @@
 @section('title', 'SIMRS Master Barang')
 
 @section('content')
+@include('simrs.partials.connection-status')
 <div class="max-w-7xl mx-auto">
     <div>
         <div class="flex justify-between items-center mb-6">
@@ -174,28 +175,7 @@
             url += `&search=${encodeURIComponent(currentSearch)}`;
         }
         
-        fetch(url, {
-            credentials: 'include',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-            .then(response => {
-                if (response.status === 401) {
-                    // Handle unauthenticated response
-                    tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-red-500">Error: Anda perlu login untuk mengakses data ini.</td></tr>';
-                    return Promise.reject('Unauthenticated');
-                }
-                if (response.status === 400) {
-                    // Handle bad request (hospital context not selected for super admin)
-                    return response.json().then(data => {
-                        tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-red-500">Error: ' + data.message + '</td></tr>';
-                        return Promise.reject('Hospital context required');
-                    });
-                }
-                return response.json();
-            })
+        simrsApiFetch(url)
             .then(data => {
                 if (data.success) {
                     totalRecords = data.count;
@@ -233,10 +213,12 @@
                 }
             })
             .catch(error => {
-                if (error !== 'Unauthenticated' && error !== 'Hospital context required') {
-                    console.error('Error:', error);
-                    tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-2 text-center text-red-500">Error loading data</td></tr>';
+                if (error && error.type) {
+                    simrsShowTableError(tableBody, 9, 'Error: ' + error.message);
+                    return;
                 }
+                console.error('Error:', error);
+                simrsShowTableError(tableBody, 9, 'Error loading data');
             });
     }
     

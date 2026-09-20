@@ -43,20 +43,23 @@ class TestSimrsConnection extends Command
     {
         $this->info('Testing connection to SIMRS database...');
         
-        $connected = $this->simrsService->testConnection();
-        
+        $connected = $this->simrsService->testConnection(true);
+        $status = $this->simrsService->connectionStatus(true);
+
         if ($connected) {
             $this->info('✓ Successfully connected to SIMRS database');
-            
-            // Test fetching some data
+            $this->line('  Connection: ' . ($status['connection'] ?? 'simrs'));
+
             $this->info('Fetching sample data...');
             $masterBarang = $this->simrsService->getMasterBarang(5);
-            $this->info('✓ Fetched ' . count($masterBarang) . ' master barang records');
-            
+            $this->info('✓ Fetched ' . count($masterBarang['data'] ?? []) . ' master barang records (sample)');
+
             return 0;
-        } else {
-            $this->error('✗ Failed to connect to SIMRS database');
-            return 1;
         }
+
+        $this->error('✗ Failed to connect to SIMRS database');
+        $this->line($status['message'] ?? '');
+
+        return 1;
     }
 }

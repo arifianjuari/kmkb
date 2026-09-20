@@ -3,6 +3,7 @@
 @section('title', 'SIMRS Kamar')
 
 @section('content')
+@include('simrs.partials.connection-status')
 <div class="max-w-7xl mx-auto">
     <div>
         <div class="flex justify-between items-center mb-6">
@@ -171,6 +172,12 @@
             credentials: 'same-origin'
         })
         .then(response => {
+            if (response.status === 503) {
+                return response.json().then(function (data) {
+                    simrsShowTableError(document.getElementById('kamar-table'), 5, data.message || 'Database SIMRS tidak tersedia.');
+                    throw { type: 'simrs' };
+                });
+            }
             if (!response.ok) {
                 if (response.status === 401) {
                     window.location.href = '/login';

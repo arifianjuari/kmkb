@@ -1,5 +1,65 @@
 <?php
 
+$hospitalDbEnabled = filter_var(env('HOSPITAL_DB_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+$simrsConnectTimeout = (int) env('HOSPITAL_DB_CONNECT_TIMEOUT', env('SIMRS_DB_CONNECT_TIMEOUT', 3));
+
+$simrsPdoOptions = [];
+if (extension_loaded('pdo_mysql')) {
+    if (defined('Pdo\Mysql::ATTR_CONNECT_TIMEOUT')) {
+        $simrsPdoOptions[\Pdo\Mysql::ATTR_CONNECT_TIMEOUT] = $simrsConnectTimeout;
+    } elseif (defined('PDO::ATTR_TIMEOUT')) {
+        $simrsPdoOptions[PDO::ATTR_TIMEOUT] = $simrsConnectTimeout;
+    }
+
+    $simrsSslCa = env('SIMRS_MYSQL_ATTR_SSL_CA');
+    if ($simrsSslCa) {
+        $simrsPdoOptions[PDO::MYSQL_ATTR_SSL_CA] = $simrsSslCa;
+    }
+}
+
+if ($hospitalDbEnabled) {
+    $simrsHost = env('HOSPITAL_DB_HOST', '127.0.0.1');
+    $simrsPort = env('HOSPITAL_DB_PORT', '3306');
+    $simrsDatabase = env('HOSPITAL_DB_DATABASE', 'simsvbaru');
+    $simrsUsername = env('HOSPITAL_DB_USERNAME', '');
+    $simrsPassword = env('HOSPITAL_DB_PASSWORD', '');
+    $simrsCharset = env('HOSPITAL_DB_CHARSET', 'utf8');
+    $simrsCollation = env('HOSPITAL_DB_COLLATION', 'utf8_general_ci');
+    $simrsStrict = false;
+} else {
+    $simrsHost = env('SIMRS_DB_HOST', '127.0.0.1');
+    $simrsPort = env('SIMRS_DB_PORT', '3306');
+    $simrsDatabase = env('SIMRS_DB_DATABASE', 'simsvbaru');
+    $simrsUsername = env('SIMRS_DB_USERNAME', 'root');
+    $simrsPassword = env('SIMRS_DB_PASSWORD', '');
+    $simrsCharset = 'utf8mb4';
+    $simrsCollation = 'utf8mb4_unicode_ci';
+    $simrsStrict = true;
+}
+
+$simrsBaseConnection = [
+    'driver' => 'mysql',
+    'url' => env('SIMRS_DATABASE_URL'),
+    'host' => $simrsHost,
+    'port' => $simrsPort,
+    'database' => $simrsDatabase,
+    'username' => $simrsUsername,
+    'password' => $simrsPassword,
+    'unix_socket' => env('SIMRS_DB_SOCKET', ''),
+    'charset' => $simrsCharset,
+    'collation' => $simrsCollation,
+    'prefix' => '',
+    'prefix_indexes' => true,
+    'strict' => $simrsStrict,
+    'engine' => null,
+    'options' => $simrsPdoOptions,
+];
+
+$simrsConnections = [
+    'simrs' => $simrsBaseConnection,
+    'hospital_sims' => $simrsBaseConnection,
+];
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -70,25 +130,8 @@ return [
             'prefix_indexes' => true,
         ],
 
-        'simrs' => [
-            'driver' => 'mysql',
-            'url' => env('SIMRS_DATABASE_URL'),
-            'host' => env('SIMRS_DB_HOST', '127.0.0.1'),
-            'port' => env('SIMRS_DB_PORT', '3306'),
-            'database' => env('SIMRS_DB_DATABASE', 'simrs'),
-            'username' => env('SIMRS_DB_USERNAME', 'simrs_user'),
-            'password' => env('SIMRS_DB_PASSWORD', ''),
-            'unix_socket' => env('SIMRS_DB_SOCKET', ''),
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('SIMRS_MYSQL_ATTR_SSL_CA'),
-            ]) : [],
-        ],
+        'simrs' => $simrsConnections['simrs'],
+        'hospital_sims' => $simrsConnections['hospital_sims'],
     ],
 
     /*

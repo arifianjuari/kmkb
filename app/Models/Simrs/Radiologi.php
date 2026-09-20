@@ -45,8 +45,8 @@ class Radiologi extends SimrsModel
         $baseDataQuery .= " ORDER BY jpr.nm_perawatan LIMIT ? OFFSET ?";
         $dataParams = array_merge($params, [$limit, $offset]);
         
-        $data = DB::connection('simrs')->select($baseDataQuery, $dataParams);
-        $count = DB::connection('simrs')->select($baseCountQuery, $countParams)[0]->total;
+        $data = self::db()->select($baseDataQuery, $dataParams);
+        $count = self::db()->select($baseCountQuery, $countParams)[0]->total;
         
         return [
             'data' => $data,
@@ -78,8 +78,8 @@ class Radiologi extends SimrsModel
         
         $countQuery = "SELECT COUNT(*) as total FROM jns_perawatan_radiologi";
         
-        $data = DB::connection('simrs')->select($dataQuery, [$limit, $offset]);
-        $count = DB::connection('simrs')->select($countQuery)[0]->total;
+        $data = self::db()->select($dataQuery, [$limit, $offset]);
+        $count = self::db()->select($countQuery)[0]->total;
         
         return [
             'data' => $data,

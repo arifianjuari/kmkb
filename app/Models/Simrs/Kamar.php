@@ -47,8 +47,8 @@ class Kamar extends SimrsModel
         $baseDataQuery .= " ORDER BY k.kd_kamar LIMIT ? OFFSET ?";
         $dataParams = array_merge($params, [$limit, $offset]);
         
-        $data = DB::connection('simrs')->select($baseDataQuery, $dataParams);
-        $count = DB::connection('simrs')->select($baseCountQuery, $countParams)[0]->total;
+        $data = self::db()->select($baseDataQuery, $dataParams);
+        $count = self::db()->select($baseCountQuery, $countParams)[0]->total;
         
         return [
             'data' => $data,

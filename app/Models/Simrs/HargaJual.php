@@ -31,6 +31,6 @@ class HargaJual extends SimrsModel
         ORDER BY dpo.tgl_perawatan DESC
         LIMIT ? OFFSET ?";
 
-        return DB::connection('simrs')->select($query, [$limit, $offset]);
+        return self::db()->select($query, [$limit, $offset]);
     }
 }

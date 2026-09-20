@@ -34,23 +34,25 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('standard-resource-usages/sync-to-cost-references', [App\Http\Controllers\Api\StandardResourceUsageController::class, 'syncToCostReferences']);
         
         // SIM RS Integration APIs
-        Route::get('simrs/test-connection', [App\Http\Controllers\Api\SimrsController::class, 'testConnection']);
-        Route::get('simrs/master-barang', [App\Http\Controllers\Api\SimrsController::class, 'masterBarang']);
-        Route::get('simrs/tindakan-rawat-jalan', [App\Http\Controllers\Api\SimrsController::class, 'tindakanRawatJalan']);
-        Route::get('simrs/tindakan-rawat-inap', [App\Http\Controllers\Api\SimrsController::class, 'tindakanRawatInap']);
-        Route::get('simrs/laboratorium', [App\Http\Controllers\Api\SimrsController::class, 'laboratorium']);
-        Route::get('simrs/radiologi', [App\Http\Controllers\Api\SimrsController::class, 'radiologi']);
-        Route::get('simrs/radiologi/jenis', [App\Http\Controllers\Api\SimrsController::class, 'jenisRadiologi']);
-        Route::get('simrs/operasi', [App\Http\Controllers\Api\SimrsController::class, 'operasi']);
-        Route::get('simrs/kamar', [App\Http\Controllers\Api\SimrsController::class, 'kamar']);
-        Route::get('simrs/all-data', [App\Http\Controllers\Api\SimrsController::class, 'allData']);
-        Route::post('simrs/sync-master-barang', [App\Http\Controllers\Api\SimrsController::class, 'syncMasterBarang']);
-        Route::post('simrs/sync-tindakan-rawat-jalan', [App\Http\Controllers\Api\SimrsController::class, 'syncTindakanRawatJalan']);
-        Route::post('simrs/sync-tindakan-rawat-inap', [App\Http\Controllers\Api\SimrsController::class, 'syncTindakanRawatInap']);
-        Route::post('simrs/sync-laboratorium', [App\Http\Controllers\Api\SimrsController::class, 'syncLaboratorium']);
-        Route::post('simrs/sync-radiologi', [App\Http\Controllers\Api\SimrsController::class, 'syncRadiologi']);
-        Route::post('simrs/sync-operasi', [App\Http\Controllers\Api\SimrsController::class, 'syncOperasi']);
-        Route::post('simrs/sync-kamar', [App\Http\Controllers\Api\SimrsController::class, 'syncKamar']);
+        Route::middleware('simrs.available')->group(function () {
+            Route::get('simrs/test-connection', [App\Http\Controllers\Api\SimrsController::class, 'testConnection']);
+            Route::get('simrs/master-barang', [App\Http\Controllers\Api\SimrsController::class, 'masterBarang']);
+            Route::get('simrs/tindakan-rawat-jalan', [App\Http\Controllers\Api\SimrsController::class, 'tindakanRawatJalan']);
+            Route::get('simrs/tindakan-rawat-inap', [App\Http\Controllers\Api\SimrsController::class, 'tindakanRawatInap']);
+            Route::get('simrs/laboratorium', [App\Http\Controllers\Api\SimrsController::class, 'laboratorium']);
+            Route::get('simrs/radiologi', [App\Http\Controllers\Api\SimrsController::class, 'radiologi']);
+            Route::get('simrs/radiologi/jenis', [App\Http\Controllers\Api\SimrsController::class, 'jenisRadiologi']);
+            Route::get('simrs/operasi', [App\Http\Controllers\Api\SimrsController::class, 'operasi']);
+            Route::get('simrs/kamar', [App\Http\Controllers\Api\SimrsController::class, 'kamar']);
+            Route::get('simrs/all-data', [App\Http\Controllers\Api\SimrsController::class, 'allData']);
+            Route::post('simrs/sync-master-barang', [App\Http\Controllers\Api\SimrsController::class, 'syncMasterBarang']);
+            Route::post('simrs/sync-tindakan-rawat-jalan', [App\Http\Controllers\Api\SimrsController::class, 'syncTindakanRawatJalan']);
+            Route::post('simrs/sync-tindakan-rawat-inap', [App\Http\Controllers\Api\SimrsController::class, 'syncTindakanRawatInap']);
+            Route::post('simrs/sync-laboratorium', [App\Http\Controllers\Api\SimrsController::class, 'syncLaboratorium']);
+            Route::post('simrs/sync-radiologi', [App\Http\Controllers\Api\SimrsController::class, 'syncRadiologi']);
+            Route::post('simrs/sync-operasi', [App\Http\Controllers\Api\SimrsController::class, 'syncOperasi']);
+            Route::post('simrs/sync-kamar', [App\Http\Controllers\Api\SimrsController::class, 'syncKamar']);
+        });
     });
     
     // Reporting APIs

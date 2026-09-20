@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Services\HospitalSimrsConnection;
 use App\Models\Simrs\MasterBarang;
 use App\Models\Simrs\TindakanRawatJalan;
 use App\Models\Simrs\TindakanRawatInap;
@@ -14,6 +15,36 @@ use Illuminate\Support\Facades\Log;
 
 class SimrsService
 {
+    public function __construct(
+        private HospitalSimrsConnection $hospitalSimrsConnection
+    ) {}
+
+    public function isConfigured(): bool
+    {
+        return $this->hospitalSimrsConnection->isConfigured();
+    }
+
+    public function isAvailable(bool $forceFresh = false): bool
+    {
+        return $this->hospitalSimrsConnection->isAvailable($forceFresh);
+    }
+
+    public function connectionStatus(bool $forceFresh = false): array
+    {
+        $configured = $this->isConfigured();
+        $available = $configured && $this->isAvailable($forceFresh);
+
+        return [
+            'configured' => $configured,
+            'available' => $available,
+            'connection' => $this->hospitalSimrsConnection->connectionName(),
+            'message' => $available
+                ? 'Terhubung ke database SIMRS.'
+                : ($configured
+                    ? $this->hospitalSimrsConnection->availabilityMessage()
+                    : $this->hospitalSimrsConnection->configurationMessage()),
+        ];
+    }
     /**
      * Get all master barang (obat/BHP)
      *
@@ -222,21 +253,21 @@ class SimrsService
     {
         try {
             // Get Poliklinik (Rawat Jalan)
-            $poli = DB::connection('simrs')
+            $poli = $this->hospitalSimrsConnection->connection()
                 ->table('poliklinik')
                 ->select('kd_poli as id', 'nm_poli as name', DB::raw("'Rawat Jalan' as type"))
                 ->where('status', '1')
                 ->get();
 
             // Get Bangsal (Rawat Inap)
-            $bangsal = DB::connection('simrs')
+            $bangsal = $this->hospitalSimrsConnection->connection()
                 ->table('bangsal')
                 ->select('kd_bangsal as id', 'nm_bangsal as name', DB::raw("'Rawat Inap' as type"))
                 ->where('status', '1')
                 ->get();
 
             // Get Departemen
-            $departemen = DB::connection('simrs')
+            $departemen = $this->hospitalSimrsConnection->connection()
                 ->table('departemen')
                 ->select('dep_id as id', 'nama as name', DB::raw("'Departemen' as type"))
                 ->get();
@@ -261,14 +292,8 @@ class SimrsService
      *
      * @return bool
      */
-    public function testConnection()
+    public function testConnection(bool $forceFresh = false): bool
     {
-        try {
-            DB::connection('simrs')->select('SELECT 1');
-            return true;
-        } catch (\Exception $e) {
-            Log::error('SIMRS database connection failed: ' . $e->getMessage());
-            return false;
-        }
+        return $this->isAvailable($forceFresh);
     }
 }

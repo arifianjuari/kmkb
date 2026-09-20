@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'set.hospital' => \App\Http\Middleware\SetHospital::class,
+        'simrs.available' => \App\Http\Middleware\EnsureSimrsDatabase::class,
     ];
 }

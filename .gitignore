@@ -48,6 +48,7 @@ config/*.backup.*
 # Database
 *.sqlite
 *.sqlite3
+main_*.sql
 
 # Composer
 composer.phar

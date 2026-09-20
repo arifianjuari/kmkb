@@ -3,6 +3,7 @@
 @section('title', 'SIMRS Operasi')
 
 @section('content')
+@include('simrs.partials.connection-status')
 <div class="max-w-7xl mx-auto">
     <div>
         <div class="flex justify-between items-center mb-6">
@@ -165,10 +166,7 @@
         // Calculate offset based on current page
         const offset = currentPage * limit;
         
-        fetch(`/api/simrs/operasi?limit=${limit}&offset=${offset}&search=${encodeURIComponent(currentSearch)}`, {
-            credentials: 'same-origin'
-        })
-            .then(response => response.json())
+        simrsApiFetch(`/api/simrs/operasi?limit=${limit}&offset=${offset}&search=${encodeURIComponent(currentSearch)}`)
             .then(data => {
                 if (data.success) {
                     totalRecords = data.count;

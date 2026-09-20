@@ -79,8 +79,8 @@ class MasterBarang extends SimrsModel
             
             $countQuery = "SELECT COUNT(*) as total FROM databarang WHERE status = '1' AND (kode_brng LIKE ? OR nama_brng LIKE ?)";
             
-            $data = DB::connection('simrs')->select($dataQuery, [$searchTerm, $searchTerm, $limit, $offset]);
-            $count = DB::connection('simrs')->select($countQuery, [$searchTerm, $searchTerm])[0]->total;
+            $data = self::db()->select($dataQuery, [$searchTerm, $searchTerm, $limit, $offset]);
+            $count = self::db()->select($countQuery, [$searchTerm, $searchTerm])[0]->total;
         } else {
             $dataQuery = "SELECT 
                 kode_brng,
@@ -98,8 +98,8 @@ class MasterBarang extends SimrsModel
             
             $countQuery = "SELECT COUNT(*) as total FROM databarang WHERE status = '1'";
             
-            $data = DB::connection('simrs')->select($dataQuery, [$limit, $offset]);
-            $count = DB::connection('simrs')->select($countQuery)[0]->total;
+            $data = self::db()->select($dataQuery, [$limit, $offset]);
+            $count = self::db()->select($countQuery)[0]->total;
         }
         
         return [
