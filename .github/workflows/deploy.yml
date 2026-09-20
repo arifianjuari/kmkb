@@ -1,0 +1,20 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: kmkb-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to /www/wwwroot/kmkb
+    runs-on: [self-hosted, kmkb-prod]
+    timeout-minutes: 30
+
+    steps:
+      - name: Run server deploy
+        run: /home/deploy/bin/deploy-kmkb-wrapper.sh

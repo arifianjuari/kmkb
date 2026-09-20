@@ -18,6 +18,10 @@ Route::get('/uploads/{path}', UploadProxyController::class)
     ->where('path', '.*')
     ->name('uploads.proxy');
 
+Route::get('/up', function () {
+    return response('OK', 200);
+});
+
 
 /*
 --------------------------------------------------------------------------
