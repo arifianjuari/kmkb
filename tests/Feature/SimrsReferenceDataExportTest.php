@@ -57,6 +57,7 @@ class SimrsReferenceDataExportTest extends TestCase
 
         $routes = [
             'simrs.tindakan-rawat-jalan' => 'simrs.tindakan-rawat-jalan.export',
+            'simrs.tindakan-rawat-inap' => 'simrs.tindakan-rawat-inap.export',
             'simrs.laboratorium' => 'simrs.laboratorium.export',
             'simrs.radiologi' => 'simrs.radiologi.export',
             'simrs.operasi' => 'simrs.operasi.export',

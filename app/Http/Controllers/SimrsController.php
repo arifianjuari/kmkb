@@ -90,6 +90,33 @@ class SimrsController extends Controller
         );
     }
 
+    public function exportTindakanRawatInap(Request $request)
+    {
+        $search = $this->searchQuery($request);
+        $rows = $this->fetchAllSimrsRows(
+            fn (int $limit, int $offset, ?string $search) => $this->simrsService->getTindakanRawatInap($limit, $offset, $search),
+            $search
+        );
+
+        return $this->streamSimrsExcelExport(
+            title: 'TINDAKAN RAWAT INAP SIMRS',
+            sheetTitle: 'Tindakan Ranap',
+            search: $search,
+            allRecordsLabel: 'Semua tindakan rawat inap',
+            headers: ['Kode', 'Nama Tindakan', 'Harga (Rp)'],
+            rows: $rows,
+            mapRow: fn ($row): array => [
+                (string) $row->kd_jenis_prw,
+                $row->nm_perawatan,
+                (float) ($row->total_byrdrpr ?? 0),
+            ],
+            filePrefix: 'tindakan-rawat-inap-simrs',
+            stringColumnIndexes: [0],
+            moneyColumnFrom: 'C',
+            moneyColumnTo: 'C',
+        );
+    }
+
     public function exportLaboratorium(Request $request)
     {
         $search = $this->searchQuery($request);

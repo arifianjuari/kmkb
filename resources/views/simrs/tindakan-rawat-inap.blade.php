@@ -24,6 +24,9 @@
                     </svg>
                     <span id="sync-text">Sync Selected</span>
                 </button>
+                <a id="export-excel" href="{{ route('simrs.tindakan-rawat-inap.export') }}" class="inline-flex items-center px-4 py-2 border border-green-600 text-sm font-medium rounded-md shadow-sm text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Export Excel
+                </a>
                 <button id="refresh-data" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                     Refresh Data
                 </button>
@@ -151,7 +154,19 @@
         document.getElementById('sync-selected').addEventListener('click', syncSelectedItems);
     });
     
+    function updateExportUrl() {
+        const exportButton = document.getElementById('export-excel');
+        const exportUrl = new URL(@json(route('simrs.tindakan-rawat-inap.export')), window.location.origin);
+
+        if (searchTindakanInap) {
+            exportUrl.searchParams.set('search', searchTindakanInap);
+        }
+
+        exportButton.href = exportUrl.toString();
+    }
+
     function loadTindakanRawatInap() {
+        updateExportUrl();
         const tableBody = document.getElementById('tindakan-rawat-inap-table');
         const syncButton = document.getElementById('sync-selected');
         const selectAllCheckbox = document.getElementById('select-all-inap');

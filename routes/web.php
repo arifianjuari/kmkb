@@ -348,6 +348,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         Route::get('/tindakan-rawat-jalan', [App\Http\Controllers\SimrsController::class, 'tindakanRawatJalanView'])->name('simrs.tindakan-rawat-jalan');
         Route::get('/tindakan-rawat-jalan/export', [App\Http\Controllers\SimrsController::class, 'exportTindakanRawatJalan'])->name('simrs.tindakan-rawat-jalan.export');
         Route::get('/tindakan-rawat-inap', [App\Http\Controllers\SimrsController::class, 'tindakanRawatInapView'])->name('simrs.tindakan-rawat-inap');
+        Route::get('/tindakan-rawat-inap/export', [App\Http\Controllers\SimrsController::class, 'exportTindakanRawatInap'])->name('simrs.tindakan-rawat-inap.export');
         Route::get('/laboratorium', [App\Http\Controllers\SimrsController::class, 'laboratorium'])->name('simrs.laboratorium');
         Route::get('/laboratorium/export', [App\Http\Controllers\SimrsController::class, 'exportLaboratorium'])->name('simrs.laboratorium.export');
         Route::get('/radiologi', [App\Http\Controllers\SimrsController::class, 'radiologi'])->name('simrs.radiologi');
