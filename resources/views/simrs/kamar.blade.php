@@ -17,6 +17,9 @@
                         </svg>
                     </div>
                 </div>
+                <a id="export-excel" href="{{ route('simrs.kamar.export') }}" class="inline-flex items-center px-4 py-2 border border-green-600 text-sm font-medium rounded-md shadow-sm text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Export Excel
+                </a>
                 <button id="refresh-data" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                     Refresh Data
                 </button>
@@ -152,7 +155,20 @@
         document.getElementById('select-all').addEventListener('change', (e) => toggleSelectAll(e.target.checked));
     });
     
+    function updateExportUrl() {
+        const exportButton = document.getElementById('export-excel');
+        const exportUrl = new URL(@json(route('simrs.kamar.export')), window.location.origin);
+        const search = document.getElementById('search-kamar').value.trim();
+
+        if (search) {
+            exportUrl.searchParams.set('search', search);
+        }
+
+        exportButton.href = exportUrl.toString();
+    }
+
     function loadKamar() {
+        updateExportUrl();
         const search = document.getElementById('search-kamar').value;
         const offset = currentPage * limit;
         

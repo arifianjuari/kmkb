@@ -57452,3 +57452,101 @@ Did you mean one of these?
 #3 /Users/arifianjuari/DEV/kmkb/artisan(14): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
 #4 {main}
 "} 
+[2026-10-14 22:07:38] laravel.EMERGENCY: Unable to create configured logger. Using emergency logger. {"exception":"[object] (InvalidArgumentException(code: 0): Log [] is not defined. at /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php:212)
+[stacktrace]
+#0 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(137): Illuminate\\Log\\LogManager->resolve(NULL, NULL)
+#1 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(124): Illuminate\\Log\\LogManager->get(NULL)
+#2 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(681): Illuminate\\Log\\LogManager->driver()
+#3 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(317): Illuminate\\Log\\LogManager->error('Cannot instanti...', Array)
+#4 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(278): Illuminate\\Foundation\\Exceptions\\Handler->reportThrowable(Object(Error))
+#5 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(183): Illuminate\\Foundation\\Exceptions\\Handler->report(Object(Error))
+#6 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(255): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleException(Object(Error))
+#7 [internal function]: Illuminate\\Foundation\\Bootstrap\\HandleExceptions->{closure:Illuminate\\Foundation\\Bootstrap\\HandleExceptions::forwardsTo():254}(Object(Error))
+#8 {main}
+"} 
+[2026-10-14 22:07:38] laravel.ERROR: Cannot instantiate interface PHPUnit\Runner\TestSuiteLoader {"exception":"[object] (Error(code: 0): Cannot instantiate interface PHPUnit\\Runner\\TestSuiteLoader at /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-71739ebe00860f83.php:225)
+[stacktrace]
+#0 /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-71739ebe00860f83.php(79): class@anonymous->collectPhpUnitTests(Array)
+#1 [internal function]: class@anonymous->{closure:class@anonymous(Array, 0)
+#2 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Collections/Arr.php(600): array_map(Object(Closure), Array, Array)
+#3 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Collections/Collection.php(778): Illuminate\\Support\\Arr::map(Array, Object(Closure))
+#4 /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-71739ebe00860f83.php(76): Illuminate\\Support\\Collection->map(Object(Closure))
+#5 /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-71739ebe00860f83.php(294): class@anonymous->all()
+#6 {main}
+"} 
+[2026-10-15 06:05:13] laravel.EMERGENCY: Unable to create configured logger. Using emergency logger. {"exception":"[object] (InvalidArgumentException(code: 0): Log [] is not defined. at /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php:212)
+[stacktrace]
+#0 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(137): Illuminate\\Log\\LogManager->resolve(NULL, NULL)
+#1 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(124): Illuminate\\Log\\LogManager->get(NULL)
+#2 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(681): Illuminate\\Log\\LogManager->driver()
+#3 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(317): Illuminate\\Log\\LogManager->error('Cannot instanti...', Array)
+#4 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(278): Illuminate\\Foundation\\Exceptions\\Handler->reportThrowable(Object(Error))
+#5 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(183): Illuminate\\Foundation\\Exceptions\\Handler->report(Object(Error))
+#6 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(255): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleException(Object(Error))
+#7 [internal function]: Illuminate\\Foundation\\Bootstrap\\HandleExceptions->{closure:Illuminate\\Foundation\\Bootstrap\\HandleExceptions::forwardsTo():254}(Object(Error))
+#8 {main}
+"} 
+[2026-10-15 06:05:13] laravel.ERROR: Cannot instantiate interface PHPUnit\Runner\TestSuiteLoader {"exception":"[object] (Error(code: 0): Cannot instantiate interface PHPUnit\\Runner\\TestSuiteLoader at /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-2b480edf76b17bae.php:225)
+[stacktrace]
+#0 /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-2b480edf76b17bae.php(79): class@anonymous->collectPhpUnitTests(Array)
+#1 [internal function]: class@anonymous->{closure:class@anonymous(Array, 0)
+#2 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Collections/Arr.php(600): array_map(Object(Closure), Array, Array)
+#3 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Collections/Collection.php(778): Illuminate\\Support\\Arr::map(Array, Object(Closure))
+#4 /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-2b480edf76b17bae.php(76): Illuminate\\Support\\Collection->map(Object(Closure))
+#5 /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-2b480edf76b17bae.php(294): class@anonymous->all()
+#6 {main}
+"} 
+[2026-10-15 06:08:22] laravel.EMERGENCY: Unable to create configured logger. Using emergency logger. {"exception":"[object] (InvalidArgumentException(code: 0): Log [] is not defined. at /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php:212)
+[stacktrace]
+#0 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(137): Illuminate\\Log\\LogManager->resolve(NULL, NULL)
+#1 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(124): Illuminate\\Log\\LogManager->get(NULL)
+#2 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(681): Illuminate\\Log\\LogManager->driver()
+#3 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(317): Illuminate\\Log\\LogManager->error('Cannot instanti...', Array)
+#4 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(278): Illuminate\\Foundation\\Exceptions\\Handler->reportThrowable(Object(Error))
+#5 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(183): Illuminate\\Foundation\\Exceptions\\Handler->report(Object(Error))
+#6 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(255): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleException(Object(Error))
+#7 [internal function]: Illuminate\\Foundation\\Bootstrap\\HandleExceptions->{closure:Illuminate\\Foundation\\Bootstrap\\HandleExceptions::forwardsTo():254}(Object(Error))
+#8 {main}
+"} 
+[2026-10-15 06:08:22] laravel.ERROR: Cannot instantiate interface PHPUnit\Runner\TestSuiteLoader {"exception":"[object] (Error(code: 0): Cannot instantiate interface PHPUnit\\Runner\\TestSuiteLoader at /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-47e103c0283c6888.php:225)
+[stacktrace]
+#0 /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-47e103c0283c6888.php(79): class@anonymous->collectPhpUnitTests(Array)
+#1 [internal function]: class@anonymous->{closure:class@anonymous(Array, 0)
+#2 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Collections/Arr.php(600): array_map(Object(Closure), Array, Array)
+#3 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Collections/Collection.php(778): Illuminate\\Support\\Arr::map(Array, Object(Closure))
+#4 /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-47e103c0283c6888.php(76): Illuminate\\Support\\Collection->map(Object(Closure))
+#5 /Users/arifianjuari/DEV/kmkb/storage/framework/lsp-47e103c0283c6888.php(294): class@anonymous->all()
+#6 {main}
+"} 
+[2026-10-15 06:08:23] laravel.EMERGENCY: Unable to create configured logger. Using emergency logger. {"exception":"[object] (InvalidArgumentException(code: 0): Log [] is not defined. at /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php:212)
+[stacktrace]
+#0 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(137): Illuminate\\Log\\LogManager->resolve(NULL, NULL)
+#1 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(124): Illuminate\\Log\\LogManager->get(NULL)
+#2 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(681): Illuminate\\Log\\LogManager->driver()
+#3 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(317): Illuminate\\Log\\LogManager->error('Command \"test\" ...', Array)
+#4 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(278): Illuminate\\Foundation\\Exceptions\\Handler->reportThrowable(Object(Symfony\\Component\\Console\\Exception\\CommandNotFoundException))
+#5 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(523): Illuminate\\Foundation\\Exceptions\\Handler->report(Object(Symfony\\Component\\Console\\Exception\\CommandNotFoundException))
+#6 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(203): Illuminate\\Foundation\\Console\\Kernel->reportException(Object(Symfony\\Component\\Console\\Exception\\CommandNotFoundException))
+#7 /Users/arifianjuari/DEV/kmkb/artisan(14): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#8 {main}
+"} 
+[2026-10-15 06:08:23] laravel.ERROR: Command "test" is not defined.
+
+Did you mean one of these?
+    app:test-patient-case-creation
+    make:test
+    schedule:test
+    simrs:test-connection {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"test\" is not defined.
+
+Did you mean one of these?
+    app:test-patient-case-creation
+    make:test
+    schedule:test
+    simrs:test-connection at /Users/arifianjuari/DEV/kmkb/vendor/symfony/console/Application.php:737)
+[stacktrace]
+#0 /Users/arifianjuari/DEV/kmkb/vendor/symfony/console/Application.php(266): Symfony\\Component\\Console\\Application->find('test')
+#1 /Users/arifianjuari/DEV/kmkb/vendor/symfony/console/Application.php(175): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#2 /Users/arifianjuari/DEV/kmkb/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(201): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#3 /Users/arifianjuari/DEV/kmkb/artisan(14): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#4 {main}
+"} 

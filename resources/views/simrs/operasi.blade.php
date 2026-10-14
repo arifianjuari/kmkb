@@ -22,6 +22,9 @@
                 <button id="refresh-data" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                     Refresh Data
                 </button>
+                <a id="export-excel" href="{{ route('simrs.operasi.export') }}" class="inline-flex items-center px-4 py-2 border border-green-600 text-sm font-medium rounded-md shadow-sm text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Export Excel
+                </a>
                 <button id="sync-selected" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 hidden">
                     Sync Selected
                 </button>
@@ -159,7 +162,19 @@
         });
     });
     
+    function updateExportUrl() {
+        const exportButton = document.getElementById('export-excel');
+        const exportUrl = new URL(@json(route('simrs.operasi.export')), window.location.origin);
+
+        if (currentSearch) {
+            exportUrl.searchParams.set('search', currentSearch);
+        }
+
+        exportButton.href = exportUrl.toString();
+    }
+
     function loadOperasi() {
+        updateExportUrl();
         const tableBody = document.getElementById('operasi-table');
         tableBody.innerHTML = '<tr><td colspan="18" class="px-6 py-2 text-center text-gray-500">Loading data...</td></tr>';
         

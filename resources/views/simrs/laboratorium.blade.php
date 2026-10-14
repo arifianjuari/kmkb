@@ -24,6 +24,9 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </button>
+                <a id="export-excel" href="{{ route('simrs.laboratorium.export') }}" class="inline-flex items-center px-4 py-2 border border-green-600 text-sm font-medium rounded-md shadow-sm text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Export Excel
+                </a>
                 <button id="refresh-data" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-biru-dongker-800 hover:bg-biru-dongker-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-biru-dongker-700">
                     Refresh Data
                 </button>
@@ -149,7 +152,19 @@
         document.getElementById('sync-selected').addEventListener('click', syncSelectedItems);
     });
     
+    function updateExportUrl() {
+        const exportButton = document.getElementById('export-excel');
+        const exportUrl = new URL(@json(route('simrs.laboratorium.export')), window.location.origin);
+
+        if (searchLaboratorium) {
+            exportUrl.searchParams.set('search', searchLaboratorium);
+        }
+
+        exportButton.href = exportUrl.toString();
+    }
+
     function loadLaboratorium() {
+        updateExportUrl();
         const tableBody = document.getElementById('laboratorium-table');
         const syncButton = document.getElementById('sync-selected');
         const selectAllCheckbox = document.getElementById('select-all-laboratorium');

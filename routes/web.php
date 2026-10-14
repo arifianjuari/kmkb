@@ -346,11 +346,16 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
         Route::get('/master-barang', [App\Http\Controllers\SimrsController::class, 'masterBarang'])->name('simrs.master-barang');
         Route::get('/master-barang/export', [App\Http\Controllers\SimrsController::class, 'exportMasterBarang'])->name('simrs.master-barang.export');
         Route::get('/tindakan-rawat-jalan', [App\Http\Controllers\SimrsController::class, 'tindakanRawatJalanView'])->name('simrs.tindakan-rawat-jalan');
+        Route::get('/tindakan-rawat-jalan/export', [App\Http\Controllers\SimrsController::class, 'exportTindakanRawatJalan'])->name('simrs.tindakan-rawat-jalan.export');
         Route::get('/tindakan-rawat-inap', [App\Http\Controllers\SimrsController::class, 'tindakanRawatInapView'])->name('simrs.tindakan-rawat-inap');
         Route::get('/laboratorium', [App\Http\Controllers\SimrsController::class, 'laboratorium'])->name('simrs.laboratorium');
+        Route::get('/laboratorium/export', [App\Http\Controllers\SimrsController::class, 'exportLaboratorium'])->name('simrs.laboratorium.export');
         Route::get('/radiologi', [App\Http\Controllers\SimrsController::class, 'radiologi'])->name('simrs.radiologi');
+        Route::get('/radiologi/export', [App\Http\Controllers\SimrsController::class, 'exportRadiologi'])->name('simrs.radiologi.export');
         Route::get('/operasi', [App\Http\Controllers\SimrsController::class, 'operasi'])->name('simrs.operasi');
+        Route::get('/operasi/export', [App\Http\Controllers\SimrsController::class, 'exportOperasi'])->name('simrs.operasi.export');
         Route::get('/kamar', [App\Http\Controllers\SimrsController::class, 'kamarView'])->name('simrs.kamar');
+        Route::get('/kamar/export', [App\Http\Controllers\SimrsController::class, 'exportKamar'])->name('simrs.kamar.export');
         
         // SIMRS Sync Routes
         Route::get('/sync', [App\Http\Controllers\SimrsSyncController::class, 'index'])->name('simrs.sync');
