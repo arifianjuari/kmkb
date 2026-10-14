@@ -344,6 +344,7 @@ Route::middleware(['auth', 'set.hospital'])->group(function () {
     // SIM RS Integration Routes
     Route::prefix('simrs')->group(function () {
         Route::get('/master-barang', [App\Http\Controllers\SimrsController::class, 'masterBarang'])->name('simrs.master-barang');
+        Route::get('/master-barang/export', [App\Http\Controllers\SimrsController::class, 'exportMasterBarang'])->name('simrs.master-barang.export');
         Route::get('/tindakan-rawat-jalan', [App\Http\Controllers\SimrsController::class, 'tindakanRawatJalanView'])->name('simrs.tindakan-rawat-jalan');
         Route::get('/tindakan-rawat-inap', [App\Http\Controllers\SimrsController::class, 'tindakanRawatInapView'])->name('simrs.tindakan-rawat-inap');
         Route::get('/laboratorium', [App\Http\Controllers\SimrsController::class, 'laboratorium'])->name('simrs.laboratorium');
